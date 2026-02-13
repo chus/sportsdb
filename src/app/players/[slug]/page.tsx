@@ -167,7 +167,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {currentTeam.name}
                   </Link>
                 )}
-                <FollowButton entityType="player" entityId={player.id} />
+                <FollowButton entityType="player" entityId={player.id} entityName={player.name} variant="hero" />
               </div>
 
               {/* Quick Stats Row */}

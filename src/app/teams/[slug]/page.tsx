@@ -194,7 +194,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                   <Users className="w-4 h-4 text-white/60" />
                   <span>{squad.length} Players</span>
                 </div>
-                <FollowButton entityType="team" entityId={team.id} />
+                <FollowButton entityType="team" entityId={team.id} entityName={team.name} variant="hero" />
               </div>
 
               {/* Standing Stats */}

@@ -120,7 +120,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                       </span>
                     </>
                   )}
-                  <FollowButton entityType="competition" entityId={competition.id} />
+                  <FollowButton entityType="competition" entityId={competition.id} entityName={competition.name} variant="hero" />
                 </div>
               </div>
             </div>
