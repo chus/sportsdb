@@ -1,8 +1,33 @@
 import { Trophy, Search, Users, Shield, MapPin, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues, searchIndex } from "@/lib/db/schema";
 import { count, desc } from "drizzle-orm";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+
+export const metadata: Metadata = {
+  title: "SportsDB – The International Sports Database",
+  description: "The structured, canonical database for football. Search across 7,000+ players, 180+ teams, and 8 competitions with time-aware data.",
+  openGraph: {
+    title: "SportsDB – The International Sports Database",
+    description: "The structured, canonical database for football. Search across 7,000+ players, 180+ teams, and 8 competitions.",
+    url: BASE_URL,
+    siteName: "SportsDB",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SportsDB – The International Sports Database",
+    description: "The structured, canonical database for football. Search players, teams, competitions, and venues.",
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
+  keywords: ["football", "soccer", "players", "teams", "competitions", "Premier League", "La Liga", "Bundesliga", "Serie A", "sports database"],
+};
 
 async function getStats() {
   const [playersCount] = await db.select({ count: count() }).from(players);

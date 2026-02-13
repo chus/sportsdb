@@ -7,10 +7,14 @@ import {
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
+import { PlayerJsonLd } from "@/components/seo/json-ld";
+import { FollowButton } from "@/components/follow-button";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
 }
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
 export async function generateMetadata({ params }: PlayerPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -20,9 +24,29 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
     return { title: "Player Not Found" };
   }
 
+  const title = `${player.name} – Career, Teams & Stats | SportsDB`;
+  const description = `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}. View full career history, current team, and player profile on SportsDB.`;
+
   return {
-    title: player.name,
-    description: `${player.name} - ${player.position}. View career history, stats, and profile.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/players/${slug}`,
+      siteName: "SportsDB",
+      type: "profile",
+      ...(player.imageUrl && { images: [{ url: player.imageUrl, alt: player.name }] }),
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(player.imageUrl && { images: [player.imageUrl] }),
+    },
+    alternates: {
+      canonical: `${BASE_URL}/players/${slug}`,
+    },
   };
 }
 
@@ -75,7 +99,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     ? differenceInYears(new Date(), new Date(player.dateOfBirth))
     : null;
 
+  const playerUrl = `${BASE_URL}/players/${slug}`;
+  const teamUrl = currentTeam ? `${BASE_URL}/teams/${currentTeam.slug}` : null;
+
   return (
+    <>
+      <PlayerJsonLd
+        name={player.name}
+        url={playerUrl}
+        image={player.imageUrl}
+        nationality={player.nationality}
+        birthDate={player.dateOfBirth}
+        height={player.heightCm}
+        position={player.position}
+        team={currentTeam && teamUrl ? { name: currentTeam.name, url: teamUrl } : null}
+      />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
@@ -129,6 +167,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {currentTeam.name}
                   </Link>
                 )}
+                <FollowButton entityType="player" entityId={player.id} />
               </div>
 
               {/* Quick Stats Row */}
@@ -307,5 +346,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

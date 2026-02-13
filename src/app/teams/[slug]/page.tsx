@@ -6,10 +6,14 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTeamBySlug, getSquad, getTeamStats } from "@/lib/queries/teams";
+import { TeamJsonLd } from "@/components/seo/json-ld";
+import { FollowButton } from "@/components/follow-button";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
 }
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
 export async function generateMetadata({ params }: TeamPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -19,9 +23,29 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
     return { title: "Team Not Found" };
   }
 
+  const title = `${team.name} – Squad, Stats & Info | SportsDB`;
+  const description = `${team.name}${team.city ? ` based in ${team.city}` : ""}${team.country ? `, ${team.country}` : ""}. View full squad, standings, and club information on SportsDB.`;
+
   return {
-    title: team.name,
-    description: `${team.name} - ${team.country}. View squad, stats, and club information.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/teams/${slug}`,
+      siteName: "SportsDB",
+      type: "website",
+      ...(team.logoUrl && { images: [{ url: team.logoUrl, alt: team.name }] }),
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(team.logoUrl && { images: [team.logoUrl] }),
+    },
+    alternates: {
+      canonical: `${BASE_URL}/teams/${slug}`,
+    },
   };
 }
 
@@ -102,7 +126,18 @@ export default async function TeamPage({ params }: TeamPageProps) {
   // Team colors for gradient
   const primaryColor = team.primaryColor || "#2563eb";
 
+  const teamUrl = `${BASE_URL}/teams/${slug}`;
+
   return (
+    <>
+      <TeamJsonLd
+        name={team.name}
+        url={teamUrl}
+        logo={team.logoUrl}
+        location={{ city: team.city, country: team.country }}
+        foundingDate={team.foundedYear}
+        memberCount={squad.length}
+      />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div
@@ -159,6 +194,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                   <Users className="w-4 h-4 text-white/60" />
                   <span>{squad.length} Players</span>
                 </div>
+                <FollowButton entityType="team" entityId={team.id} />
               </div>
 
               {/* Standing Stats */}
@@ -340,5 +376,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
