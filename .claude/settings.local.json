@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run db:push:*)",
+      "Bash(npx dotenv:*)",
+      "Bash(npm install:*)",
+      "Bash(yes:*)",
+      "Bash(npx drizzle-kit push:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(curl:*)",
+      "Bash(npm run ingest:wikipedia:*)",
+      "Bash(git init:*)",
+      "Bash(git -C /Users/agustonna/sportsdb add -A)",
+      "Bash(git -C /Users/agustonna/sportsdb status --short)"
+    ]
+  }
+}
