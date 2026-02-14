@@ -1,9 +1,10 @@
 import { Trophy, Search, Users, Shield, MapPin, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
-import { players, teams, competitions, venues, searchIndex } from "@/lib/db/schema";
-import { count, desc } from "drizzle-orm";
+import { players, teams, competitions, venues } from "@/lib/db/schema";
+import { count } from "drizzle-orm";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -63,6 +64,7 @@ function formatNumber(num: number): string {
 }
 
 export default async function HomePage() {
+  const t = await getTranslations();
   const [stats, featuredTeams, featuredPlayers, featuredCompetitions] = await Promise.all([
     getStats(),
     getFeaturedTeams(),
@@ -79,21 +81,20 @@ export default async function HomePage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
             <Trophy className="w-4 h-4 text-blue-300" />
             <span className="text-sm font-medium text-blue-100">
-              The International Sports Database
+              {t("home.heroTagline")}
             </span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Every Player. Every Team.
+            {t("home.heroTitle1")}
             <br />
             <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Every Match.
+              {t("home.heroTitle2")}
             </span>
           </h1>
 
           <p className="text-lg text-neutral-300 max-w-2xl mb-8">
-            The structured, canonical database for football. Search across
-            players, teams, competitions, and venues with time-aware data.
+            {t("home.heroDescription")}
           </p>
 
           {/* Search CTA */}
@@ -104,7 +105,7 @@ export default async function HomePage() {
             >
               <Search className="w-5 h-5 text-neutral-400 group-hover:text-blue-500 transition-colors" />
               <span className="text-neutral-500 flex-1">
-                Search players, teams, competitions...
+                {t("home.searchPlaceholder")}
               </span>
               <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
             </Link>
@@ -117,10 +118,10 @@ export default async function HomePage() {
         <div className="max-w-5xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: Trophy, label: "Competitions", value: stats.competitions, href: "/search?type=competition" },
-              { icon: Shield, label: "Teams", value: stats.teams, href: "/search?type=team" },
-              { icon: Users, label: "Players", value: stats.players, href: "/search?type=player" },
-              { icon: MapPin, label: "Venues", value: stats.venues, href: "/search?type=venue" },
+              { icon: Trophy, label: t("common.competitions"), value: stats.competitions, href: "/search?type=competition" },
+              { icon: Shield, label: t("common.teams"), value: stats.teams, href: "/search?type=team" },
+              { icon: Users, label: t("common.players"), value: stats.players, href: "/search?type=player" },
+              { icon: MapPin, label: t("common.venues"), value: stats.venues, href: "/search?type=venue" },
             ].map((stat) => (
               <Link
                 key={stat.label}
@@ -143,12 +144,12 @@ export default async function HomePage() {
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Competitions</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">{t("common.competitions")}</h2>
               <Link
                 href="/search?type=competition"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
               >
-                View all <ArrowRight className="w-4 h-4" />
+                {t("common.viewAll")} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -181,12 +182,12 @@ export default async function HomePage() {
         <section className="py-12 bg-neutral-50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Featured Teams</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">{t("home.featuredTeams")}</h2>
               <Link
                 href="/search?type=team"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
               >
-                View all <ArrowRight className="w-4 h-4" />
+                {t("common.viewAll")} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -219,12 +220,12 @@ export default async function HomePage() {
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Featured Players</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">{t("home.featuredPlayers")}</h2>
               <Link
                 href="/search?type=player"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
               >
-                View all <ArrowRight className="w-4 h-4" />
+                {t("common.viewAll")} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -256,17 +257,21 @@ export default async function HomePage() {
       <section className="py-16 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to explore?
+            {t("home.readyToExplore")}
           </h2>
           <p className="text-lg text-white/80 mb-8">
-            Search through {formatNumber(stats.players)} players, {formatNumber(stats.teams)} teams, and {formatNumber(stats.competitions)} competitions.
+            {t("home.exploreDescription", {
+              players: formatNumber(stats.players),
+              teams: formatNumber(stats.teams),
+              competitions: formatNumber(stats.competitions)
+            })}
           </p>
           <Link
             href="/search"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-neutral-100 transition-colors"
           >
             <Search className="w-5 h-5" />
-            Start Searching
+            {t("home.startSearching")}
           </Link>
         </div>
       </section>

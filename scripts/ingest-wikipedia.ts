@@ -61,6 +61,7 @@ function slugify(text: string): string {
 
 // League configurations with Wikipedia page titles
 const LEAGUES = [
+  // European Leagues
   {
     name: "Premier League",
     country: "England",
@@ -110,11 +111,90 @@ const LEAGUES = [
     teamsPage: "2024–25_Primeira_Liga",
     tableSelector: "table.wikitable",
   },
+  // North American Leagues
   {
     name: "MLS",
     country: "USA",
     type: "league" as const,
     teamsPage: "2024_Major_League_Soccer_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Liga MX",
+    country: "Mexico",
+    type: "league" as const,
+    teamsPage: "2024–25_Liga_MX_season",
+    tableSelector: "table.wikitable",
+  },
+  // South American Leagues
+  {
+    name: "Liga Profesional Argentina",
+    country: "Argentina",
+    type: "league" as const,
+    teamsPage: "2024_Argentine_Primera_División",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Brasileirão Série A",
+    country: "Brazil",
+    type: "league" as const,
+    teamsPage: "2024_Campeonato_Brasileiro_Série_A",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Liga BetPlay",
+    country: "Colombia",
+    type: "league" as const,
+    teamsPage: "2024_Categoría_Primera_A_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Primera División de Chile",
+    country: "Chile",
+    type: "league" as const,
+    teamsPage: "2024_Chilean_Primera_División",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Primera División de Uruguay",
+    country: "Uruguay",
+    type: "league" as const,
+    teamsPage: "2024_Uruguayan_Primera_División_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Liga 1 Perú",
+    country: "Peru",
+    type: "league" as const,
+    teamsPage: "2024_Liga_1_(Peru)_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Liga Pro Ecuador",
+    country: "Ecuador",
+    type: "league" as const,
+    teamsPage: "2024_Ecuadorian_Serie_A_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Primera División de Paraguay",
+    country: "Paraguay",
+    type: "league" as const,
+    teamsPage: "2024_Paraguayan_Primera_División_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Primera División de Venezuela",
+    country: "Venezuela",
+    type: "league" as const,
+    teamsPage: "2024_Venezuelan_Primera_División_season",
+    tableSelector: "table.wikitable",
+  },
+  {
+    name: "Primera División de Bolivia",
+    country: "Bolivia",
+    type: "league" as const,
+    teamsPage: "2024_Bolivian_Primera_División_season",
     tableSelector: "table.wikitable",
   },
 ];
@@ -389,21 +469,8 @@ function normalizePosition(pos: string): string {
 async function clearDatabase() {
   console.log("🗑️  Clearing existing data...\n");
 
-  await db.delete(schema.searchIndex);
-  await db.delete(schema.playerSeasonStats);
-  await db.delete(schema.matchEvents);
-  await db.delete(schema.matchLineups);
-  await db.delete(schema.matches);
-  await db.delete(schema.standings);
-  await db.delete(schema.teamSeasons);
-  await db.delete(schema.competitionSeasons);
-  await db.delete(schema.playerTeamHistory);
-  await db.delete(schema.teamVenueHistory);
-  await db.delete(schema.players);
-  await db.delete(schema.venues);
-  await db.delete(schema.teams);
-  await db.delete(schema.competitions);
-  await db.delete(schema.seasons);
+  // Use raw SQL TRUNCATE with CASCADE to avoid foreign key issues
+  await sql`TRUNCATE TABLE search_index, player_season_stats, match_events, match_lineups, matches, standings, team_seasons, competition_seasons, player_team_history, team_venue_history, players, venues, teams, competitions, seasons CASCADE`;
 }
 
 async function main() {
@@ -436,31 +503,39 @@ async function main() {
     console.log(`\n🏆 ${league.name} (${league.country})`);
     console.log("─".repeat(40));
 
-    // Create competition
-    const [competition] = await db
-      .insert(schema.competitions)
-      .values({
-        name: league.name,
-        slug: slugify(league.name),
-        country: league.country,
-        type: league.type,
-      })
-      .returning();
-    allCompetitions.push(competition);
+    try {
+      // Create competition
+      const [competition] = await db
+        .insert(schema.competitions)
+        .values({
+          name: league.name,
+          slug: slugify(league.name),
+          country: league.country,
+          type: league.type,
+        })
+        .returning();
+      allCompetitions.push(competition);
 
-    // Create competition-season link
-    const [compSeason] = await db
-      .insert(schema.competitionSeasons)
-      .values({
-        competitionId: competition.id,
-        seasonId: currentSeason.id,
-        status: "in_progress",
-      })
-      .returning();
+      // Create competition-season link
+      const [compSeason] = await db
+        .insert(schema.competitionSeasons)
+        .values({
+          competitionId: competition.id,
+          seasonId: currentSeason.id,
+          status: "in_progress",
+        })
+        .returning();
 
-    // Get teams from league page
-    const teamsInfo = await extractTeamsFromLeaguePage(league.teamsPage);
-    console.log(`   Found ${teamsInfo.length} teams`);
+      // Get teams from league page
+      let teamsInfo;
+      try {
+        teamsInfo = await extractTeamsFromLeaguePage(league.teamsPage);
+      } catch (err) {
+        console.log(`   ⚠️ Could not fetch league page: ${err instanceof Error ? err.message : err}`);
+        console.log(`   Skipping ${league.name}...`);
+        continue;
+      }
+      console.log(`   Found ${teamsInfo.length} teams`);
 
     for (const teamInfo of teamsInfo) {
       console.log(`\n   ⚽ ${teamInfo.name}`);
@@ -548,6 +623,10 @@ async function main() {
           }).onConflictDoNothing();
         }
       }
+    }
+    } catch (err) {
+      console.log(`   ❌ Error processing ${league.name}: ${err instanceof Error ? err.message : err}`);
+      console.log(`   Continuing with next league...`);
     }
   }
 

@@ -3,20 +3,23 @@
 import { Trophy, Search, Menu, X, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
-
-const navLinks = [
-  { label: "Players", href: "/search?type=player" },
-  { label: "Teams", href: "/search?type=team" },
-  { label: "Competitions", href: "/search?type=competition" },
-  { label: "Matches", href: "/search?type=match" },
-];
+import { LanguageToggle } from "@/components/language-toggle";
 
 export function Navbar() {
+  const t = useTranslations();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, isLoading, logout } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const navLinks = [
+    { label: t("common.players"), href: "/search?type=player" },
+    { label: t("common.teams"), href: "/search?type=team" },
+    { label: t("common.competitions"), href: "/search?type=competition" },
+    { label: t("common.matches"), href: "/search?type=match" },
+  ];
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -48,7 +51,7 @@ export function Navbar() {
                 SportsDB
               </div>
               <div className="text-xs text-neutral-500 -mt-0.5">
-                International Sports Database
+                {t("home.heroTagline")}
               </div>
             </div>
           </Link>
@@ -68,9 +71,13 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Language Toggle */}
+            <LanguageToggle />
+
             <Link
               href="/search"
               className="p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              aria-label={t("common.search")}
             >
               <Search className="w-5 h-5" />
             </Link>
@@ -105,14 +112,14 @@ export function Navbar() {
                           className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
                           onClick={() => setUserMenuOpen(false)}
                         >
-                          My Feed
+                          {t("feed.activityFeed")}
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
                           <LogOut className="w-4 h-4" />
-                          Sign out
+                          {t("common.signOut")}
                         </button>
                       </div>
                     )}
@@ -123,13 +130,13 @@ export function Navbar() {
                       href="/login"
                       className="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     >
-                      Sign in
+                      {t("common.signIn")}
                     </Link>
                     <Link
                       href="/signup"
                       className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                     >
-                      Sign up
+                      {t("common.signUp")}
                     </Link>
                   </div>
                 )}
@@ -173,14 +180,14 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex-1 px-4 py-2 text-sm font-medium text-center text-neutral-700 border border-neutral-300 rounded-lg hover:bg-neutral-50"
                   >
-                    Sign in
+                    {t("common.signIn")}
                   </Link>
                   <Link
                     href="/signup"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                   >
-                    Sign up
+                    {t("common.signUp")}
                   </Link>
                 </div>
               )}
