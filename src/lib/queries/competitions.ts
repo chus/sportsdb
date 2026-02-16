@@ -8,7 +8,7 @@ import {
   playerSeasonStats,
   players,
 } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 
 /**
  * Get a competition by slug.
@@ -83,4 +83,61 @@ export async function getCompetitionSeason(
     .limit(1);
 
   return result[0] ? { ...result[0], competition: comp } : null;
+}
+
+/**
+ * Get all seasons for a competition.
+ */
+export async function getAllSeasons(competitionId: string) {
+  return db
+    .select({
+      competitionSeason: competitionSeasons,
+      season: seasons,
+    })
+    .from(competitionSeasons)
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(eq(competitionSeasons.competitionId, competitionId))
+    .orderBy(desc(seasons.startDate));
+}
+
+/**
+ * Get historical standings for a competition-season by slug and season label.
+ */
+export async function getHistoricalStandings(
+  competitionSlug: string,
+  seasonLabel: string
+) {
+  const comp = await getCompetitionBySlug(competitionSlug);
+  if (!comp) return null;
+
+  // Convert URL-friendly format (2024-25) to DB format (2024/25)
+  const dbSeasonLabel = seasonLabel.replace("-", "/");
+
+  const result = await db
+    .select({
+      competitionSeason: competitionSeasons,
+      season: seasons,
+    })
+    .from(competitionSeasons)
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(
+      and(
+        eq(competitionSeasons.competitionId, comp.id),
+        eq(seasons.label, dbSeasonLabel)
+      )
+    )
+    .limit(1);
+
+  if (!result[0]) return null;
+
+  const standingsData = await getStandings(result[0].competitionSeason.id);
+  const topScorers = await getTopScorers(result[0].competitionSeason.id, 10);
+
+  return {
+    competition: comp,
+    competitionSeason: result[0].competitionSeason,
+    season: result[0].season,
+    standings: standingsData,
+    topScorers,
+  };
 }

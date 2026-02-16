@@ -297,22 +297,116 @@ async function extractTeamsFromLeaguePage(
   return uniqueTeams.slice(0, 25); // Limit to 25 teams per league
 }
 
+interface StadiumDetails {
+  name: string;
+  wikiTitle?: string;
+  capacity?: number;
+  openedYear?: number;
+  imageUrl?: string;
+  city?: string;
+}
+
+async function extractStadiumDetails(
+  stadiumName: string,
+  $teamPage?: cheerio.CheerioAPI
+): Promise<StadiumDetails | null> {
+  try {
+    // First, try to get stadium page URL from team page if available
+    let stadiumWikiTitle = stadiumName.replace(/ /g, "_");
+
+    // Try to fetch stadium's own Wikipedia page for detailed info
+    const $stadium = await getWikipediaPage(stadiumWikiTitle);
+
+    const details: StadiumDetails = { name: stadiumName };
+
+    // Parse stadium infobox
+    $stadium(".infobox th, .infobox .infobox-label").each((_, th) => {
+      const $th = $stadium(th);
+      const label = $th.text().toLowerCase().trim();
+      const $td = $th.next("td, .infobox-data");
+      const value = $td.text().trim();
+
+      // Capacity - parse numbers like "53,400" or "53400"
+      if (label.includes("capacity") || label.includes("seating")) {
+        const capacityMatch = value.replace(/,/g, "").match(/(\d+)/);
+        if (capacityMatch) {
+          details.capacity = parseInt(capacityMatch[1]);
+        }
+      }
+
+      // Opened year - parse "1923 (rebuilt 2006)" -> 1923
+      if (label.includes("opened") || label.includes("built")) {
+        const yearMatch = value.match(/(\d{4})/);
+        if (yearMatch) {
+          details.openedYear = parseInt(yearMatch[1]);
+        }
+      }
+
+      // Location/City
+      if (label.includes("location") || label.includes("city")) {
+        details.city = value.split(",")[0].split("\n")[0].trim();
+      }
+    });
+
+    // Try to get image from infobox
+    const $image = $stadium(".infobox img, .infobox-image img").first();
+    if ($image.length) {
+      const src = $image.attr("src");
+      if (src && !src.includes("Flag") && !src.includes("icon")) {
+        // Convert thumbnail URL to full-size Wikimedia Commons URL
+        const imageMatch = src.match(/\/([^/]+\.(jpg|jpeg|png|gif|svg))$/i);
+        if (imageMatch) {
+          const filename = decodeURIComponent(imageMatch[1]);
+          details.imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(
+            filename
+          )}?width=800`;
+        }
+      }
+    }
+
+    return details;
+  } catch {
+    // Return basic details if we couldn't fetch the stadium page
+    return { name: stadiumName };
+  }
+}
+
 async function extractTeamDetails(
   wikiTitle: string
-): Promise<{ stadium?: string; city?: string; founded?: number }> {
+): Promise<{
+  stadium?: string;
+  stadiumDetails?: StadiumDetails;
+  city?: string;
+  founded?: number;
+}> {
   try {
     const $ = await getWikipediaPage(wikiTitle);
-    const details: { stadium?: string; city?: string; founded?: number } = {};
+    const details: {
+      stadium?: string;
+      stadiumDetails?: StadiumDetails;
+      city?: string;
+      founded?: number;
+    } = {};
 
     // Parse infobox
-    $(".infobox th").each((_, th) => {
+    $(".infobox th, .infobox .infobox-label").each((_, th) => {
       const $th = $(th);
       const label = $th.text().toLowerCase().trim();
-      const $td = $th.next("td");
+      const $td = $th.next("td, .infobox-data");
       const value = $td.text().trim();
 
       if (label.includes("ground") || label.includes("stadium")) {
-        details.stadium = $td.find("a").first().text() || value.split("\n")[0];
+        const $link = $td.find("a").first();
+        details.stadium = $link.text() || value.split("\n")[0];
+
+        // Get wiki title for the stadium if there's a link
+        const href = $link.attr("href");
+        if (href && href.startsWith("/wiki/")) {
+          const stadiumWikiTitle = decodeURIComponent(
+            href.replace("/wiki/", "")
+          ).replace(/_/g, " ");
+          details.stadium = stadiumWikiTitle;
+        }
       }
       if (label.includes("city") || label.includes("location")) {
         details.city = value.split(",")[0].split("\n")[0];
@@ -322,6 +416,11 @@ async function extractTeamDetails(
         if (year) details.founded = parseInt(year[0]);
       }
     });
+
+    // If we found a stadium, get its detailed info
+    if (details.stadium) {
+      details.stadiumDetails = await extractStadiumDetails(details.stadium, $);
+    }
 
     return details;
   } catch {
@@ -563,15 +662,19 @@ async function main() {
       }
       allTeams.push(team);
 
-      // Insert venue if found
+      // Insert venue if found (with enhanced stadium details)
       if (details.stadium) {
+        const stadiumInfo = details.stadiumDetails;
         const [venue] = await db
           .insert(schema.venues)
           .values({
             name: details.stadium,
             slug: slugify(details.stadium),
-            city: details.city || null,
+            city: stadiumInfo?.city || details.city || null,
             country: league.country,
+            capacity: stadiumInfo?.capacity || null,
+            openedYear: stadiumInfo?.openedYear || null,
+            imageUrl: stadiumInfo?.imageUrl || null,
           })
           .onConflictDoNothing()
           .returning();
@@ -583,6 +686,11 @@ async function main() {
             venueId: venue.id,
             validFrom: "2020-01-01",
           }).onConflictDoNothing();
+
+          // Log stadium details if found
+          if (stadiumInfo?.capacity || stadiumInfo?.openedYear) {
+            console.log(`      🏟️  ${details.stadium}: capacity ${stadiumInfo.capacity || 'N/A'}, opened ${stadiumInfo.openedYear || 'N/A'}`);
+          }
         }
       }
 

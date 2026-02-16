@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues } from "@/lib/db/schema";
 import { count } from "drizzle-orm";
+import { LiveMatchesSection } from "@/components/live/live-matches-section";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -112,6 +113,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Live Matches Section */}
+      <LiveMatchesSection />
 
       {/* Stats Section */}
       <section className="py-12 -mt-16 relative z-10">

@@ -5,7 +5,7 @@ import {
   Footprints, Shield, ArrowLeft, Trophy
 } from "lucide-react";
 import type { Metadata } from "next";
-import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer } from "@/lib/queries/players";
+import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
 import { PlayerJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
@@ -86,9 +86,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
 
-  const [currentTeamData, career] = await Promise.all([
+  const [currentTeamData, career, statsHistory] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerCareer(player.id),
+    getPlayerStatsHistory(player.id),
   ]);
 
   const currentTeam = currentTeamData?.team;
@@ -274,6 +275,95 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </Link>
                     ))}
                   </div>
+                </div>
+              </section>
+            )}
+
+            {/* Stats History */}
+            {statsHistory.length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Season Statistics</h2>
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
+                        <th className="px-4 py-3 font-medium">Season</th>
+                        <th className="px-4 py-3 font-medium">Team</th>
+                        <th className="px-4 py-3 font-medium">Competition</th>
+                        <th className="px-4 py-3 font-medium text-center">Apps</th>
+                        <th className="px-4 py-3 font-medium text-center">Goals</th>
+                        <th className="px-4 py-3 font-medium text-center">Assists</th>
+                        <th className="px-4 py-3 font-medium text-center">Mins</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100">
+                      {statsHistory.map(({ stat, team, season, competition }) => (
+                        <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-neutral-900">
+                            {season.label}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Link
+                              href={`/teams/${team.slug}`}
+                              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                            >
+                              {team.logoUrl ? (
+                                <img
+                                  src={team.logoUrl}
+                                  alt={team.name}
+                                  className="w-5 h-5 object-contain"
+                                />
+                              ) : (
+                                <Shield className="w-5 h-5 text-neutral-300" />
+                              )}
+                              <span className="text-sm">{team.shortName || team.name}</span>
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-neutral-600">
+                            <Link
+                              href={`/competitions/${competition.slug}`}
+                              className="hover:text-blue-600 transition-colors"
+                            >
+                              {competition.name}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3 text-center text-neutral-600">
+                            {stat.appearances}
+                          </td>
+                          <td className="px-4 py-3 text-center font-medium text-neutral-900">
+                            {stat.goals}
+                          </td>
+                          <td className="px-4 py-3 text-center text-neutral-600">
+                            {stat.assists}
+                          </td>
+                          <td className="px-4 py-3 text-center text-neutral-500 text-sm">
+                            {stat.minutesPlayed.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    {statsHistory.length > 0 && (
+                      <tfoot className="bg-neutral-50 border-t border-neutral-200">
+                        <tr className="font-medium">
+                          <td className="px-4 py-3" colSpan={3}>
+                            Career Total
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {statsHistory.reduce((sum, s) => sum + s.stat.goals, 0)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {statsHistory.reduce((sum, s) => sum + s.stat.assists, 0)}
+                          </td>
+                          <td className="px-4 py-3 text-center text-sm">
+                            {statsHistory.reduce((sum, s) => sum + s.stat.minutesPlayed, 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
                 </div>
               </section>
             )}

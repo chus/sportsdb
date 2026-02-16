@@ -5,7 +5,7 @@ import {
   ArrowLeft, Building, TrendingUp
 } from "lucide-react";
 import type { Metadata } from "next";
-import { getTeamBySlug, getSquad, getTeamStats } from "@/lib/queries/teams";
+import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/queries/teams";
 import { TeamJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 
@@ -106,9 +106,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
     notFound();
   }
 
-  const [squad, statsData] = await Promise.all([
+  const [squad, statsData, formerPlayers] = await Promise.all([
     getSquad(team.id),
     getTeamStats(team.id),
+    getFormerPlayers(team.id, 10),
   ]);
 
   const standing = statsData[0]?.standing;
@@ -242,6 +243,43 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 </div>
               )}
             </section>
+
+            {/* Former Players */}
+            {formerPlayers.length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Former Players</h2>
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                  <div className="divide-y divide-neutral-100">
+                    {formerPlayers.map(({ player, shirtNumber, validFrom, validTo }) => (
+                      <Link
+                        key={player.id}
+                        href={`/players/${player.slug}`}
+                        className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 font-medium group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                            {shirtNumber || "—"}
+                          </div>
+                          <div>
+                            <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                              {player.name}
+                            </div>
+                            <div className="text-sm text-neutral-500">
+                              {player.position} • {new Date(validFrom).getFullYear()} - {validTo ? new Date(validTo).getFullYear() : "Present"}
+                            </div>
+                          </div>
+                        </div>
+                        {player.nationality && (
+                          <span className="text-sm text-neutral-500 hidden sm:block">
+                            {player.nationality}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}

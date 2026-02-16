@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { teams, standings, competitionSeasons, seasons, playerTeamHistory, players } from "@/lib/db/schema";
-import { eq, and, isNull, lte, or, gte } from "drizzle-orm";
+import { eq, and, isNull, lte, or, gte, isNotNull, desc } from "drizzle-orm";
 
 /**
  * Get a team by their URL slug.
@@ -86,4 +86,50 @@ export async function getSquad(teamId: string, seasonId?: string) {
         )
       )
     );
+}
+
+/**
+ * Get former players for a team (players with valid_to IS NOT NULL).
+ */
+export async function getFormerPlayers(teamId: string, limit = 20) {
+  return db
+    .select({
+      player: players,
+      shirtNumber: playerTeamHistory.shirtNumber,
+      validFrom: playerTeamHistory.validFrom,
+      validTo: playerTeamHistory.validTo,
+    })
+    .from(playerTeamHistory)
+    .innerJoin(players, eq(players.id, playerTeamHistory.playerId))
+    .where(
+      and(
+        eq(playerTeamHistory.teamId, teamId),
+        isNotNull(playerTeamHistory.validTo)
+      )
+    )
+    .orderBy(desc(playerTeamHistory.validTo))
+    .limit(limit);
+}
+
+/**
+ * Get all seasons available for a team.
+ */
+export async function getTeamSeasons(teamId: string) {
+  return db
+    .select({
+      season: seasons,
+    })
+    .from(playerTeamHistory)
+    .innerJoin(seasons,
+      and(
+        lte(seasons.startDate, playerTeamHistory.validFrom),
+        or(
+          isNull(playerTeamHistory.validTo),
+          gte(seasons.endDate, playerTeamHistory.validFrom)
+        )
+      )
+    )
+    .where(eq(playerTeamHistory.teamId, teamId))
+    .groupBy(seasons.id)
+    .orderBy(desc(seasons.startDate));
 }

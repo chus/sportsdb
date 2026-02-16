@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, seasons } from "@/lib/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons } from "@/lib/db/schema";
+import { eq, and, isNull, desc } from "drizzle-orm";
 
 /**
  * Get a player by their URL slug.
@@ -76,4 +76,27 @@ export async function getPlayerStats(playerId: string, seasonId?: string) {
     .where(
       and(eq(playerSeasonStats.playerId, playerId), seasonFilter)
     );
+}
+
+/**
+ * Get all player stats across all seasons (for stats history table).
+ */
+export async function getPlayerStatsHistory(playerId: string) {
+  return db
+    .select({
+      stat: playerSeasonStats,
+      team: teams,
+      season: seasons,
+      competition: competitions,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(teams, eq(teams.id, playerSeasonStats.teamId))
+    .innerJoin(
+      competitionSeasons,
+      eq(competitionSeasons.id, playerSeasonStats.competitionSeasonId)
+    )
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    .where(eq(playerSeasonStats.playerId, playerId))
+    .orderBy(desc(seasons.startDate));
 }
