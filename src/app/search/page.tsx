@@ -4,6 +4,7 @@ import { Users, Shield, Trophy, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { searchEntities } from "@/lib/queries/search";
 import { SearchBar } from "@/components/search/search-bar";
+import { PopularSearches } from "@/components/search/popular-searches";
 import type { SearchResult } from "@/types/entities";
 
 interface SearchPageProps {
@@ -99,16 +100,21 @@ async function SearchResults({
 }) {
   if (!query) {
     return (
-      <div className="text-center py-16">
-        <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Users className="w-8 h-8 text-neutral-400" />
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-neutral-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-neutral-700 mb-2">
+            Start searching
+          </h2>
+          <p className="text-neutral-500">
+            Enter a query above to find players, teams, competitions, and venues.
+          </p>
         </div>
-        <h2 className="text-xl font-semibold text-neutral-700 mb-2">
-          Start searching
-        </h2>
-        <p className="text-neutral-500">
-          Enter a query above to find players, teams, competitions, and venues.
-        </p>
+        <Suspense fallback={null}>
+          <PopularSearches />
+        </Suspense>
       </div>
     );
   }

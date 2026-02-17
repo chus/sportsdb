@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { searchIndex } from "@/lib/db/schema";
-import { eq, ilike, or, and, sql, desc } from "drizzle-orm";
+import { searchIndex, searchAnalytics } from "@/lib/db/schema";
+import { eq, ilike, or, and, sql, desc, gte } from "drizzle-orm";
 import type { SearchResult } from "@/types/entities";
 
 /**
@@ -99,4 +99,53 @@ export async function searchEntities(
     subtitle: r.subtitle,
     meta: r.meta,
   }));
+}
+
+/**
+ * Track a search query for analytics purposes.
+ * Used to calculate popular searches.
+ */
+export async function trackSearch(
+  query: string,
+  resultsCount: number,
+  entityType?: string
+): Promise<void> {
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery || trimmedQuery.length < 2) return;
+
+  try {
+    await db.insert(searchAnalytics).values({
+      query: trimmedQuery,
+      resultsCount,
+      entityType: entityType || null,
+    });
+  } catch (error) {
+    // Silently fail - analytics shouldn't break search
+    console.error("Failed to track search:", error);
+  }
+}
+
+/**
+ * Get popular searches from the last N days.
+ * Returns queries sorted by frequency.
+ */
+export async function getPopularSearches(
+  limit = 10,
+  daysBack = 7
+): Promise<{ query: string; count: number }[]> {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+
+  const results = await db
+    .select({
+      query: searchAnalytics.query,
+      count: sql<number>`count(*)::int`.as("count"),
+    })
+    .from(searchAnalytics)
+    .where(gte(searchAnalytics.searchedAt, cutoffDate))
+    .groupBy(searchAnalytics.query)
+    .orderBy(desc(sql`count(*)`))
+    .limit(limit);
+
+  return results;
 }

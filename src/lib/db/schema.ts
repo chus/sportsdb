@@ -432,3 +432,47 @@ export const searchIndex = pgTable(
   },
   (table) => [index("idx_search_entity_type").on(table.entityType)]
 );
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // 'match_start' | 'goal' | 'match_end' | 'transfer'
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    entityType: text("entity_type"), // 'player' | 'team' | 'match'
+    entityId: uuid("entity_id"),
+    isRead: boolean("is_read").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_notifications_user").on(table.userId),
+    index("idx_notifications_user_unread").on(table.userId, table.isRead),
+  ]
+);
+
+// ============================================================
+// SEARCH ANALYTICS
+// ============================================================
+
+export const searchAnalytics = pgTable(
+  "search_analytics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    query: text("query").notNull(),
+    resultsCount: integer("results_count").notNull(),
+    entityType: text("entity_type"), // optional filter used
+    searchedAt: timestamp("searched_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_search_analytics_query").on(table.query),
+    index("idx_search_analytics_searched_at").on(table.searchedAt),
+  ]
+);

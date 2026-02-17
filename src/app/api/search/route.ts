@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchEntities } from "@/lib/queries/search";
+import { searchEntities, trackSearch } from "@/lib/queries/search";
 import type { SearchResponse } from "@/types/api";
 
 export async function GET(request: NextRequest) {
@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const results = await searchEntities(query, type, limit);
+
+    // Track search in background (don't await)
+    trackSearch(query, results.length, type).catch(() => {});
 
     return NextResponse.json<SearchResponse>({
       results,

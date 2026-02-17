@@ -17,6 +17,10 @@ import {
   getMatchEventsWithPlayers,
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
+import { MatchJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { RelatedMatches } from "@/components/entity/related-entities";
+import { HeadToHead } from "@/components/match/head-to-head";
+import { FormationView } from "@/components/match/formation-view";
 
 interface MatchPageProps {
   params: Promise<{ id: string }>;
@@ -281,7 +285,29 @@ export default async function MatchPage({ params }: MatchPageProps) {
       (e.type === "goal" || e.type === "penalty") && e.teamId === awayTeam.id
   ).length;
 
+  // Build breadcrumb items
+  const breadcrumbItems = [
+    { name: "Home", url: BASE_URL },
+    ...(competition
+      ? [{ name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` }]
+      : []),
+    { name: `${homeTeam.shortName || homeTeam.name} vs ${awayTeam.shortName || awayTeam.name}`, url: `${BASE_URL}/matches/${id}` },
+  ];
+
   return (
+    <>
+      <MatchJsonLd
+        homeTeam={{ name: homeTeam.name, url: `${BASE_URL}/teams/${homeTeam.slug}` }}
+        awayTeam={{ name: awayTeam.name, url: `${BASE_URL}/teams/${awayTeam.slug}` }}
+        homeScore={match.homeScore}
+        awayScore={match.awayScore}
+        scheduledAt={match.scheduledAt.toISOString()}
+        status={match.status}
+        venue={venue ? { name: venue.name, url: `${BASE_URL}/venues/${venue.slug}` } : null}
+        competition={competition ? { name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` } : null}
+        matchUrl={`${BASE_URL}/matches/${id}`}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
@@ -448,6 +474,36 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 </div>
               )}
             </section>
+
+            {/* Formation View */}
+            {homeLineups && awayLineups && (
+              <FormationView
+                homeTeam={{
+                  name: homeTeam.name,
+                  shortName: homeTeam.shortName,
+                  primaryColor: homeTeam.primaryColor,
+                  players: homeLineups.starters.map(({ lineup, player }) => ({
+                    id: player.id,
+                    name: player.name,
+                    slug: player.slug,
+                    position: lineup.position || player.position,
+                    shirtNumber: lineup.shirtNumber,
+                  })),
+                }}
+                awayTeam={{
+                  name: awayTeam.name,
+                  shortName: awayTeam.shortName,
+                  primaryColor: awayTeam.primaryColor,
+                  players: awayLineups.starters.map(({ lineup, player }) => ({
+                    id: player.id,
+                    name: player.name,
+                    slug: player.slug,
+                    position: lineup.position || player.position,
+                    shirtNumber: lineup.shirtNumber,
+                  })),
+                }}
+              />
+            )}
 
             {/* Lineups */}
             {(homeLineups || awayLineups) && (
@@ -806,9 +862,23 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 </div>
               </div>
             )}
+
+            {/* Head to Head */}
+            <HeadToHead
+              team1Id={homeTeam.id}
+              team2Id={awayTeam.id}
+              team1Name={homeTeam.shortName || homeTeam.name}
+              team2Name={awayTeam.shortName || awayTeam.name}
+              team1Logo={homeTeam.logoUrl}
+              team2Logo={awayTeam.logoUrl}
+            />
+
+            {/* Related Matches */}
+            <RelatedMatches matchId={id} />
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -7,8 +7,9 @@ import {
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
-import { PlayerJsonLd } from "@/components/seo/json-ld";
+import { PlayerJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
+import { RelatedPlayers } from "@/components/entity/related-entities";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -103,8 +104,19 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const playerUrl = `${BASE_URL}/players/${slug}`;
   const teamUrl = currentTeam ? `${BASE_URL}/teams/${currentTeam.slug}` : null;
 
+  // Build breadcrumb items
+  const breadcrumbItems = [
+    { name: "Home", url: BASE_URL },
+    { name: "Players", url: `${BASE_URL}/search?type=player` },
+    ...(currentTeam
+      ? [{ name: currentTeam.name, url: `${BASE_URL}/teams/${currentTeam.slug}` }]
+      : []),
+    { name: player.name, url: playerUrl },
+  ];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <PlayerJsonLd
         name={player.name}
         url={playerUrl}
@@ -432,6 +444,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 )}
               </dl>
             </div>
+
+            {/* Related Players */}
+            <RelatedPlayers playerId={player.id} />
           </div>
         </div>
       </div>

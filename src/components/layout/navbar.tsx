@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
 import { LanguageToggle } from "@/components/language-toggle";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export function Navbar() {
   const t = useTranslations();
@@ -73,6 +74,9 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             {/* Language Toggle */}
             <LanguageToggle />
+
+            {/* Notifications (only when logged in) */}
+            {!isLoading && user && <NotificationBell />}
 
             <Link
               href="/search"

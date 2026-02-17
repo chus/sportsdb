@@ -6,8 +6,9 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/queries/teams";
-import { TeamJsonLd } from "@/components/seo/json-ld";
+import { TeamJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
+import { RelatedTeams } from "@/components/entity/related-entities";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -129,8 +130,16 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const teamUrl = `${BASE_URL}/teams/${slug}`;
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { name: "Home", url: BASE_URL },
+    { name: "Teams", url: `${BASE_URL}/search?type=team` },
+    { name: team.name, url: teamUrl },
+  ];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <TeamJsonLd
         name={team.name}
         url={teamUrl}
@@ -410,6 +419,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Related Teams */}
+            <RelatedTeams teamId={team.id} />
           </div>
         </div>
       </div>

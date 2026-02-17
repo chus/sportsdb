@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { players, teams, competitions, venues } from "@/lib/db/schema";
 import { count } from "drizzle-orm";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
+import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -74,6 +75,18 @@ export default async function HomePage() {
   ]);
 
   return (
+    <>
+      <WebsiteJsonLd
+        url={BASE_URL}
+        name="SportsDB"
+        description="The International Sports Database - Search across players, teams, competitions, and venues."
+        searchUrl={`${BASE_URL}/search?q={search_term_string}`}
+      />
+      <OrganizationJsonLd
+        name="SportsDB"
+        url={BASE_URL}
+        description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
+      />
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       {/* Hero Section */}
       <section className="relative h-[550px] bg-gradient-to-br from-neutral-900 via-blue-950 to-indigo-950 overflow-hidden">
@@ -280,5 +293,6 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

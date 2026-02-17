@@ -4,7 +4,7 @@
  * Parses player Wikipedia pages to extract career history (teams, years, appearances, goals).
  * Populates the player_team_history table with historical data.
  *
- * Usage: npx tsx scripts/extract-careers.ts
+ * Usage: npx tsx scripts/extract-careers.ts [--dry-run] [--player="Player Name"]
  *
  * Rate limiting: 1 request/second to be nice to Wikipedia
  */
@@ -13,13 +13,21 @@ import * as cheerio from "cheerio";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
-import { eq, sql as drizzleSql, and, isNull } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
+import { CareerParser, type CareerEntry } from "./career/career-parser";
+import { findBestMatch, type TEAM_ALIASES } from "./career/team-matcher";
+import { toIsoDate } from "./career/date-parser";
 
 config({ path: ".env.local" });
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql, { schema });
+
+// Parse command line args
+const args = process.argv.slice(2);
+const isDryRun = args.includes("--dry-run");
+const playerFilter = args.find((a) => a.startsWith("--player="))?.slice(9);
 
 // Rate limiting - 1 request/second
 const RATE_LIMIT_MS = 1000;
@@ -50,23 +58,12 @@ async function rateLimitedFetch(url: string): Promise<string> {
   return response.text();
 }
 
-interface CareerEntry {
-  teamName: string;
-  startYear: number;
-  endYear: number | null; // null = current team
-  appearances: number | null;
-  goals: number | null;
-  isLoan: boolean;
-}
-
 /**
- * Parse Wikipedia page for career history
+ * Search Wikipedia for a player and return their career data
  */
 async function getPlayerCareer(
   playerName: string
 ): Promise<CareerEntry[]> {
-  const career: CareerEntry[] = [];
-
   try {
     // Search for the player's Wikipedia page
     const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(
@@ -82,7 +79,7 @@ async function getPlayerCareer(
     const searchResults = searchData.query?.search;
 
     if (!searchResults || searchResults.length === 0) {
-      return career;
+      return [];
     }
 
     const pageTitle = searchResults[0].title;
@@ -93,178 +90,66 @@ async function getPlayerCareer(
     const html = await rateLimitedFetch(wikiUrl);
     const $ = cheerio.load(html);
 
-    // Find career statistics tables
-    // Wikipedia footballer pages typically have an infobox with career info
-    // and/or a dedicated "Club career" section with a table
-
-    // Strategy 1: Parse infobox career table
-    $(".infobox").each((_, infobox) => {
-      const $infobox = $(infobox);
-
-      // Look for "Senior career" or "Youth career" headers
-      $infobox.find("tr").each((_, row) => {
-        const $row = $(row);
-        const headerText = $row.find("th").text().toLowerCase();
-
-        // Check if this is a career section header
-        if (
-          headerText.includes("senior career") ||
-          headerText.includes("career")
-        ) {
-          return; // Skip header row
-        }
-
-        // Parse career rows
-        const cells = $row.find("td");
-        if (cells.length >= 2) {
-          const yearsText = $(cells[0]).text().trim();
-          const teamCell = $(cells[1]);
-          const teamName =
-            teamCell.find("a").first().text() || teamCell.text().trim();
-          const statsText = cells.length > 2 ? $(cells[2]).text().trim() : "";
-
-          // Parse years (e.g., "2019–2022", "2023–")
-          const yearsMatch = yearsText.match(/(\d{4})[–-](\d{4})?/);
-          if (yearsMatch && teamName && !teamName.includes("Total")) {
-            const startYear = parseInt(yearsMatch[1]);
-            const endYear = yearsMatch[2] ? parseInt(yearsMatch[2]) : null;
-
-            // Parse appearances and goals from stats (e.g., "45 (12)")
-            const statsMatch = statsText.match(/(\d+)\s*\((\d+)\)/);
-            const appearances = statsMatch ? parseInt(statsMatch[1]) : null;
-            const goals = statsMatch ? parseInt(statsMatch[2]) : null;
-
-            // Check if it's a loan
-            const isLoan =
-              teamCell.text().toLowerCase().includes("loan") ||
-              yearsText.toLowerCase().includes("loan");
-
-            // Filter out national teams and invalid entries
-            if (
-              !teamName.toLowerCase().includes("national") &&
-              !teamName.toLowerCase().includes("u-") &&
-              !teamName.toLowerCase().includes("under-") &&
-              teamName.length > 1
-            ) {
-              career.push({
-                teamName: teamName.replace(/\(loan\)/i, "").trim(),
-                startYear,
-                endYear,
-                appearances,
-                goals,
-                isLoan,
-              });
-            }
-          }
-        }
-      });
-    });
-
-    // Strategy 2: Parse "Club career" section table if infobox didn't work
-    if (career.length === 0) {
-      $("table.wikitable").each((_, table) => {
-        const $table = $(table);
-        const caption = $table.find("caption").text().toLowerCase();
-        const prevHeader = $table.prev("h2, h3").text().toLowerCase();
-
-        if (
-          caption.includes("career") ||
-          prevHeader.includes("career") ||
-          prevHeader.includes("club")
-        ) {
-          $table.find("tbody tr").each((_, row) => {
-            const $row = $(row);
-            const cells = $row.find("td");
-
-            if (cells.length >= 3) {
-              // Typical columns: Season/Years, Club, Apps, Goals
-              const yearText = $(cells[0]).text().trim();
-              const teamCell = $(cells[1]);
-              const teamName =
-                teamCell.find("a").first().text() || teamCell.text().trim();
-              const apps = parseInt($(cells[2]).text().trim()) || null;
-              const goals =
-                cells.length > 3
-                  ? parseInt($(cells[3]).text().trim()) || null
-                  : null;
-
-              const yearsMatch = yearText.match(/(\d{4})/);
-              if (yearsMatch && teamName && !teamName.includes("Total")) {
-                const startYear = parseInt(yearsMatch[1]);
-
-                career.push({
-                  teamName,
-                  startYear,
-                  endYear: null,
-                  appearances: apps,
-                  goals,
-                  isLoan: teamCell.text().toLowerCase().includes("loan"),
-                });
-              }
-            }
-          });
-        }
-      });
-    }
+    // Use the modular parser
+    const parser = new CareerParser();
+    return parser.parse($);
   } catch (error) {
-    console.log(`      ⚠️ Could not fetch career for ${playerName}`);
+    console.log(`      Could not fetch career for ${playerName}`);
+    return [];
   }
-
-  return career;
 }
 
 /**
- * Find or create a team by name
+ * Find team in database using multi-strategy matching
  */
-async function findOrCreateTeam(
+async function findTeamInDb(
   teamName: string,
-  country: string = "Unknown"
-): Promise<string | null> {
-  // Try to find existing team
-  const normalizedName = teamName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  teams: { id: string; name: string }[]
+): Promise<{ teamId: string; confidence: number } | null> {
+  const match = findBestMatch(teamName, teams);
 
-  const existingTeams = await db.select().from(schema.teams);
-
-  // Fuzzy match against existing teams
-  for (const team of existingTeams) {
-    const teamNormalized = team.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (
-      teamNormalized.includes(normalizedName) ||
-      normalizedName.includes(teamNormalized)
-    ) {
-      return team.id;
-    }
+  if (match && match.confidence >= 0.75) {
+    return { teamId: match.teamId, confidence: match.confidence };
   }
 
-  // If not found, we could create the team - but for now, skip unknown teams
-  // to avoid polluting the database with partial data
   return null;
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 async function main() {
-  console.log("📜 Career History Extraction");
-  console.log("═".repeat(50));
+  console.log("\n Career History Extraction");
+  console.log("=".repeat(50));
+  if (isDryRun) {
+    console.log("DRY RUN MODE - No changes will be saved\n");
+  }
   console.log("Extracting career histories from Wikipedia...");
   console.log("Rate limit: 1 request/second\n");
 
-  // Get all players
-  const players = await db.select().from(schema.players);
-  console.log(`Found ${players.length} players to process\n`);
+  // Get all teams for matching
+  const allTeams = await db.select({
+    id: schema.teams.id,
+    name: schema.teams.name,
+  }).from(schema.teams);
+  console.log(`Loaded ${allTeams.length} teams for matching\n`);
+
+  // Get players to process
+  let playersQuery = db.select().from(schema.players);
+  const players = await playersQuery;
+
+  const filteredPlayers = playerFilter
+    ? players.filter((p) =>
+        p.name.toLowerCase().includes(playerFilter.toLowerCase())
+      )
+    : players;
+
+  console.log(`Found ${filteredPlayers.length} players to process\n`);
 
   let totalCareersFound = 0;
   let totalEntriesAdded = 0;
+  let totalTeamsNotFound = 0;
+  let totalSkipped = 0;
 
-  for (const player of players) {
-    process.stdout.write(`👤 ${player.name}: `);
+  for (const player of filteredPlayers) {
+    process.stdout.write(`  ${player.name}: `);
 
     // Get career history from Wikipedia
     const career = await getPlayerCareer(player.name);
@@ -279,58 +164,100 @@ async function main() {
 
     // Process each career entry
     for (const entry of career) {
-      // Find the team in our database
-      const teamId = await findOrCreateTeam(entry.teamName);
-
-      if (!teamId) {
-        console.log(`   ⚠️ Team not found: ${entry.teamName}`);
+      // Skip youth career entries for now
+      if (entry.careerType === "youth") {
         continue;
       }
 
+      // Find the team in our database
+      const teamMatch = await findTeamInDb(entry.teamName, allTeams);
+
+      if (!teamMatch) {
+        console.log(`      Team not found: ${entry.teamName}`);
+        totalTeamsNotFound++;
+        continue;
+      }
+
+      const team = allTeams.find((t) => t.id === teamMatch.teamId);
+      const confidenceStr =
+        teamMatch.confidence < 1
+          ? ` (${Math.round(teamMatch.confidence * 100)}%)`
+          : "";
+
+      // Calculate dates
+      const validFrom = toIsoDate(
+        { year: entry.startYear, month: entry.startMonth },
+        false
+      );
+      const validTo = entry.endYear
+        ? toIsoDate({ year: entry.endYear, month: entry.endMonth }, true)
+        : null;
+
       // Check if this entry already exists
-      const existingEntry = await db
+      const existingEntries = await db
         .select()
         .from(schema.playerTeamHistory)
         .where(
           and(
             eq(schema.playerTeamHistory.playerId, player.id),
-            eq(schema.playerTeamHistory.teamId, teamId),
-            eq(
-              schema.playerTeamHistory.validFrom,
-              `${entry.startYear}-07-01`
-            )
+            eq(schema.playerTeamHistory.teamId, teamMatch.teamId)
           )
-        )
-        .limit(1);
+        );
 
-      if (existingEntry.length > 0) {
-        console.log(`   ⏭️ Already exists: ${entry.teamName} (${entry.startYear})`);
+      // Check for duplicate by similar date range
+      const isDuplicate = existingEntries.some((existing) => {
+        const existingStart = existing.validFrom;
+        const existingEnd = existing.validTo;
+        // Consider duplicate if start dates are within same year
+        return (
+          existingStart.slice(0, 4) === validFrom.slice(0, 4)
+        );
+      });
+
+      if (isDuplicate) {
+        console.log(
+          `      Exists: ${team?.name}${confidenceStr} (${entry.startYear})`
+        );
+        totalSkipped++;
         continue;
       }
 
-      // Insert the career entry
-      await db.insert(schema.playerTeamHistory).values({
-        playerId: player.id,
-        teamId,
-        validFrom: `${entry.startYear}-07-01`,
-        validTo: entry.endYear ? `${entry.endYear}-06-30` : null,
-        transferType: entry.isLoan ? "loan" : "permanent",
-      });
+      if (isDryRun) {
+        console.log(
+          `      [DRY] Would add: ${team?.name}${confidenceStr} (${entry.startYear}-${entry.endYear || "present"})`
+        );
+        totalEntriesAdded++;
+      } else {
+        // Insert the career entry
+        await db.insert(schema.playerTeamHistory).values({
+          playerId: player.id,
+          teamId: teamMatch.teamId,
+          validFrom,
+          validTo,
+          transferType: entry.isLoan ? "loan" : "permanent",
+        });
 
-      totalEntriesAdded++;
-      console.log(
-        `   ✅ Added: ${entry.teamName} (${entry.startYear}-${entry.endYear || "present"})`
-      );
+        console.log(
+          `      Added: ${team?.name}${confidenceStr} (${entry.startYear}-${entry.endYear || "present"})`
+        );
+        totalEntriesAdded++;
+      }
     }
   }
 
-  console.log("\n" + "═".repeat(50));
-  console.log("📊 Summary:");
+  console.log("\n" + "=".repeat(50));
+  console.log(" Summary:");
   console.log(`   Players with career data: ${totalCareersFound}`);
-  console.log(`   Career entries added: ${totalEntriesAdded}`);
+  console.log(`   Career entries ${isDryRun ? "would be " : ""}added: ${totalEntriesAdded}`);
+  console.log(`   Entries skipped (duplicates): ${totalSkipped}`);
+  console.log(`   Teams not found: ${totalTeamsNotFound}`);
+
+  if (isDryRun) {
+    console.log("\n Re-run without --dry-run to apply changes.");
+  }
 }
 
 main().catch((err) => {
-  console.error("❌ Career extraction failed:", err);
+  console.error(" Career extraction failed:", err);
   process.exit(1);
 });
