@@ -45,3 +45,4 @@ Next.js 15 (App Router) · Tailwind CSS v4 · PostgreSQL via Neon · Drizzle ORM
 | `/competitions/:slug/:season` | Competition for specific season |
 | `/matches/:id` | Match detail |
 | `/search?q=...` | Search results |
+# Trigger deploy
