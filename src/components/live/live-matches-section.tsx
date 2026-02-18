@@ -8,8 +8,9 @@ export function LiveMatchesSection() {
   const { matches, isLoading, error, lastUpdated, refetch, hasLiveMatches } =
     useLiveMatches({ pollingInterval: 30000 });
 
-  if (!hasLiveMatches && !isLoading) {
-    return null; // Don't show section if no live matches
+  // Don't show anything until we know there are live matches
+  if (!hasLiveMatches) {
+    return null;
   }
 
   return (
