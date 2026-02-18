@@ -149,3 +149,52 @@ export async function getPopularSearches(
 
   return results;
 }
+
+/**
+ * Get featured entities for each type to show on empty search pages.
+ * Returns a mix of players, teams, and competitions.
+ */
+export async function getFeaturedEntities(limitPerType = 6): Promise<{
+  players: SearchResult[];
+  teams: SearchResult[];
+  competitions: SearchResult[];
+}> {
+  // Get featured players (those with images, well-known)
+  const players = await db
+    .select()
+    .from(searchIndex)
+    .where(eq(searchIndex.entityType, "player"))
+    .orderBy(sql`random()`)
+    .limit(limitPerType);
+
+  // Get featured teams (those with logos)
+  const teams = await db
+    .select()
+    .from(searchIndex)
+    .where(eq(searchIndex.entityType, "team"))
+    .orderBy(sql`random()`)
+    .limit(limitPerType);
+
+  // Get featured competitions
+  const competitions = await db
+    .select()
+    .from(searchIndex)
+    .where(eq(searchIndex.entityType, "competition"))
+    .orderBy(sql`random()`)
+    .limit(limitPerType);
+
+  const mapResult = (r: typeof players[0]): SearchResult => ({
+    id: r.id,
+    entityType: r.entityType as SearchResult["entityType"],
+    slug: r.slug,
+    name: r.name,
+    subtitle: r.subtitle,
+    meta: r.meta,
+  });
+
+  return {
+    players: players.map(mapResult),
+    teams: teams.map(mapResult),
+    competitions: competitions.map(mapResult),
+  };
+}
