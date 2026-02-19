@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Users, Shield, Trophy, MapPin } from "lucide-react";
 import type { Metadata } from "next";
-import { searchEntities } from "@/lib/queries/search";
+import { searchEntities, getEntitiesByType } from "@/lib/queries/search";
 import { SearchBar } from "@/components/search/search-bar";
 import { PopularSearches } from "@/components/search/popular-searches";
 import { FeaturedEntities } from "@/components/search/featured-entities";
@@ -99,7 +99,8 @@ async function SearchResults({
   query: string;
   type?: string;
 }) {
-  if (!query) {
+  // No query and no type filter - show featured entities
+  if (!query && !type) {
     return (
       <div className="space-y-8">
         <Suspense fallback={null}>
@@ -112,7 +113,13 @@ async function SearchResults({
     );
   }
 
-  const results = await searchEntities(query, type || undefined, 50);
+  // Type filter but no query - show all of that type
+  let results: Awaited<ReturnType<typeof searchEntities>>;
+  if (!query && type) {
+    results = await getEntitiesByType(type, 50);
+  } else {
+    results = await searchEntities(query, type || undefined, 50);
+  }
 
   if (results.length === 0) {
     return (
@@ -124,8 +131,9 @@ async function SearchResults({
           No results found
         </h2>
         <p className="text-neutral-500">
-          No matches for "{query}"{type ? ` in ${TYPE_LABELS[type] || type}s` : ""}.
-          Try adjusting your search.
+          {query
+            ? `No matches for "${query}"${type ? ` in ${TYPE_LABELS[type] || type}s` : ""}. Try adjusting your search.`
+            : `No ${type ? (TYPE_LABELS[type] || type) : "result"}s found.`}
         </p>
       </div>
     );
@@ -134,8 +142,9 @@ async function SearchResults({
   return (
     <div>
       <p className="text-sm text-neutral-500 mb-4">
-        {results.length} result{results.length !== 1 ? "s" : ""} for "{query}"
-        {type ? ` in ${TYPE_LABELS[type] || type}s` : ""}
+        {query
+          ? `${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"${type ? ` in ${TYPE_LABELS[type] || type}s` : ""}`
+          : `${results.length} ${type ? (TYPE_LABELS[type] || type) : "result"}${results.length !== 1 ? "s" : ""}`}
       </p>
       <div className="grid gap-3">
         {results.map((result) => (

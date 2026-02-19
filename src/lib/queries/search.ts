@@ -148,6 +148,84 @@ export async function getPopularSearches(
 }
 
 /**
+ * Get all entities of a specific type (for browsing without search query).
+ * Returns entities ordered by relevance/popularity.
+ */
+export async function getEntitiesByType(
+  entityType: string,
+  limit = 50
+): Promise<SearchResult[]> {
+  if (entityType === "player") {
+    const results = await db.execute<{
+      id: string;
+      entity_type: string;
+      slug: string;
+      name: string;
+      subtitle: string | null;
+      meta: string | null;
+    }>(sql`
+      SELECT si.id, si.entity_type, si.slug, si.name, si.subtitle, si.meta
+      FROM search_index si
+      LEFT JOIN players p ON si.id = p.id
+      WHERE si.entity_type = 'player'
+      ORDER BY coalesce(p.popularity_score, 0) DESC
+      LIMIT ${limit}
+    `);
+    return results.rows.map((r) => ({
+      id: r.id,
+      entityType: r.entity_type as SearchResult["entityType"],
+      slug: r.slug,
+      name: r.name,
+      subtitle: r.subtitle,
+      meta: r.meta,
+    }));
+  }
+
+  if (entityType === "team") {
+    const results = await db.execute<{
+      id: string;
+      entity_type: string;
+      slug: string;
+      name: string;
+      subtitle: string | null;
+      meta: string | null;
+    }>(sql`
+      SELECT si.id, si.entity_type, si.slug, si.name, si.subtitle, si.meta
+      FROM search_index si
+      LEFT JOIN teams t ON si.id = t.id
+      WHERE si.entity_type = 'team'
+      ORDER BY coalesce(t.tier, 3) ASC, si.name ASC
+      LIMIT ${limit}
+    `);
+    return results.rows.map((r) => ({
+      id: r.id,
+      entityType: r.entity_type as SearchResult["entityType"],
+      slug: r.slug,
+      name: r.name,
+      subtitle: r.subtitle,
+      meta: r.meta,
+    }));
+  }
+
+  // For competition, venue, etc.
+  const results = await db
+    .select()
+    .from(searchIndex)
+    .where(eq(searchIndex.entityType, entityType))
+    .orderBy(searchIndex.name)
+    .limit(limit);
+
+  return results.map((r) => ({
+    id: r.id,
+    entityType: r.entityType as SearchResult["entityType"],
+    slug: r.slug,
+    name: r.name,
+    subtitle: r.subtitle,
+    meta: r.meta,
+  }));
+}
+
+/**
  * Get featured entities for each type to show on empty search pages.
  * Returns popular players, teams, and competitions.
  */
