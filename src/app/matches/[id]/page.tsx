@@ -21,6 +21,7 @@ import { MatchJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
 import { FormationView } from "@/components/match/formation-view";
+import { MatchInternalLinks } from "@/components/seo/internal-links";
 
 interface MatchPageProps {
   params: Promise<{ id: string }>;
@@ -875,6 +876,12 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* Related Matches */}
             <RelatedMatches matchId={id} />
+
+            {/* Internal Links for SEO */}
+            <MatchInternalLinks
+              competitionSlug={competition?.slug}
+              competitionName={competition?.name}
+            />
           </div>
         </div>
       </div>

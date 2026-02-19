@@ -10,6 +10,7 @@ import { format, differenceInYears } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
+import { PlayerInternalLinks } from "@/components/seo/internal-links";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -447,6 +448,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
             {/* Related Players */}
             <RelatedPlayers playerId={player.id} />
+
+            {/* Internal Links for SEO */}
+            <PlayerInternalLinks
+              playerId={player.id}
+              nationality={player.nationality}
+              position={player.position}
+            />
           </div>
         </div>
       </div>

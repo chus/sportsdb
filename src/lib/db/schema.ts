@@ -51,6 +51,7 @@ export const teams = pgTable(
     logoUrl: text("logo_url"),
     primaryColor: text("primary_color"), // hex
     secondaryColor: text("secondary_color"),
+    tier: integer("tier").default(3), // 1 = top club, 2 = mid tier, 3 = other
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -72,6 +73,7 @@ export const players = pgTable(
     preferredFoot: text("preferred_foot"), // 'Left' | 'Right' | 'Both'
     status: text("status").notNull().default("active"), // 'active' | 'retired'
     imageUrl: text("image_url"),
+    popularityScore: integer("popularity_score").default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },

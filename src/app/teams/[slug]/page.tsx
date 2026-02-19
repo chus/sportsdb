@@ -9,6 +9,7 @@ import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/q
 import { TeamJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
+import { TeamInternalLinks } from "@/components/seo/internal-links";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -422,6 +423,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
             {/* Related Teams */}
             <RelatedTeams teamId={team.id} />
+
+            {/* Internal Links for SEO */}
+            <TeamInternalLinks teamId={team.id} country={team.country} />
           </div>
         </div>
       </div>
