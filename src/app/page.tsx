@@ -3,10 +3,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
-import { players, teams, competitions, venues } from "@/lib/db/schema";
+import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
 import { count } from "drizzle-orm";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
+import { LandingHero } from "@/components/landing/landing-hero";
+import { LandingStats } from "@/components/landing/landing-stats";
+import { LandingFeatures } from "@/components/landing/landing-features";
+import { LandingBenefits } from "@/components/landing/landing-benefits";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -37,12 +41,14 @@ async function getStats() {
   const [teamsCount] = await db.select({ count: count() }).from(teams);
   const [competitionsCount] = await db.select({ count: count() }).from(competitions);
   const [venuesCount] = await db.select({ count: count() }).from(venues);
+  const [matchesCount] = await db.select({ count: count() }).from(matches);
 
   return {
     players: playersCount.count,
     teams: teamsCount.count,
     competitions: competitionsCount.count,
     venues: venuesCount.count,
+    matches: matchesCount.count,
   };
 }
 
@@ -88,73 +94,24 @@ export default async function HomePage() {
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-      {/* Hero Section */}
-      <section className="relative h-[550px] bg-gradient-to-br from-neutral-900 via-blue-950 to-indigo-950 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="relative h-full max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
-            <Trophy className="w-4 h-4 text-blue-300" />
-            <span className="text-sm font-medium text-blue-100">
-              {t("home.heroTagline")}
-            </span>
-          </div>
+      {/* Landing Hero */}
+      <LandingHero />
 
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            {t("home.heroTitle1")}
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              {t("home.heroTitle2")}
-            </span>
-          </h1>
-
-          <p className="text-lg text-neutral-300 max-w-2xl mb-8">
-            {t("home.heroDescription")}
-          </p>
-
-          {/* Search CTA */}
-          <div className="w-full max-w-xl">
-            <Link
-              href="/search"
-              className="flex items-center gap-3 w-full px-6 py-4 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] text-left group"
-            >
-              <Search className="w-5 h-5 text-neutral-400 group-hover:text-blue-500 transition-colors" />
-              <span className="text-neutral-500 flex-1">
-                {t("home.searchPlaceholder")}
-              </span>
-              <ArrowRight className="w-5 h-5 text-neutral-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Stats */}
+      <LandingStats
+        players={stats.players}
+        teams={stats.teams}
+        competitions={stats.competitions}
+        matches={stats.matches}
+      />
 
       {/* Live Matches Section */}
-      <LiveMatchesSection />
+      <div className="mt-12">
+        <LiveMatchesSection />
+      </div>
 
-      {/* Stats Section */}
-      <section className="py-12 -mt-16 relative z-10">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Trophy, label: t("common.competitions"), value: stats.competitions, href: "/search?type=competition" },
-              { icon: Shield, label: t("common.teams"), value: stats.teams, href: "/search?type=team" },
-              { icon: Users, label: t("common.players"), value: stats.players, href: "/search?type=player" },
-              { icon: MapPin, label: t("common.venues"), value: stats.venues, href: "/search?type=venue" },
-            ].map((stat) => (
-              <Link
-                key={stat.label}
-                href={stat.href}
-                className="text-center p-6 bg-white rounded-xl border border-neutral-200 shadow-lg hover:shadow-xl hover:border-blue-200 transition-all group"
-              >
-                <stat.icon className="w-8 h-8 text-blue-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                <div className="text-3xl font-bold text-neutral-900 mb-1">
-                  {formatNumber(stat.value)}
-                </div>
-                <div className="text-sm text-neutral-500">{stat.label}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Features */}
+      <LandingFeatures />
 
       {/* Featured Competitions */}
       {featuredCompetitions.length > 0 && (
@@ -270,28 +227,8 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t("home.readyToExplore")}
-          </h2>
-          <p className="text-lg text-white/80 mb-8">
-            {t("home.exploreDescription", {
-              players: formatNumber(stats.players),
-              teams: formatNumber(stats.teams),
-              competitions: formatNumber(stats.competitions)
-            })}
-          </p>
-          <Link
-            href="/search"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-neutral-100 transition-colors"
-          >
-            <Search className="w-5 h-5" />
-            {t("home.startSearching")}
-          </Link>
-        </div>
-      </section>
+      {/* Benefits & CTA */}
+      <LandingBenefits />
     </div>
     </>
   );
