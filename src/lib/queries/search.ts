@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { searchIndex, searchAnalytics } from "@/lib/db/schema";
+import { searchIndex, searchAnalytics, players } from "@/lib/db/schema";
 import { eq, ilike, or, and, sql, desc, gte } from "drizzle-orm";
 import type { SearchResult } from "@/types/entities";
 
@@ -30,7 +30,7 @@ export async function searchEntities(
     ? sql`AND ${searchIndex.entityType} = ${entityType}`
     : sql``;
 
-  // Full-text search with ranking
+  // Full-text search with ranking, boosted by popularity for players
   const results = await db.execute<{
     id: string;
     entity_type: string;
@@ -39,23 +39,33 @@ export async function searchEntities(
     subtitle: string | null;
     meta: string | null;
     rank: number;
+    popularity: number | null;
   }>(sql`
     SELECT
-      id,
-      entity_type,
-      slug,
-      name,
-      subtitle,
-      meta,
+      si.id,
+      si.entity_type,
+      si.slug,
+      si.name,
+      si.subtitle,
+      si.meta,
       ts_rank(
-        to_tsvector('english', coalesce(name, '') || ' ' || coalesce(subtitle, '') || ' ' || coalesce(meta, '')),
+        to_tsvector('english', coalesce(si.name, '') || ' ' || coalesce(si.subtitle, '') || ' ' || coalesce(si.meta, '')),
         to_tsquery('english', ${sanitizedQuery + ":*"})
-      ) as rank
-    FROM search_index
-    WHERE to_tsvector('english', coalesce(name, '') || ' ' || coalesce(subtitle, '') || ' ' || coalesce(meta, ''))
+      ) as rank,
+      CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END as popularity
+    FROM search_index si
+    LEFT JOIN players p ON si.entity_type = 'player' AND si.id = p.id
+    WHERE to_tsvector('english', coalesce(si.name, '') || ' ' || coalesce(si.subtitle, '') || ' ' || coalesce(si.meta, ''))
       @@ to_tsquery('english', ${sanitizedQuery + ":*"})
     ${typeFilter}
-    ORDER BY rank DESC, name ASC
+    ORDER BY
+      -- Boost exact name matches
+      CASE WHEN lower(si.name) = lower(${query}) THEN 1000 ELSE 0 END DESC,
+      -- Boost prefix matches (name starts with query)
+      CASE WHEN lower(si.name) LIKE lower(${query + "%"}) THEN 500 ELSE 0 END DESC,
+      -- Combine text relevance with popularity
+      (rank * 100) + coalesce(CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END, 0) DESC,
+      si.name ASC
     LIMIT ${limit}
   `);
 
@@ -152,40 +162,58 @@ export async function getPopularSearches(
 
 /**
  * Get featured entities for each type to show on empty search pages.
- * Returns a mix of players, teams, and competitions.
+ * Returns popular players, teams, and competitions.
  */
 export async function getFeaturedEntities(limitPerType = 6): Promise<{
   players: SearchResult[];
   teams: SearchResult[];
   competitions: SearchResult[];
 }> {
-  // Get featured players (those with images, well-known)
-  const players = await db
-    .select()
-    .from(searchIndex)
-    .where(eq(searchIndex.entityType, "player"))
-    .orderBy(sql`random()`)
-    .limit(limitPerType);
+  // Get top players by popularity score
+  const featuredPlayers = await db.execute<{
+    id: string;
+    entity_type: string;
+    slug: string;
+    name: string;
+    subtitle: string | null;
+    meta: string | null;
+  }>(sql`
+    SELECT si.id, si.entity_type, si.slug, si.name, si.subtitle, si.meta
+    FROM search_index si
+    LEFT JOIN players p ON si.id = p.id
+    WHERE si.entity_type = 'player'
+    ORDER BY coalesce(p.popularity_score, 0) DESC
+    LIMIT ${limitPerType}
+  `);
 
-  // Get featured teams (those with logos)
-  const teams = await db
-    .select()
-    .from(searchIndex)
-    .where(eq(searchIndex.entityType, "team"))
-    .orderBy(sql`random()`)
-    .limit(limitPerType);
+  // Get top teams (prefer tier 1 and 2 teams)
+  const featuredTeams = await db.execute<{
+    id: string;
+    entity_type: string;
+    slug: string;
+    name: string;
+    subtitle: string | null;
+    meta: string | null;
+  }>(sql`
+    SELECT si.id, si.entity_type, si.slug, si.name, si.subtitle, si.meta
+    FROM search_index si
+    LEFT JOIN teams t ON si.id = t.id
+    WHERE si.entity_type = 'team'
+    ORDER BY coalesce(t.tier, 3) ASC, si.name ASC
+    LIMIT ${limitPerType}
+  `);
 
   // Get featured competitions
-  const competitions = await db
+  const featuredCompetitions = await db
     .select()
     .from(searchIndex)
     .where(eq(searchIndex.entityType, "competition"))
-    .orderBy(sql`random()`)
+    .orderBy(searchIndex.name)
     .limit(limitPerType);
 
-  const mapResult = (r: typeof players[0]): SearchResult => ({
+  const mapResult = (r: { id: string; entity_type?: string; entityType?: string; slug: string; name: string; subtitle: string | null; meta: string | null }): SearchResult => ({
     id: r.id,
-    entityType: r.entityType as SearchResult["entityType"],
+    entityType: (r.entity_type || r.entityType) as SearchResult["entityType"],
     slug: r.slug,
     name: r.name,
     subtitle: r.subtitle,
@@ -193,8 +221,15 @@ export async function getFeaturedEntities(limitPerType = 6): Promise<{
   });
 
   return {
-    players: players.map(mapResult),
-    teams: teams.map(mapResult),
-    competitions: competitions.map(mapResult),
+    players: featuredPlayers.rows.map(mapResult),
+    teams: featuredTeams.rows.map(mapResult),
+    competitions: featuredCompetitions.map(r => ({
+      id: r.id,
+      entityType: r.entityType as SearchResult["entityType"],
+      slug: r.slug,
+      name: r.name,
+      subtitle: r.subtitle,
+      meta: r.meta,
+    })),
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Search, X, Users, Shield, Trophy, MapPin, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchResult } from "@/types/entities";
@@ -12,6 +12,7 @@ interface SearchBarProps {
   placeholder?: string;
   initialQuery?: string;
   onSubmit?: (query: string) => void;
+  size?: "default" | "large";
 }
 
 const ENTITY_ROUTES: Record<string, string> = {
@@ -29,17 +30,42 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  player: "bg-blue-100 text-blue-700",
-  team: "bg-green-100 text-green-700",
-  competition: "bg-purple-100 text-purple-700",
-  venue: "bg-orange-100 text-orange-700",
+  player: "bg-blue-100 text-blue-800",
+  team: "bg-green-100 text-green-800",
+  competition: "bg-purple-100 text-purple-800",
+  venue: "bg-orange-100 text-orange-800",
 };
+
+const TYPE_ICONS: Record<string, React.ElementType> = {
+  player: Users,
+  team: Shield,
+  competition: Trophy,
+  venue: MapPin,
+};
+
+function highlightMatch(text: string, query: string): React.ReactNode {
+  if (!query.trim()) return text;
+
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
+
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="bg-yellow-200 text-neutral-900 rounded px-0.5">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
 
 export function SearchBar({
   autoFocus,
   placeholder = "Search players, teams, competitions...",
   initialQuery = "",
   onSubmit,
+  size = "default",
 }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
@@ -74,7 +100,7 @@ export function SearchBar({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/search?q=${encodeURIComponent(searchQuery)}&limit=6`
+        `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8`
       );
       if (response.ok) {
         const data = await response.json();
@@ -87,20 +113,25 @@ export function SearchBar({
     }
   }, []);
 
-  // Handle input change with debouncing
+  // Handle input change with faster debouncing for instant feel
   const handleInputChange = (value: string) => {
     setQuery(value);
     setHighlightedIndex(-1);
+
+    // Show loading immediately for better UX
+    if (value.trim()) {
+      setIsLoading(true);
+    }
 
     // Clear previous timeout
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    // Set new debounced search
+    // Faster debounce for instant search feel (150ms instead of 300ms)
     debounceRef.current = setTimeout(() => {
       performSearch(value);
-    }, 300);
+    }, 150);
   };
 
   // Cleanup debounce on unmount
@@ -211,11 +242,21 @@ export function SearchBar({
     inputRef.current?.focus();
   };
 
+  const inputSizeClasses = size === "large"
+    ? "pl-14 pr-14 py-4 text-lg"
+    : "pl-12 pr-12 py-3 text-base";
+
+  const iconSizeClasses = size === "large" ? "w-6 h-6" : "w-5 h-5";
+
   return (
     <div className="relative w-full">
       <form onSubmit={handleSubmit}>
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+          {isLoading && query ? (
+            <Loader2 className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconSizeClasses} text-blue-500 animate-spin`} />
+          ) : (
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconSizeClasses} text-neutral-400`} />
+          )}
           <input
             ref={inputRef}
             type="text"
@@ -225,15 +266,15 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             autoFocus={autoFocus}
             placeholder={placeholder}
-            className="w-full pl-12 pr-12 py-3 border border-neutral-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`w-full ${inputSizeClasses} border border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm`}
           />
           {query && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className={iconSizeClasses} />
             </button>
           )}
         </div>
@@ -251,7 +292,7 @@ export function SearchBar({
           />
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-300 rounded-lg shadow-lg overflow-hidden z-20 max-h-[400px] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-20 max-h-[480px] overflow-y-auto"
           >
             {/* Recent Searches */}
             {showRecentSearches && (
@@ -266,66 +307,98 @@ export function SearchBar({
             {/* Search Results */}
             {showResults && (
               <>
-                {isLoading && (
-                  <div className="px-4 py-3 text-neutral-500 text-sm">
-                    Searching...
+                {/* Loading skeleton */}
+                {isLoading && results.length === 0 && (
+                  <div className="p-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-3 px-3 py-3 animate-pulse">
+                        <div className="w-10 h-10 bg-neutral-100 rounded-lg" />
+                        <div className="flex-1">
+                          <div className="h-4 bg-neutral-100 rounded w-2/3 mb-2" />
+                          <div className="h-3 bg-neutral-50 rounded w-1/2" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 {!isLoading && results.length === 0 && query.trim() && (
-                  <div className="px-4 py-3 text-neutral-500 text-sm">
-                    No results found for "{query}"
+                  <div className="px-4 py-8 text-center">
+                    <Search className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+                    <p className="text-neutral-500 text-sm">
+                      No results for "<span className="font-medium text-neutral-700">{query}</span>"
+                    </p>
+                    <p className="text-neutral-400 text-xs mt-1">
+                      Try searching for players, teams, or competitions
+                    </p>
                   </div>
                 )}
 
-                {!isLoading &&
-                  results.map((result, index) => (
-                    <button
-                      key={result.id}
-                      data-index={index}
-                      onClick={() => handleResultClick(result)}
-                      className={`w-full px-4 py-3 text-left border-b border-neutral-100 last:border-b-0 flex items-center gap-3 ${
-                        highlightedIndex === index
-                          ? "bg-blue-50"
-                          : "hover:bg-neutral-50"
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-neutral-900 truncate">
-                          {result.name}
-                        </div>
-                        {result.subtitle && (
-                          <div className="text-sm text-neutral-600 truncate">
-                            {result.subtitle}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {result.meta && (
-                          <span className="text-xs text-neutral-500">
-                            {result.meta}
-                          </span>
-                        )}
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${TYPE_COLORS[result.entityType] || "bg-neutral-100 text-neutral-600"}`}
+                {results.length > 0 && (
+                  <div className="p-2">
+                    {results.map((result, index) => {
+                      const Icon = TYPE_ICONS[result.entityType] || Users;
+                      return (
+                        <button
+                          key={result.id}
+                          data-index={index}
+                          onClick={() => handleResultClick(result)}
+                          className={`w-full px-3 py-2.5 text-left flex items-center gap-3 rounded-lg transition-colors ${
+                            highlightedIndex === index
+                              ? "bg-blue-50"
+                              : "hover:bg-neutral-50"
+                          }`}
                         >
-                          {TYPE_LABELS[result.entityType] || result.entityType}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            highlightedIndex === index
+                              ? "bg-blue-100"
+                              : "bg-neutral-100"
+                          }`}>
+                            <Icon className={`w-5 h-5 ${
+                              highlightedIndex === index
+                                ? "text-blue-600"
+                                : "text-neutral-500"
+                            }`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-semibold truncate ${
+                              highlightedIndex === index
+                                ? "text-blue-900"
+                                : "text-neutral-900"
+                            }`}>
+                              {highlightMatch(result.name, query)}
+                            </div>
+                            {result.subtitle && (
+                              <div className="text-sm text-neutral-500 truncate">
+                                {highlightMatch(result.subtitle, query)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-md font-medium ${TYPE_COLORS[result.entityType] || "bg-neutral-100 text-neutral-600"}`}
+                            >
+                              {TYPE_LABELS[result.entityType] || result.entityType}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
-                {!isLoading && results.length > 0 && (
+                {results.length > 0 && (
                   <button
                     data-index={results.length}
                     onClick={handleSubmit}
-                    className={`w-full px-4 py-3 text-left text-sm font-medium border-t border-neutral-200 ${
+                    className={`w-full px-4 py-3 text-left text-sm font-semibold border-t border-neutral-100 flex items-center justify-between ${
                       highlightedIndex === results.length
                         ? "bg-blue-50 text-blue-700"
                         : "text-blue-600 hover:bg-blue-50"
                     }`}
                   >
-                    See all results for "{query}"
+                    <span>See all results for "{query}"</span>
+                    <span className="text-xs text-neutral-400">↵</span>
                   </button>
                 )}
               </>
