@@ -85,10 +85,12 @@ async function getTeamsByCountry(country: string, excludeId: string, limit = 6) 
 
 export async function PlayerInternalLinks({
   playerId,
+  playerSlug,
   nationality,
   position,
 }: {
   playerId: string;
+  playerSlug: string;
   nationality?: string | null;
   position?: string | null;
 }) {
@@ -106,7 +108,7 @@ export async function PlayerInternalLinks({
       {/* Compare CTA */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
         <Link
-          href="/compare/players"
+          href={`/compare/players?p1=${playerSlug}`}
           className="flex items-center gap-3 text-blue-700 hover:text-blue-800"
         >
           <GitCompare className="w-5 h-5" />

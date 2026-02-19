@@ -452,6 +452,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             {/* Internal Links for SEO */}
             <PlayerInternalLinks
               playerId={player.id}
+              playerSlug={player.slug}
               nationality={player.nationality}
               position={player.position}
             />

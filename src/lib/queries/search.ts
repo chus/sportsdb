@@ -29,6 +29,8 @@ export async function searchEntities(
   const exactPattern = trimmedQuery;
   const prefixPattern = `${trimmedQuery}%`;
   const wordPrefixPattern = `% ${trimmedQuery}%`; // Matches word boundaries (space before)
+  const exactWordPattern = `% ${trimmedQuery} %`; // Exact word match with spaces
+  const exactWordEndPattern = `% ${trimmedQuery}`; // Word at end of name
   const containsPattern = `%${trimmedQuery}%`;
 
   // Autocomplete search with smart ranking
@@ -51,13 +53,15 @@ export async function searchEntities(
       si.meta,
       CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END as popularity,
       CASE
-        -- Exact match on name (highest priority)
+        -- Exact match on full name (highest priority)
         WHEN lower(si.name) = ${exactPattern} THEN 10000
-        -- Name starts with query
+        -- Exact word match in name (e.g., "Messi" as a complete word)
+        WHEN lower(' ' || si.name || ' ') LIKE ${'% ' + trimmedQuery + ' %'} THEN 8000
+        -- Name starts with query exactly
         WHEN lower(si.name) LIKE ${prefixPattern} THEN 5000
-        -- Any word in name starts with query (e.g., "Messi" in "Lionel Messi")
+        -- Any word in name starts with query (e.g., "Mes" in "Lionel Messi")
         WHEN lower(si.name) LIKE ${wordPrefixPattern} THEN 3000
-        -- Subtitle starts with or contains word starting with query
+        -- Subtitle matches
         WHEN lower(coalesce(si.subtitle, '')) LIKE ${prefixPattern} THEN 1000
         WHEN lower(coalesce(si.subtitle, '')) LIKE ${wordPrefixPattern} THEN 800
         -- Name contains query anywhere
