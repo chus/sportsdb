@@ -4,33 +4,34 @@ import { eq, ilike, or, and, sql, desc, gte } from "drizzle-orm";
 import type { SearchResult } from "@/types/entities";
 
 /**
- * Search entities using Postgres full-text search.
- * Uses to_tsvector for indexing and ts_rank for relevance ranking.
- * Falls back to ILIKE for partial matches when no full-text results.
+ * Autocomplete-style search that works with partial input.
+ * Matches any word in the name starting with the query (e.g., "mes" finds "Lionel Messi")
+ * Results ranked by: exact match > prefix match > contains match > popularity
  */
 export async function searchEntities(
   query: string,
   entityType?: string,
   limit = 10
 ): Promise<SearchResult[]> {
-  // Sanitize query for tsquery - remove special characters
-  const sanitizedQuery = query
-    .trim()
-    .replace(/[^\w\s]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .join(" & ");
+  const trimmedQuery = query.trim().toLowerCase();
 
-  if (!sanitizedQuery) {
+  // Require at least 2 characters for search
+  if (!trimmedQuery || trimmedQuery.length < 2) {
     return [];
   }
 
-  // Build the WHERE clause for entity type filter
+  // Build type filter
   const typeFilter = entityType
-    ? sql`AND ${searchIndex.entityType} = ${entityType}`
+    ? sql`AND si.entity_type = ${entityType}`
     : sql``;
 
-  // Full-text search with ranking, boosted by popularity for players
+  // Patterns for different match types
+  const exactPattern = trimmedQuery;
+  const prefixPattern = `${trimmedQuery}%`;
+  const wordPrefixPattern = `% ${trimmedQuery}%`; // Matches word boundaries (space before)
+  const containsPattern = `%${trimmedQuery}%`;
+
+  // Autocomplete search with smart ranking
   const results = await db.execute<{
     id: string;
     entity_type: string;
@@ -38,8 +39,8 @@ export async function searchEntities(
     name: string;
     subtitle: string | null;
     meta: string | null;
-    rank: number;
     popularity: number | null;
+    match_rank: number;
   }>(sql`
     SELECT
       si.id,
@@ -48,62 +49,48 @@ export async function searchEntities(
       si.name,
       si.subtitle,
       si.meta,
-      ts_rank(
-        to_tsvector('english', coalesce(si.name, '') || ' ' || coalesce(si.subtitle, '') || ' ' || coalesce(si.meta, '')),
-        to_tsquery('english', ${sanitizedQuery + ":*"})
-      ) as rank,
-      CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END as popularity
+      CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END as popularity,
+      CASE
+        -- Exact match on name (highest priority)
+        WHEN lower(si.name) = ${exactPattern} THEN 10000
+        -- Name starts with query
+        WHEN lower(si.name) LIKE ${prefixPattern} THEN 5000
+        -- Any word in name starts with query (e.g., "Messi" in "Lionel Messi")
+        WHEN lower(si.name) LIKE ${wordPrefixPattern} THEN 3000
+        -- Subtitle starts with or contains word starting with query
+        WHEN lower(coalesce(si.subtitle, '')) LIKE ${prefixPattern} THEN 1000
+        WHEN lower(coalesce(si.subtitle, '')) LIKE ${wordPrefixPattern} THEN 800
+        -- Name contains query anywhere
+        WHEN lower(si.name) LIKE ${containsPattern} THEN 500
+        -- Subtitle/meta contains query
+        WHEN lower(coalesce(si.subtitle, '')) LIKE ${containsPattern} THEN 200
+        WHEN lower(coalesce(si.meta, '')) LIKE ${containsPattern} THEN 100
+        ELSE 0
+      END as match_rank
     FROM search_index si
     LEFT JOIN players p ON si.entity_type = 'player' AND si.id = p.id
-    WHERE to_tsvector('english', coalesce(si.name, '') || ' ' || coalesce(si.subtitle, '') || ' ' || coalesce(si.meta, ''))
-      @@ to_tsquery('english', ${sanitizedQuery + ":*"})
+    LEFT JOIN teams t ON si.entity_type = 'team' AND si.id = t.id
+    WHERE (
+      lower(si.name) LIKE ${containsPattern}
+      OR lower(coalesce(si.subtitle, '')) LIKE ${containsPattern}
+      OR lower(coalesce(si.meta, '')) LIKE ${containsPattern}
+    )
     ${typeFilter}
     ORDER BY
-      -- Boost exact name matches
-      CASE WHEN lower(si.name) = lower(${query}) THEN 1000 ELSE 0 END DESC,
-      -- Boost prefix matches (name starts with query)
-      CASE WHEN lower(si.name) LIKE lower(${query + "%"}) THEN 500 ELSE 0 END DESC,
-      -- Combine text relevance with popularity
-      (rank * 100) + coalesce(CASE WHEN si.entity_type = 'player' THEN p.popularity_score ELSE 0 END, 0) DESC,
+      match_rank DESC,
+      -- Within same match rank, order by popularity (players) or tier (teams)
+      CASE
+        WHEN si.entity_type = 'player' THEN coalesce(p.popularity_score, 0)
+        WHEN si.entity_type = 'team' THEN (4 - coalesce(t.tier, 3)) * 100
+        ELSE 0
+      END DESC,
       si.name ASC
     LIMIT ${limit}
   `);
 
-  // If full-text search returns results, use them
-  if (results.rows.length > 0) {
-    return results.rows.map((r) => ({
-      id: r.id,
-      entityType: r.entity_type as SearchResult["entityType"],
-      slug: r.slug,
-      name: r.name,
-      subtitle: r.subtitle,
-      meta: r.meta,
-    }));
-  }
-
-  // Fallback to ILIKE for partial matches (handles typos, substrings)
-  const pattern = `%${query}%`;
-  const filters = [
-    or(
-      ilike(searchIndex.name, pattern),
-      ilike(searchIndex.subtitle, pattern),
-      ilike(searchIndex.meta, pattern)
-    ),
-  ];
-
-  if (entityType) {
-    filters.push(eq(searchIndex.entityType, entityType));
-  }
-
-  const fallbackResults = await db
-    .select()
-    .from(searchIndex)
-    .where(and(...filters))
-    .limit(limit);
-
-  return fallbackResults.map((r) => ({
+  return results.rows.map((r) => ({
     id: r.id,
-    entityType: r.entityType as SearchResult["entityType"],
+    entityType: r.entity_type as SearchResult["entityType"],
     slug: r.slug,
     name: r.name,
     subtitle: r.subtitle,

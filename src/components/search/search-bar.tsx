@@ -80,10 +80,11 @@ export function SearchBar({
   const { recentSearches, addSearch, removeSearch, clearAll } =
     useRecentSearches();
 
-  // Show recent searches when focused with empty query
+  // Show recent searches when focused with empty/short query
   const showRecentSearches =
-    isFocused && query.length === 0 && recentSearches.length > 0;
-  const showResults = isFocused && query.length > 0;
+    isFocused && query.trim().length < 2 && recentSearches.length > 0;
+  // Show results dropdown when we have 2+ characters
+  const showResults = isFocused && query.trim().length >= 2;
 
   // Total navigable items count
   const totalItems = showRecentSearches
@@ -118,20 +119,25 @@ export function SearchBar({
     setQuery(value);
     setHighlightedIndex(-1);
 
-    // Show loading immediately for better UX
-    if (value.trim()) {
-      setIsLoading(true);
-    }
-
     // Clear previous timeout
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    // Faster debounce for instant search feel (150ms instead of 300ms)
+    // Only search if at least 2 characters
+    if (value.trim().length < 2) {
+      setResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // Show loading immediately for better UX
+    setIsLoading(true);
+
+    // Faster debounce for instant search feel (100ms)
     debounceRef.current = setTimeout(() => {
       performSearch(value);
-    }, 150);
+    }, 100);
   };
 
   // Cleanup debounce on unmount
@@ -322,14 +328,14 @@ export function SearchBar({
                   </div>
                 )}
 
-                {!isLoading && results.length === 0 && query.trim() && (
+                {!isLoading && results.length === 0 && query.trim().length >= 2 && (
                   <div className="px-4 py-8 text-center">
                     <Search className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
                     <p className="text-neutral-500 text-sm">
                       No results for "<span className="font-medium text-neutral-700">{query}</span>"
                     </p>
                     <p className="text-neutral-400 text-xs mt-1">
-                      Try searching for players, teams, or competitions
+                      Try a different spelling or search term
                     </p>
                   </div>
                 )}
