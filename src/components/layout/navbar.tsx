@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Search, Menu, X, User, LogOut } from "lucide-react";
+import { Trophy, Search, Menu, X, User, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -158,6 +158,15 @@ export function Navbar() {
                         >
                           {t("feed.activityFeed")}
                         </Link>
+                        <Link
+                          href="/account"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          Account Settings
+                        </Link>
+                        <div className="border-t border-neutral-100 my-1" />
                         <button
                           onClick={handleLogout}
                           className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
