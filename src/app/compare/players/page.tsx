@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { players, playerSeasonStats, competitionSeasons, seasons, teams } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
-import { SearchBar } from "@/components/search/search-bar";
+import { PlayerSearchSelector } from "@/components/search/player-search-selector";
 
 interface ComparePageProps {
   searchParams: Promise<{ p1?: string; p2?: string }>;
@@ -203,50 +203,26 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         {/* Player Selection */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-neutral-700 mb-3">
               Player 1
             </label>
-            <form action="/compare/players" method="get">
-              <input type="hidden" name="p2" value={p2Slug || ""} />
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  name="p1"
-                  defaultValue={p1Slug || ""}
-                  placeholder="Enter player slug..."
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                >
-                  Load
-                </button>
-              </div>
-            </form>
+            <PlayerSearchSelector
+              name="p1"
+              defaultValue={p1Slug || ""}
+              otherPlayerSlug={p2Slug || ""}
+              placeholder="Search for first player..."
+            />
           </div>
           <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-neutral-700 mb-3">
               Player 2
             </label>
-            <form action="/compare/players" method="get">
-              <input type="hidden" name="p1" value={p1Slug || ""} />
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  name="p2"
-                  defaultValue={p2Slug || ""}
-                  placeholder="Enter player slug..."
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                >
-                  Load
-                </button>
-              </div>
-            </form>
+            <PlayerSearchSelector
+              name="p2"
+              defaultValue={p2Slug || ""}
+              otherPlayerSlug={p1Slug || ""}
+              placeholder="Search for second player..."
+            />
           </div>
         </div>
 
