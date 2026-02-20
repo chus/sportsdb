@@ -272,7 +272,7 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             autoFocus={autoFocus}
             placeholder={placeholder}
-            className={`w-full ${inputSizeClasses} border border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm`}
+            className={`w-full ${inputSizeClasses} border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-500 placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400 transition-all`}
           />
           {query && (
             <button

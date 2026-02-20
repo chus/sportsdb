@@ -186,7 +186,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-neutral-900 mb-6">Search</h1>
-        <SearchBar initialQuery={query} autoFocus={!query} />
+        <SearchBar
+          initialQuery={query}
+          autoFocus={!query}
+          size="large"
+          placeholder="Search for players, teams, competitions..."
+        />
       </div>
 
       {/* Type filter tabs */}
