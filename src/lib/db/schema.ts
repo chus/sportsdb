@@ -214,6 +214,7 @@ export const matches = pgTable(
   "matches",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    externalId: text("external_id").unique(), // External API ID for deduplication (e.g., "fd-12345")
     competitionSeasonId: uuid("competition_season_id")
       .notNull()
       .references(() => competitionSeasons.id),
@@ -457,6 +458,86 @@ export const notifications = pgTable(
   (table) => [
     index("idx_notifications_user").on(table.userId),
     index("idx_notifications_user_unread").on(table.userId, table.isRead),
+  ]
+);
+
+// ============================================================
+// AI CONTENT GENERATION
+// ============================================================
+
+export const matchSummaries = pgTable("match_summaries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  matchId: uuid("match_id")
+    .notNull()
+    .references(() => matches.id)
+    .unique(),
+
+  // Generated content
+  headline: text("headline").notNull(),
+  summary: text("summary").notNull(),
+  keyMoments: text("key_moments"), // JSON array of key moments
+  manOfTheMatch: uuid("motm_player_id").references(() => players.id),
+
+  // Metadata
+  generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
+  modelVersion: text("model_version"),
+  promptVersion: integer("prompt_version").default(1),
+
+  // For regeneration
+  regenerateRequested: boolean("regenerate_requested").default(false),
+});
+
+export const playerMatchSummaries = pgTable(
+  "player_match_summaries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+
+    // Generated content
+    rating: decimal("rating", { precision: 2, scale: 1 }),
+    summary: text("summary").notNull(),
+    highlights: text("highlights"), // JSON array
+
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_player_match_summary").on(table.matchId, table.playerId),
+  ]
+);
+
+export const tournamentSummaries = pgTable(
+  "tournament_summaries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    competitionSeasonId: uuid("competition_season_id")
+      .notNull()
+      .references(() => competitionSeasons.id),
+
+    // Time period
+    periodType: text("period_type").notNull(), // 'matchday' | 'week' | 'month'
+    periodValue: integer("period_value"), // matchday number or week/month
+    periodStart: date("period_start").notNull(),
+    periodEnd: date("period_end").notNull(),
+
+    // Generated content
+    headline: text("headline").notNull(),
+    summary: text("summary").notNull(),
+    topPerformers: text("top_performers"), // JSON array of player IDs + reasons
+    standingsMovement: text("standings_movement"), // JSON
+
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_tournament_summary").on(
+      table.competitionSeasonId,
+      table.periodType,
+      table.periodValue
+    ),
   ]
 );
 

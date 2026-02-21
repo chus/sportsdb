@@ -10,6 +10,8 @@ import {
 } from "@/lib/queries/competitions";
 import { CompetitionJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
+import { TournamentRecap } from "@/components/competition/tournament-recap";
+import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
 
 interface CompetitionPageProps {
   params: Promise<{ slug: string }>;
@@ -198,10 +200,26 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                   </table>
                 </div>
               )}
+
+              {/* Fixtures */}
+              {competitionSeason && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-bold text-neutral-900 mb-4">Fixtures & Results</h2>
+                  <CompetitionFixtures
+                    competitionSeasonId={competitionSeason.competitionSeason.id}
+                    limit={30}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
+              {/* Tournament Recap */}
+              {competitionSeason && (
+                <TournamentRecap competitionSeasonId={competitionSeason.competitionSeason.id} />
+              )}
+
               {/* Top Scorers */}
               {topScorers.length > 0 && (
                 <div className="bg-white rounded-xl border border-neutral-200 p-6">

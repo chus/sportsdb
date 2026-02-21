@@ -10,7 +10,7 @@ import {
   competitionSeasons,
   seasons,
 } from "@/lib/db/schema";
-import { eq, inArray, desc, and, or } from "drizzle-orm";
+import { eq, inArray, desc, and, or, asc, gt } from "drizzle-orm";
 
 /**
  * Get a match by ID with teams.
@@ -205,4 +205,117 @@ export async function getRecentMatches(limit = 10) {
     .where(eq(matches.status, "finished"))
     .orderBy(desc(matches.scheduledAt))
     .limit(limit);
+}
+
+/**
+ * Get upcoming scheduled matches with team details.
+ */
+export async function getUpcomingMatches(limit = 10) {
+  const now = new Date();
+
+  const result = await db
+    .select({
+      match: matches,
+      homeTeam: teams,
+      competition: competitions,
+    })
+    .from(matches)
+    .innerJoin(teams, eq(teams.id, matches.homeTeamId))
+    .innerJoin(
+      competitionSeasons,
+      eq(competitionSeasons.id, matches.competitionSeasonId)
+    )
+    .innerJoin(
+      competitions,
+      eq(competitions.id, competitionSeasons.competitionId)
+    )
+    .where(
+      and(
+        eq(matches.status, "scheduled"),
+        // scheduledAt > now
+      )
+    )
+    .orderBy(matches.scheduledAt)
+    .limit(limit * 2); // Fetch more to filter
+
+  // Get away teams
+  const awayTeamIds = result.map((r) => r.match.awayTeamId);
+  const awayTeamsResult =
+    awayTeamIds.length > 0
+      ? await db.select().from(teams).where(inArray(teams.id, awayTeamIds))
+      : [];
+
+  const awayTeamMap = new Map(awayTeamsResult.map((t) => [t.id, t]));
+
+  // Combine and filter future matches
+  return result
+    .filter((r) => new Date(r.match.scheduledAt) > now)
+    .slice(0, limit)
+    .map((r) => ({
+      ...r.match,
+      homeTeam: r.homeTeam,
+      awayTeam: awayTeamMap.get(r.match.awayTeamId) || null,
+      competition: r.competition,
+    }));
+}
+
+/**
+ * Get fixtures for a competition season.
+ */
+export async function getCompetitionFixtures(
+  competitionSeasonId: string,
+  options?: { matchday?: number; limit?: number }
+) {
+  const { matchday, limit = 50 } = options || {};
+
+  let query = db
+    .select({
+      match: matches,
+      homeTeam: teams,
+    })
+    .from(matches)
+    .innerJoin(teams, eq(teams.id, matches.homeTeamId))
+    .where(
+      matchday
+        ? and(
+            eq(matches.competitionSeasonId, competitionSeasonId),
+            eq(matches.matchday, matchday)
+          )
+        : eq(matches.competitionSeasonId, competitionSeasonId)
+    )
+    .orderBy(matches.scheduledAt)
+    .limit(limit);
+
+  const result = await query;
+
+  // Get away teams
+  const awayTeamIds = result.map((r) => r.match.awayTeamId);
+  const awayTeamsResult =
+    awayTeamIds.length > 0
+      ? await db.select().from(teams).where(inArray(teams.id, awayTeamIds))
+      : [];
+
+  const awayTeamMap = new Map(awayTeamsResult.map((t) => [t.id, t]));
+
+  return result.map((r) => ({
+    ...r.match,
+    homeTeam: r.homeTeam,
+    awayTeam: awayTeamMap.get(r.match.awayTeamId) || null,
+  }));
+}
+
+/**
+ * Get matchdays for a competition season.
+ */
+export async function getCompetitionMatchdays(competitionSeasonId: string) {
+  const result = await db
+    .select({ matchday: matches.matchday })
+    .from(matches)
+    .where(eq(matches.competitionSeasonId, competitionSeasonId))
+    .groupBy(matches.matchday)
+    .orderBy(matches.matchday);
+
+  return result
+    .filter((r) => r.matchday !== null)
+    .map((r) => r.matchday as number);
 }

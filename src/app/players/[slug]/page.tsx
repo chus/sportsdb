@@ -10,6 +10,7 @@ import { format, differenceInYears } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
+import { PlayerMatchPerformance } from "@/components/player/player-match-performance";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
 
 interface PlayerPageProps {
@@ -445,6 +446,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 )}
               </dl>
             </div>
+
+            {/* Recent Match Performances */}
+            <PlayerMatchPerformance playerId={player.id} limit={5} />
 
             {/* Related Players */}
             <RelatedPlayers playerId={player.id} />

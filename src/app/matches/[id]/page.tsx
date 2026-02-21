@@ -21,6 +21,7 @@ import { MatchJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
 import { FormationView } from "@/components/match/formation-view";
+import { MatchSummary } from "@/components/match/match-summary";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
 
 interface MatchPageProps {
@@ -475,6 +476,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 </div>
               )}
             </section>
+
+            {/* AI Match Summary */}
+            {match.status === "finished" && (
+              <MatchSummary matchId={id} />
+            )}
 
             {/* Formation View */}
             {homeLineups && awayLineups && (

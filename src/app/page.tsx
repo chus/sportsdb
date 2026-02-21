@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
 import { count } from "drizzle-orm";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
+import { UpcomingMatches } from "@/components/matches/upcoming-matches";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
@@ -109,6 +110,9 @@ export default async function HomePage() {
       <div className="mt-12">
         <LiveMatchesSection />
       </div>
+
+      {/* Upcoming Matches */}
+      <UpcomingMatches limit={6} />
 
       {/* Features */}
       <LandingFeatures />
