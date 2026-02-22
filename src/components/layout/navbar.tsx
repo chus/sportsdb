@@ -34,6 +34,7 @@ export function Navbar() {
     { label: t("common.teams"), href: "/search?type=team" },
     { label: t("common.competitions"), href: "/search?type=competition" },
     { label: t("common.matches"), href: "/search?type=match" },
+    { label: t("common.news"), href: "/news" },
   ];
 
   // Close user menu when clicking outside

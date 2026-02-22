@@ -319,3 +319,85 @@ export async function getCompetitionMatchdays(competitionSeasonId: string) {
     .filter((r) => r.matchday !== null)
     .map((r) => r.matchday as number);
 }
+
+/**
+ * Get recent and upcoming matches for a team.
+ */
+export async function getTeamMatches(teamId: string, limit = 10) {
+  const now = new Date();
+
+  // Get recent finished matches
+  const recentResult = await db
+    .select({
+      match: matches,
+      homeTeam: teams,
+      competition: competitions,
+    })
+    .from(matches)
+    .innerJoin(teams, eq(teams.id, matches.homeTeamId))
+    .innerJoin(
+      competitionSeasons,
+      eq(competitionSeasons.id, matches.competitionSeasonId)
+    )
+    .innerJoin(
+      competitions,
+      eq(competitions.id, competitionSeasons.competitionId)
+    )
+    .where(
+      and(
+        eq(matches.status, "finished"),
+        or(eq(matches.homeTeamId, teamId), eq(matches.awayTeamId, teamId))
+      )
+    )
+    .orderBy(desc(matches.scheduledAt))
+    .limit(limit);
+
+  // Get upcoming scheduled matches
+  const upcomingResult = await db
+    .select({
+      match: matches,
+      homeTeam: teams,
+      competition: competitions,
+    })
+    .from(matches)
+    .innerJoin(teams, eq(teams.id, matches.homeTeamId))
+    .innerJoin(
+      competitionSeasons,
+      eq(competitionSeasons.id, matches.competitionSeasonId)
+    )
+    .innerJoin(
+      competitions,
+      eq(competitions.id, competitionSeasons.competitionId)
+    )
+    .where(
+      and(
+        eq(matches.status, "scheduled"),
+        or(eq(matches.homeTeamId, teamId), eq(matches.awayTeamId, teamId)),
+        gt(matches.scheduledAt, now)
+      )
+    )
+    .orderBy(asc(matches.scheduledAt))
+    .limit(limit);
+
+  // Get all away teams needed
+  const allMatches = [...recentResult, ...upcomingResult];
+  const awayTeamIds = allMatches.map((r) => r.match.awayTeamId);
+  const awayTeamsResult =
+    awayTeamIds.length > 0
+      ? await db.select().from(teams).where(inArray(teams.id, awayTeamIds))
+      : [];
+
+  const awayTeamMap = new Map(awayTeamsResult.map((t) => [t.id, t]));
+
+  const mapMatch = (r: (typeof allMatches)[0]) => ({
+    ...r.match,
+    homeTeam: r.homeTeam,
+    awayTeam: awayTeamMap.get(r.match.awayTeamId) || null,
+    competition: r.competition,
+  });
+
+  return {
+    recent: recentResult.map(mapMatch),
+    upcoming: upcomingResult.map(mapMatch),
+  };
+}

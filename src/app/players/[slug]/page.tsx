@@ -12,6 +12,7 @@ import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerMatchPerformance } from "@/components/player/player-match-performance";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
+import { RelatedArticles } from "@/components/articles/related-articles";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -446,6 +447,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 )}
               </dl>
             </div>
+
+            {/* Related Articles */}
+            <RelatedArticles playerId={player.id} limit={5} />
 
             {/* Recent Match Performances */}
             <PlayerMatchPerformance playerId={player.id} limit={5} />

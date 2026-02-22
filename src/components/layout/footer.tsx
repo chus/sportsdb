@@ -13,6 +13,7 @@ export function Footer() {
       { label: t("common.teams"), href: "/search?type=team" },
       { label: t("common.competitions"), href: "/search?type=competition" },
       { label: t("common.matches"), href: "/search?type=match" },
+      { label: t("common.news"), href: "/news" },
     ],
     [t("common.competitions")]: [
       { label: "Premier League", href: "/competitions/premier-league" },

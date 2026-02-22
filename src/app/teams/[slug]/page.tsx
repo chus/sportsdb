@@ -10,6 +10,8 @@ import { TeamJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
 import { TeamInternalLinks } from "@/components/seo/internal-links";
+import { RelatedArticles } from "@/components/articles/related-articles";
+import { TeamFixtures } from "@/components/team/team-fixtures";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -294,6 +296,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Team Fixtures */}
+            <TeamFixtures teamId={team.id} limit={5} />
+
+            {/* Related Articles */}
+            <RelatedArticles teamId={team.id} limit={5} />
+
             {/* Club Info Card */}
             <div className="bg-white rounded-xl border border-neutral-200 p-6">
               <h3 className="text-sm font-medium text-neutral-500 mb-4">Club Info</h3>
