@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { teams, standings, competitionSeasons, seasons, playerTeamHistory, players } from "@/lib/db/schema";
-import { eq, and, isNull, lte, or, gte, isNotNull, desc } from "drizzle-orm";
+import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne } from "drizzle-orm";
 
 /**
  * Get a team by their URL slug.
@@ -43,7 +43,7 @@ export async function getTeamStats(teamId: string, seasonId?: string) {
  */
 export async function getSquad(teamId: string, seasonId?: string) {
   if (!seasonId) {
-    // Current squad
+    // Current squad - exclude Unknown position (bad data)
     return db
       .select({
         player: players,
@@ -54,7 +54,8 @@ export async function getSquad(teamId: string, seasonId?: string) {
       .where(
         and(
           eq(playerTeamHistory.teamId, teamId),
-          isNull(playerTeamHistory.validTo)
+          isNull(playerTeamHistory.validTo),
+          ne(players.position, "Unknown")
         )
       );
   }
@@ -104,7 +105,8 @@ export async function getFormerPlayers(teamId: string, limit = 20) {
     .where(
       and(
         eq(playerTeamHistory.teamId, teamId),
-        isNotNull(playerTeamHistory.validTo)
+        isNotNull(playerTeamHistory.validTo),
+        ne(players.position, "Unknown")
       )
     )
     .orderBy(desc(playerTeamHistory.validTo))
