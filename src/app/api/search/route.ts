@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchEntities, trackSearch } from "@/lib/queries/search";
+import { searchEntities, searchArticles, trackSearch } from "@/lib/queries/search";
 import type { SearchResponse } from "@/types/api";
 
 export async function GET(request: NextRequest) {
@@ -17,7 +17,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const results = await searchEntities(query, type, limit);
+    // Search entities and articles in parallel
+    const [entityResults, articleResults] = await Promise.all([
+      type !== "article" ? searchEntities(query, type, limit) : Promise.resolve([]),
+      !type || type === "article" ? searchArticles(query, Math.min(limit, 3)) : Promise.resolve([]),
+    ]);
+
+    // Combine results: entities first, then articles
+    const results = type === "article"
+      ? articleResults
+      : [...entityResults, ...articleResults].slice(0, limit);
 
     // Track search in background (don't await)
     trackSearch(query, results.length, type).catch(() => {});

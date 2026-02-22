@@ -542,6 +542,99 @@ export const tournamentSummaries = pgTable(
 );
 
 // ============================================================
+// NEWS ARTICLES
+// ============================================================
+
+export const articles = pgTable(
+  "articles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull().unique(),
+
+    // Content type: match_report, player_spotlight, round_recap, season_review, transfer_news
+    type: text("type").notNull(),
+
+    // Content
+    title: text("title").notNull(),
+    excerpt: text("excerpt").notNull(), // Short summary for cards/meta
+    content: text("content").notNull(), // Full article markdown
+    imageUrl: text("image_url"),
+
+    // SEO
+    metaTitle: text("meta_title"),
+    metaDescription: text("meta_description"),
+
+    // Relationships (nullable - article may reference multiple or none)
+    matchId: uuid("match_id").references(() => matches.id),
+    competitionSeasonId: uuid("competition_season_id").references(
+      () => competitionSeasons.id
+    ),
+    primaryPlayerId: uuid("primary_player_id").references(() => players.id),
+    primaryTeamId: uuid("primary_team_id").references(() => teams.id),
+
+    // For round recaps
+    matchday: integer("matchday"),
+
+    // Publishing
+    status: text("status").notNull().default("draft"), // draft, published, archived
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+
+    // AI metadata
+    generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
+    modelVersion: text("model_version"),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_articles_type").on(table.type),
+    index("idx_articles_status").on(table.status),
+    index("idx_articles_published_at").on(table.publishedAt),
+    index("idx_articles_match_id").on(table.matchId),
+    index("idx_articles_competition_season").on(table.competitionSeasonId),
+    index("idx_articles_primary_player").on(table.primaryPlayerId),
+  ]
+);
+
+// Many-to-many: articles can mention multiple players
+export const articlePlayers = pgTable(
+  "article_players",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+    role: text("role"), // 'featured', 'mentioned', 'mvp'
+  },
+  (table) => [
+    uniqueIndex("uq_article_player").on(table.articleId, table.playerId),
+    index("idx_article_players_player").on(table.playerId),
+  ]
+);
+
+// Many-to-many: articles can mention multiple teams
+export const articleTeams = pgTable(
+  "article_teams",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id),
+    role: text("role"), // 'featured', 'mentioned'
+  },
+  (table) => [
+    uniqueIndex("uq_article_team").on(table.articleId, table.teamId),
+    index("idx_article_teams_team").on(table.teamId),
+  ]
+);
+
+// ============================================================
 // SEARCH ANALYTICS
 // ============================================================
 

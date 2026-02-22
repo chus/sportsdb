@@ -526,77 +526,94 @@ GET  /api/seasons
 
 ## 5. Implementation Roadmap
 
-### Phase 0: Project Bootstrap (Day 1)
-- [ ] Initialize Next.js 15 project with App Router
-- [ ] Port Tailwind config, fonts, theme from Figma export
-- [ ] Port UI primitives (`/components/ui/*`) — direct copy
-- [ ] Set up Drizzle ORM + Neon Postgres connection
-- [ ] Run initial migration (all tables)
-- [ ] Seed database with sample data (1 competition, 5 teams, 50 players, 10 matches)
-- [ ] Verify: `npm run dev` renders a blank layout with nav + footer
+### Phase 0: Project Bootstrap — COMPLETE ✅
+- [x] Initialize Next.js 15 project with App Router
+- [x] Port Tailwind config, fonts, theme from Figma export
+- [x] Port UI primitives (`/components/ui/*`) — direct copy
+- [x] Set up Drizzle ORM + Neon Postgres connection
+- [x] Run initial migration (all tables)
+- [x] Seed database with sample data
+- [x] Verify: `npm run dev` renders a blank layout with nav + footer
 
-### Phase 1: Layout Shell + Search (Days 2–3)
-- [ ] Build root layout with Navbar and Footer (from Figma `HomePageRedesign`)
-- [ ] Implement search bar with Postgres full-text query
-- [ ] Build `/search` results page
-- [ ] Wire up navigation links
-- [ ] Deliverable: You can search "Haaland" and see results
+### Phase 1: Layout Shell + Search — COMPLETE ✅
+- [x] Build root layout with Navbar and Footer
+- [x] Implement search bar with Postgres full-text query
+- [x] Build `/search` results page
+- [x] Wire up navigation links
+- [x] Deliverable: Search works across all entities
 
-### Phase 2: Player Page (Days 4–5)
-- [ ] Build `getPlayer()` + `getPlayerStats()` + `getPlayerCareer()` queries
-- [ ] Build Player page Server Component at `/players/[slug]`
-- [ ] Port `PlayerPageEnhanced` design into Server + Client components
-- [ ] Implement TimeToggle (client) that fetches stats via API
-- [ ] Implement career timeline, honours, recent matches sections
-- [ ] Deliverable: `/players/erling-haaland` renders full profile with season toggle
+### Phase 2: Player Page — COMPLETE ✅
+- [x] Build `getPlayer()` + `getPlayerStats()` + `getPlayerCareer()` queries
+- [x] Build Player page Server Component at `/players/[slug]`
+- [x] Player profile with stats, career history
+- [x] AI-generated match performance summaries
+- [x] Deliverable: Full player profiles with AI analysis
 
-### Phase 3: Team Page (Days 6–7)
-- [ ] Build `getTeam()` + `getSquad()` + `getTeamStats()` queries
-- [ ] Build Team page at `/teams/[slug]`
-- [ ] Port `TeamPageEnhanced` design
-- [ ] Squad section with position filter tabs
-- [ ] Fixtures & results
-- [ ] Deliverable: `/teams/manchester-city` renders with squad and stats
+### Phase 3: Team Page — COMPLETE ✅
+- [x] Build `getTeam()` + `getSquad()` + `getTeamStats()` queries
+- [x] Build Team page at `/teams/[slug]`
+- [x] Squad section with player links
+- [x] Deliverable: Team pages with squad and stats
 
-### Phase 4: Competition Page (Days 8–9)
-- [ ] Build `getCompetition()` + `getStandings()` + `getTopScorers()` queries
-- [ ] Build Competition page at `/competitions/[slug]/[season]`
-- [ ] Standings table (desktop) + card view (mobile)
-- [ ] Season archive section
-- [ ] Top scorers sidebar
-- [ ] Season selector in nav
-- [ ] Deliverable: `/competitions/premier-league/2025-26` renders standings
+### Phase 4: Competition Page — COMPLETE ✅
+- [x] Build `getCompetition()` + `getStandings()` + `getTopScorers()` queries
+- [x] Build Competition page at `/competitions/[slug]`
+- [x] Standings table with team links
+- [x] Top scorers sidebar
+- [x] Fixtures & Results section
+- [x] AI-generated tournament recaps
+- [x] Deliverable: Competition pages with standings, fixtures, AI recaps
 
-### Phase 5: Match Page (Days 10–11)
-- [ ] Build `getMatch()` + `getMatchEvents()` + `getMatchLineups()` queries
-- [ ] Build Match page at `/matches/[id]`
-- [ ] Scoreboard hero, events timeline, lineups
-- [ ] Match stats bars
-- [ ] Deliverable: Match detail page renders with all data
+### Phase 5: Match Page — COMPLETE ✅
+- [x] Build `getMatch()` + `getMatchEvents()` + `getMatchLineups()` queries
+- [x] Build Match page at `/matches/[id]`
+- [x] Scoreboard hero, events timeline, lineups
+- [x] Head-to-head component
+- [x] Formation view
+- [x] AI-generated match summaries with key moments & MOTM
+- [x] Deliverable: Match detail page with AI analysis
 
-### Phase 6: Home Page + Live (Days 12–13)
-- [ ] Build Home page with live matches horizontal scroll
-- [ ] Implement `/api/matches/live` + client polling
-- [ ] Trending players, featured moments, exploration hooks
-- [ ] Statistics section
-- [ ] Deliverable: Homepage renders with live data, all sections
+### Phase 6: Home Page + Live — COMPLETE ✅
+- [x] Build Home page with hero, stats, features
+- [x] Live matches section with polling
+- [x] Upcoming matches section (grouped by date)
+- [x] Featured competitions, teams, players sections
+- [x] Deliverable: Homepage with live data and upcoming fixtures
 
-### Phase 7: Cross-Linking + SEO (Day 14)
-- [ ] All entity names across all pages are `<Link>` to their detail pages
-- [ ] Add `generateMetadata()` to all pages (title, description, OpenGraph)
-- [ ] Add `generateStaticParams()` for known entities (ISR)
-- [ ] Sitemap generation
-- [ ] Structured data (JSON-LD) for matches and players
-- [ ] Deliverable: Pages are crawlable, shareable, interlinked
+### Phase 7: Cross-Linking + SEO — COMPLETE ✅
+- [x] All entity names are `<Link>` to their detail pages
+- [x] Add `generateMetadata()` to all pages
+- [x] Structured data (JSON-LD) for matches, players, teams, competitions
+- [x] Internal linking components
+- [x] Follow buttons for entities
+- [x] Deliverable: Pages are crawlable, shareable, interlinked
 
-### Phase 8: Polish + Data (Days 15–16)
-- [ ] Loading states (skeleton screens matching design)
-- [ ] Error boundaries
-- [ ] 404 pages
-- [ ] Mobile responsive pass across all pages
-- [ ] Image optimization (next/image)
-- [ ] Expand seed data (more teams, players, historical seasons)
-- [ ] Deliverable: Production-ready MVP
+### Phase 8: AI Content Generation — COMPLETE ✅
+- [x] Database schema for AI summaries (matchSummaries, playerMatchSummaries, tournamentSummaries)
+- [x] OpenAI GPT-3.5 integration for content generation
+- [x] Match summary generation script (`scripts/generate-summaries.ts`)
+- [x] Automated cron job (every 4 hours via Vercel)
+- [x] Display components for AI content on match/player/competition pages
+- [x] Deliverable: Auto-generated AI match reports
+
+### Phase 9: Data Ingestion — COMPLETE ✅
+- [x] Football-data.org API integration
+- [x] Match fetching script (`scripts/fetch-matches.ts`)
+- [x] Wikipedia data ingestion (`scripts/ingest-wikipedia.ts`)
+- [x] 5 major leagues: Premier League, La Liga, Bundesliga, Serie A, Ligue 1
+- [x] 1,100+ matches, 12,000+ players, 500+ teams
+- [x] Deliverable: Real football data across top European leagues
+
+### Phase 10: Future Enhancements — PLANNED
+- [ ] User authentication & personalization
+- [ ] Favorite teams/players with notifications
+- [ ] Historical season archives
+- [ ] Transfer news & rumors
+- [ ] Advanced statistics (xG, pass maps, heatmaps)
+- [ ] Mobile app (React Native)
+- [ ] Real-time match updates via WebSocket
+- [ ] Multi-language support (i18n)
+- [ ] Dark mode theme
 
 ---
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {
+  players,
   playerSeasonStats,
   competitionSeasons,
   competitions,
@@ -13,12 +14,37 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+// Check if string is a valid UUID
+function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const { id: playerId } = await params;
+  const { id } = await params;
   const searchParams = request.nextUrl.searchParams;
   const seasonId = searchParams.get("season_id");
 
   try {
+    // Resolve player ID - could be UUID or slug
+    let playerId = id;
+    if (!isUUID(id)) {
+      // It's a slug, look up the player
+      const [player] = await db
+        .select({ id: players.id })
+        .from(players)
+        .where(eq(players.slug, id))
+        .limit(1);
+
+      if (!player) {
+        return NextResponse.json(
+          { error: "Player not found" },
+          { status: 404 }
+        );
+      }
+      playerId = player.id;
+    }
+
     // Build query
     let query = db
       .select({

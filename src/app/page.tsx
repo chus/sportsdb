@@ -12,6 +12,7 @@ import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
 import { LandingBenefits } from "@/components/landing/landing-benefits";
+import { LatestNews } from "@/components/news/latest-news";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -113,6 +114,9 @@ export default async function HomePage() {
 
       {/* Upcoming Matches */}
       <UpcomingMatches limit={6} />
+
+      {/* Latest News */}
+      <LatestNews limit={4} />
 
       {/* Features */}
       <LandingFeatures />

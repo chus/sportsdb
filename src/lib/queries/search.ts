@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { searchIndex, searchAnalytics, players } from "@/lib/db/schema";
+import { searchIndex, searchAnalytics, players, articles } from "@/lib/db/schema";
 import { eq, ilike, or, and, sql, desc, gte } from "drizzle-orm";
 import type { SearchResult } from "@/types/entities";
 
@@ -99,6 +99,47 @@ export async function searchEntities(
     name: r.name,
     subtitle: r.subtitle,
     meta: r.meta,
+  }));
+}
+
+/**
+ * Search for articles by title/content.
+ * Returns matching published articles.
+ */
+export async function searchArticles(
+  query: string,
+  limit = 5
+): Promise<SearchResult[]> {
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery || trimmedQuery.length < 2) return [];
+
+  const containsPattern = `%${trimmedQuery}%`;
+
+  const results = await db.execute<{
+    id: string;
+    slug: string;
+    title: string;
+    type: string;
+    excerpt: string;
+  }>(sql`
+    SELECT id, slug, title, type, excerpt
+    FROM articles
+    WHERE status = 'published'
+      AND (
+        lower(title) LIKE ${containsPattern}
+        OR lower(excerpt) LIKE ${containsPattern}
+      )
+    ORDER BY published_at DESC
+    LIMIT ${limit}
+  `);
+
+  return results.rows.map((r) => ({
+    id: r.id,
+    entityType: "article" as const,
+    slug: r.slug,
+    name: r.title,
+    subtitle: r.type.replace("_", " "),
+    meta: r.excerpt,
   }));
 }
 

@@ -138,7 +138,7 @@ export interface PlayerCareerEntry {
 
 export interface SearchResult {
   id: string;
-  entityType: "player" | "team" | "competition" | "venue";
+  entityType: "player" | "team" | "competition" | "venue" | "article";
   slug: string;
   name: string;
   subtitle: string | null;

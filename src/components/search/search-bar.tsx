@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X, Users, Shield, Trophy, MapPin, Loader2 } from "lucide-react";
+import { Search, X, Users, Shield, Trophy, MapPin, Loader2, Newspaper } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchResult } from "@/types/entities";
@@ -20,6 +20,7 @@ const ENTITY_ROUTES: Record<string, string> = {
   team: "/teams",
   competition: "/competitions",
   venue: "/venues",
+  article: "/news",
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -27,6 +28,7 @@ const TYPE_LABELS: Record<string, string> = {
   team: "Team",
   competition: "Competition",
   venue: "Venue",
+  article: "News",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -34,6 +36,7 @@ const TYPE_COLORS: Record<string, string> = {
   team: "bg-green-100 text-green-800",
   competition: "bg-purple-100 text-purple-800",
   venue: "bg-orange-100 text-orange-800",
+  article: "bg-red-100 text-red-800",
 };
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
@@ -41,6 +44,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   team: Shield,
   competition: Trophy,
   venue: MapPin,
+  article: Newspaper,
 };
 
 function highlightMatch(text: string, query: string): React.ReactNode {
