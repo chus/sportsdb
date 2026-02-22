@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { neon } from "@neondatabase/serverless";
+import { neon, NeonQueryFunction } from "@neondatabase/serverless";
 import OpenAI from "openai";
-
-const DATABASE_URL = process.env.DATABASE_URL!;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
-const CRON_SECRET = process.env.CRON_SECRET;
-
-const sql = neon(DATABASE_URL);
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 export const maxDuration = 300; // 5 minutes
 
 export async function GET(request: NextRequest) {
+  const DATABASE_URL = process.env.DATABASE_URL;
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const CRON_SECRET = process.env.CRON_SECRET;
+
+  if (!DATABASE_URL || !OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "Missing required environment variables" },
+      { status: 500 }
+    );
+  }
+
+  const sql = neon(DATABASE_URL);
+  const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+
   // Verify cron secret
   const authHeader = request.headers.get("authorization");
   if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
@@ -21,7 +28,6 @@ export async function GET(request: NextRequest) {
   try {
     const results = {
       matchReports: 0,
-      roundRecaps: 0,
       errors: [] as string[],
     };
 
@@ -70,10 +76,10 @@ export async function GET(request: NextRequest) {
         `;
 
         const prompt = buildMatchReportPrompt(match, events);
-        const article = await generateArticle(prompt);
+        const article = await generateArticle(openai, prompt);
 
         if (article) {
-          await insertArticle(article, "match_report", match.id, match.home_team_slug, match.away_team_slug);
+          await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug);
           results.matchReports++;
         }
 
@@ -148,7 +154,7 @@ Return as JSON:
 }`;
 }
 
-async function generateArticle(prompt: string): Promise<any | null> {
+async function generateArticle(openai: OpenAI, prompt: string): Promise<any | null> {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -171,6 +177,7 @@ async function generateArticle(prompt: string): Promise<any | null> {
 }
 
 async function insertArticle(
+  sql: NeonQueryFunction<false, false>,
   article: any,
   type: string,
   matchId: string,
