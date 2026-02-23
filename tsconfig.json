@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "docs/figma-reference", "scripts", "_figma_reference", "_figma_new"]
+  "exclude": ["node_modules", "docs/figma-reference", "scripts", "_figma_reference", "_figma_new", "designs"]
 }
