@@ -109,57 +109,98 @@ function buildMatchReportPrompt(match: any, events: any[]): string {
   const awayTeamLink = `[${match.away_team}](/teams/${match.away_team_slug})`;
   const competitionLink = `[${match.competition}](/competitions/${match.competition_slug})`;
 
-  return `You are an SEO-focused sports journalist writing a match report for a football database website.
+  // Group events by type for analysis
+  const goals = events.filter(e => e.type === 'goal' || e.type === 'penalty');
+  const cards = events.filter(e => e.type === 'yellow_card' || e.type === 'red_card');
+  const substitutions = events.filter(e => e.type === 'substitution');
 
-MATCH DETAILS:
+  return `You are an experienced sports journalist writing an in-depth match report for SportsDB, a professional football database website. Write with authority, insight, and engaging storytelling.
+
+MATCH INFORMATION:
 - Competition: ${match.competition} (${match.season})
+- Matchday: ${match.matchday || 'N/A'}
 - Date: ${match.scheduled_at}
-- Result: ${scoreline}
+- Final Score: ${scoreline}
 ${match.venue ? `- Venue: ${match.venue}` : ""}
-${match.matchday ? `- Matchday: ${match.matchday}` : ""}
 
-KEY EVENTS:
-${events.map((e: any) => `${e.minute}' - ${e.type}: ${e.player_name} (${e.team_name})`).join("\n")}
+MATCH EVENTS TIMELINE:
+${events.length > 0 ? events.map((e: any) => `${e.minute}' - ${e.type.toUpperCase()}: ${e.player_name} (${e.team_name})`).join("\n") : "No detailed events available"}
 
-${match.existing_summary ? `MATCH SUMMARY (use as reference):\n${match.existing_summary}` : ""}
+${match.existing_summary ? `ADDITIONAL CONTEXT:\n${match.existing_summary}` : ""}
 
-INTERNAL LINKS TO USE:
+LINKS TO INCLUDE (use these exact markdown formats):
 - Home team: ${homeTeamLink}
 - Away team: ${awayTeamLink}
 - Competition: ${competitionLink}
+- For players: [Player Name](/players/player-slug-lowercase-with-dashes)
 
-SEO REQUIREMENTS:
-1. Include the team names and competition in the title for search visibility
-2. Use H2/H3 subheadings to structure content (## First Half, ## Second Half, ## Key Moments)
-3. Include internal markdown links to team pages
-4. When mentioning goal scorers, link to their player page using format [Player Name](/players/player-slug)
-5. Include keywords: "${match.home_team} vs ${match.away_team}", "${match.competition} ${match.season}"
-6. Meta description should be 150-160 chars with key result info
+WRITING GUIDELINES:
 
-ARTICLE REQUIREMENTS:
-1. Engaging headline with team names and score (max 80 chars)
-2. Brief excerpt for cards/social (1-2 sentences, 150 chars max)
-3. 400-600 words, professional sports journalism style
-4. Clear structure with H2 headings for sections
-5. All team/player mentions should be internal links
+1. OPENING PARAGRAPH (hook the reader):
+   - Start with the most dramatic or significant aspect of the match
+   - Set the scene and context (rivalry, standings implications, etc.)
+   - Make readers want to continue reading
 
-Return as JSON:
+2. STRUCTURE (use ## for H2 headings):
+   ## Match Overview
+   - Brief tactical setup and early game flow
+   - How both teams approached the match
+
+   ## First Half Action
+   - Key moments, goals, chances
+   - Tactical battles and momentum shifts
+
+   ## Second Half Drama
+   - How the game evolved
+   - Decisive moments and turning points
+
+   ## Key Performances
+   - Highlight 2-3 standout players
+   - Specific contributions that influenced the result
+
+   ## Looking Ahead
+   - What this result means for both teams
+   - Upcoming fixtures or implications
+
+3. WRITING STYLE:
+   - Use vivid, descriptive language ("thunderous strike" not "good shot")
+   - Include specific minute references for key moments
+   - Build narrative tension and drama
+   - Professional but engaging tone
+   - Vary sentence length for rhythm
+   - Use active voice predominantly
+
+4. SEO & LINKING:
+   - Link team names on first mention using provided links
+   - Create player links as [Full Name](/players/firstname-lastname)
+   - Natural keyword integration: "${match.home_team} vs ${match.away_team}", "${match.competition}"
+   - Include competition context throughout
+
+5. LENGTH: 800-1000 words minimum. This should be a comprehensive match report.
+
+OUTPUT FORMAT (return valid JSON only):
 {
-  "title": "...",
-  "slug": "...",
-  "excerpt": "...",
-  "content": "...",
-  "metaTitle": "...",
-  "metaDescription": "..."
+  "title": "Compelling headline with teams and key narrative (max 80 chars)",
+  "slug": "team-vs-team-competition-result-keyword",
+  "excerpt": "Engaging 1-2 sentence summary that hooks readers (max 160 chars)",
+  "content": "Full markdown article content with ## headings and [links](/path)",
+  "metaTitle": "SEO title with teams, score, competition (max 60 chars)",
+  "metaDescription": "Meta description with result and key info (150-160 chars)"
 }`;
 }
 
 async function generateArticle(openai: OpenAI, prompt: string): Promise<any | null> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2000,
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert sports journalist. Write engaging, detailed match reports with vivid language and professional analysis. Always return valid JSON."
+        },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 4000,
       temperature: 0.7,
     });
 
@@ -197,7 +238,7 @@ async function insertArticle(
     ) VALUES (
       ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${matchId}, 'published', NOW(), 'gpt-3.5-turbo'
+      ${matchId}, 'published', NOW(), 'gpt-4o-mini'
     )
   `;
 
