@@ -18,8 +18,8 @@ import { eq, and, isNull, inArray, desc } from "drizzle-orm";
 import { format } from "date-fns";
 import OpenAI from "openai";
 
-const MODEL_VERSION = "gpt-3.5-turbo";
-const MATCHES_PER_RUN = 20; // Process 20 matches per cron run
+const MODEL_VERSION = "gpt-4o-mini";
+const MATCHES_PER_RUN = 10; // Process 10 matches per cron run
 
 // Verify cron secret
 async function verifyCronSecret() {
@@ -104,7 +104,7 @@ export async function GET() {
         // Parse response
         const summary = parseJsonResponse(content);
 
-        // Save to database
+        // Save match summary to database
         await db.insert(matchSummaries).values({
           matchId: match.id,
           headline: summary.headline,
@@ -114,6 +114,9 @@ export async function GET() {
           modelVersion: MODEL_VERSION,
           promptVersion: 1,
         });
+
+        // Generate player summaries for key players in the match
+        await generatePlayerSummaries(openai, match.id, context);
 
         processed++;
 
@@ -245,4 +248,113 @@ function parseJsonResponse(content: string) {
   const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
   const jsonStr = jsonMatch ? jsonMatch[1].trim() : content.trim();
   return JSON.parse(jsonStr);
+}
+
+async function generatePlayerSummaries(openai: OpenAI, matchId: string, context: MatchContext) {
+  // Get lineups for the match
+  const lineups = await db
+    .select({ lineup: matchLineups, player: players })
+    .from(matchLineups)
+    .innerJoin(players, eq(players.id, matchLineups.playerId))
+    .where(eq(matchLineups.matchId, matchId));
+
+  if (lineups.length === 0) return;
+
+  // Get match events to analyze player performances
+  const events = await db
+    .select({ event: matchEvents, player: players })
+    .from(matchEvents)
+    .leftJoin(players, eq(players.id, matchEvents.playerId))
+    .where(eq(matchEvents.matchId, matchId));
+
+  // Group events by player
+  const playerEvents = new Map<string, typeof events>();
+  for (const e of events) {
+    if (e.player?.id) {
+      const existing = playerEvents.get(e.player.id) || [];
+      existing.push(e);
+      playerEvents.set(e.player.id, existing);
+    }
+  }
+
+  // Select key players (starters with events, or all starters if no events)
+  const starters = lineups.filter(l => l.lineup.isStarter);
+  const playersToAnalyze = starters.slice(0, 8); // Analyze up to 8 key players
+
+  for (const { lineup, player } of playersToAnalyze) {
+    try {
+      // Check if summary already exists
+      const existing = await db
+        .select()
+        .from(playerMatchSummaries)
+        .where(
+          and(
+            eq(playerMatchSummaries.matchId, matchId),
+            eq(playerMatchSummaries.playerId, player.id)
+          )
+        )
+        .limit(1);
+
+      if (existing.length > 0) continue;
+
+      const playerEventsList = playerEvents.get(player.id) || [];
+      const prompt = buildPlayerPrompt(player, context, playerEventsList);
+
+      const completion = await openai.chat.completions.create({
+        model: MODEL_VERSION,
+        max_tokens: 512,
+        messages: [
+          {
+            role: "system",
+            content: "You are a football analyst providing brief, insightful player performance assessments. Return only valid JSON."
+          },
+          { role: "user", content: prompt }
+        ],
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) continue;
+
+      const summary = parseJsonResponse(content);
+
+      await db.insert(playerMatchSummaries).values({
+        matchId,
+        playerId: player.id,
+        rating: summary.rating?.toString() || null,
+        summary: summary.summary,
+        highlights: JSON.stringify(summary.highlights || []),
+      });
+
+      // Small delay
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    } catch (error) {
+      console.error(`Error generating summary for player ${player.id}:`, error);
+    }
+  }
+}
+
+function buildPlayerPrompt(
+  player: typeof players.$inferSelect,
+  match: MatchContext,
+  events: { event: typeof matchEvents.$inferSelect; player: typeof players.$inferSelect | null }[]
+): string {
+  const eventsText = events.length > 0
+    ? events.map(e => `${e.event.minute}' - ${e.event.type}`).join(", ")
+    : "No recorded events";
+
+  return `Analyze this player's performance in the match:
+
+PLAYER: ${player.name} (${player.position})
+MATCH: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}
+COMPETITION: ${match.competition} (${match.season})
+
+PLAYER EVENTS IN MATCH: ${eventsText}
+
+Generate a brief performance assessment:
+1. rating - Number from 1.0 to 10.0 (based on typical football ratings)
+2. summary - 1-2 sentences about their performance
+3. highlights - Array of 1-3 short highlight phrases (e.g., "Key assist", "Solid defending")
+
+Return ONLY valid JSON:
+{"rating": number, "summary": "string", "highlights": ["string"]}`;
 }
