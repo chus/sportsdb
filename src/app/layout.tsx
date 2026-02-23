@@ -6,6 +6,8 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -66,10 +68,14 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            <Navbar />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-            <SpeedInsights />
+            <SubscriptionProvider>
+              <OnboardingProvider>
+                <Navbar />
+                <main className="min-h-screen">{children}</main>
+                <Footer />
+                <SpeedInsights />
+              </OnboardingProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { useSubscription } from "@/components/subscription/subscription-provider";
 
 export function Navbar() {
   const t = useTranslations();
@@ -17,8 +18,10 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoading, logout } = useAuth();
+  const { subscription } = useSubscription();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isPro = subscription?.tier === "pro" || subscription?.tier === "ultimate";
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,8 +142,13 @@ export function Navbar() {
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <User className="w-4 h-4 text-blue-600" />
                       </div>
-                      <span className="hidden sm:block text-sm font-medium">
+                      <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium">
                         {user.name || user.email.split("@")[0]}
+                        {isPro && (
+                          <span className="px-1.5 py-0.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded">
+                            {subscription?.tier === "ultimate" ? "ULTIMATE" : "PRO"}
+                          </span>
+                        )}
                       </span>
                     </button>
 
@@ -166,6 +174,13 @@ export function Navbar() {
                         >
                           <Settings className="w-4 h-4" />
                           Account Settings
+                        </Link>
+                        <Link
+                          href="/pricing"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {isPro ? "Manage Subscription" : "Upgrade to Pro"}
                         </Link>
                         <div className="border-t border-neutral-100 my-1" />
                         <button

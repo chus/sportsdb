@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { followEntity, unfollowEntity, isFollowing } from "@/lib/queries/follows";
+import { canUserFollow } from "@/lib/queries/subscriptions";
 
 const followSchema = z.object({
   entityType: z.enum(["player", "team", "competition"]),
@@ -24,6 +25,13 @@ export async function POST(request: NextRequest) {
     const { entityType, entityId, action } = followSchema.parse(body);
 
     if (action === "follow") {
+      const { allowed, reason } = await canUserFollow(user.id);
+      if (!allowed) {
+        return NextResponse.json(
+          { error: reason || "Follow limit reached" },
+          { status: 403 }
+        );
+      }
       await followEntity(user.id, entityType, entityId);
     } else {
       await unfollowEntity(user.id, entityType, entityId);

@@ -341,6 +341,7 @@ export const users = pgTable(
     name: text("name"),
     avatarUrl: text("avatar_url"),
     emailVerified: boolean("email_verified").notNull().default(false),
+    onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -635,6 +636,83 @@ export const articleTeams = pgTable(
 );
 
 // ============================================================
+// SUBSCRIPTIONS
+// ============================================================
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" })
+      .unique(),
+    tier: text("tier").notNull().default("free"), // 'free' | 'pro' | 'ultimate'
+    status: text("status").notNull().default("active"), // 'active' | 'cancelled' | 'past_due'
+    startDate: timestamp("start_date", { withTimezone: true }).defaultNow(),
+    endDate: timestamp("end_date", { withTimezone: true }),
+    autoRenew: boolean("auto_renew").notNull().default(true),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_subscriptions_user").on(table.userId)]
+);
+
+export const usageLimits = pgTable(
+  "usage_limits",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    featureType: text("feature_type").notNull(), // 'comparison' | 'api_call'
+    usageDate: date("usage_date").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("uq_usage_limits").on(
+      table.userId,
+      table.featureType,
+      table.usageDate
+    ),
+    index("idx_usage_limits_user").on(table.userId),
+  ]
+);
+
+// ============================================================
+// NOTIFICATION SETTINGS
+// ============================================================
+
+export const notificationSettings = pgTable(
+  "notification_settings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" })
+      .unique(),
+    // Notification types
+    goals: boolean("goals").notNull().default(true),
+    matchStart: boolean("match_start").notNull().default(true),
+    matchResult: boolean("match_result").notNull().default(true),
+    milestone: boolean("milestone").notNull().default(true),
+    transfer: boolean("transfer").notNull().default(true),
+    upcomingMatch: boolean("upcoming_match").notNull().default(true),
+    weeklyDigest: boolean("weekly_digest").notNull().default(true),
+    achievement: boolean("achievement").notNull().default(true),
+    // Global settings
+    pushEnabled: boolean("push_enabled").notNull().default(true),
+    emailEnabled: boolean("email_enabled").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_notification_settings_user").on(table.userId)]
+);
+
+// ============================================================
 // SEARCH ANALYTICS
 // ============================================================
 
@@ -651,4 +729,143 @@ export const searchAnalytics = pgTable(
     index("idx_search_analytics_query").on(table.query),
     index("idx_search_analytics_searched_at").on(table.searchedAt),
   ]
+);
+
+export const analyticsEvents = pgTable(
+  "analytics_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    sessionId: text("session_id"),
+    eventType: text("event_type").notNull(), // 'page_view' | 'search' | 'follow' | 'click' | 'share'
+    entityType: text("entity_type"), // 'player' | 'team' | 'competition' | 'match'
+    entityId: uuid("entity_id"),
+    metadata: text("metadata"), // JSON string for additional data
+    searchQuery: text("search_query"),
+    referrer: text("referrer"),
+    timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_analytics_user").on(table.userId),
+    index("idx_analytics_type").on(table.eventType),
+    index("idx_analytics_timestamp").on(table.timestamp),
+    index("idx_analytics_entity").on(table.entityType, table.entityId),
+  ]
+);
+
+// ============================================================
+// PREDICTION GAME
+// ============================================================
+
+export const predictions = pgTable(
+  "predictions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+    homeScore: integer("home_score").notNull(),
+    awayScore: integer("away_score").notNull(),
+    points: integer("points"), // null until scored
+    isExactScore: boolean("is_exact_score"), // null until scored
+    isCorrectResult: boolean("is_correct_result"), // null until scored
+    submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow(),
+    scoredAt: timestamp("scored_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("uq_prediction").on(table.userId, table.matchId),
+    index("idx_predictions_user").on(table.userId),
+    index("idx_predictions_match").on(table.matchId),
+  ]
+);
+
+export const badges = pgTable(
+  "badges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    badgeType: text("badge_type").notNull(), // 'first_blood' | 'hot_streak' | 'perfect_week' | 'master_predictor' | 'early_bird'
+    earnedAt: timestamp("earned_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_badge").on(table.userId, table.badgeType),
+    index("idx_badges_user").on(table.userId),
+  ]
+);
+
+export const predictionLeagues = pgTable(
+  "prediction_leagues",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    code: text("code").notNull().unique(), // 6-char join code
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+    isPrivate: boolean("is_private").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_leagues_code").on(table.code)]
+);
+
+export const predictionLeagueMembers = pgTable(
+  "prediction_league_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    leagueId: uuid("league_id")
+      .notNull()
+      .references(() => predictionLeagues.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_league_member").on(table.leagueId, table.userId),
+    index("idx_league_members_league").on(table.leagueId),
+    index("idx_league_members_user").on(table.userId),
+  ]
+);
+
+// ============================================================
+// BOOKMARKS
+// ============================================================
+
+export const bookmarks = pgTable(
+  "bookmarks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    entityType: text("entity_type").notNull(), // 'player' | 'team' | 'competition' | 'match'
+    entityId: uuid("entity_id").notNull(),
+    collectionId: uuid("collection_id").references(() => bookmarkCollections.id, { onDelete: "set null" }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_bookmark").on(table.userId, table.entityType, table.entityId),
+    index("idx_bookmarks_user").on(table.userId),
+    index("idx_bookmarks_collection").on(table.collectionId),
+  ]
+);
+
+export const bookmarkCollections = pgTable(
+  "bookmark_collections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color").default("#3b82f6"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_bookmark_collections_user").on(table.userId)]
 );
