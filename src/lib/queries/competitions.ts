@@ -58,6 +58,7 @@ export async function getTopScorers(competitionSeasonId: string, limit = 10) {
 
 /**
  * Get competition-season by competition slug and season label (e.g., '2024-25').
+ * If no season label provided, tries current season first, then falls back to most recent.
  */
 export async function getCompetitionSeason(
   competitionSlug: string,
@@ -66,11 +67,28 @@ export async function getCompetitionSeason(
   const comp = await getCompetitionBySlug(competitionSlug);
   if (!comp) return null;
 
-  const seasonFilter = seasonLabel
-    ? eq(seasons.label, seasonLabel.replace("-", "/"))
-    : eq(seasons.isCurrent, true);
+  // If specific season requested, get that one
+  if (seasonLabel) {
+    const result = await db
+      .select({
+        competitionSeason: competitionSeasons,
+        season: seasons,
+      })
+      .from(competitionSeasons)
+      .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+      .where(
+        and(
+          eq(competitionSeasons.competitionId, comp.id),
+          eq(seasons.label, seasonLabel.replace("-", "/"))
+        )
+      )
+      .limit(1);
 
-  const result = await db
+    return result[0] ? { ...result[0], competition: comp } : null;
+  }
+
+  // Otherwise, try current season first
+  const currentResult = await db
     .select({
       competitionSeason: competitionSeasons,
       season: seasons,
@@ -78,11 +96,27 @@ export async function getCompetitionSeason(
     .from(competitionSeasons)
     .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
     .where(
-      and(eq(competitionSeasons.competitionId, comp.id), seasonFilter)
+      and(eq(competitionSeasons.competitionId, comp.id), eq(seasons.isCurrent, true))
     )
     .limit(1);
 
-  return result[0] ? { ...result[0], competition: comp } : null;
+  if (currentResult[0]) {
+    return { ...currentResult[0], competition: comp };
+  }
+
+  // Fallback: get most recent season by start date
+  const fallbackResult = await db
+    .select({
+      competitionSeason: competitionSeasons,
+      season: seasons,
+    })
+    .from(competitionSeasons)
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(eq(competitionSeasons.competitionId, comp.id))
+    .orderBy(desc(seasons.startDate))
+    .limit(1);
+
+  return fallbackResult[0] ? { ...fallbackResult[0], competition: comp } : null;
 }
 
 /**

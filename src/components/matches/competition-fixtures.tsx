@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Calendar } from "lucide-react";
+import { Shield, Calendar, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { getCompetitionFixtures } from "@/lib/queries/matches";
 
@@ -14,7 +14,7 @@ function getStatusBadge(status: string, homeScore: number | null, awayScore: num
     case "finished":
       return (
         <span className="text-sm font-bold text-neutral-900">
-          {homeScore} - {awayScore}
+          {homeScore ?? 0} - {awayScore ?? 0}
         </span>
       );
     case "live":
@@ -36,9 +36,51 @@ function getStatusBadge(status: string, homeScore: number | null, awayScore: num
           PPD
         </span>
       );
+    case "cancelled":
+      return (
+        <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded">
+          CAN
+        </span>
+      );
     default:
-      return null;
+      return (
+        <span className="text-xs text-neutral-400">
+          -
+        </span>
+      );
   }
+}
+
+// Loading skeleton for fixtures
+export function CompetitionFixturesSkeleton() {
+  return (
+    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-pulse">
+      <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-200">
+        <div className="h-5 bg-neutral-200 rounded w-24" />
+      </div>
+      <div className="divide-y divide-neutral-100">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center p-4 gap-4">
+            <div className="w-20 flex-shrink-0">
+              <div className="h-3 bg-neutral-200 rounded w-12 mx-auto mb-1" />
+              <div className="h-4 bg-neutral-200 rounded w-10 mx-auto" />
+            </div>
+            <div className="flex-1 flex items-center justify-end gap-3">
+              <div className="h-4 bg-neutral-200 rounded w-24" />
+              <div className="w-8 h-8 bg-neutral-200 rounded" />
+            </div>
+            <div className="w-16 flex-shrink-0 flex justify-center">
+              <div className="h-4 bg-neutral-200 rounded w-8" />
+            </div>
+            <div className="flex-1 flex items-center gap-3">
+              <div className="w-8 h-8 bg-neutral-200 rounded" />
+              <div className="h-4 bg-neutral-200 rounded w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export async function CompetitionFixtures({
@@ -46,16 +88,37 @@ export async function CompetitionFixtures({
   matchday,
   limit = 20,
 }: CompetitionFixturesProps) {
-  const fixtures = await getCompetitionFixtures(competitionSeasonId, {
-    matchday,
-    limit,
-  });
+  let fixtures;
+  let error: string | null = null;
 
-  if (fixtures.length === 0) {
+  try {
+    fixtures = await getCompetitionFixtures(competitionSeasonId, {
+      matchday,
+      limit,
+    });
+  } catch (e) {
+    console.error("Failed to fetch fixtures:", e);
+    error = "Failed to load fixtures";
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl border border-red-200 p-8 text-center">
+        <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+        <p className="text-red-600 font-medium mb-2">Unable to load fixtures</p>
+        <p className="text-neutral-500 text-sm">Please try refreshing the page</p>
+      </div>
+    );
+  }
+
+  // Empty state - only when confirmed empty
+  if (!fixtures || fixtures.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
         <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-        <p className="text-neutral-500">No fixtures available</p>
+        <p className="text-neutral-500">No fixtures available for this season</p>
+        <p className="text-neutral-400 text-sm mt-1">Check back later for scheduled matches</p>
       </div>
     );
   }
