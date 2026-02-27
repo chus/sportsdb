@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
+import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 export const metadata: Metadata = {
   title: "Football News & Match Reports | SportsDB",
@@ -81,6 +82,8 @@ export default async function NewsPage({ searchParams }: Props) {
               <ArticleCard article={featuredArticle} featured />
             </div>
           )}
+
+          <BetweenContentAd />
 
           {/* Article Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

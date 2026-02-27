@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { ArrowLeft, Calendar, Clock, Trophy, User, ChevronRight } from "lucide-react";
+import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { InArticleAd } from "@/components/ads/in-article-ad";
 import { marked } from "marked";
 
 interface Props {
@@ -221,6 +223,8 @@ export default async function ArticlePage({ params }: Props) {
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
 
+              <InArticleAd />
+
               {/* Tags section */}
               <div className="mt-12 pt-8 border-t border-neutral-200">
                 <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-4">
@@ -296,6 +300,8 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   </div>
                 )}
+
+                <SidebarAd />
 
                 {/* Competition info */}
                 {competition && (

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AdSenseScript } from "@/components/ads/adsense-script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -74,6 +75,7 @@ export default async function RootLayout({
                 <main className="min-h-screen">{children}</main>
                 <Footer />
                 <SpeedInsights />
+                <AdSenseScript />
               </OnboardingProvider>
             </SubscriptionProvider>
           </AuthProvider>

@@ -12,6 +12,7 @@ import { CompetitionJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
+import { SidebarAd } from "@/components/ads/sidebar-ad";
 
 interface CompetitionPageProps {
   params: Promise<{ slug: string }>;
@@ -248,6 +249,8 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                   </div>
                 </div>
               )}
+
+              <SidebarAd />
 
               {/* Competition Info */}
               <div className="bg-white rounded-xl border border-neutral-200 p-6">

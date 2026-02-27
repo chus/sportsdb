@@ -23,6 +23,8 @@ import { HeadToHead } from "@/components/match/head-to-head";
 import { FormationView } from "@/components/match/formation-view";
 import { MatchSummary } from "@/components/match/match-summary";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
+import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 interface MatchPageProps {
   params: Promise<{ id: string }>;
@@ -477,6 +479,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
               )}
             </section>
 
+            <BetweenContentAd />
+
             {/* AI Match Summary */}
             {match.status === "finished" && (
               <MatchSummary matchId={id} />
@@ -731,6 +735,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 )}
               </dl>
             </div>
+
+            <SidebarAd />
 
             {/* Goal Scorers Card */}
             {(homeEvents.filter((e) => e.type === "goal").length > 0 ||

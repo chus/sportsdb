@@ -13,6 +13,8 @@ import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerProfileSummary } from "@/components/player/player-profile-summary";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
+import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -294,6 +296,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               </section>
             )}
 
+            <BetweenContentAd />
+
             {/* Stats History */}
             {statsHistory.length > 0 && (
               <section>
@@ -450,6 +454,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
             {/* Related Articles */}
             <RelatedArticles playerId={player.id} limit={5} />
+
+            <SidebarAd />
 
             {/* Player Profile Summary */}
             <PlayerProfileSummary playerId={player.id} />

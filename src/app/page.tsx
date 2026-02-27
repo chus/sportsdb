@@ -13,6 +13,7 @@ import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
 import { LandingBenefits } from "@/components/landing/landing-benefits";
 import { LatestNews } from "@/components/news/latest-news";
+import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -115,6 +116,8 @@ export default async function HomePage() {
       {/* Upcoming Matches */}
       <UpcomingMatches limit={6} />
 
+      <BetweenContentAd />
+
       {/* Latest News */}
       <LatestNews limit={4} />
 
@@ -158,6 +161,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <BetweenContentAd />
 
       {/* Featured Teams */}
       {featuredTeams.length > 0 && (

@@ -12,6 +12,8 @@ import { RelatedTeams } from "@/components/entity/related-entities";
 import { TeamInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { TeamFixtures } from "@/components/team/team-fixtures";
+import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -256,6 +258,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
               )}
             </section>
 
+            <BetweenContentAd />
+
             {/* Former Players */}
             {formerPlayers.length > 0 && (
               <section>
@@ -301,6 +305,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
             {/* Related Articles */}
             <RelatedArticles teamId={team.id} limit={5} />
+
+            <SidebarAd />
 
             {/* Club Info Card */}
             <div className="bg-white rounded-xl border border-neutral-200 p-6">
