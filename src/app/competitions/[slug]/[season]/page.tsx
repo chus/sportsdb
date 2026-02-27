@@ -7,7 +7,7 @@ import {
   getHistoricalStandings,
   getAllSeasons,
 } from "@/lib/queries/competitions";
-import { CompetitionJsonLd } from "@/components/seo/json-ld";
+import { CompetitionJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { SeasonSelector } from "@/components/time/season-selector";
 
@@ -104,6 +104,14 @@ export default async function CompetitionSeasonPage({
         url={competitionUrl}
         logo={competition.logoUrl}
         location={competition.country}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "Competitions", url: `${BASE_URL}/search?type=competition` },
+          { name: competition.name, url: `${BASE_URL}/competitions/${slug}` },
+          { name: seasonData.label, url: competitionUrl },
+        ]}
       />
       <div className="min-h-screen bg-neutral-50">
         {/* Hero Section */}

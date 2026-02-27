@@ -7,7 +7,10 @@ import { ArticleCard } from "@/components/news/article-card";
 import { ArrowLeft, Calendar, Clock, Trophy, User, ChevronRight } from "lucide-react";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { InArticleAd } from "@/components/ads/in-article-ad";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { marked } from "marked";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -108,6 +111,13 @@ export default async function ArticlePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "News", url: `${BASE_URL}/news` },
+          { name: article.title, url: `${BASE_URL}/news/${slug}` },
+        ]}
       />
 
       <div className="min-h-screen bg-neutral-50">

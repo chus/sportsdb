@@ -54,6 +54,17 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
+  verification: {
+    google: "hUS5tZ-8jRrr64sNU_Ybeizth2ZH-4uo_6qVQJ7vz4w",
+  },
+  other: {
+    "google-adsense-account": "ca-pub-7616433745494289",
+  },
 };
 
 export default async function RootLayout({
@@ -66,6 +77,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <AdSenseScript />
+      </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
@@ -75,7 +89,6 @@ export default async function RootLayout({
                 <main className="min-h-screen">{children}</main>
                 <Footer />
                 <SpeedInsights />
-                <AdSenseScript />
               </OnboardingProvider>
             </SubscriptionProvider>
           </AuthProvider>

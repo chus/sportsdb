@@ -8,7 +8,7 @@ import {
   getStandings,
   getTopScorers,
 } from "@/lib/queries/competitions";
-import { CompetitionJsonLd } from "@/components/seo/json-ld";
+import { CompetitionJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
@@ -81,6 +81,13 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         url={competitionUrl}
         logo={competition.logoUrl}
         location={competition.country}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "Competitions", url: `${BASE_URL}/search?type=competition` },
+          { name: competition.name, url: competitionUrl },
+        ]}
       />
       <div className="min-h-screen bg-neutral-50">
         {/* Hero Section */}

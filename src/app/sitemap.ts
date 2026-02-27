@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
-import { players, teams, competitions, venues } from "@/lib/db/schema";
+import { players, teams, competitions, venues, articles, competitionSeasons, seasons } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
 
@@ -19,14 +20,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${BASE_URL}/news`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/trending`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/top-scorers`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
   ];
 
   // Fetch all entities
-  const [allPlayers, allTeams, allCompetitions, allVenues] = await Promise.all([
+  const [allPlayers, allTeams, allCompetitions, allVenues, allArticles, allCompetitionSeasons] = await Promise.all([
     db.select({ slug: players.slug, updatedAt: players.updatedAt }).from(players),
     db.select({ slug: teams.slug, updatedAt: teams.updatedAt }).from(teams),
     db.select({ slug: competitions.slug, updatedAt: competitions.updatedAt }).from(competitions),
     db.select({ slug: venues.slug, updatedAt: venues.updatedAt }).from(venues),
+    db.select({
+      slug: articles.slug,
+      publishedAt: articles.publishedAt,
+      updatedAt: articles.updatedAt,
+    })
+      .from(articles)
+      .where(eq(articles.status, "published")),
+    db.select({
+      competitionSlug: competitions.slug,
+      seasonLabel: seasons.label,
+    })
+      .from(competitionSeasons)
+      .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+      .innerJoin(seasons, eq(competitionSeasons.seasonId, seasons.id)),
   ]);
 
   // Player pages
@@ -53,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // Venue pages (if we have a venue page)
+  // Venue pages
   const venuePages: MetadataRoute.Sitemap = allVenues.map((venue) => ({
     url: `${BASE_URL}/venues/${venue.slug}`,
     lastModified: venue.updatedAt || new Date(),
@@ -61,11 +94,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  // Article pages
+  const articlePages: MetadataRoute.Sitemap = allArticles.map((article) => ({
+    url: `${BASE_URL}/news/${article.slug}`,
+    lastModified: article.updatedAt || article.publishedAt || new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  // Competition season pages
+  const competitionSeasonPages: MetadataRoute.Sitemap = allCompetitionSeasons.map((cs) => ({
+    url: `${BASE_URL}/competitions/${cs.competitionSlug}/${cs.seasonLabel.replace("/", "-")}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
   return [
     ...staticPages,
     ...competitionPages,
+    ...competitionSeasonPages,
     ...teamPages,
     ...playerPages,
     ...venuePages,
+    ...articlePages,
   ];
 }

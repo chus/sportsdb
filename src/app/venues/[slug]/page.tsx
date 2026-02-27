@@ -17,6 +17,7 @@ import {
   getVenueMatches,
 } from "@/lib/queries/venues";
 import { getVenueImage } from "@/lib/utils/avatar";
+import { BreadcrumbJsonLd, VenueJsonLd } from "@/components/seo/json-ld";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -182,7 +183,24 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const heroImage = getVenueImage(venue, 1200);
 
+  const venueUrl = `${BASE_URL}/venues/${slug}`;
+
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "Venues", url: `${BASE_URL}/search?type=venue` },
+        { name: venue.name, url: venueUrl },
+      ]}
+    />
+    <VenueJsonLd
+      name={venue.name}
+      url={venueUrl}
+      image={venue.imageUrl}
+      address={{ city: venue.city, country: venue.country }}
+      capacity={venue.capacity}
+    />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div
@@ -463,5 +481,6 @@ export default async function VenuePage({ params }: VenuePageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
