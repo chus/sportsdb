@@ -2,8 +2,13 @@ import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues, articles, competitionSeasons, seasons } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import {
+  getDistinctNationalities,
+  getDistinctTeamCountries,
+  getTopPlayerPairs,
+} from "@/lib/queries/leaderboards";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
@@ -38,11 +43,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/top-assists`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/transfers`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/players/nationality`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/teams/country`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
   ];
 
   // Fetch all entities
-  const [allPlayers, allTeams, allCompetitions, allVenues, allArticles, allCompetitionSeasons] = await Promise.all([
-    db.select({ slug: players.slug, updatedAt: players.updatedAt }).from(players),
+  const [
+    allPlayers,
+    allTeams,
+    allCompetitions,
+    allVenues,
+    allArticles,
+    allCompetitionSeasons,
+    nationalities,
+    teamCountries,
+    topPlayers,
+  ] = await Promise.all([
+    db.select({ slug: players.slug, updatedAt: players.updatedAt, position: players.position }).from(players),
     db.select({ slug: teams.slug, updatedAt: teams.updatedAt }).from(teams),
     db.select({ slug: competitions.slug, updatedAt: competitions.updatedAt }).from(competitions),
     db.select({ slug: venues.slug, updatedAt: venues.updatedAt }).from(venues),
@@ -60,15 +99,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from(competitionSeasons)
       .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
       .innerJoin(seasons, eq(competitionSeasons.seasonId, seasons.id)),
+    getDistinctNationalities(),
+    getDistinctTeamCountries(),
+    getTopPlayerPairs(15),
   ]);
 
-  // Player pages
-  const playerPages: MetadataRoute.Sitemap = allPlayers.map((player) => ({
-    url: `${BASE_URL}/players/${player.slug}`,
-    lastModified: player.updatedAt || new Date(),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  // Player pages — filter out Unknown position
+  const playerPages: MetadataRoute.Sitemap = allPlayers
+    .filter((player) => player.position !== "Unknown")
+    .map((player) => ({
+      url: `${BASE_URL}/players/${player.slug}`,
+      lastModified: player.updatedAt || new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
 
   // Team pages
   const teamPages: MetadataRoute.Sitemap = allTeams.map((team) => ({
@@ -110,6 +154,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Top scorers by competition
+  const topScorerCompPages: MetadataRoute.Sitemap = allCompetitions.map((comp) => ({
+    url: `${BASE_URL}/top-scorers/${comp.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
+
+  // Top assists by competition
+  const topAssistCompPages: MetadataRoute.Sitemap = allCompetitions.map((comp) => ({
+    url: `${BASE_URL}/top-assists/${comp.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: 0.6,
+  }));
+
+  // Players by nationality
+  const nationalityPages: MetadataRoute.Sitemap = nationalities.map((n) => ({
+    url: `${BASE_URL}/players/nationality/${encodeURIComponent(n.nationality)}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  // Teams by country
+  const teamCountryPages: MetadataRoute.Sitemap = teamCountries.map((c) => ({
+    url: `${BASE_URL}/teams/country/${encodeURIComponent(c.country)}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  // Head-to-head comparison pages
+  const comparePairs: MetadataRoute.Sitemap = [];
+  for (let i = 0; i < topPlayers.length; i++) {
+    for (let j = i + 1; j < topPlayers.length; j++) {
+      comparePairs.push({
+        url: `${BASE_URL}/compare/${topPlayers[i].slug}-vs-${topPlayers[j].slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      });
+    }
+  }
+
   return [
     ...staticPages,
     ...competitionPages,
@@ -118,5 +207,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...playerPages,
     ...venuePages,
     ...articlePages,
+    ...topScorerCompPages,
+    ...topAssistCompPages,
+    ...nationalityPages,
+    ...teamCountryPages,
+    ...comparePairs,
   ];
 }

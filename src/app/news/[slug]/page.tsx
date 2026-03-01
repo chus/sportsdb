@@ -10,7 +10,7 @@ import { InArticleAd } from "@/components/ads/in-article-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { marked } from "marked";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 interface Props {
   params: Promise<{ slug: string }>;

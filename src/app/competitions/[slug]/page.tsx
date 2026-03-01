@@ -18,7 +18,7 @@ interface CompetitionPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export async function generateMetadata({ params }: CompetitionPageProps): Promise<Metadata> {
   const { slug } = await params;

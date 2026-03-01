@@ -15,7 +15,7 @@ import { LandingBenefits } from "@/components/landing/landing-benefits";
 import { LatestNews } from "@/components/news/latest-news";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
   title: "SportsDB – The International Sports Database",

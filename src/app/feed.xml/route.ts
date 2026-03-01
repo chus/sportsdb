@@ -1,6 +1,6 @@
 import { getPublishedArticles } from "@/lib/queries/articles";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 function escapeXml(str: string): string {
   return str

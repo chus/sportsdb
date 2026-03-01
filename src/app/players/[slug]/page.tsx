@@ -20,7 +20,7 @@ interface PlayerPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export async function generateMetadata({ params }: PlayerPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -88,7 +88,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const player = await getPlayerBySlug(slug);
 
-  if (!player) {
+  if (!player || player.position === "Unknown") {
     notFound();
   }
 

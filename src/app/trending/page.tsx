@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const revalidate = 3600;
 

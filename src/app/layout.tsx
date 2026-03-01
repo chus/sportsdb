@@ -10,7 +10,7 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const viewport: Viewport = {
   width: "device-width",

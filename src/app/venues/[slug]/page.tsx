@@ -24,7 +24,7 @@ interface VenuePageProps {
 }
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+  process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export async function generateMetadata({
   params,

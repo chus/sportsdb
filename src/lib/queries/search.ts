@@ -79,6 +79,7 @@ export async function searchEntities(
       OR lower(coalesce(si.subtitle, '')) LIKE ${containsPattern}
       OR lower(coalesce(si.meta, '')) LIKE ${containsPattern}
     )
+    AND (si.entity_type != 'player' OR coalesce(p.position, '') != 'Unknown')
     ${typeFilter}
     ORDER BY
       match_rank DESC,
@@ -213,6 +214,7 @@ export async function getEntitiesByType(
       FROM search_index si
       LEFT JOIN players p ON si.id = p.id
       WHERE si.entity_type = 'player'
+        AND coalesce(p.position, '') != 'Unknown'
       ORDER BY coalesce(p.popularity_score, 0) DESC
       LIMIT ${limit}
     `);
@@ -292,6 +294,7 @@ export async function getFeaturedEntities(limitPerType = 6): Promise<{
     FROM search_index si
     LEFT JOIN players p ON si.id = p.id
     WHERE si.entity_type = 'player'
+      AND coalesce(p.position, '') != 'Unknown'
     ORDER BY coalesce(p.popularity_score, 0) DESC
     LIMIT ${limitPerType}
   `);

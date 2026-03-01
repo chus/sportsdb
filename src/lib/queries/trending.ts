@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { analyticsEvents, searchAnalytics, players, teams } from "@/lib/db/schema";
-import { desc, eq, gte, and, count } from "drizzle-orm";
+import { desc, eq, gte, and, ne, count } from "drizzle-orm";
 
 const TRENDING_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -37,7 +37,7 @@ export async function getTrendingPlayers(limit = 10) {
           nationality: players.nationality,
         })
         .from(players)
-        .where(eq(players.id, item.entityId))
+        .where(and(eq(players.id, item.entityId), ne(players.position, "Unknown")))
         .limit(1);
       return player ? { ...player, views: Number(item.views) } : null;
     })

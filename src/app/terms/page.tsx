@@ -2,7 +2,7 @@ import { FileText } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://sportsdb-nine.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
   title: "Terms of Service – SportsDB",
