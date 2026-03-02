@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   User, MapPin, Calendar, Ruler, Flag,
-  Footprints, Shield, ArrowLeft, Trophy
+  Footprints, Shield, ArrowLeft, Trophy, BarChart3
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory } from "@/lib/queries/players";
@@ -147,7 +147,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Player Avatar */}
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
               {player.imageUrl ? (
                 <img
                   src={player.imageUrl}
@@ -157,31 +157,31 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               ) : (
                 <User className="w-16 h-16 md:w-20 md:h-20 text-white/60" />
               )}
+              {shirtNumber && (
+                <div className="absolute -bottom-2 -right-2 w-14 h-14 bg-white text-blue-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+                  {shirtNumber}
+                </div>
+              )}
             </div>
 
             {/* Player Info */}
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                {shirtNumber && (
-                  <span className="text-4xl md:text-5xl font-bold text-white/30">
-                    #{shirtNumber}
-                  </span>
-                )}
-                <h1 className="text-3xl md:text-5xl font-bold">{player.name}</h1>
-              </div>
+              <h1 className="text-3xl md:text-5xl font-bold mb-2">{player.name}</h1>
 
               {player.knownAs && player.knownAs !== player.name && (
-                <p className="text-xl text-white/80 mb-4">"{player.knownAs}"</p>
+                <p className="text-xl text-white/80 mb-4">&ldquo;{player.knownAs}&rdquo;</p>
               )}
 
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <PositionBadge position={player.position} />
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <span className={`px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white`}>
+                  {player.position}
+                </span>
                 {currentTeam && (
                   <Link
                     href={`/teams/${currentTeam.slug}`}
-                    className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+                    className="flex items-center gap-2 px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white hover:bg-white/30 transition-colors"
                   >
-                    <Shield className="w-5 h-5" />
+                    <Shield className="w-4 h-4" />
                     {currentTeam.name}
                   </Link>
                 )}
@@ -245,6 +245,51 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 )}
               </div>
             </section>
+
+            {/* Season Stats Summary */}
+            {statsHistory.length > 0 && (() => {
+              const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
+              const totalGoals = statsHistory.reduce((sum, s) => sum + s.stat.goals, 0);
+              const totalAssists = statsHistory.reduce((sum, s) => sum + s.stat.assists, 0);
+              const totalMins = statsHistory.reduce((sum, s) => sum + s.stat.minutesPlayed, 0);
+              return (
+                <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                  <h2 className="text-xl font-bold text-neutral-900 mb-6">Career Overview</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">{totalApps}</div>
+                      <div className="text-sm text-neutral-500 mt-1">Appearances</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">{totalGoals}</div>
+                      <div className="text-sm text-neutral-500 mt-1">Goals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-purple-600">{totalAssists}</div>
+                      <div className="text-sm text-neutral-500 mt-1">Assists</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-orange-500">{totalMins.toLocaleString()}</div>
+                      <div className="text-sm text-neutral-500 mt-1">Minutes</div>
+                    </div>
+                  </div>
+                  {totalApps > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm text-neutral-500 mb-2">
+                        <span>Goals per Appearance</span>
+                        <span className="font-medium text-neutral-900">{(totalGoals / totalApps).toFixed(2)}</span>
+                      </div>
+                      <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                          style={{ width: `${Math.min((totalGoals / totalApps) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </section>
+              );
+            })()}
 
             {/* Career History */}
             {career.length > 0 && (
@@ -462,6 +507,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
             {/* Related Players */}
             <RelatedPlayers playerId={player.id} />
+
+            {/* Compare CTA */}
+            <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">
+              <h3 className="font-semibold text-neutral-900 mb-2">Compare Players</h3>
+              <p className="text-sm text-neutral-600 mb-4">
+                See how {player.name} stacks up against other players with side-by-side stats comparison.
+              </p>
+              <Link
+                href={`/compare/players?p1=${player.slug}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Compare
+              </Link>
+            </div>
 
             {/* Internal Links for SEO */}
             <PlayerInternalLinks

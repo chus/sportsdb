@@ -170,12 +170,12 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                     </div>
                     {result && (
                       <span
-                        className={`w-6 h-6 rounded flex items-center justify-center text-xs font-medium text-white ml-2 ${
+                        className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold ml-2 ${
                           result === "W"
-                            ? "bg-green-500"
+                            ? "bg-green-100 text-green-700"
                             : result === "D"
-                            ? "bg-neutral-400"
-                            : "bg-red-500"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
                         }`}
                       >
                         {result}

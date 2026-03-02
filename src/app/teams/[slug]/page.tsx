@@ -75,17 +75,17 @@ function PositionGroup({
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
-        {title} ({players.length})
+      <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+        {title} <span className="text-neutral-400">({players.length})</span>
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {players.map(({ player, shirtNumber }) => (
           <Link
             key={player.id}
             href={`/players/${player.slug}`}
-            className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+            className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-100 hover:shadow-md hover:border-blue-200 transition-all group"
           >
-            <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 font-medium group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+            <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-700 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
               {shirtNumber || "—"}
             </div>
             <div className="flex-1 min-w-0">
@@ -312,28 +312,28 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <div className="bg-white rounded-xl border border-neutral-200 p-6">
               <h3 className="text-sm font-medium text-neutral-500 mb-4">Club Info</h3>
               <dl className="space-y-3">
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm">
                   <dt className="text-neutral-600">Full Name</dt>
                   <dd className="font-medium text-neutral-900 text-right">{team.name}</dd>
                 </div>
                 {team.shortName && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <dt className="text-neutral-600">Short Name</dt>
                     <dd className="font-medium text-neutral-900">{team.shortName}</dd>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm">
                   <dt className="text-neutral-600">Country</dt>
                   <dd className="font-medium text-neutral-900">{team.country}</dd>
                 </div>
                 {team.city && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <dt className="text-neutral-600">City</dt>
                     <dd className="font-medium text-neutral-900">{team.city}</dd>
                   </div>
                 )}
                 {team.foundedYear && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm">
                     <dt className="text-neutral-600">Founded</dt>
                     <dd className="font-medium text-neutral-900">{team.foundedYear}</dd>
                   </div>

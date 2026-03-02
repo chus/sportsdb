@@ -1,14 +1,15 @@
 "use client";
 
-import { Trophy, Search, Menu, X, User, LogOut, Settings } from "lucide-react";
+import { Search, Menu, X, User, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { LanguageToggle } from "@/components/language-toggle";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { Logo } from "@/components/layout/logo";
 
 export function Navbar() {
   const t = useTranslations();
@@ -19,6 +20,7 @@ export function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isLoading, logout } = useAuth();
   const { subscription } = useSubscription();
+  const pathname = usePathname();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isPro = subscription?.tier === "pro" || subscription?.tier === "ultimate";
@@ -61,31 +63,26 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-              <Trophy className="w-6 h-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <div className="font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                SportsDB
-              </div>
-              <div className="text-xs text-neutral-500 -mt-0.5">
-                {t("home.heroTagline")}
-              </div>
-            </div>
-          </Link>
+          <Logo size="md" showText />
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-3 py-2 text-sm font-medium text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href || pathname?.startsWith(link.href + "&");
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-neutral-700 hover:text-blue-600 hover:bg-blue-50"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Desktop Inline Search */}
@@ -139,8 +136,8 @@ export function Navbar() {
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center gap-2 p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     >
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-blue-600" />
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        {(user.name || user.email)?.[0]?.toUpperCase() || "U"}
                       </div>
                       <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium">
                         {user.name || user.email.split("@")[0]}
@@ -230,16 +227,23 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pt-4 border-t border-neutral-200">
             <div className="flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-3 text-sm font-medium text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || pathname?.startsWith(link.href + "&");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                      isActive
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-neutral-700 hover:text-blue-600 hover:bg-blue-50"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
 
               {/* Mobile auth buttons */}
               {!isLoading && !user && (

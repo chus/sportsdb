@@ -14,7 +14,7 @@ export function LiveMatchesSection() {
   }
 
   return (
-    <section className="bg-gradient-to-r from-red-600 to-red-700 py-6">
+    <section className="bg-neutral-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
