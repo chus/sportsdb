@@ -6,10 +6,12 @@ import {
   players,
   teams,
   matches,
+  venues,
   competitions,
   competitionSeasons,
   seasons,
 } from "@/lib/db/schema";
+import { alias } from "drizzle-orm/pg-core";
 import { eq, desc, and, or, isNotNull, sql } from "drizzle-orm";
 
 export interface ArticleWithRelations {
@@ -330,4 +332,75 @@ export async function getArticleCount(type?: string): Promise<number> {
     .where(whereClause);
 
   return Number(result?.count || 0);
+}
+
+export async function getArticleMatchData(matchId: string) {
+  const homeTeams = alias(teams, "homeTeam");
+  const awayTeams = alias(teams, "awayTeam");
+
+  const [result] = await db
+    .select({
+      match: {
+        id: matches.id,
+        scheduledAt: matches.scheduledAt,
+        homeScore: matches.homeScore,
+        awayScore: matches.awayScore,
+        status: matches.status,
+      },
+      homeTeam: {
+        name: homeTeams.name,
+        slug: homeTeams.slug,
+        logoUrl: homeTeams.logoUrl,
+      },
+      awayTeam: {
+        name: awayTeams.name,
+        slug: awayTeams.slug,
+        logoUrl: awayTeams.logoUrl,
+      },
+      venue: {
+        name: venues.name,
+        slug: venues.slug,
+        city: venues.city,
+      },
+      competition: {
+        name: competitions.name,
+        slug: competitions.slug,
+      },
+    })
+    .from(matches)
+    .innerJoin(homeTeams, eq(matches.homeTeamId, homeTeams.id))
+    .innerJoin(awayTeams, eq(matches.awayTeamId, awayTeams.id))
+    .leftJoin(venues, eq(matches.venueId, venues.id))
+    .innerJoin(competitionSeasons, eq(matches.competitionSeasonId, competitionSeasons.id))
+    .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+    .where(eq(matches.id, matchId))
+    .limit(1);
+
+  return result || null;
+}
+
+export async function getArticleRelatedEntities(articleId: string) {
+  const relatedPlayers = await db
+    .select({
+      name: players.name,
+      slug: players.slug,
+      position: players.position,
+      role: articlePlayers.role,
+    })
+    .from(articlePlayers)
+    .innerJoin(players, eq(articlePlayers.playerId, players.id))
+    .where(eq(articlePlayers.articleId, articleId));
+
+  const relatedTeams = await db
+    .select({
+      name: teams.name,
+      slug: teams.slug,
+      logoUrl: teams.logoUrl,
+      role: articleTeams.role,
+    })
+    .from(articleTeams)
+    .innerJoin(teams, eq(articleTeams.teamId, teams.id))
+    .where(eq(articleTeams.articleId, articleId));
+
+  return { relatedPlayers, relatedTeams };
 }
