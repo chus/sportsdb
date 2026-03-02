@@ -1,4 +1,4 @@
-import { Users, Shield, ArrowRight, TrendingUp } from "lucide-react";
+import { TrendingUp, Users, ChevronRight, Shield } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -10,25 +10,24 @@ import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
-import { BetweenContentAd } from "@/components/ads/between-content-ad";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "DataSports – The International Sports Database",
-  description: "The structured, canonical database for football. Search across 7,000+ players, 180+ teams, and 8 competitions with time-aware data.",
+  title: "SportsDB – The International Sports Database",
+  description: "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data.",
   openGraph: {
-    title: "DataSports – The International Sports Database",
-    description: "The structured, canonical database for football. Search across 7,000+ players, 180+ teams, and 8 competitions.",
+    title: "SportsDB – The International Sports Database",
+    description: "The comprehensive, structured database for football. Search across players, teams, and competitions.",
     url: BASE_URL,
-    siteName: "DataSports",
+    siteName: "SportsDB",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "DataSports – The International Sports Database",
-    description: "The structured, canonical database for football. Search players, teams, competitions, and venues.",
+    title: "SportsDB – The International Sports Database",
+    description: "The comprehensive, structured database for football. Search players, teams, competitions, and venues.",
   },
   alternates: {
     canonical: BASE_URL,
@@ -72,43 +71,40 @@ export default async function HomePage() {
     <>
       <WebsiteJsonLd
         url={BASE_URL}
-        name="DataSports"
+        name="SportsDB"
         description="The International Sports Database - Search across players, teams, competitions, and venues."
         searchUrl={`${BASE_URL}/search?q={search_term_string}`}
       />
       <OrganizationJsonLd
-        name="DataSports"
+        name="SportsDB"
         url={BASE_URL}
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
-    <div className="min-h-screen">
-      {/* Hero */}
-      <LandingHero />
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      {/* Hero Section */}
+      <LandingHero stats={stats} />
 
       {/* Live Matches */}
       <LiveMatchesSection />
-
-      {/* Explore Features */}
-      <LandingFeatures />
-
-      <BetweenContentAd />
 
       {/* Trending Players */}
       {featuredPlayers.length > 0 && (
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-orange-500" />
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <TrendingUp className="w-6 h-6 text-orange-500" />
+                  <h2 className="text-3xl font-bold text-neutral-900">Trending Players</h2>
                 </div>
-                <h2 className="text-3xl font-bold text-neutral-900">{t("home.featuredPlayers")}</h2>
+                <p className="text-neutral-600">Most searched this week</p>
               </div>
               <Link
                 href="/search?type=player"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                {t("common.viewAll")} <ArrowRight className="w-4 h-4" />
+                See all
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -116,7 +112,7 @@ export default async function HomePage() {
                 <Link
                   key={player.id}
                   href={`/players/${player.slug}`}
-                  className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-200 group"
+                  className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
                 >
                   <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
                     <Users className="w-6 h-6 text-neutral-400 group-hover:text-blue-500" />
@@ -126,7 +122,7 @@ export default async function HomePage() {
                       {player.name}
                     </div>
                     <div className="text-sm text-neutral-500 truncate">
-                      {player.position} {player.nationality && `• ${player.nationality}`}
+                      {player.position} {player.nationality && `· ${player.nationality}`}
                     </div>
                   </div>
                 </Link>
@@ -136,30 +132,35 @@ export default async function HomePage() {
         </section>
       )}
 
+      {/* Exploration Hooks */}
+      <LandingFeatures />
+
       {/* Top Teams */}
       {featuredTeams.length > 0 && (
-        <section className="py-16 bg-neutral-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-600" />
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-3xl font-bold text-neutral-900">Top Teams</h2>
                 </div>
-                <h2 className="text-3xl font-bold text-neutral-900">{t("home.featuredTeams")}</h2>
+                <p className="text-neutral-600">Elite clubs from around the world</p>
               </div>
               <Link
                 href="/search?type=team"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                {t("common.viewAll")} <ArrowRight className="w-4 h-4" />
+                See all teams
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredTeams.map((team) => (
                 <Link
                   key={team.id}
                   href={`/teams/${team.slug}`}
-                  className="p-6 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-200 group text-center"
+                  className="p-6 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group text-center"
                 >
                   <div className="w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors p-2">
                     {team.logoUrl ? (
@@ -179,9 +180,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <BetweenContentAd />
-
-      {/* Premium Stats */}
+      {/* Premium Statistics */}
       <LandingStats
         players={stats.players}
         teams={stats.teams}

@@ -8,7 +8,6 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
-import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -52,7 +51,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
   alternates: {
     types: {
@@ -84,12 +83,10 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <SubscriptionProvider>
-              <OnboardingProvider>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
-                <SpeedInsights />
-              </OnboardingProvider>
+              <Navbar />
+              <main className="min-h-screen">{children}</main>
+              <Footer />
+              <SpeedInsights />
             </SubscriptionProvider>
           </AuthProvider>
         </NextIntlClientProvider>

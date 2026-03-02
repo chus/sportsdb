@@ -1,29 +1,20 @@
 "use client";
 
-import { Search, Menu, X, User, LogOut, Settings } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/components/auth/auth-provider";
-import { LanguageToggle } from "@/components/language-toggle";
-import { NotificationBell } from "@/components/notifications/notification-bell";
-import { useSubscription } from "@/components/subscription/subscription-provider";
 import { Logo } from "@/components/layout/logo";
 
 export function Navbar() {
   const t = useTranslations();
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
-  const { user, isLoading, logout } = useAuth();
-  const { subscription } = useSubscription();
-  const pathname = usePathname();
-  const userMenuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const isPro = subscription?.tier === "pro" || subscription?.tier === "ultimate";
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,22 +33,6 @@ export function Navbar() {
     { label: t("common.news"), href: "/news" },
   ];
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    setUserMenuOpen(false);
-  };
-
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4">
@@ -73,7 +48,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isActive
                       ? "text-blue-600 bg-blue-50"
                       : "text-neutral-700 hover:text-blue-600 hover:bg-blue-50"
@@ -97,7 +72,7 @@ export function Navbar() {
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder="Search players, teams..."
-                className="w-full pl-10 pr-4 py-2 text-sm border-2 border-neutral-200 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 focus:bg-white hover:border-neutral-300 hover:bg-white transition-all"
+                className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-200 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 focus:bg-white hover:border-neutral-300 hover:bg-white transition-all"
               />
               {searchQuery && (
                 <button
@@ -113,12 +88,7 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Language Toggle */}
-            <LanguageToggle />
-
-            {/* Notifications (only when logged in) */}
-            {!isLoading && user && <NotificationBell />}
-
+            {/* Mobile search icon */}
             <Link
               href="/search"
               className="md:hidden p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -126,88 +96,6 @@ export function Navbar() {
             >
               <Search className="w-5 h-5" />
             </Link>
-
-            {/* Auth buttons */}
-            {!isLoading && (
-              <>
-                {user ? (
-                  <div className="relative" ref={userMenuRef}>
-                    <button
-                      onClick={() => setUserMenuOpen(!userMenuOpen)}
-                      className="flex items-center gap-2 p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        {(user.name || user.email)?.[0]?.toUpperCase() || "U"}
-                      </div>
-                      <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium">
-                        {user.name || user.email.split("@")[0]}
-                        {isPro && (
-                          <span className="px-1.5 py-0.5 text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded">
-                            {subscription?.tier === "ultimate" ? "ULTIMATE" : "PRO"}
-                          </span>
-                        )}
-                      </span>
-                    </button>
-
-                    {userMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-neutral-200 shadow-lg overflow-hidden">
-                        <div className="px-4 py-3 border-b border-neutral-100">
-                          <p className="text-sm font-medium text-neutral-900 truncate">
-                            {user.name || "User"}
-                          </p>
-                          <p className="text-xs text-neutral-500 truncate">{user.email}</p>
-                        </div>
-                        <Link
-                          href="/feed"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          {t("feed.activityFeed")}
-                        </Link>
-                        <Link
-                          href="/account"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <Settings className="w-4 h-4" />
-                          Account Settings
-                        </Link>
-                        <Link
-                          href="/pricing"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          {isPro ? "Manage Subscription" : "Upgrade to Pro"}
-                        </Link>
-                        <div className="border-t border-neutral-100 my-1" />
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          {t("common.signOut")}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="hidden sm:flex items-center gap-2">
-                    <Link
-                      href="/login"
-                      className="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      {t("common.signIn")}
-                    </Link>
-                    <Link
-                      href="/signup"
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                    >
-                      {t("common.signUp")}
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -244,26 +132,6 @@ export function Navbar() {
                   </Link>
                 );
               })}
-
-              {/* Mobile auth buttons */}
-              {!isLoading && !user && (
-                <div className="flex gap-2 mt-4 pt-4 border-t border-neutral-200">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-center text-neutral-700 border border-neutral-300 rounded-lg hover:bg-neutral-50"
-                  >
-                    {t("common.signIn")}
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                  >
-                    {t("common.signUp")}
-                  </Link>
-                </div>
-              )}
             </div>
           </div>
         )}
