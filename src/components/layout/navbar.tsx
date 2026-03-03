@@ -260,6 +260,14 @@ function UserDropdown({
         <p className="text-sm font-medium text-neutral-900 truncate">{userName}</p>
       </div>
       <Link
+        href="/account"
+        onClick={onClose}
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+      >
+        <User className="w-4 h-4 text-neutral-400" />
+        Account
+      </Link>
+      <Link
         href="/pricing"
         onClick={onClose}
         className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
@@ -288,6 +296,14 @@ function MobileAuthLinks({ onClose }: { onClose: () => void }) {
 
   return (
     <>
+      <Link
+        href="/account"
+        onClick={onClose}
+        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+      >
+        <User className="w-4 h-4 text-neutral-400" />
+        Account
+      </Link>
       <Link
         href="/pricing"
         onClick={onClose}

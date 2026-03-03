@@ -50,6 +50,8 @@ const COMPETITION_MAP: Record<string, string[]> = {
   ELC: ["championship"],
   DED: ["eredivisie"],
   PPL: ["primeira-liga"],
+  WC: ["fifa-world-cup-2026", "world-cup"],
+  EC: ["european-championship"],
 };
 
 const COMPETITIONS = SINGLE_LEAGUE

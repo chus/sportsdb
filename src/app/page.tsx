@@ -1,4 +1,4 @@
-import { TrendingUp, Users, ChevronRight, Shield } from "lucide-react";
+import { TrendingUp, Users, ChevronRight, Shield, Trophy } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -10,6 +10,7 @@ import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
+import { WorldCupBanner } from "@/components/landing/world-cup-banner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: BASE_URL,
   },
-  keywords: ["football", "soccer", "players", "teams", "competitions", "Premier League", "La Liga", "Bundesliga", "Serie A", "sports database"],
+  keywords: ["football", "soccer", "players", "teams", "competitions", "Premier League", "La Liga", "Bundesliga", "Serie A", "sports database", "World Cup 2026", "FIFA World Cup", "World Cup USA"],
 };
 
 async function getStats() {
@@ -88,6 +89,9 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       {/* Hero Section */}
       <LandingHero stats={stats} />
+
+      {/* World Cup 2026 Banner */}
+      <WorldCupBanner />
 
       {/* Live Matches */}
       <LiveMatchesSection />

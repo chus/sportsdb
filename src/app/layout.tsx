@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/footer";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AuthModalProvider } from "@/components/auth/auth-modal";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
+import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -85,10 +86,12 @@ export default async function RootLayout({
           <AuthProvider>
             <SubscriptionProvider>
               <AuthModalProvider>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
-                <SpeedInsights />
+                <OnboardingProvider>
+                  <Navbar />
+                  <main className="min-h-screen">{children}</main>
+                  <Footer />
+                  <SpeedInsights />
+                </OnboardingProvider>
               </AuthModalProvider>
             </SubscriptionProvider>
           </AuthProvider>
