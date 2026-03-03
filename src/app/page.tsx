@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
-import { count } from "drizzle-orm";
+import { count, ne, desc } from "drizzle-orm";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { LandingHero } from "@/components/landing/landing-hero";
@@ -56,7 +56,12 @@ async function getFeaturedTeams(limit = 8) {
 }
 
 async function getFeaturedPlayers(limit = 8) {
-  return db.select().from(players).limit(limit);
+  return db
+    .select()
+    .from(players)
+    .where(ne(players.position, "Unknown"))
+    .orderBy(desc(players.popularityScore))
+    .limit(limit);
 }
 
 export default async function HomePage() {

@@ -84,7 +84,8 @@ export async function getSquad(teamId: string, seasonId?: string) {
         or(
           isNull(playerTeamHistory.validTo),
           gte(playerTeamHistory.validTo, season.startDate)
-        )
+        ),
+        ne(players.position, "Unknown")
       )
     );
 }
