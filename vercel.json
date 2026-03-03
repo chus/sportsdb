@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/update-matches",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
