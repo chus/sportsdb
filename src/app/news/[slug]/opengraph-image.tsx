@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getArticleBySlug } from "@/lib/queries/articles";
+import { getArticleBySlug, getArticleMatchData } from "@/lib/queries/articles";
 
 export const runtime = "edge";
 export const alt = "Article on SportsDB";
@@ -34,6 +34,14 @@ export default async function Image({ params }: { params: { slug: string } }) {
 
   const { article, competition } = result;
 
+  // Fetch match data for match reports
+  const matchData = article.matchId ? await getArticleMatchData(article.matchId) : null;
+  const hasScoreline =
+    matchData &&
+    article.type === "match_report" &&
+    matchData.match.homeScore !== null &&
+    matchData.match.awayScore !== null;
+
   const details = [
     competition?.name,
     article.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -51,7 +59,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "60px 80px",
-          background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7e22ce 100%)",
+          background: "linear-gradient(135deg, #0c1e3a 0%, #172554 50%, #312e81 100%)",
           color: "white",
         }}
       >
@@ -64,21 +72,69 @@ export default async function Image({ params }: { params: { slug: string } }) {
               letterSpacing: "2px",
             }}
           >
-            News
+            {hasScoreline ? "Match Report" : "News"}
           </div>
-          <div
-            style={{
-              fontSize: 56,
-              fontWeight: 700,
-              lineHeight: 1.15,
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-            }}
-          >
-            {article.title}
-          </div>
+
+          {/* Scoreline for match reports */}
+          {hasScoreline && matchData && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "40px",
+                padding: "24px 0",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 42,
+                  fontWeight: 700,
+                  textAlign: "right",
+                  flex: 1,
+                }}
+              >
+                {matchData.homeTeam.name}
+              </div>
+              <div
+                style={{
+                  fontSize: 72,
+                  fontWeight: 800,
+                  letterSpacing: "4px",
+                }}
+              >
+                {matchData.match.homeScore} - {matchData.match.awayScore}
+              </div>
+              <div
+                style={{
+                  fontSize: 42,
+                  fontWeight: 700,
+                  textAlign: "left",
+                  flex: 1,
+                }}
+              >
+                {matchData.awayTeam.name}
+              </div>
+            </div>
+          )}
+
+          {/* Title (smaller when scoreline is shown) */}
+          {!hasScoreline && (
+            <div
+              style={{
+                fontSize: 56,
+                fontWeight: 700,
+                lineHeight: 1.15,
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+              }}
+            >
+              {article.title}
+            </div>
+          )}
+
           {details && (
             <div style={{ fontSize: 28, opacity: 0.85, marginTop: "8px" }}>
               {details}
@@ -96,7 +152,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
             SportsDB
           </div>
           <div style={{ fontSize: 20, opacity: 0.6 }}>
-            sportsdb-nine.vercel.app
+            datasports.co
           </div>
         </div>
       </div>

@@ -2,9 +2,26 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { getArticleBySlug, getRelatedArticles, getArticleMatchData, getArticleRelatedEntities } from "@/lib/queries/articles";
+import {
+  getArticleBySlug,
+  getRelatedArticles,
+  getArticleMatchData,
+  getArticleRelatedEntities,
+  getArticleMatchContext,
+} from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
-import { Calendar, Clock, Trophy, User, ChevronRight, Shield, MapPin } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Trophy,
+  User,
+  ChevronRight,
+  Shield,
+  MapPin,
+  ArrowRightLeft,
+  Target,
+  Users,
+} from "lucide-react";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { InArticleAd } from "@/components/ads/in-article-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
@@ -24,11 +41,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Article Not Found" };
   }
 
-  const { article } = result;
+  const { article, competition, season } = result;
+
+  // Enhanced title for match reports
+  let title = article.metaTitle || article.title;
+  if (article.type === "match_report" && article.matchId) {
+    const matchData = await getArticleMatchData(article.matchId);
+    if (matchData && matchData.match.homeScore !== null && matchData.match.awayScore !== null) {
+      const compName = competition?.name || "";
+      const seasonLabel = season?.label || "";
+      title = `${matchData.homeTeam.name} ${matchData.match.homeScore}-${matchData.match.awayScore} ${matchData.awayTeam.name} | ${compName} ${seasonLabel} Match Report`.trim();
+
+      // Enhanced description with scorers
+      const matchContext = await getArticleMatchContext(article.matchId, article.competitionSeasonId);
+      const goals = matchContext.events.filter((e) => e.type === "goal" || e.type === "own_goal");
+      if (goals.length > 0) {
+        const scorerNames = goals
+          .map((g) => g.player?.name || "Unknown")
+          .slice(0, 3)
+          .join(", ");
+        const desc = `${matchData.homeTeam.name} ${matchData.match.homeScore}-${matchData.match.awayScore} ${matchData.awayTeam.name}. Goals: ${scorerNames}. Full match report and analysis.`;
+        return {
+          title,
+          description: desc,
+          alternates: { canonical: `${BASE_URL}/news/${slug}` },
+          openGraph: {
+            title,
+            description: desc,
+            type: "article",
+            publishedTime: article.publishedAt?.toISOString(),
+            ...(article.imageUrl && { images: [article.imageUrl] }),
+          },
+          twitter: {
+            card: "summary_large_image",
+            title,
+            description: desc,
+          },
+        };
+      }
+    }
+  }
 
   return {
-    title: article.metaTitle || article.title,
+    title,
     description: article.metaDescription || article.excerpt,
+    alternates: { canonical: `${BASE_URL}/news/${slug}` },
     openGraph: {
       title: article.title,
       description: article.excerpt,
@@ -92,6 +149,12 @@ function linkifyEntities(
   return result;
 }
 
+function getRatingColor(rating: number): string {
+  if (rating >= 7.0) return "text-green-600 bg-green-50";
+  if (rating >= 6.0) return "text-yellow-600 bg-yellow-50";
+  return "text-red-600 bg-red-50";
+}
+
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
   const result = await getArticleBySlug(slug);
@@ -107,17 +170,21 @@ export default async function ArticlePage({ params }: Props) {
     bg: "bg-neutral-50 border-neutral-200",
   };
 
-  // Fetch match data, related entities, and related articles in parallel
-  const [relatedArticles, matchData, { relatedPlayers, relatedTeams }] = await Promise.all([
-    getRelatedArticles(
-      article.id,
-      article.competitionSeasonId,
-      article.primaryPlayerId,
-      article.primaryTeamId
-    ),
-    article.matchId ? getArticleMatchData(article.matchId) : Promise.resolve(null),
-    getArticleRelatedEntities(article.id),
-  ]);
+  // Fetch match data, related entities, related articles, and match context in parallel
+  const [relatedArticles, matchData, { relatedPlayers, relatedTeams }, matchContext] =
+    await Promise.all([
+      getRelatedArticles(
+        article.id,
+        article.competitionSeasonId,
+        article.primaryPlayerId,
+        article.primaryTeamId
+      ),
+      article.matchId ? getArticleMatchData(article.matchId) : Promise.resolve(null),
+      getArticleRelatedEntities(article.id),
+      article.matchId
+        ? getArticleMatchContext(article.matchId, article.competitionSeasonId)
+        : Promise.resolve(null),
+    ]);
 
   // Parse markdown content
   let htmlContent = marked.parse(article.content, { async: false }) as string;
@@ -145,6 +212,24 @@ export default async function ArticlePage({ params }: Props) {
   htmlContent = linkifyEntities(htmlContent, uniqueEntities);
 
   const readingTime = estimateReadingTime(article.content);
+
+  // Prepare lineups data for player ratings section
+  const homeLineups = matchData && matchContext?.lineups
+    ? matchContext.lineups.get(matchData.match.homeTeamId)
+    : null;
+  const awayLineups = matchData && matchContext?.lineups
+    ? matchContext.lineups.get(matchData.match.awayTeamId)
+    : null;
+  const hasRatings = !!(
+    homeLineups?.starters.some((l) => l.lineup.rating !== null) ||
+    awayLineups?.starters.some((l) => l.lineup.rating !== null)
+  );
+
+  // Standings data
+  const standingsData =
+    matchContext?.standings && matchContext.standings.length > 0
+      ? matchContext.standings.slice(0, 8)
+      : null;
 
   // NewsArticle JSON-LD
   const newsJsonLd = {
@@ -199,6 +284,16 @@ export default async function ArticlePage({ params }: Props) {
         }
       : null;
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { name: "Home", url: BASE_URL },
+    { name: "News", url: `${BASE_URL}/news` },
+    ...(competition
+      ? [{ name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` }]
+      : []),
+    { name: article.title, url: `${BASE_URL}/news/${slug}` },
+  ];
+
   return (
     <>
       <script
@@ -211,17 +306,11 @@ export default async function ArticlePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventJsonLd) }}
         />
       )}
-      <BreadcrumbJsonLd
-        items={[
-          { name: "Home", url: BASE_URL },
-          { name: "News", url: `${BASE_URL}/news` },
-          { name: article.title, url: `${BASE_URL}/news/${slug}` },
-        ]}
-      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
 
       <div className="min-h-screen bg-white">
         {/* Hero Header */}
-        <div className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 text-white">
+        <div className="bg-gradient-to-br from-neutral-900 via-blue-950 to-indigo-950 text-white">
           <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-neutral-400 mb-6">
@@ -232,6 +321,17 @@ export default async function ArticlePage({ params }: Props) {
               <Link href="/news" className="hover:text-white transition-colors">
                 News
               </Link>
+              {competition && (
+                <>
+                  <ChevronRight className="w-4 h-4" />
+                  <Link
+                    href={`/competitions/${competition.slug}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {competition.name}
+                  </Link>
+                </>
+              )}
               <ChevronRight className="w-4 h-4" />
               <span className="text-neutral-300 truncate max-w-[200px]">
                 {article.title}
@@ -289,47 +389,281 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Match Scoreline (for match reports) */}
+        {/* Scoreboard Card (for match reports) */}
         {matchData && matchData.match.homeScore !== null && matchData.match.awayScore !== null && (
-          <div className="bg-neutral-50 border-b border-neutral-200">
-            <div className="max-w-3xl mx-auto px-4 py-6">
-              <div className="flex items-center justify-center gap-6">
-                <Link href={`/teams/${matchData.homeTeam.slug}`} className="flex items-center gap-3 group">
-                  {matchData.homeTeam.logoUrl && (
-                    <img src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} className="w-10 h-10 object-contain" />
-                  )}
-                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">
+          <div className="max-w-3xl mx-auto px-4 -mt-6">
+            <div className="bg-white rounded-xl border border-neutral-200 shadow-md p-6">
+              <div className="flex items-center justify-center gap-4 sm:gap-8">
+                {/* Home team */}
+                <Link
+                  href={`/teams/${matchData.homeTeam.slug}`}
+                  className="flex flex-col items-center gap-2 group flex-1 min-w-0"
+                >
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                    {matchData.homeTeam.logoUrl ? (
+                      <img
+                        src={matchData.homeTeam.logoUrl}
+                        alt={matchData.homeTeam.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Shield className="w-10 h-10 text-neutral-300" />
+                    )}
+                  </div>
+                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
                     {matchData.homeTeam.name}
                   </span>
                 </Link>
-                <div className="text-3xl font-bold text-neutral-900 px-4">
-                  {matchData.match.homeScore} – {matchData.match.awayScore}
+
+                {/* Score */}
+                <div className="flex flex-col items-center">
+                  <div className="text-4xl sm:text-5xl font-bold text-neutral-900 tracking-tight">
+                    {matchData.match.homeScore} – {matchData.match.awayScore}
+                  </div>
+                  <span className="text-xs text-neutral-500 mt-1 uppercase tracking-wide">
+                    Full Time
+                  </span>
                 </div>
-                <Link href={`/teams/${matchData.awayTeam.slug}`} className="flex items-center gap-3 group">
-                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">
+
+                {/* Away team */}
+                <Link
+                  href={`/teams/${matchData.awayTeam.slug}`}
+                  className="flex flex-col items-center gap-2 group flex-1 min-w-0"
+                >
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                    {matchData.awayTeam.logoUrl ? (
+                      <img
+                        src={matchData.awayTeam.logoUrl}
+                        alt={matchData.awayTeam.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Shield className="w-10 h-10 text-neutral-300" />
+                    )}
+                  </div>
+                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
                     {matchData.awayTeam.name}
                   </span>
-                  {matchData.awayTeam.logoUrl && (
-                    <img src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} className="w-10 h-10 object-contain" />
-                  )}
                 </Link>
               </div>
-              {matchData.venue?.name && (
-                <div className="text-center text-sm text-neutral-500 mt-3 flex items-center justify-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <Link href={`/venues/${matchData.venue.slug}`} className="hover:text-blue-600 transition-colors">
-                    {matchData.venue.name}
-                  </Link>
-                  {matchData.venue.city && <span>· {matchData.venue.city}</span>}
-                </div>
-              )}
+
+              {/* Venue / Referee / Attendance */}
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-4 pt-4 border-t border-neutral-100 text-sm text-neutral-500">
+                {matchData.venue?.name && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <Link
+                      href={`/venues/${matchData.venue.slug}`}
+                      className="hover:text-blue-600 transition-colors"
+                    >
+                      {matchData.venue.name}
+                    </Link>
+                    {matchData.venue.city && <span>· {matchData.venue.city}</span>}
+                  </span>
+                )}
+                {matchData.match.referee && (
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5" />
+                    {matchData.match.referee}
+                  </span>
+                )}
+                {matchData.match.attendance && (
+                  <span className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
+                    {matchData.match.attendance.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Match Timeline */}
+        {matchContext && matchContext.events.length > 0 && matchData && (
+          <div className="max-w-3xl mx-auto px-4 py-8">
+            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              Match Timeline
+            </h2>
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-neutral-200" />
+
+              <div className="space-y-0">
+                {matchContext.events.map((event, idx) => {
+                  const isHomeTeam = event.teamId === matchData.match.homeTeamId;
+                  const prevEvent = idx > 0 ? matchContext.events[idx - 1] : null;
+                  const showHalfTimeDivider =
+                    prevEvent && prevEvent.minute <= 45 && event.minute > 45;
+
+                  return (
+                    <div key={event.id}>
+                      {/* Half-time divider */}
+                      {showHalfTimeDivider && (
+                        <div className="flex items-center gap-3 py-3 pl-2">
+                          <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-300 flex items-center justify-center z-10">
+                            <span className="text-xs font-semibold text-neutral-500">HT</span>
+                          </div>
+                          <div className="flex-1 h-px bg-neutral-300" />
+                          <span className="text-xs font-medium text-neutral-500 pr-2">Half Time</span>
+                          <div className="flex-1 h-px bg-neutral-300" />
+                        </div>
+                      )}
+
+                      <div className="flex items-start gap-3 py-2 pl-2">
+                        {/* Event icon */}
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center z-10 flex-shrink-0">
+                          {(event.type === "goal" || event.type === "own_goal") && (
+                            <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-green-500 flex items-center justify-center">
+                              <Target className="w-4 h-4 text-green-600" />
+                            </div>
+                          )}
+                          {event.type === "penalty_missed" && (
+                            <div className="w-8 h-8 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
+                              <Target className="w-4 h-4 text-red-500" />
+                            </div>
+                          )}
+                          {event.type === "yellow_card" && (
+                            <div className="w-8 h-8 rounded-full bg-yellow-50 border-2 border-yellow-400 flex items-center justify-center">
+                              <div className="w-3 h-4 rounded-sm bg-yellow-400" />
+                            </div>
+                          )}
+                          {event.type === "red_card" && (
+                            <div className="w-8 h-8 rounded-full bg-red-50 border-2 border-red-500 flex items-center justify-center">
+                              <div className="w-3 h-4 rounded-sm bg-red-500" />
+                            </div>
+                          )}
+                          {event.type === "substitution" && (
+                            <div className="w-8 h-8 rounded-full bg-blue-50 border-2 border-blue-400 flex items-center justify-center">
+                              <ArrowRightLeft className="w-4 h-4 text-blue-500" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Minute */}
+                        <span className="text-sm font-bold text-neutral-500 w-10 pt-1 flex-shrink-0">
+                          {event.minute}&apos;
+                          {event.addedTime ? `+${event.addedTime}` : ""}
+                        </span>
+
+                        {/* Event details */}
+                        <div className="flex-1 pt-0.5">
+                          {(event.type === "goal" || event.type === "own_goal") && (
+                            <div>
+                              <span className="font-semibold text-neutral-900">
+                                {event.player ? (
+                                  <Link
+                                    href={`/players/${event.player.slug}`}
+                                    className="hover:text-blue-600 transition-colors"
+                                  >
+                                    {event.player.name}
+                                  </Link>
+                                ) : (
+                                  "Unknown"
+                                )}
+                              </span>
+                              {event.type === "own_goal" && (
+                                <span className="text-red-500 text-sm ml-1">(OG)</span>
+                              )}
+                              {event.secondaryPlayer && (
+                                <span className="text-neutral-500 text-sm ml-1">
+                                  (assist:{" "}
+                                  <Link
+                                    href={`/players/${event.secondaryPlayer.slug}`}
+                                    className="text-neutral-600 hover:text-blue-600 transition-colors"
+                                  >
+                                    {event.secondaryPlayer.name}
+                                  </Link>
+                                  )
+                                </span>
+                              )}
+                              <span className="text-xs text-neutral-400 ml-2">
+                                {isHomeTeam ? matchData.homeTeam.name : matchData.awayTeam.name}
+                              </span>
+                            </div>
+                          )}
+                          {event.type === "penalty_missed" && (
+                            <div>
+                              <span className="font-semibold text-neutral-900">
+                                {event.player ? (
+                                  <Link
+                                    href={`/players/${event.player.slug}`}
+                                    className="hover:text-blue-600 transition-colors"
+                                  >
+                                    {event.player.name}
+                                  </Link>
+                                ) : (
+                                  "Unknown"
+                                )}
+                              </span>
+                              <span className="text-red-500 text-sm ml-1">(Penalty missed)</span>
+                            </div>
+                          )}
+                          {(event.type === "yellow_card" || event.type === "red_card") && (
+                            <div>
+                              <span className="font-semibold text-neutral-900">
+                                {event.player ? (
+                                  <Link
+                                    href={`/players/${event.player.slug}`}
+                                    className="hover:text-blue-600 transition-colors"
+                                  >
+                                    {event.player.name}
+                                  </Link>
+                                ) : (
+                                  "Unknown"
+                                )}
+                              </span>
+                              <span
+                                className={`text-sm ml-1 ${
+                                  event.type === "yellow_card" ? "text-yellow-600" : "text-red-600"
+                                }`}
+                              >
+                                {event.type === "yellow_card" ? "Yellow card" : "Red card"}
+                              </span>
+                            </div>
+                          )}
+                          {event.type === "substitution" && (
+                            <div className="text-sm">
+                              <span className="text-green-600 font-medium">
+                                {event.player ? (
+                                  <Link
+                                    href={`/players/${event.player.slug}`}
+                                    className="hover:text-green-700 transition-colors"
+                                  >
+                                    {event.player.name}
+                                  </Link>
+                                ) : (
+                                  "Unknown"
+                                )}
+                              </span>
+                              <span className="text-neutral-400 mx-1">for</span>
+                              <span className="text-red-500 font-medium">
+                                {event.secondaryPlayer ? (
+                                  <Link
+                                    href={`/players/${event.secondaryPlayer.slug}`}
+                                    className="hover:text-red-600 transition-colors"
+                                  >
+                                    {event.secondaryPlayer.name}
+                                  </Link>
+                                ) : (
+                                  "Unknown"
+                                )}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-4 py-12">
-          {/* Team badge for match reports */}
+          {/* Team badge for non-match articles */}
           {primaryTeam && !matchData && (
             <div className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 mb-8">
               {primaryTeam.logoUrl && (
@@ -354,20 +688,202 @@ export default async function ArticlePage({ params }: Props) {
           {/* Article body */}
           <article
             className="prose prose-lg max-w-none
-              prose-headings:font-semibold prose-headings:text-neutral-900 prose-headings:tracking-tight
+              prose-headings:font-bold prose-headings:text-neutral-900
               prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-neutral-200
               prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-neutral-800 prose-p:leading-[1.8] prose-p:mb-6
+              prose-p:text-neutral-800 prose-p:text-base prose-p:leading-relaxed prose-p:mb-6
               prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
               prose-strong:text-neutral-900 prose-strong:font-semibold
               prose-li:text-neutral-800 prose-li:leading-relaxed
               prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-neutral-700
-              [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-neutral-700 [&>p:first-of-type]:leading-relaxed [&>p:first-of-type]:font-normal
-              [&>p:first-of-type]:first-letter:text-5xl [&>p:first-of-type]:first-letter:font-bold [&>p:first-of-type]:first-letter:text-blue-600 [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:mt-1"
+              [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-neutral-700 [&>p:first-of-type]:leading-relaxed [&>p:first-of-type]:font-normal"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
 
           <InArticleAd />
+
+          {/* Player Ratings Section */}
+          {article.type === "match_report" && matchData && hasRatings && homeLineups && awayLineups && (
+            <div className="mt-12 pt-8 border-t border-neutral-200">
+              <h3 className="text-xl font-bold text-neutral-900 mb-6">Player Ratings</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Home team */}
+                <div>
+                  <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                    {matchData.homeTeam.logoUrl && (
+                      <img src={matchData.homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    {matchData.homeTeam.name}
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-neutral-200 text-neutral-500">
+                          <th className="text-left py-2 font-medium">Player</th>
+                          <th className="text-center py-2 font-medium w-12">Pos</th>
+                          <th className="text-center py-2 font-medium w-14">Rating</th>
+                          <th className="text-center py-2 font-medium w-12">Mins</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {homeLineups.starters.map((l) => (
+                          <tr key={l.lineup.id} className="border-b border-neutral-100">
+                            <td className="py-2">
+                              <Link
+                                href={`/players/${l.player.slug}`}
+                                className="text-neutral-900 hover:text-blue-600 transition-colors"
+                              >
+                                {l.player.name}
+                              </Link>
+                            </td>
+                            <td className="text-center text-neutral-500 text-xs">
+                              {l.lineup.position?.slice(0, 3).toUpperCase() || "—"}
+                            </td>
+                            <td className="text-center">
+                              {l.lineup.rating ? (
+                                <span
+                                  className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${getRatingColor(
+                                    parseFloat(l.lineup.rating)
+                                  )}`}
+                                >
+                                  {parseFloat(l.lineup.rating).toFixed(1)}
+                                </span>
+                              ) : (
+                                <span className="text-neutral-400">—</span>
+                              )}
+                            </td>
+                            <td className="text-center text-neutral-500 text-xs">
+                              {l.lineup.minutesPlayed ?? "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Away team */}
+                <div>
+                  <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                    {matchData.awayTeam.logoUrl && (
+                      <img src={matchData.awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                    )}
+                    {matchData.awayTeam.name}
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-neutral-200 text-neutral-500">
+                          <th className="text-left py-2 font-medium">Player</th>
+                          <th className="text-center py-2 font-medium w-12">Pos</th>
+                          <th className="text-center py-2 font-medium w-14">Rating</th>
+                          <th className="text-center py-2 font-medium w-12">Mins</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {awayLineups.starters.map((l) => (
+                          <tr key={l.lineup.id} className="border-b border-neutral-100">
+                            <td className="py-2">
+                              <Link
+                                href={`/players/${l.player.slug}`}
+                                className="text-neutral-900 hover:text-blue-600 transition-colors"
+                              >
+                                {l.player.name}
+                              </Link>
+                            </td>
+                            <td className="text-center text-neutral-500 text-xs">
+                              {l.lineup.position?.slice(0, 3).toUpperCase() || "—"}
+                            </td>
+                            <td className="text-center">
+                              {l.lineup.rating ? (
+                                <span
+                                  className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${getRatingColor(
+                                    parseFloat(l.lineup.rating)
+                                  )}`}
+                                >
+                                  {parseFloat(l.lineup.rating).toFixed(1)}
+                                </span>
+                              ) : (
+                                <span className="text-neutral-400">—</span>
+                              )}
+                            </td>
+                            <td className="text-center text-neutral-500 text-xs">
+                              {l.lineup.minutesPlayed ?? "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Standings Impact Section */}
+          {article.type === "match_report" && matchData && standingsData && (
+            <div className="mt-12 pt-8 border-t border-neutral-200">
+              <h3 className="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-blue-600" />
+                Standings
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b-2 border-neutral-200 text-neutral-500">
+                      <th className="text-left py-2 font-medium w-8">#</th>
+                      <th className="text-left py-2 font-medium">Team</th>
+                      <th className="text-center py-2 font-medium w-8">P</th>
+                      <th className="text-center py-2 font-medium w-8">W</th>
+                      <th className="text-center py-2 font-medium w-8">D</th>
+                      <th className="text-center py-2 font-medium w-8">L</th>
+                      <th className="text-center py-2 font-medium w-10">GD</th>
+                      <th className="text-center py-2 font-medium w-10">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {standingsData.map((row) => {
+                      const isMatchTeam =
+                        row.team.id === matchData.match.homeTeamId ||
+                        row.team.id === matchData.match.awayTeamId;
+                      return (
+                        <tr
+                          key={row.standing.id}
+                          className={`border-b border-neutral-100 ${
+                            isMatchTeam ? "bg-blue-50 font-medium" : ""
+                          }`}
+                        >
+                          <td className="py-2 text-neutral-500">{row.standing.position}</td>
+                          <td className="py-2">
+                            <Link
+                              href={`/teams/${row.team.slug}`}
+                              className="text-neutral-900 hover:text-blue-600 transition-colors flex items-center gap-2"
+                            >
+                              {row.team.logoUrl && (
+                                <img src={row.team.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                              )}
+                              {row.team.name}
+                            </Link>
+                          </td>
+                          <td className="text-center text-neutral-600">{row.standing.played}</td>
+                          <td className="text-center text-neutral-600">{row.standing.won}</td>
+                          <td className="text-center text-neutral-600">{row.standing.drawn}</td>
+                          <td className="text-center text-neutral-600">{row.standing.lost}</td>
+                          <td className="text-center text-neutral-600">
+                            {row.standing.goalDifference > 0 ? "+" : ""}
+                            {row.standing.goalDifference}
+                          </td>
+                          <td className="text-center font-bold text-neutral-900">
+                            {row.standing.points}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Related Topics — entity cards */}
           <div className="mt-12 pt-8 border-t border-neutral-200">

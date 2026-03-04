@@ -30,6 +30,11 @@ export interface MatchReportContext {
     team: string;
     stats: string;
   }>;
+  standings?: Array<{
+    position: number;
+    team: string;
+    points: number;
+  }>;
   existingSummary?: string;
 }
 
@@ -90,7 +95,20 @@ export function buildMatchReportPrompt(ctx: MatchReportContext): string {
     ?.map((p) => `${p.playerName}: /players/${p.playerSlug}`)
     .join(", ") || "";
 
-  return `You are an SEO-focused sports journalist writing a match report for a football database website.
+  const standingsContext = ctx.standings?.length
+    ? `\nSTANDINGS CONTEXT (use for analysis):\n${ctx.standings
+        .slice(0, 6)
+        .map((s) => `${s.position}. ${s.team} - ${s.points} pts`)
+        .join("\n")}`
+    : "";
+
+  const topPerformerContext = ctx.topPerformers?.length
+    ? `\nTOP PERFORMERS (mention season stats):\n${ctx.topPerformers
+        .map((p) => `- ${p.playerName} (${p.team}): ${p.stats}`)
+        .join("\n")}`
+    : "";
+
+  return `You are an SEO-focused sports journalist writing an in-depth match report for a football database website.
 
 MATCH DETAILS:
 - Competition: ${ctx.match.competition} (${ctx.match.season})
@@ -101,6 +119,8 @@ ${ctx.match.matchday ? `- Matchday: ${ctx.match.matchday}` : ""}
 
 KEY EVENTS:
 ${ctx.events.map((e) => `${e.minute}' - ${e.type}: ${e.playerName} (${e.teamName})`).join("\n")}
+${standingsContext}
+${topPerformerContext}
 
 ${ctx.existingSummary ? `MATCH SUMMARY (use as reference):\n${ctx.existingSummary}` : ""}
 
@@ -112,7 +132,7 @@ ${playerLinks ? `- Players: ${playerLinks}` : ""}
 
 SEO REQUIREMENTS:
 1. Include the team names and competition in the title for search visibility
-2. Use H2/H3 subheadings to structure content (## First Half, ## Second Half, ## Key Moments)
+2. Use H2/H3 subheadings to structure content (## Pre-Match Context, ## First Half, ## Second Half, ## Key Moments, ## What This Means)
 3. Include internal markdown links to team pages: ${homeTeamLink}, ${awayTeamLink}
 4. Include internal markdown links to the competition: ${competitionLink}
 5. When mentioning goal scorers, link to their player page using format [Player Name](/players/player-slug)
@@ -123,9 +143,17 @@ SEO REQUIREMENTS:
 ARTICLE REQUIREMENTS:
 1. Engaging headline with team names and score (max 80 chars)
 2. Brief excerpt for cards/social (1-2 sentences, 150 chars max, include final score)
-3. 400-600 words, professional sports journalism style
-4. Clear structure with H2 headings for sections
-5. All team/player mentions should be internal links where possible
+3. 800-1200 words, professional sports journalism style
+4. 4-5 substantial paragraphs organized into clear sections:
+   - Pre-match context: stakes, form, standings implications
+   - First half narrative: key moments with minute references
+   - Second half narrative: tactical shifts, goals, turning points
+   - Key moments: standout individual performances, controversial decisions
+   - Post-match implications: what the result means for the table, upcoming fixtures
+5. Reference specific minutes for all events (e.g., "Haaland broke the deadlock on 23 minutes")
+6. Use standings data for context (e.g., "City moved to 2nd with the win, closing the gap to just two points")
+7. Reference player season stats when available (e.g., "Haaland's 15th league goal of the campaign")
+8. All team/player mentions should be internal links where possible
 
 Generate SEO-friendly slug: lowercase, hyphens, include team slugs (e.g., "team1-vs-team2-result-competition-matchday")
 

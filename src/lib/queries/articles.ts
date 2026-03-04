@@ -13,6 +13,8 @@ import {
 } from "@/lib/db/schema";
 import { alias } from "drizzle-orm/pg-core";
 import { eq, desc, and, or, isNotNull, sql } from "drizzle-orm";
+import { getMatchEventsWithPlayers, getMatchLineupsGrouped } from "./matches";
+import { getStandings } from "./competitions";
 
 export interface ArticleWithRelations {
   article: typeof articles.$inferSelect;
@@ -346,6 +348,10 @@ export async function getArticleMatchData(matchId: string) {
         homeScore: matches.homeScore,
         awayScore: matches.awayScore,
         status: matches.status,
+        homeTeamId: matches.homeTeamId,
+        awayTeamId: matches.awayTeamId,
+        attendance: matches.attendance,
+        referee: matches.referee,
       },
       homeTeam: {
         name: homeTeams.name,
@@ -403,4 +409,16 @@ export async function getArticleRelatedEntities(articleId: string) {
     .where(eq(articleTeams.articleId, articleId));
 
   return { relatedPlayers, relatedTeams };
+}
+
+export async function getArticleMatchContext(
+  matchId: string,
+  competitionSeasonId: string | null
+) {
+  const [events, lineups, standings] = await Promise.all([
+    getMatchEventsWithPlayers(matchId),
+    getMatchLineupsGrouped(matchId),
+    competitionSeasonId ? getStandings(competitionSeasonId) : Promise.resolve([]),
+  ]);
+  return { events, lineups, standings };
 }
