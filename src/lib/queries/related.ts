@@ -116,11 +116,9 @@ export async function getRelatedPlayers(
         and(
           eq(players.position, currentPlayer.position),
           ne(players.id, playerId),
-          sql`${players.id} NOT IN (${sql.raw(
-            teammateIds.length > 0
-              ? teammateIds.map((id) => `'${id}'`).join(",")
-              : "''"
-          )})`
+          ...(teammateIds.length > 0
+            ? [sql`${players.id} NOT IN (${sql.raw(teammateIds.map((id) => `'${id}'`).join(","))})`]
+            : [])
         )
       )
       .limit(remaining);
