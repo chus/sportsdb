@@ -6,30 +6,18 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { Logo } from "@/components/layout/logo";
+import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAuthModal } from "@/components/auth/auth-modal";
 
 export function Navbar() {
   const t = useTranslations();
-  const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading: authLoading } = useAuth();
   const { openModal } = useAuthModal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchFocused, setSearchFocused] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-      searchInputRef.current?.blur();
-    }
-  };
 
   // Close user menu on outside click
   useEffect(() => {
@@ -82,30 +70,9 @@ export function Navbar() {
           </div>
 
           {/* Desktop Inline Search */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:block flex-1 max-w-md mx-4">
-            <div className="relative">
-              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${searchFocused ? 'text-blue-500' : 'text-neutral-400'}`} />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-                placeholder="Search players, teams..."
-                className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-200 rounded-lg bg-neutral-50 text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 focus:bg-white hover:border-neutral-300 hover:bg-white transition-all"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </form>
+          <div className="hidden md:block flex-1 max-w-md mx-4">
+            <SearchBar size="default" placeholder="Search players, teams..." />
+          </div>
 
           {/* Right side */}
           <div className="flex items-center gap-2">

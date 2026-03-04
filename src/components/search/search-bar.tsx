@@ -77,6 +77,7 @@ export function SearchBar({
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -152,6 +153,19 @@ export function SearchBar({
       }
     };
   }, []);
+
+  // Close dropdown on outside click (works inside backdrop-filter parents)
+  useEffect(() => {
+    if (!isFocused) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsFocused(false);
+        setHighlightedIndex(-1);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isFocused]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -259,7 +273,7 @@ export function SearchBar({
   const iconSizeClasses = size === "large" ? "w-6 h-6" : "w-5 h-5";
 
   return (
-    <div className="relative w-full">
+    <div ref={containerRef} className="relative w-full">
       <form onSubmit={handleSubmit}>
         <div className="relative">
           {isLoading && query ? (
@@ -292,17 +306,9 @@ export function SearchBar({
 
       {/* Dropdown */}
       {isFocused && (showRecentSearches || showResults) && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => {
-              setIsFocused(false);
-              setHighlightedIndex(-1);
-            }}
-          />
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-20 max-h-[480px] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-[60] max-h-[480px] overflow-y-auto"
           >
             {/* Recent Searches */}
             {showRecentSearches && (
@@ -414,7 +420,6 @@ export function SearchBar({
               </>
             )}
           </div>
-        </>
       )}
     </div>
   );
