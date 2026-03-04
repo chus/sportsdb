@@ -73,16 +73,16 @@ export function LandingBenefits() {
                     </p>
                   </div>
                   <Link
-                    href="/predictions"
+                    href="/search"
                     className="block w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl text-center"
                   >
-                    Make Predictions
+                    Explore Players & Teams
                   </Link>
                   <Link
-                    href="/stats"
+                    href="/world-cup-2026"
                     className="block w-full px-8 py-4 mt-3 bg-white border-2 border-neutral-200 text-neutral-900 text-lg font-semibold rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-center"
                   >
-                    View Advanced Stats
+                    World Cup 2026
                   </Link>
                 </>
               ) : (

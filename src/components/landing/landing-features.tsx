@@ -3,28 +3,28 @@ import Link from "next/link";
 
 const explorationCards = [
   {
-    title: "Rising Stars",
-    description: "Discover the next generation of football talent breaking into the scene",
-    icon: TrendingUp,
-    gradient: "from-green-500 to-emerald-600",
-    href: "/trending",
-    linkText: "Explore players",
-  },
-  {
-    title: "Historic Rivalries",
-    description: "Explore the greatest matchups and intense competitions throughout history",
+    title: "Top Leagues",
+    description: "Explore the Premier League, La Liga, Bundesliga, Serie A, and more",
     icon: Trophy,
     gradient: "from-red-500 to-orange-600",
     href: "/search?type=competition",
-    linkText: "View rivalries",
+    linkText: "Browse competitions",
   },
   {
-    title: "Recently Updated",
-    description: "Check out the latest profile updates and newly added information",
+    title: "Search Players",
+    description: "Find any footballer — from rising stars to all-time legends",
+    icon: TrendingUp,
+    gradient: "from-green-500 to-emerald-600",
+    href: "/search?type=player",
+    linkText: "Explore players",
+  },
+  {
+    title: "Compare Teams",
+    description: "Head-to-head comparisons and squad breakdowns across clubs",
     icon: RefreshCw,
     gradient: "from-purple-500 to-indigo-600",
-    href: "/transfers",
-    linkText: "See updates",
+    href: "/compare",
+    linkText: "Compare now",
   },
 ];
 
