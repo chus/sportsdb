@@ -18,13 +18,13 @@ import {
   ChevronRight,
   Shield,
   MapPin,
-  ArrowRightLeft,
-  Target,
   Users,
 } from "lucide-react";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { InArticleAd } from "@/components/ads/in-article-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { MatchTimeline } from "@/components/match/match-timeline";
+import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { marked } from "marked";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -247,41 +247,58 @@ export default async function ArticlePage({ params }: Props) {
   // SportsEvent JSON-LD for match reports
   const sportsEventJsonLd =
     matchData && article.type === "match_report"
-      ? {
-          "@context": "https://schema.org",
-          "@type": "SportsEvent",
-          name: `${matchData.homeTeam.name} vs ${matchData.awayTeam.name}`,
-          startDate: matchData.match.scheduledAt.toISOString(),
-          homeTeam: {
-            "@type": "SportsTeam",
-            name: matchData.homeTeam.name,
-            url: `${BASE_URL}/teams/${matchData.homeTeam.slug}`,
-          },
-          awayTeam: {
-            "@type": "SportsTeam",
-            name: matchData.awayTeam.name,
-            url: `${BASE_URL}/teams/${matchData.awayTeam.slug}`,
-          },
-          ...(matchData.venue?.name && {
-            location: {
-              "@type": "Place",
-              name: matchData.venue.name,
-              ...(matchData.venue.city && {
-                address: { "@type": "PostalAddress", addressLocality: matchData.venue.city },
-              }),
-            },
-          }),
-          ...(matchData.competition && {
-            superEvent: {
-              "@type": "SportsEvent",
-              name: matchData.competition.name,
-            },
-          }),
-          ...(matchData.match.homeScore !== null &&
-            matchData.match.awayScore !== null && {
-              result: `${matchData.homeTeam.name} ${matchData.match.homeScore} - ${matchData.match.awayScore} ${matchData.awayTeam.name}`,
+      ? (() => {
+          const scoreStr =
+            matchData.match.homeScore !== null && matchData.match.awayScore !== null
+              ? `${matchData.homeTeam.name} ${matchData.match.homeScore} - ${matchData.match.awayScore} ${matchData.awayTeam.name}`
+              : null;
+          const desc = scoreStr
+            ? `${scoreStr}. ${matchData.competition ? matchData.competition.name + " match" : "Football match"} report.`
+            : `${matchData.competition ? matchData.competition.name + " match" : "Football match"}: ${matchData.homeTeam.name} vs ${matchData.awayTeam.name}.`;
+          return {
+            "@context": "https://schema.org",
+            "@type": "SportsEvent",
+            name: `${matchData.homeTeam.name} vs ${matchData.awayTeam.name}`,
+            description: desc,
+            startDate: matchData.match.scheduledAt.toISOString(),
+            sport: "Football",
+            competitor: [
+              {
+                "@type": "SportsTeam",
+                name: matchData.homeTeam.name,
+                url: `${BASE_URL}/teams/${matchData.homeTeam.slug}`,
+              },
+              {
+                "@type": "SportsTeam",
+                name: matchData.awayTeam.name,
+                url: `${BASE_URL}/teams/${matchData.awayTeam.slug}`,
+              },
+            ],
+            location: matchData.venue?.name
+              ? {
+                  "@type": "StadiumOrArena",
+                  name: matchData.venue.name,
+                  ...(matchData.venue.city && {
+                    address: { "@type": "PostalAddress", addressLocality: matchData.venue.city },
+                  }),
+                }
+              : { "@type": "Place", name: "TBD" },
+            ...(matchData.competition && {
+              organizer: {
+                "@type": "SportsOrganization",
+                name: matchData.competition.name,
+                url: `${BASE_URL}/competitions/${matchData.competition.slug}`,
+              },
             }),
-        }
+            ...(matchData.competition && {
+              superEvent: {
+                "@type": "SportsEvent",
+                name: matchData.competition.name,
+              },
+            }),
+            ...(scoreStr && { result: scoreStr }),
+          };
+        })()
       : null;
 
   // Breadcrumb items
@@ -478,186 +495,25 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         )}
 
-        {/* Match Timeline */}
+        {/* Match Timeline & Stats */}
         {matchContext && matchContext.events.length > 0 && matchData && (
-          <div className="max-w-3xl mx-auto px-4 py-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
-              Match Timeline
-            </h2>
-            <div className="relative">
-              {/* Vertical line */}
-              <div className="absolute left-6 top-0 bottom-0 w-px bg-neutral-200" />
-
-              <div className="space-y-0">
-                {matchContext.events.map((event, idx) => {
-                  const isHomeTeam = event.teamId === matchData.match.homeTeamId;
-                  const prevEvent = idx > 0 ? matchContext.events[idx - 1] : null;
-                  const showHalfTimeDivider =
-                    prevEvent && prevEvent.minute <= 45 && event.minute > 45;
-
-                  return (
-                    <div key={event.id}>
-                      {/* Half-time divider */}
-                      {showHalfTimeDivider && (
-                        <div className="flex items-center gap-3 py-3 pl-2">
-                          <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-300 flex items-center justify-center z-10">
-                            <span className="text-xs font-semibold text-neutral-500">HT</span>
-                          </div>
-                          <div className="flex-1 h-px bg-neutral-300" />
-                          <span className="text-xs font-medium text-neutral-500 pr-2">Half Time</span>
-                          <div className="flex-1 h-px bg-neutral-300" />
-                        </div>
-                      )}
-
-                      <div className="flex items-start gap-3 py-2 pl-2">
-                        {/* Event icon */}
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center z-10 flex-shrink-0">
-                          {(event.type === "goal" || event.type === "own_goal") && (
-                            <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-green-500 flex items-center justify-center">
-                              <Target className="w-4 h-4 text-green-600" />
-                            </div>
-                          )}
-                          {event.type === "penalty_missed" && (
-                            <div className="w-8 h-8 rounded-full bg-red-100 border-2 border-red-400 flex items-center justify-center">
-                              <Target className="w-4 h-4 text-red-500" />
-                            </div>
-                          )}
-                          {event.type === "yellow_card" && (
-                            <div className="w-8 h-8 rounded-full bg-yellow-50 border-2 border-yellow-400 flex items-center justify-center">
-                              <div className="w-3 h-4 rounded-sm bg-yellow-400" />
-                            </div>
-                          )}
-                          {event.type === "red_card" && (
-                            <div className="w-8 h-8 rounded-full bg-red-50 border-2 border-red-500 flex items-center justify-center">
-                              <div className="w-3 h-4 rounded-sm bg-red-500" />
-                            </div>
-                          )}
-                          {event.type === "substitution" && (
-                            <div className="w-8 h-8 rounded-full bg-blue-50 border-2 border-blue-400 flex items-center justify-center">
-                              <ArrowRightLeft className="w-4 h-4 text-blue-500" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Minute */}
-                        <span className="text-sm font-bold text-neutral-500 w-10 pt-1 flex-shrink-0">
-                          {event.minute}&apos;
-                          {event.addedTime ? `+${event.addedTime}` : ""}
-                        </span>
-
-                        {/* Event details */}
-                        <div className="flex-1 pt-0.5">
-                          {(event.type === "goal" || event.type === "own_goal") && (
-                            <div>
-                              <span className="font-semibold text-neutral-900">
-                                {event.player ? (
-                                  <Link
-                                    href={`/players/${event.player.slug}`}
-                                    className="hover:text-blue-600 transition-colors"
-                                  >
-                                    {event.player.name}
-                                  </Link>
-                                ) : (
-                                  "Unknown"
-                                )}
-                              </span>
-                              {event.type === "own_goal" && (
-                                <span className="text-red-500 text-sm ml-1">(OG)</span>
-                              )}
-                              {event.secondaryPlayer && (
-                                <span className="text-neutral-500 text-sm ml-1">
-                                  (assist:{" "}
-                                  <Link
-                                    href={`/players/${event.secondaryPlayer.slug}`}
-                                    className="text-neutral-600 hover:text-blue-600 transition-colors"
-                                  >
-                                    {event.secondaryPlayer.name}
-                                  </Link>
-                                  )
-                                </span>
-                              )}
-                              <span className="text-xs text-neutral-400 ml-2">
-                                {isHomeTeam ? matchData.homeTeam.name : matchData.awayTeam.name}
-                              </span>
-                            </div>
-                          )}
-                          {event.type === "penalty_missed" && (
-                            <div>
-                              <span className="font-semibold text-neutral-900">
-                                {event.player ? (
-                                  <Link
-                                    href={`/players/${event.player.slug}`}
-                                    className="hover:text-blue-600 transition-colors"
-                                  >
-                                    {event.player.name}
-                                  </Link>
-                                ) : (
-                                  "Unknown"
-                                )}
-                              </span>
-                              <span className="text-red-500 text-sm ml-1">(Penalty missed)</span>
-                            </div>
-                          )}
-                          {(event.type === "yellow_card" || event.type === "red_card") && (
-                            <div>
-                              <span className="font-semibold text-neutral-900">
-                                {event.player ? (
-                                  <Link
-                                    href={`/players/${event.player.slug}`}
-                                    className="hover:text-blue-600 transition-colors"
-                                  >
-                                    {event.player.name}
-                                  </Link>
-                                ) : (
-                                  "Unknown"
-                                )}
-                              </span>
-                              <span
-                                className={`text-sm ml-1 ${
-                                  event.type === "yellow_card" ? "text-yellow-600" : "text-red-600"
-                                }`}
-                              >
-                                {event.type === "yellow_card" ? "Yellow card" : "Red card"}
-                              </span>
-                            </div>
-                          )}
-                          {event.type === "substitution" && (
-                            <div className="text-sm">
-                              <span className="text-green-600 font-medium">
-                                {event.player ? (
-                                  <Link
-                                    href={`/players/${event.player.slug}`}
-                                    className="hover:text-green-700 transition-colors"
-                                  >
-                                    {event.player.name}
-                                  </Link>
-                                ) : (
-                                  "Unknown"
-                                )}
-                              </span>
-                              <span className="text-neutral-400 mx-1">for</span>
-                              <span className="text-red-500 font-medium">
-                                {event.secondaryPlayer ? (
-                                  <Link
-                                    href={`/players/${event.secondaryPlayer.slug}`}
-                                    className="hover:text-red-600 transition-colors"
-                                  >
-                                    {event.secondaryPlayer.name}
-                                  </Link>
-                                ) : (
-                                  "Unknown"
-                                )}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+            <MatchTimeline
+              events={matchContext.events}
+              homeTeamId={matchData.match.homeTeamId}
+              awayTeamId={matchData.match.awayTeamId}
+              homeTeamName={matchData.homeTeam.name}
+              awayTeamName={matchData.awayTeam.name}
+            />
+            <MatchStatBars
+              homeTeamName={matchData.homeTeam.name}
+              awayTeamName={matchData.awayTeam.name}
+              homeTeamLogo={matchData.homeTeam.logoUrl}
+              awayTeamLogo={matchData.awayTeam.logoUrl}
+              events={matchContext.events}
+              homeTeamId={matchData.match.homeTeamId}
+              awayTeamId={matchData.match.awayTeamId}
+            />
           </div>
         )}
 

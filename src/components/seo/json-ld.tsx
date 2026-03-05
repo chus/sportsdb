@@ -200,13 +200,26 @@ export function MatchJsonLd({
     }
   };
 
+  const scoreStr =
+    (status === "finished" || status === "live" || status === "half_time") &&
+    homeScore !== null &&
+    awayScore !== null
+      ? `${homeTeam.name} ${homeScore} - ${awayScore} ${awayTeam.name}`
+      : null;
+
+  const description = scoreStr
+    ? `${scoreStr}. ${competition ? competition.name + " match" : "Football match"} between ${homeTeam.name} and ${awayTeam.name}.`
+    : `${competition ? competition.name + " match" : "Football match"}: ${homeTeam.name} vs ${awayTeam.name}.`;
+
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     name: `${homeTeam.name} vs ${awayTeam.name}`,
+    description,
     url: matchUrl,
     startDate: scheduledAt,
     eventStatus: getEventStatus(status),
+    sport: "Football",
     competitor: [
       {
         "@type": "SportsTeam",
@@ -219,11 +232,21 @@ export function MatchJsonLd({
         url: awayTeam.url,
       },
     ],
-    ...(venue && {
-      location: {
-        "@type": "StadiumOrArena",
-        name: venue.name,
-        url: venue.url,
+    location: venue
+      ? {
+          "@type": "StadiumOrArena",
+          name: venue.name,
+          url: venue.url,
+        }
+      : {
+          "@type": "Place",
+          name: "TBD",
+        },
+    ...(competition && {
+      organizer: {
+        "@type": "SportsOrganization",
+        name: competition.name,
+        url: competition.url,
       },
     }),
     ...(competition && {
@@ -233,14 +256,12 @@ export function MatchJsonLd({
         url: competition.url,
       },
     }),
-    ...((status === "finished" || status === "live" || status === "half_time") &&
-      homeScore !== null &&
-      awayScore !== null && {
-        result: {
-          "@type": "Text",
-          name: `${homeTeam.name} ${homeScore} - ${awayScore} ${awayTeam.name}`,
-        },
-      }),
+    ...(scoreStr && {
+      result: {
+        "@type": "Text",
+        name: scoreStr,
+      },
+    }),
   };
 
   return <JsonLd data={data} />;

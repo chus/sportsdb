@@ -22,6 +22,8 @@ import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
 import { FormationView } from "@/components/match/formation-view";
 import { MatchSummary } from "@/components/match/match-summary";
+import { MatchTimeline } from "@/components/match/match-timeline";
+import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
@@ -445,13 +447,32 @@ export default async function MatchPage({ params }: MatchPageProps) {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Match Events Timeline */}
-            <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-neutral-200">
-                <h2 className="text-lg font-bold text-neutral-900">
-                  Match Events
-                </h2>
-              </div>
-              {events.length === 0 ? (
+            {events.length > 0 ? (
+              <>
+                <MatchTimeline
+                  events={events}
+                  homeTeamId={homeTeam.id}
+                  awayTeamId={awayTeam.id}
+                  homeTeamName={homeTeam.shortName || homeTeam.name}
+                  awayTeamName={awayTeam.shortName || awayTeam.name}
+                />
+                <MatchStatBars
+                  homeTeamName={homeTeam.shortName || homeTeam.name}
+                  awayTeamName={awayTeam.shortName || awayTeam.name}
+                  homeTeamLogo={homeTeam.logoUrl}
+                  awayTeamLogo={awayTeam.logoUrl}
+                  events={events}
+                  homeTeamId={homeTeam.id}
+                  awayTeamId={awayTeam.id}
+                />
+              </>
+            ) : (
+              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-neutral-200">
+                  <h2 className="text-lg font-bold text-neutral-900">
+                    Match Events
+                  </h2>
+                </div>
                 <div className="p-8 text-center text-neutral-500">
                   <Clock className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
                   <p>
@@ -460,24 +481,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
                       : "No events recorded"}
                   </p>
                 </div>
-              ) : (
-                <div className="px-6 py-4">
-                  <div className="flex items-center justify-between text-sm font-medium text-neutral-500 mb-4 pb-2 border-b border-neutral-100">
-                    <span>{homeTeam.shortName || homeTeam.name}</span>
-                    <span>{awayTeam.shortName || awayTeam.name}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {events.map((event) => (
-                      <MatchEventItem
-                        key={event.id}
-                        event={event}
-                        isHomeTeam={event.teamId === homeTeam.id}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             <BetweenContentAd />
 
