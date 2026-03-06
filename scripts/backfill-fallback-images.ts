@@ -12,7 +12,9 @@ if (!DATABASE_URL) {
 }
 
 const sql = neon(DATABASE_URL);
-const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co").replace(/\/$/, "");
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co")
+  .trim()
+  .replace(/\/$/, "");
 const dryRun = process.argv.includes("--dry-run");
 
 async function main() {

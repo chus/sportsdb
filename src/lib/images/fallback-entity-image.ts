@@ -69,5 +69,5 @@ export function buildFallbackEntityImageUrl({
     params.set("seed", seed);
   }
 
-  return `${baseUrl}/api/entity-image?${params.toString()}`;
+  return `${baseUrl.trim().replace(/\/$/, "")}/api/entity-image?${params.toString()}`;
 }
