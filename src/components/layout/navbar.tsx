@@ -4,7 +4,7 @@ import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown } from "lucide-r
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/layout/logo";
 import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -13,6 +13,7 @@ import { useAuthModal } from "@/components/auth/auth-modal";
 export function Navbar() {
   const t = useTranslations();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { openModal } = useAuthModal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,11 +34,11 @@ export function Navbar() {
   }, [userMenuOpen]);
 
   const navLinks = [
-    { label: t("common.players"), href: "/search?type=player" },
-    { label: t("common.teams"), href: "/search?type=team" },
-    { label: t("common.competitions"), href: "/search?type=competition" },
-    { label: t("common.matches"), href: "/search?type=match" },
-    { label: t("common.news"), href: "/news" },
+    { label: t("common.players"), href: "/search?type=player", path: "/search", type: "player" },
+    { label: t("common.teams"), href: "/search?type=team", path: "/search", type: "team" },
+    { label: t("common.competitions"), href: "/search?type=competition", path: "/search", type: "competition" },
+    { label: t("common.matches"), href: "/search?type=match", path: "/search", type: "match" },
+    { label: t("common.news"), href: "/news", path: "/news" },
   ];
 
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?";
@@ -52,7 +53,9 @@ export function Navbar() {
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href || pathname?.startsWith(link.href + "&");
+              const isActive =
+                pathname === link.path &&
+                (!link.type || searchParams.get("type") === link.type);
               return (
                 <Link
                   key={link.href}
@@ -93,6 +96,9 @@ export function Navbar() {
                   <div className="hidden lg:block relative" ref={userMenuRef}>
                     <button
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      aria-label="Open user menu"
+                      aria-haspopup="menu"
+                      aria-expanded={userMenuOpen}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
@@ -131,6 +137,9 @@ export function Navbar() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
               className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900 rounded-lg"
             >
               {mobileMenuOpen ? (
@@ -144,10 +153,12 @@ export function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 pt-4 border-t border-neutral-200">
+          <div id="mobile-navigation" className="lg:hidden mt-4 pt-4 border-t border-neutral-200">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href || pathname?.startsWith(link.href + "&");
+                const isActive =
+                  pathname === link.path &&
+                  (!link.type || searchParams.get("type") === link.type);
                 return (
                   <Link
                     key={link.href}

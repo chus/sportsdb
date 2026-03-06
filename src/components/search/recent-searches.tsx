@@ -28,6 +28,7 @@ export function RecentSearches({
         </div>
         <button
           onClick={onClearAll}
+          aria-label="Clear recent searches"
           className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
         >
           <Trash2 className="w-3 h-3" />
@@ -51,6 +52,7 @@ export function RecentSearches({
                 e.stopPropagation();
                 onRemove(query);
               }}
+              aria-label={`Remove ${query} from recent searches`}
               className="opacity-0 group-hover:opacity-100 p-1 text-neutral-400 hover:text-neutral-600 transition-all"
             >
               <X className="w-3.5 h-3.5" />

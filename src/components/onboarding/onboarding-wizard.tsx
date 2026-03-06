@@ -40,6 +40,9 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -54,6 +57,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   }, []);
 
   const fetchSuggestions = async () => {
+    setLoadError(null);
     try {
       const [playersRes, teamsRes, competitionsRes] = await Promise.all([
         fetch("/api/onboarding/suggestions?type=players"),
@@ -64,14 +68,20 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
       if (playersRes.ok) setPlayers(await playersRes.json());
       if (teamsRes.ok) setTeams(await teamsRes.json());
       if (competitionsRes.ok) setCompetitions(await competitionsRes.json());
+
+      if (!playersRes.ok && !teamsRes.ok && !competitionsRes.ok) {
+        setLoadError("We could not load recommendations right now.");
+      }
     } catch (error) {
       console.error("Failed to fetch suggestions:", error);
+      setLoadError("We could not load recommendations right now.");
     } finally {
       setLoading(false);
     }
   };
 
   const togglePlayer = (id: string) => {
+    setStepError(null);
     setSelectedPlayers((prev) =>
       prev.includes(id)
         ? prev.filter((p) => p !== id)
@@ -82,6 +92,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   };
 
   const toggleTeam = (id: string) => {
+    setStepError(null);
     setSelectedTeams((prev) =>
       prev.includes(id)
         ? prev.filter((t) => t !== id)
@@ -92,6 +103,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   };
 
   const toggleCompetition = (id: string) => {
+    setStepError(null);
     setSelectedCompetitions((prev) =>
       prev.includes(id)
         ? prev.filter((c) => c !== id)
@@ -103,16 +115,20 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
   const handleNext = () => {
     if (step === 1 && selectedPlayers.length < 2) {
+      setStepError("Select at least 2 players to continue.");
       return; // Could show toast
     }
     if (step === 2 && selectedTeams.length < 1) {
+      setStepError("Select at least 1 team to continue.");
       return;
     }
+    setStepError(null);
     setStep((prev) => prev + 1);
   };
 
   const handleFinish = async () => {
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await fetch("/api/onboarding/complete", {
         method: "POST",
@@ -126,9 +142,12 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
       if (res.ok) {
         onComplete();
+      } else {
+        setSubmitError("We could not save your selections. Please try again.");
       }
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
+      setSubmitError("We could not save your selections. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -152,6 +171,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
         <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white">
           <button
             onClick={onSkip}
+            aria-label="Skip onboarding"
             className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
@@ -181,6 +201,30 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
         {/* Content */}
         <div className="p-8 overflow-y-auto max-h-[60vh]">
+          {loadError && (
+            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {loadError}
+              <button
+                onClick={fetchSuggestions}
+                className="ml-2 font-semibold text-amber-900 underline underline-offset-2"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {stepError && (
+            <div role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {stepError}
+            </div>
+          )}
+
+          {submitError && (
+            <div role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {submitError}
+            </div>
+          )}
+
           {step === 1 && (
             <div>
               <h3 className="text-2xl font-bold text-neutral-900 mb-2">
@@ -234,6 +278,11 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                   );
                 })}
               </div>
+              {players.length === 0 && (
+                <p className="mt-4 text-sm text-neutral-500">
+                  No player recommendations available right now.
+                </p>
+              )}
             </div>
           )}
 
@@ -290,6 +339,11 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                   );
                 })}
               </div>
+              {teams.length === 0 && (
+                <p className="mt-4 text-sm text-neutral-500">
+                  No team recommendations available right now.
+                </p>
+              )}
             </div>
           )}
 
@@ -346,6 +400,11 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                   );
                 })}
               </div>
+              {competitions.length === 0 && (
+                <p className="mt-4 text-sm text-neutral-500">
+                  No competition recommendations available right now.
+                </p>
+              )}
             </div>
           )}
         </div>

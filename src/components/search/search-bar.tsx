@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, X, Users, Shield, Trophy, MapPin, Loader2, Newspaper } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useId } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchResult } from "@/types/entities";
 import { useRecentSearches } from "@/hooks/use-recent-searches";
@@ -54,7 +54,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   const parts = text.split(regex);
 
   return parts.map((part, i) =>
-    regex.test(part) ? (
+    i % 2 === 1 ? (
       <mark key={i} className="bg-yellow-200 text-neutral-900 rounded px-0.5">
         {part}
       </mark>
@@ -77,10 +77,12 @@ export function SearchBar({
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const router = useRouter();
+  const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const requestIdRef = useRef(0);
 
   const { recentSearches, addSearch, removeSearch, clearAll } =
     useRecentSearches();
@@ -91,11 +93,6 @@ export function SearchBar({
   // Show results dropdown when we have 2+ characters
   const showResults = isFocused && query.trim().length >= 2;
 
-  // Total navigable items count
-  const totalItems = showRecentSearches
-    ? recentSearches.length
-    : results.length + 1; // +1 for "See all results"
-
   // Debounced search function
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -103,6 +100,7 @@ export function SearchBar({
       return;
     }
 
+    const requestId = ++requestIdRef.current;
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -110,12 +108,16 @@ export function SearchBar({
       );
       if (response.ok) {
         const data = await response.json();
-        setResults(data.results);
+        if (requestId === requestIdRef.current) {
+          setResults(data.results);
+        }
       }
     } catch (error) {
       console.error("Search error:", error);
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -131,6 +133,7 @@ export function SearchBar({
 
     // Only search if at least 2 characters
     if (value.trim().length < 2) {
+      requestIdRef.current += 1;
       setResults([]);
       setIsLoading(false);
       return;
@@ -260,11 +263,15 @@ export function SearchBar({
   };
 
   const handleClear = () => {
+    requestIdRef.current += 1;
     setQuery("");
     setResults([]);
     setHighlightedIndex(-1);
     inputRef.current?.focus();
   };
+
+  const activeDescendantId =
+    highlightedIndex >= 0 ? `search-option-${highlightedIndex}` : undefined;
 
   const inputSizeClasses = size === "large"
     ? "pl-14 pr-14 py-4 text-lg"
@@ -290,12 +297,18 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             autoFocus={autoFocus}
             placeholder={placeholder}
+            role="combobox"
+            aria-expanded={isFocused && (showRecentSearches || showResults)}
+            aria-autocomplete="list"
+            aria-controls={listboxId}
+            aria-activedescendant={activeDescendantId}
             className={`w-full ${inputSizeClasses} border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-500 placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400 transition-all`}
           />
           {query && (
             <button
               type="button"
               onClick={handleClear}
+              aria-label="Clear search"
               className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
             >
               <X className={iconSizeClasses} />
@@ -308,6 +321,8 @@ export function SearchBar({
       {isFocused && (showRecentSearches || showResults) && (
           <div
             ref={dropdownRef}
+            id={listboxId}
+            role="listbox"
             className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-[60] max-h-[480px] overflow-y-auto"
           >
             {/* Recent Searches */}
@@ -342,7 +357,7 @@ export function SearchBar({
                   <div className="px-4 py-8 text-center">
                     <Search className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
                     <p className="text-neutral-500 text-sm">
-                      No results for "<span className="font-medium text-neutral-700">{query}</span>"
+                      No results for &quot;<span className="font-medium text-neutral-700">{query}</span>&quot;
                     </p>
                     <p className="text-neutral-400 text-xs mt-1">
                       Try a different spelling or search term
@@ -357,7 +372,10 @@ export function SearchBar({
                       return (
                         <button
                           key={result.id}
+                          id={`search-option-${index}`}
                           data-index={index}
+                          role="option"
+                          aria-selected={highlightedIndex === index}
                           onClick={() => handleResultClick(result)}
                           className={`w-full px-3 py-2.5 text-left flex items-center gap-3 rounded-lg transition-colors ${
                             highlightedIndex === index
@@ -405,7 +423,10 @@ export function SearchBar({
 
                 {results.length > 0 && (
                   <button
+                    id={`search-option-${results.length}`}
                     data-index={results.length}
+                    role="option"
+                    aria-selected={highlightedIndex === results.length}
                     onClick={handleSubmit}
                     className={`w-full px-4 py-3 text-left text-sm font-semibold border-t border-neutral-100 flex items-center justify-between ${
                       highlightedIndex === results.length
@@ -413,7 +434,7 @@ export function SearchBar({
                         : "text-blue-600 hover:bg-blue-50"
                     }`}
                   >
-                    <span>See all results for "{query}"</span>
+                    <span>See all results for &quot;{query}&quot;</span>
                     <span className="text-xs text-neutral-400">↵</span>
                   </button>
                 )}

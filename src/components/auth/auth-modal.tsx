@@ -5,6 +5,9 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
+  useId,
+  useRef,
   ReactNode,
   FormEvent,
 } from "react";
@@ -63,6 +66,64 @@ function AuthModal({
   onTabChange: (tab: AuthTab) => void;
   onClose: () => void;
 }) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  useEffect(() => {
+    const previousActiveElement = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const getFocusableElements = () => {
+      if (!modalRef.current) return [] as HTMLElement[];
+      return Array.from(
+        modalRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        )
+      );
+    };
+
+    const focusableElements = getFocusableElements();
+    focusableElements[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const elements = getFocusableElements();
+      if (elements.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstElement = elements[0];
+      const lastElement = elements[elements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousActiveElement?.focus();
+    };
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
@@ -72,10 +133,18 @@ function AuthModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+      >
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close authentication dialog"
           className="absolute top-4 right-4 p-1 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors z-10"
         >
           <X className="w-5 h-5" />
@@ -83,10 +152,10 @@ function AuthModal({
 
         {/* Header */}
         <div className="px-8 pt-8 pb-4">
-          <h2 className="text-2xl font-bold text-neutral-900 mb-1">
+          <h2 id={titleId} className="text-2xl font-bold text-neutral-900 mb-1">
             {tab === "signin" ? "Welcome back" : "Create an account"}
           </h2>
-          <p className="text-sm text-neutral-500">
+          <p id={descriptionId} className="text-sm text-neutral-500">
             {tab === "signin"
               ? "Sign in to your SportsDB account"
               : "Join SportsDB to follow your favorite teams and players"}
@@ -157,7 +226,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+        <div role="alert" className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
           {error}
         </div>
       )}
@@ -227,7 +296,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+        <div role="alert" className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
           {error}
         </div>
       )}

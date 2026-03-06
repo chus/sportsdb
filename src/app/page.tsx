@@ -1,7 +1,6 @@
-import { TrendingUp, Users, ChevronRight, Shield, Trophy } from "lucide-react";
+import { TrendingUp, Users, ChevronRight, Shield } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
 import { count, ne, desc } from "drizzle-orm";
@@ -66,7 +65,6 @@ async function getFeaturedPlayers(limit = 8) {
 }
 
 export default async function HomePage() {
-  const t = await getTranslations();
   const [stats, featuredTeams, featuredPlayers] = await Promise.all([
     getStats(),
     getFeaturedTeams(),
@@ -173,7 +171,15 @@ export default async function HomePage() {
                 >
                   <div className="w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors p-2">
                     {team.logoUrl ? (
-                      <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
+                      <img
+                        src={team.logoUrl}
+                        alt={`${team.name} logo`}
+                        className="w-full h-full object-contain"
+                        width={64}
+                        height={64}
+                        loading="lazy"
+                        decoding="async"
+                      />
                     ) : (
                       <Shield className="w-8 h-8 text-neutral-400 group-hover:text-blue-500" />
                     )}
