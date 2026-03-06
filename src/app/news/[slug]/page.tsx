@@ -25,6 +25,8 @@ import { InArticleAd } from "@/components/ads/in-article-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
+import { ShareButtons } from "@/components/news/share-buttons";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { marked } from "marked";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -212,6 +214,7 @@ export default async function ArticlePage({ params }: Props) {
   htmlContent = linkifyEntities(htmlContent, uniqueEntities);
 
   const readingTime = estimateReadingTime(article.content);
+  const articleUrl = `${BASE_URL}/news/${slug}`;
 
   // Prepare lineups data for player ratings section
   const homeLineups = matchData && matchContext?.lineups
@@ -241,6 +244,7 @@ export default async function ArticlePage({ params }: Props) {
     dateModified: article.updatedAt?.toISOString(),
     author: { "@type": "Organization", name: "SportsDB" },
     publisher: { "@type": "Organization", name: "SportsDB" },
+    mainEntityOfPage: articleUrl,
     ...(article.imageUrl && { image: article.imageUrl }),
   };
 
@@ -308,7 +312,7 @@ export default async function ArticlePage({ params }: Props) {
     ...(competition
       ? [{ name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` }]
       : []),
-    { name: article.title, url: `${BASE_URL}/news/${slug}` },
+    { name: article.title, url: articleUrl },
   ];
 
   return (
@@ -416,12 +420,14 @@ export default async function ArticlePage({ params }: Props) {
                   href={`/teams/${matchData.homeTeam.slug}`}
                   className="flex flex-col items-center gap-2 group flex-1 min-w-0"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
                     {matchData.homeTeam.logoUrl ? (
-                      <img
+                      <ImageWithFallback
                         src={matchData.homeTeam.logoUrl}
                         alt={matchData.homeTeam.name}
-                        className="w-full h-full object-contain"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
                       />
                     ) : (
                       <Shield className="w-10 h-10 text-neutral-300" />
@@ -447,12 +453,14 @@ export default async function ArticlePage({ params }: Props) {
                   href={`/teams/${matchData.awayTeam.slug}`}
                   className="flex flex-col items-center gap-2 group flex-1 min-w-0"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
                     {matchData.awayTeam.logoUrl ? (
-                      <img
+                      <ImageWithFallback
                         src={matchData.awayTeam.logoUrl}
                         alt={matchData.awayTeam.name}
-                        className="w-full h-full object-contain"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
                       />
                     ) : (
                       <Shield className="w-10 h-10 text-neutral-300" />
@@ -523,9 +531,11 @@ export default async function ArticlePage({ params }: Props) {
           {primaryTeam && !matchData && (
             <div className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 mb-8">
               {primaryTeam.logoUrl && (
-                <img
+                <ImageWithFallback
                   src={primaryTeam.logoUrl}
                   alt={primaryTeam.name}
+                  width={48}
+                  height={48}
                   className="w-12 h-12 object-contain"
                 />
               )}
@@ -540,6 +550,10 @@ export default async function ArticlePage({ params }: Props) {
               </div>
             </div>
           )}
+
+          <div className="mb-8">
+            <ShareButtons title={article.title} url={articleUrl} />
+          </div>
 
           {/* Article body */}
           <article
@@ -567,7 +581,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div>
                   <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
                     {matchData.homeTeam.logoUrl && (
-                      <img src={matchData.homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                      <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
                     {matchData.homeTeam.name}
                   </h4>
@@ -622,7 +636,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div>
                   <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
                     {matchData.awayTeam.logoUrl && (
-                      <img src={matchData.awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                      <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
                     {matchData.awayTeam.name}
                   </h4>
@@ -716,7 +730,7 @@ export default async function ArticlePage({ params }: Props) {
                               className="text-neutral-900 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               {row.team.logoUrl && (
-                                <img src={row.team.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                                <ImageWithFallback src={row.team.logoUrl} alt="" width={16} height={16} className="w-4 h-4 object-contain" />
                               )}
                               {row.team.name}
                             </Link>
@@ -751,12 +765,12 @@ export default async function ArticlePage({ params }: Props) {
               {matchData && (
                 <>
                   <Link
-                    href={`/teams/${matchData.homeTeam.slug}`}
-                    className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
-                  >
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
-                      {matchData.homeTeam.logoUrl ? (
-                        <img src={matchData.homeTeam.logoUrl} alt="" className="w-full h-full object-contain" />
+                  href={`/teams/${matchData.homeTeam.slug}`}
+                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                >
+                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                    {matchData.homeTeam.logoUrl ? (
+                        <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}
@@ -769,12 +783,12 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   </Link>
                   <Link
-                    href={`/teams/${matchData.awayTeam.slug}`}
-                    className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
-                  >
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
-                      {matchData.awayTeam.logoUrl ? (
-                        <img src={matchData.awayTeam.logoUrl} alt="" className="w-full h-full object-contain" />
+                  href={`/teams/${matchData.awayTeam.slug}`}
+                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                >
+                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                    {matchData.awayTeam.logoUrl ? (
+                        <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}
@@ -795,9 +809,9 @@ export default async function ArticlePage({ params }: Props) {
                   href={`/teams/${primaryTeam.slug}`}
                   className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {primaryTeam.logoUrl ? (
-                      <img src={primaryTeam.logoUrl} alt="" className="w-full h-full object-contain" />
+                      <ImageWithFallback src={primaryTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
                     ) : (
                       <Shield className="w-6 h-6 text-neutral-400" />
                     )}
@@ -879,12 +893,12 @@ export default async function ArticlePage({ params }: Props) {
                 .map((team) => (
                   <Link
                     key={team.slug}
-                    href={`/teams/${team.slug}`}
-                    className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
-                  >
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                  href={`/teams/${team.slug}`}
+                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                >
+                    <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                       {team.logoUrl ? (
-                        <img src={team.logoUrl} alt="" className="w-full h-full object-contain" />
+                        <ImageWithFallback src={team.logoUrl} alt="" fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}

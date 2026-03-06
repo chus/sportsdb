@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import type { ArticleWithRelations } from "@/lib/queries/articles";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   match_report: { label: "Match Report", color: "bg-blue-100 text-blue-700" },
@@ -48,9 +49,11 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               {primaryTeam && (
                 <span className="flex items-center gap-2">
                   {primaryTeam.logoUrl && (
-                    <img
+                    <ImageWithFallback
                       src={primaryTeam.logoUrl}
                       alt={primaryTeam.name}
+                      width={20}
+                      height={20}
                       className="w-5 h-5 object-contain"
                     />
                   )}
@@ -89,9 +92,11 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
         {primaryTeam && (
           <span className="flex items-center gap-1">
             {primaryTeam.logoUrl && (
-              <img
+              <ImageWithFallback
                 src={primaryTeam.logoUrl}
                 alt={primaryTeam.name}
+                width={16}
+                height={16}
                 className="w-4 h-4 object-contain"
               />
             )}

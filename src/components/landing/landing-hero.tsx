@@ -12,6 +12,8 @@ interface LandingHeroProps {
     competitions: number;
     matches: number;
   };
+  viewerName?: string | null;
+  isAuthenticated?: boolean;
 }
 
 function formatStat(num: number): string {
@@ -24,7 +26,11 @@ function formatStat(num: number): string {
   return num.toString() + "+";
 }
 
-export function LandingHero({ stats }: LandingHeroProps) {
+export function LandingHero({
+  stats,
+  viewerName,
+  isAuthenticated = false,
+}: LandingHeroProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -49,7 +55,11 @@ export function LandingHero({ stats }: LandingHeroProps) {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full mb-8">
             <Sparkles className="w-4 h-4 text-blue-300" />
-            <span className="text-sm font-semibold text-blue-100">The International Sports Database</span>
+            <span className="text-sm font-semibold text-blue-100">
+              {isAuthenticated && viewerName
+                ? `Welcome back, ${viewerName}`
+                : "The International Sports Database"}
+            </span>
           </div>
 
           {/* Headline */}
@@ -61,8 +71,9 @@ export function LandingHero({ stats }: LandingHeroProps) {
 
           {/* Description */}
           <p className="text-xl text-neutral-300 mb-10 max-w-2xl leading-relaxed">
-            The comprehensive, structured database for football. Search across players,
-            teams, competitions, and matches with time-aware data.
+            {isAuthenticated
+              ? "Pick up where you left off with live matches, player tracking, and the football data you follow most."
+              : "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data."}
           </p>
 
           {/* Search Bar */}
@@ -86,13 +97,27 @@ export function LandingHero({ stats }: LandingHeroProps) {
           </form>
 
           {/* CTA */}
-          <Link
-            href="/search"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
-          >
-            Explore the Database
-            <ChevronRight className="w-5 h-5" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href={isAuthenticated ? "/account" : "/search"}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+            >
+              {isAuthenticated ? "Go to Your Account" : "Explore the Database"}
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href={isAuthenticated ? "/news" : "/signup"}
+              className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-6 py-4 font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/15"
+            >
+              {isAuthenticated ? "Read Latest News" : "Create Free Account"}
+            </Link>
+          </div>
+
+          {!isAuthenticated && (
+            <p className="mt-4 text-sm text-neutral-400">
+              Create a free account to follow teams and players, save searches, and get notified when new coverage lands.
+            </p>
+          )}
         </div>
 
         {/* Stats counters */}

@@ -1,27 +1,57 @@
-import React, { useState } from 'react'
+"use client";
 
-const ERROR_IMG_SRC =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg=='
+import { useState } from "react";
+import Image, { type ImageProps } from "next/image";
+import { ImageIcon } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 
-export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement>) {
-  const [didError, setDidError] = useState(false)
+type ImageWithFallbackProps = Omit<ImageProps, "src" | "alt"> & {
+  src: string | null | undefined;
+  alt: string;
+  fallbackClassName?: string;
+  iconClassName?: string;
+};
 
-  const handleError = () => {
-    setDidError(true)
+export function ImageWithFallback({
+  src,
+  alt,
+  className,
+  fallbackClassName,
+  iconClassName,
+  style,
+  onError,
+  ...props
+}: ImageWithFallbackProps) {
+  const [didError, setDidError] = useState(false);
+
+  if (!src || didError) {
+    return (
+      <div
+        aria-hidden="true"
+        className={cn(
+          "flex items-center justify-center bg-neutral-100 text-neutral-400",
+          className,
+          fallbackClassName
+        )}
+        style={style}
+      >
+        <ImageIcon className={cn("h-1/2 w-1/2 max-h-8 max-w-8", iconClassName)} />
+      </div>
+    );
   }
 
-  const { src, alt, style, className, ...rest } = props
-
-  return didError ? (
-    <div
-      className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
+  return (
+    <Image
+      {...props}
+      alt={alt}
+      className={className}
+      src={src}
       style={style}
-    >
-      <div className="flex items-center justify-center w-full h-full">
-        <img src={ERROR_IMG_SRC} alt="Error loading image" {...rest} data-original-url={src} />
-      </div>
-    </div>
-  ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
-  )
+      unoptimized
+      onError={(event) => {
+        setDidError(true);
+        onError?.(event);
+      }}
+    />
+  );
 }

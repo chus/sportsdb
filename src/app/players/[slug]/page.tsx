@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  User, MapPin, Calendar, Ruler, Flag,
-  Footprints, Shield, ArrowLeft, Trophy, BarChart3
+  User, Calendar, Ruler, Flag,
+  Footprints, Shield, ArrowLeft, BarChart3
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
-import { PlayerJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerProfileSummary } from "@/components/player/player-profile-summary";
@@ -15,6 +15,8 @@ import { PlayerInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -69,20 +71,6 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string |
   );
 }
 
-function PositionBadge({ position }: { position: string }) {
-  const colors: Record<string, string> = {
-    "Goalkeeper": "bg-yellow-100 text-yellow-800",
-    "Defender": "bg-blue-100 text-blue-800",
-    "Midfielder": "bg-green-100 text-green-800",
-    "Forward": "bg-red-100 text-red-800",
-  };
-  return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${colors[position] || "bg-neutral-100 text-neutral-800"}`}>
-      {position}
-    </span>
-  );
-}
-
 export default async function PlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params;
 
@@ -105,9 +93,38 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const age = player.dateOfBirth
     ? differenceInYears(new Date(), new Date(player.dateOfBirth))
     : null;
+  const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
+  const totalGoals = statsHistory.reduce((sum, s) => sum + s.stat.goals, 0);
+  const totalAssists = statsHistory.reduce((sum, s) => sum + s.stat.assists, 0);
+  const totalMins = statsHistory.reduce((sum, s) => sum + s.stat.minutesPlayed, 0);
 
   const playerUrl = `${BASE_URL}/players/${slug}`;
   const teamUrl = currentTeam ? `${BASE_URL}/teams/${currentTeam.slug}` : null;
+  const aboutParagraphs = buildPlayerAbout({
+    name: player.name,
+    knownAs: player.knownAs,
+    nationality: player.nationality,
+    secondNationality: player.secondNationality,
+    position: player.position,
+    currentTeamName: currentTeam?.name,
+    shirtNumber,
+    age,
+    heightCm: player.heightCm,
+    preferredFoot: player.preferredFoot,
+    status: player.status,
+    careerClubCount: career.length,
+    totalAppearances: totalApps,
+    totalGoals,
+    totalAssists,
+  });
+  const faqItems = buildPlayerFaqs({
+    name: player.name,
+    nationality: player.nationality,
+    position: player.position,
+    currentTeamName: currentTeam?.name,
+    age,
+    preferredFoot: player.preferredFoot,
+  });
 
   // Build breadcrumb items
   const breadcrumbItems = [
@@ -132,6 +149,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         position={player.position}
         team={currentTeam && teamUrl ? { name: currentTeam.name, url: teamUrl } : null}
       />
+      {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
@@ -149,10 +167,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             {/* Player Avatar */}
             <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
               {player.imageUrl ? (
-                <img
+                <ImageWithFallback
                   src={player.imageUrl}
                   alt={player.name}
-                  className="w-full h-full object-cover rounded-2xl"
+                  fill
+                  sizes="160px"
+                  className="object-cover rounded-2xl"
                 />
               ) : (
                 <User className="w-16 h-16 md:w-20 md:h-20 text-white/60" />
@@ -246,12 +266,17 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               </div>
             </section>
 
+            <section className="bg-white rounded-xl border border-neutral-200 p-6">
+              <h2 className="text-xl font-bold text-neutral-900 mb-4">About {player.name}</h2>
+              <div className="space-y-4 text-base leading-8 text-neutral-700">
+                {aboutParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+
             {/* Season Stats Summary */}
             {statsHistory.length > 0 && (() => {
-              const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
-              const totalGoals = statsHistory.reduce((sum, s) => sum + s.stat.goals, 0);
-              const totalAssists = statsHistory.reduce((sum, s) => sum + s.stat.assists, 0);
-              const totalMins = statsHistory.reduce((sum, s) => sum + s.stat.minutesPlayed, 0);
               return (
                 <section className="bg-white rounded-xl border border-neutral-200 p-6">
                   <h2 className="text-xl font-bold text-neutral-900 mb-6">Career Overview</h2>
@@ -306,9 +331,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center">
                             {entry.team.logoUrl ? (
-                              <img
+                              <ImageWithFallback
                                 src={entry.team.logoUrl}
                                 alt={entry.team.name}
+                                width={32}
+                                height={32}
                                 className="w-8 h-8 object-contain"
                               />
                             ) : (
@@ -372,9 +399,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                               className="flex items-center gap-2 hover:text-blue-600 transition-colors"
                             >
                               {team.logoUrl ? (
-                                <img
+                                <ImageWithFallback
                                   src={team.logoUrl}
                                   alt={team.name}
+                                  width={20}
+                                  height={20}
                                   className="w-5 h-5 object-contain"
                                 />
                               ) : (
@@ -445,9 +474,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 >
                   <div className="w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center group-hover:bg-neutral-200 transition-colors">
                     {currentTeam.logoUrl ? (
-                      <img
+                      <ImageWithFallback
                         src={currentTeam.logoUrl}
                         alt={currentTeam.name}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 object-contain"
                       />
                     ) : (
@@ -504,6 +535,25 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
             {/* Player Profile Summary */}
             <PlayerProfileSummary playerId={player.id} />
+
+            {faqItems.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Player FAQ</h3>
+                <div className="space-y-3">
+                  {faqItems.map((item) => (
+                    <details
+                      key={item.question}
+                      className="group rounded-lg border border-neutral-200 px-4 py-3"
+                    >
+                      <summary className="cursor-pointer list-none font-medium text-neutral-900">
+                        {item.question}
+                      </summary>
+                      <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Related Players */}
             <RelatedPlayers playerId={player.id} />

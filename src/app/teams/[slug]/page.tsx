@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  Shield, MapPin, Calendar, Users, Trophy,
-  ArrowLeft, Building, TrendingUp
+  Shield, MapPin, Calendar, Users, ArrowLeft
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/queries/teams";
-import { TeamJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
 import { TeamInternalLinks } from "@/components/seo/internal-links";
@@ -14,6 +13,8 @@ import { RelatedArticles } from "@/components/articles/related-articles";
 import { TeamFixtures } from "@/components/team/team-fixtures";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -69,7 +70,16 @@ function PositionGroup({
   players,
 }: {
   title: string;
-  players: { player: any; shirtNumber: number | null }[];
+  players: {
+    player: {
+      id: string;
+      slug: string;
+      name: string;
+      nationality: string | null;
+      position: string;
+    };
+    shirtNumber: number | null;
+  }[];
 }) {
   if (players.length === 0) return null;
 
@@ -134,6 +144,26 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const primaryColor = team.primaryColor || "#2563eb";
 
   const teamUrl = `${BASE_URL}/teams/${slug}`;
+  const aboutParagraphs = buildTeamAbout({
+    name: team.name,
+    shortName: team.shortName,
+    city: team.city,
+    country: team.country,
+    foundedYear: team.foundedYear,
+    squadSize: squad.length,
+    formerPlayersCount: formerPlayers.length,
+    seasonLabel,
+    standing,
+  });
+  const faqItems = buildTeamFaqs({
+    name: team.name,
+    city: team.city,
+    country: team.country,
+    foundedYear: team.foundedYear,
+    squadSize: squad.length,
+    seasonLabel,
+    standing,
+  });
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -153,6 +183,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         foundingDate={team.foundedYear}
         memberCount={squad.length}
       />
+      {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div
@@ -173,12 +204,14 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Team Logo */}
-            <div className="w-32 h-32 md:w-40 md:h-40 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
               {team.logoUrl ? (
-                <img
+                <ImageWithFallback
                   src={team.logoUrl}
                   alt={team.name}
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="160px"
+                  className="object-contain"
                 />
               ) : (
                 <Shield className="w-16 h-16 md:w-20 md:h-20 text-neutral-300" />
@@ -258,6 +291,15 @@ export default async function TeamPage({ params }: TeamPageProps) {
               )}
             </section>
 
+            <section className="bg-white rounded-xl border border-neutral-200 p-6">
+              <h2 className="text-xl font-bold text-neutral-900 mb-4">About {team.name}</h2>
+              <div className="space-y-4 text-base leading-8 text-neutral-700">
+                {aboutParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+
             <BetweenContentAd />
 
             {/* Former Players */}
@@ -307,6 +349,25 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <RelatedArticles teamId={team.id} limit={5} />
 
             <SidebarAd />
+
+            {faqItems.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Team FAQ</h3>
+                <div className="space-y-3">
+                  {faqItems.map((item) => (
+                    <details
+                      key={item.question}
+                      className="group rounded-lg border border-neutral-200 px-4 py-3"
+                    >
+                      <summary className="cursor-pointer list-none font-medium text-neutral-900">
+                        {item.question}
+                      </summary>
+                      <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Club Info Card */}
             <div className="bg-white rounded-xl border border-neutral-200 p-6">

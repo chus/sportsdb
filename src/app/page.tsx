@@ -4,12 +4,14 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
 import { count, ne, desc } from "drizzle-orm";
+import { getCurrentUser } from "@/lib/auth";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
 import { WorldCupBanner } from "@/components/landing/world-cup-banner";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -65,11 +67,14 @@ async function getFeaturedPlayers(limit = 8) {
 }
 
 export default async function HomePage() {
-  const [stats, featuredTeams, featuredPlayers] = await Promise.all([
+  const [stats, featuredTeams, featuredPlayers, currentUser] = await Promise.all([
     getStats(),
     getFeaturedTeams(),
     getFeaturedPlayers(),
+    getCurrentUser(),
   ]);
+
+  const viewerName = currentUser?.name || currentUser?.email?.split("@")[0] || null;
 
   return (
     <>
@@ -86,13 +91,85 @@ export default async function HomePage() {
       />
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       {/* Hero Section */}
-      <LandingHero stats={stats} />
+      <LandingHero
+        stats={stats}
+        isAuthenticated={!!currentUser}
+        viewerName={viewerName}
+      />
 
       {/* World Cup 2026 Banner */}
       <WorldCupBanner />
 
       {/* Live Matches */}
       <LiveMatchesSection />
+
+      <section className="border-y border-neutral-200 bg-white/80">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {currentUser ? (
+            <div className="grid gap-6 rounded-3xl border border-neutral-200 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-6 md:grid-cols-[1.4fr_1fr] md:items-center">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+                  Personalized Home
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-neutral-900">
+                  {viewerName ? `${viewerName}, your football workspace is ready.` : "Your football workspace is ready."}
+                </h2>
+                <p className="mt-3 max-w-2xl text-neutral-600">
+                  Jump back into the parts of SportsDB that matter most: account settings, live coverage, and the latest reporting.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 md:justify-end">
+                <Link
+                  href="/account"
+                  className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                >
+                  Open Account
+                </Link>
+                <Link
+                  href="/news"
+                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
+                >
+                  Browse News
+                </Link>
+                <Link
+                  href="/trending"
+                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
+                >
+                  See Trending
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-6 rounded-3xl border border-neutral-200 bg-gradient-to-r from-amber-50 via-white to-blue-50 p-6 md:grid-cols-[1.3fr_1fr] md:items-center">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
+                  Free Account
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-neutral-900">
+                  Follow clubs, track players, and come back to the stories you care about.
+                </h2>
+                <p className="mt-3 max-w-2xl text-neutral-600">
+                  A SportsDB account lets you follow entities, build a football habit, and turn search traffic into repeat visits.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 md:justify-end">
+                <Link
+                  href="/signup"
+                  className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                >
+                  Create Free Account
+                </Link>
+                <Link
+                  href="/login"
+                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Trending Players */}
       {featuredPlayers.length > 0 && (
@@ -169,16 +246,14 @@ export default async function HomePage() {
                   href={`/teams/${team.slug}`}
                   className="p-6 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group text-center"
                 >
-                  <div className="w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors p-2">
+                  <div className="relative w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors p-2">
                     {team.logoUrl ? (
-                      <img
+                      <ImageWithFallback
                         src={team.logoUrl}
                         alt={`${team.name} logo`}
-                        className="w-full h-full object-contain"
-                        width={64}
-                        height={64}
-                        loading="lazy"
-                        decoding="async"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
                       />
                     ) : (
                       <Shield className="w-8 h-8 text-neutral-400 group-hover:text-blue-500" />

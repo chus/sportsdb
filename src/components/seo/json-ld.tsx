@@ -286,6 +286,23 @@ export function BreadcrumbJsonLd({
   return <JsonLd data={data} />;
 }
 
+export function FAQJsonLd({ items }: { items: { question: string; answer: string }[] }) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
+  return <JsonLd data={data} />;
+}
+
 export function WebsiteJsonLd({
   url,
   name,
