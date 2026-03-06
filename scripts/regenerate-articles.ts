@@ -1,8 +1,10 @@
 /**
- * Regenerate articles with improved prompts
+ * Regenerate articles with improved prompts for better length and readability
  *
  * Usage:
  *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --limit=10
+ *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --type=match_report --limit=5
+ *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --type=all --limit=20
  */
 
 import { db } from "../src/lib/db";
@@ -16,24 +18,47 @@ import {
   venues,
   matchEvents,
   players,
-  articleTeams,
 } from "../src/lib/db/schema";
-import { eq, desc, and, inArray } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import OpenAI from "openai";
+import {
+  buildMatchReportPrompt,
+  buildRoundRecapPrompt,
+  buildPlayerSpotlightPrompt,
+  buildMatchPreviewPrompt,
+  buildSeasonRecapPrompt,
+  type MatchReportContext,
+  type RoundRecapContext,
+  type PlayerSpotlightContext,
+  type MatchPreviewContext,
+  type SeasonRecapContext,
+} from "./content/article-prompts";
 
 const openai = new OpenAI();
 
 const args = process.argv.slice(2);
 const limitArg = parseInt(args.find(a => a.startsWith("--limit="))?.split("=")[1] || "10");
+const typeArg = args.find(a => a.startsWith("--type="))?.split("=")[1] || "all";
+
+const VALID_TYPES = ["match_report", "round_recap", "player_spotlight", "match_preview", "season_review", "all"] as const;
 
 async function main() {
-  console.log(`\n📝 Regenerating ${limitArg} articles with improved prompts\n`);
+  if (!VALID_TYPES.includes(typeArg as any)) {
+    console.log(`❌ Invalid type: ${typeArg}. Valid types: ${VALID_TYPES.join(", ")}`);
+    process.exit(1);
+  }
 
-  // Get oldest articles to regenerate
+  console.log(`\n📝 Regenerating ${limitArg} articles (type: ${typeArg}) with improved prompts\n`);
+
+  // Get oldest articles to regenerate, filtered by type
+  const conditions = typeArg !== "all"
+    ? [eq(articles.type, typeArg as any)]
+    : [];
+
   const oldArticles = await db
     .select()
     .from(articles)
-    .where(eq(articles.type, "match_report"))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(articles.createdAt)
     .limit(limitArg);
 
@@ -43,38 +68,38 @@ async function main() {
   let errors = 0;
 
   for (const article of oldArticles) {
-    if (!article.matchId) {
-      console.log(`⏭️  Skipping ${article.slug} - no match ID`);
-      continue;
-    }
-
     try {
-      console.log(`🔄 Regenerating: ${article.title}`);
+      console.log(`🔄 [${article.type}] Regenerating: ${article.title}`);
 
-      // Get match data
-      const matchData = await getMatchData(article.matchId);
-      if (!matchData) {
-        console.log(`   ❌ Could not fetch match data`);
+      let prompt: string | null = null;
+
+      switch (article.type) {
+        case "match_report":
+          prompt = await buildMatchReportPromptFromArticle(article);
+          break;
+        case "round_recap":
+          prompt = await buildRoundRecapPromptFromArticle(article);
+          break;
+        case "player_spotlight":
+          prompt = await buildPlayerSpotlightPromptFromArticle(article);
+          break;
+        case "match_preview":
+          prompt = await buildMatchPreviewPromptFromArticle(article);
+          break;
+        case "season_review":
+          prompt = await buildSeasonRecapPromptFromArticle(article);
+          break;
+        default:
+          console.log(`   ⏭️  Unsupported type: ${article.type}`);
+          continue;
+      }
+
+      if (!prompt) {
+        console.log(`   ❌ Could not build prompt (missing data)`);
         errors++;
         continue;
       }
 
-      // Get match events
-      const events = await db
-        .select({
-          minute: matchEvents.minute,
-          type: matchEvents.type,
-          player_name: players.name,
-          team_name: teams.name,
-        })
-        .from(matchEvents)
-        .innerJoin(players, eq(players.id, matchEvents.playerId))
-        .innerJoin(teams, eq(teams.id, matchEvents.teamId))
-        .where(eq(matchEvents.matchId, article.matchId))
-        .orderBy(matchEvents.minute);
-
-      // Build prompt and generate
-      const prompt = buildMatchReportPrompt(matchData, events);
       const newArticle = await generateArticle(prompt);
 
       if (!newArticle) {
@@ -83,7 +108,7 @@ async function main() {
         continue;
       }
 
-      // Update the article
+      // Update the article (preserve slug for SEO continuity)
       await db
         .update(articles)
         .set({
@@ -92,12 +117,12 @@ async function main() {
           content: newArticle.content,
           metaTitle: newArticle.metaTitle,
           metaDescription: newArticle.metaDescription,
-          modelVersion: "gpt-4o-mini",
+          modelVersion: "gpt-4o-mini-improved",
           updatedAt: new Date(),
         })
         .where(eq(articles.id, article.id));
 
-      console.log(`   ✅ Regenerated successfully`);
+      console.log(`   ✅ Regenerated (${estimateWordCount(newArticle.content)} words)`);
       regenerated++;
 
       // Rate limit
@@ -108,8 +133,224 @@ async function main() {
     }
   }
 
-  console.log(`\n✅ Done! Regenerated: ${regenerated}, Errors: ${errors}`);
+  console.log(`\n✅ Done! Regenerated: ${regenerated}, Errors: ${errors}, Skipped: ${oldArticles.length - regenerated - errors}`);
 }
+
+function estimateWordCount(content: string): number {
+  return content.split(/\s+/).filter(Boolean).length;
+}
+
+// --- Prompt builders for each article type ---
+
+async function buildMatchReportPromptFromArticle(article: any): Promise<string | null> {
+  if (!article.matchId) return null;
+
+  const matchData = await getMatchData(article.matchId);
+  if (!matchData) return null;
+
+  const events = await db
+    .select({
+      minute: matchEvents.minute,
+      type: matchEvents.type,
+      player_name: players.name,
+      team_name: teams.name,
+    })
+    .from(matchEvents)
+    .innerJoin(players, eq(players.id, matchEvents.playerId))
+    .innerJoin(teams, eq(teams.id, matchEvents.teamId))
+    .where(eq(matchEvents.matchId, article.matchId))
+    .orderBy(matchEvents.minute);
+
+  const ctx: MatchReportContext = {
+    match: {
+      id: matchData.id,
+      homeTeam: matchData.home_team,
+      homeTeamSlug: matchData.home_team_slug,
+      awayTeam: matchData.away_team,
+      awayTeamSlug: matchData.away_team_slug,
+      homeScore: matchData.home_score ?? 0,
+      awayScore: matchData.away_score ?? 0,
+      competition: matchData.competition,
+      competitionSlug: matchData.competition_slug,
+      season: matchData.season,
+      matchday: matchData.matchday ?? undefined,
+      date: String(matchData.scheduled_at),
+      venue: matchData.venue ?? undefined,
+    },
+    events: events.map(e => ({
+      minute: e.minute,
+      type: e.type,
+      playerName: e.player_name,
+      teamName: e.team_name,
+    })),
+  };
+
+  return buildMatchReportPrompt(ctx);
+}
+
+async function buildRoundRecapPromptFromArticle(article: any): Promise<string | null> {
+  if (!article.competitionSeasonId || !article.matchday) return null;
+
+  const [compSeason] = await db
+    .select({
+      competition: competitions,
+      season: seasons,
+    })
+    .from(competitionSeasons)
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(eq(competitionSeasons.id, article.competitionSeasonId));
+
+  if (!compSeason) return null;
+
+  // Get matches for this matchday
+  const matchdayMatches = await db
+    .select()
+    .from(matches)
+    .where(
+      and(
+        eq(matches.competitionSeasonId, article.competitionSeasonId),
+        eq(matches.matchday, article.matchday)
+      )
+    );
+
+  const matchResults = [];
+  for (const m of matchdayMatches) {
+    const [homeTeam] = await db.select().from(teams).where(eq(teams.id, m.homeTeamId));
+    const [awayTeam] = await db.select().from(teams).where(eq(teams.id, m.awayTeamId));
+
+    // Get goal scorers for this match
+    const goalEvents = await db
+      .select({ player_name: players.name })
+      .from(matchEvents)
+      .innerJoin(players, eq(players.id, matchEvents.playerId))
+      .where(
+        and(
+          eq(matchEvents.matchId, m.id),
+          sql`${matchEvents.type} IN ('goal', 'penalty')`
+        )
+      );
+
+    matchResults.push({
+      homeTeam: homeTeam?.name || "Unknown",
+      awayTeam: awayTeam?.name || "Unknown",
+      homeScore: m.homeScore ?? 0,
+      awayScore: m.awayScore ?? 0,
+      topScorers: goalEvents.map(e => e.player_name),
+    });
+  }
+
+  const ctx: RoundRecapContext = {
+    competition: compSeason.competition.name,
+    competitionSlug: compSeason.competition.slug,
+    season: compSeason.season.label,
+    matchday: article.matchday,
+    matches: matchResults,
+  };
+
+  return buildRoundRecapPrompt(ctx);
+}
+
+async function buildPlayerSpotlightPromptFromArticle(article: any): Promise<string | null> {
+  if (!article.primaryPlayerId) return null;
+
+  const [player] = await db.select().from(players).where(eq(players.id, article.primaryPlayerId));
+  if (!player) return null;
+
+  // Get current team
+  const teamId = article.primaryTeamId;
+  const [team] = teamId
+    ? await db.select().from(teams).where(eq(teams.id, teamId))
+    : [null];
+
+  const ctx: PlayerSpotlightContext = {
+    player: {
+      name: player.name,
+      slug: player.slug,
+      position: player.position || "Unknown",
+      nationality: player.nationality || "Unknown",
+      currentTeam: team?.name || "Unknown",
+      currentTeamSlug: team?.slug || "unknown",
+    },
+    recentMatches: [], // Would need match history query
+    seasonStats: {
+      appearances: 0,
+      goals: 0,
+      assists: 0,
+      competition: "League",
+    },
+    achievement: article.title || "Outstanding recent form",
+  };
+
+  return buildPlayerSpotlightPrompt(ctx);
+}
+
+async function buildMatchPreviewPromptFromArticle(article: any): Promise<string | null> {
+  if (!article.matchId) return null;
+
+  const matchData = await getMatchData(article.matchId);
+  if (!matchData) return null;
+
+  const ctx: MatchPreviewContext = {
+    match: {
+      homeTeam: matchData.home_team,
+      homeTeamSlug: matchData.home_team_slug,
+      awayTeam: matchData.away_team,
+      awayTeamSlug: matchData.away_team_slug,
+      competition: matchData.competition,
+      competitionSlug: matchData.competition_slug,
+      season: matchData.season,
+      matchday: matchData.matchday ?? undefined,
+      date: String(matchData.scheduled_at),
+      venue: matchData.venue ?? undefined,
+    },
+  };
+
+  return buildMatchPreviewPrompt(ctx);
+}
+
+async function buildSeasonRecapPromptFromArticle(article: any): Promise<string | null> {
+  if (!article.competitionSeasonId) return null;
+
+  const [compSeason] = await db
+    .select({
+      competition: competitions,
+      season: seasons,
+    })
+    .from(competitionSeasons)
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(eq(competitionSeasons.id, article.competitionSeasonId));
+
+  if (!compSeason) return null;
+
+  // Count matches and goals for the season
+  const matchStats = await db
+    .select({
+      totalMatches: sql<number>`count(*)`,
+      totalGoals: sql<number>`coalesce(sum(${matches.homeScore}) + sum(${matches.awayScore}), 0)`,
+    })
+    .from(matches)
+    .where(eq(matches.competitionSeasonId, article.competitionSeasonId));
+
+  const totalMatches = Number(matchStats[0]?.totalMatches) || 0;
+  const totalGoals = Number(matchStats[0]?.totalGoals) || 0;
+
+  const ctx: SeasonRecapContext = {
+    competition: compSeason.competition.name,
+    competitionSlug: compSeason.competition.slug,
+    season: compSeason.season.label,
+    keyStats: {
+      totalGoals,
+      matches: totalMatches,
+      avgGoalsPerMatch: totalMatches > 0 ? totalGoals / totalMatches : 0,
+    },
+  };
+
+  return buildSeasonRecapPrompt(ctx);
+}
+
+// --- Shared helpers ---
 
 async function getMatchData(matchId: string) {
   const [match] = await db
@@ -160,89 +401,6 @@ async function getMatchData(matchId: string) {
   };
 }
 
-function buildMatchReportPrompt(match: any, events: any[]): string {
-  const scoreline = `${match.home_team} ${match.home_score}-${match.away_score} ${match.away_team}`;
-  const homeTeamLink = `[${match.home_team}](/teams/${match.home_team_slug})`;
-  const awayTeamLink = `[${match.away_team}](/teams/${match.away_team_slug})`;
-  const competitionLink = `[${match.competition}](/competitions/${match.competition_slug})`;
-
-  // Group events by type for analysis
-  const goals = events.filter(e => e.type === 'goal' || e.type === 'penalty');
-  const cards = events.filter(e => e.type === 'yellow_card' || e.type === 'red_card');
-
-  return `You are an experienced sports journalist writing an in-depth match report for SportsDB, a professional football database website. Write with authority, insight, and engaging storytelling.
-
-MATCH INFORMATION:
-- Competition: ${match.competition} (${match.season})
-- Matchday: ${match.matchday || 'N/A'}
-- Date: ${match.scheduled_at}
-- Final Score: ${scoreline}
-${match.venue ? `- Venue: ${match.venue}` : ""}
-
-MATCH EVENTS TIMELINE:
-${events.length > 0 ? events.map((e: any) => `${e.minute}' - ${e.type.toUpperCase()}: ${e.player_name} (${e.team_name})`).join("\n") : "No detailed events available"}
-
-LINKS TO INCLUDE (use these exact markdown formats):
-- Home team: ${homeTeamLink}
-- Away team: ${awayTeamLink}
-- Competition: ${competitionLink}
-- For players: [Player Name](/players/player-slug-lowercase-with-dashes)
-
-WRITING GUIDELINES:
-
-1. OPENING PARAGRAPH (hook the reader):
-   - Start with the most dramatic or significant aspect of the match
-   - Set the scene and context (rivalry, standings implications, etc.)
-   - Make readers want to continue reading
-
-2. STRUCTURE (use ## for H2 headings):
-   ## Match Overview
-   - Brief tactical setup and early game flow
-   - How both teams approached the match
-
-   ## First Half Action
-   - Key moments, goals, chances
-   - Tactical battles and momentum shifts
-
-   ## Second Half Drama
-   - How the game evolved
-   - Decisive moments and turning points
-
-   ## Key Performances
-   - Highlight 2-3 standout players
-   - Specific contributions that influenced the result
-
-   ## Looking Ahead
-   - What this result means for both teams
-   - Upcoming fixtures or implications
-
-3. WRITING STYLE:
-   - Use vivid, descriptive language ("thunderous strike" not "good shot")
-   - Include specific minute references for key moments
-   - Build narrative tension and drama
-   - Professional but engaging tone
-   - Vary sentence length for rhythm
-   - Use active voice predominantly
-
-4. SEO & LINKING:
-   - Link team names on first mention using provided links
-   - Create player links as [Full Name](/players/firstname-lastname)
-   - Natural keyword integration: "${match.home_team} vs ${match.away_team}", "${match.competition}"
-   - Include competition context throughout
-
-5. LENGTH: 800-1000 words minimum. This should be a comprehensive match report.
-
-OUTPUT FORMAT (return valid JSON only):
-{
-  "title": "Compelling headline with teams and key narrative (max 80 chars)",
-  "slug": "team-vs-team-competition-result-keyword",
-  "excerpt": "Engaging 1-2 sentence summary that hooks readers (max 160 chars)",
-  "content": "Full markdown article content with ## headings and [links](/path)",
-  "metaTitle": "SEO title with teams, score, competition (max 60 chars)",
-  "metaDescription": "Meta description with result and key info (150-160 chars)"
-}`;
-}
-
 async function generateArticle(prompt: string): Promise<any | null> {
   try {
     const response = await openai.chat.completions.create({
@@ -250,11 +408,11 @@ async function generateArticle(prompt: string): Promise<any | null> {
       messages: [
         {
           role: "system",
-          content: "You are an expert sports journalist. Write engaging, detailed match reports with vivid language and professional analysis. Always return valid JSON."
+          content: "You are an expert sports journalist writing for a professional football database website. Write engaging, detailed articles with vivid language, clear structure, and excellent readability. Use short paragraphs (3-4 sentences max), varied sentence lengths, active voice, and strong transition words. Articles should be comprehensive and informative — never thin or generic. Always return valid JSON.",
         },
-        { role: "user", content: prompt }
+        { role: "user", content: prompt },
       ],
-      max_tokens: 4000,
+      max_tokens: 6000,
       temperature: 0.7,
     });
 
