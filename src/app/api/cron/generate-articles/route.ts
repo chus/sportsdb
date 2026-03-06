@@ -176,7 +176,15 @@ WRITING GUIDELINES:
    - Natural keyword integration: "${match.home_team} vs ${match.away_team}", "${match.competition}"
    - Include competition context throughout
 
-5. LENGTH: 800-1000 words minimum. This should be a comprehensive match report.
+5. LENGTH: 1200-1800 words minimum. This should be a comprehensive, in-depth match report.
+
+6. READABILITY:
+   - Keep paragraphs to 3-4 sentences max for easy scanning
+   - Vary sentence length: mix short punchy sentences with longer analytical ones
+   - Use transition words between sections (Meanwhile, However, In contrast, As a result)
+   - Open each section with a hook sentence
+   - Use active voice predominantly
+   - Break up dense analysis with vivid match descriptions
 
 OUTPUT FORMAT (return valid JSON only):
 {
@@ -196,11 +204,11 @@ async function generateArticle(openai: OpenAI, prompt: string): Promise<any | nu
       messages: [
         {
           role: "system",
-          content: "You are an expert sports journalist. Write engaging, detailed match reports with vivid language and professional analysis. Always return valid JSON."
+          content: "You are an expert sports journalist writing for a professional football database website. Write engaging, detailed articles with vivid language, clear structure, and excellent readability. Use short paragraphs (3-4 sentences max), varied sentence lengths, active voice, and strong transition words. Articles should be comprehensive and informative — never thin or generic. Always return valid JSON."
         },
         { role: "user", content: prompt }
       ],
-      max_tokens: 4000,
+      max_tokens: 6000,
       temperature: 0.7,
     });
 

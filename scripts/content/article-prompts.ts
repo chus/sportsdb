@@ -143,17 +143,27 @@ SEO REQUIREMENTS:
 ARTICLE REQUIREMENTS:
 1. Engaging headline with team names and score (max 80 chars)
 2. Brief excerpt for cards/social (1-2 sentences, 150 chars max, include final score)
-3. 800-1200 words, professional sports journalism style
-4. 4-5 substantial paragraphs organized into clear sections:
-   - Pre-match context: stakes, form, standings implications
-   - First half narrative: key moments with minute references
-   - Second half narrative: tactical shifts, goals, turning points
-   - Key moments: standout individual performances, controversial decisions
-   - Post-match implications: what the result means for the table, upcoming fixtures
+3. 1200-1800 words, professional sports journalism style
+4. 6-8 substantial paragraphs organized into clear sections with ## H2 headings:
+   - ## Pre-Match Context: stakes, form, standings implications, tactical expectations
+   - ## First Half: key moments with minute references, tactical setup, early momentum
+   - ## Second Half: tactical shifts, goals, turning points, substitution impact
+   - ## Key Moments: standout individual performances, controversial decisions, turning points
+   - ## Player Ratings: brief assessment of 4-6 key players from both sides
+   - ## What This Means: implications for the table, upcoming fixtures, season narrative
 5. Reference specific minutes for all events (e.g., "Haaland broke the deadlock on 23 minutes")
 6. Use standings data for context (e.g., "City moved to 2nd with the win, closing the gap to just two points")
 7. Reference player season stats when available (e.g., "Haaland's 15th league goal of the campaign")
 8. All team/player mentions should be internal links where possible
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max for easy scanning
+- Vary sentence length: mix short punchy sentences with longer analytical ones
+- Use transition words between sections (Meanwhile, However, In contrast, As a result)
+- Open each section with a hook sentence that draws the reader in
+- Use active voice predominantly ("Salah drove forward" not "The ball was driven forward by Salah")
+- Include at least one direct quote-style observation (e.g., "It was the kind of goal that deserves to be watched on repeat")
+- Break up dense analysis with vivid match descriptions
 
 Generate SEO-friendly slug: lowercase, hyphens, include team slugs (e.g., "team1-vs-team2-result-competition-matchday")
 
@@ -202,9 +212,23 @@ SEO REQUIREMENTS:
 ARTICLE REQUIREMENTS:
 1. Headline with competition name and matchday number (max 80 chars)
 2. Excerpt for social/cards (1-2 sentences, key storyline)
-3. 500-700 words organized by storyline, not just match-by-match
-4. Group matches by narrative: title implications, relegation fights, surprise results
+3. 900-1400 words organized by storyline, not just match-by-match
+4. Group matches by narrative themes with ## H2 headings:
+   - Title race implications and top-of-table drama
+   - Midtable battles and European qualification fights
+   - Relegation fights and survival stories
+   - Surprise results and upsets
+   - Individual standout performances
 5. All team names should be markdown links
+6. End with a "Matchday in Numbers" section with 3-4 key stats
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max for easy scanning
+- Open with the biggest storyline of the matchday as a hook
+- Use transition words between sections (Meanwhile, Elsewhere, In contrast)
+- Vary sentence length for rhythm — mix short punchy lines with longer analysis
+- Use active voice and vivid verbs ("demolished", "edged past", "stunned")
+- Each match mention should feel like a mini-story, not just a scoreline
 
 Slug format: "${ctx.competitionSlug}-matchday-${ctx.matchday}-recap-${ctx.season.replace("/", "-")}"
 
@@ -291,15 +315,23 @@ INTERNAL LINKS:
 REQUIREMENTS:
 1. CLICKBAIT headline that builds excitement (max 80 chars) - use power words like "CLASH", "BATTLE", "SHOWDOWN"
 2. Engaging excerpt that teases the stakes (150 chars max)
-3. 400-500 words covering:
-   - Why this match matters
-   - Recent form analysis
-   - Key players to watch (link to player pages)
-   - Historical context
-   - Prediction or key battles
+3. 700-1000 words covering these sections with ## H2 headings:
+   - ## Why This Match Matters: stakes, rivalry history, table implications
+   - ## Form Guide: recent results for both teams with context
+   - ## Key Players to Watch: 2-3 players per side who could decide the match (link to player pages)
+   - ## Head-to-Head History: previous meetings and patterns
+   - ## Tactical Battle: expected formations, key matchups
+   - ## Prediction: informed take on the likely outcome
 4. Use H2 headings for structure
 5. Include ALL internal links to teams, players, competition
 6. SEO keywords: "${ctx.match.homeTeam} vs ${ctx.match.awayTeam} prediction", "${ctx.match.competition} preview"
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max
+- Build anticipation through the article — start with context, end with prediction
+- Use active voice and present tense for immediacy ("This is a match that could define the season")
+- Vary sentence length for rhythm
+- Include a bold prediction statement at the end
 
 Generate SEO slug: "${ctx.match.homeTeamSlug}-vs-${ctx.match.awayTeamSlug}-preview-${ctx.match.competitionSlug}"
 
@@ -344,16 +376,26 @@ REQUIREMENTS:
 1. CLICKBAIT headline that captures the season drama (max 80 chars)
    - Examples: "How [Team] Defied All Odds", "The Season That Changed Everything", "Glory and Heartbreak"
 2. Engaging excerpt highlighting the main story (150 chars)
-3. 600-800 words covering:
-   - The title race narrative
-   - Key turning points
-   - Star performers (link to player pages)
-   - Relegation battles
-   - Memorable moments
-   - Legacy and impact
+3. 1200-1800 words covering these sections with ## H2 headings:
+   - ## The Title Race: narrative arc from early favorites to final outcome
+   - ## Key Turning Points: 3-4 pivotal moments that shaped the season
+   - ## Star Performers: top 4-5 players who defined the campaign (link to player pages)
+   - ## The Relegation Battle: drama at the bottom of the table
+   - ## Season in Numbers: key statistics and records
+   - ## Memorable Moments: dramatic finishes, upsets, milestones
+   - ## Legacy: what this season means in historical context
 4. Use H2 headings for major sections
-5. Include dramatic language and storytelling
+5. Include dramatic language and storytelling — this should read like a documentary script
 6. ALL team and player mentions must be links
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max for easy scanning
+- Open with a dramatic scene-setting paragraph that captures the season's essence
+- Use chronological narrative within sections to build tension
+- Vary sentence length — short sentences for dramatic moments, longer for analysis
+- Use active voice and vivid language ("clinched", "collapsed", "surged")
+- Include retrospective insights ("Looking back, the turning point came in...")
+- End with a forward-looking statement about the next season
 
 SEO keywords: "${ctx.competition} ${ctx.season} review", "${ctx.competition} champions", "${ctx.competition} season recap"
 
@@ -411,11 +453,25 @@ SEO REQUIREMENTS:
 ARTICLE REQUIREMENTS:
 1. Headline with player name and achievement (max 80 chars)
 2. Excerpt summarizing the achievement (1-2 sentences)
-3. 400-500 words with clear H2 structure
+3. 800-1200 words with clear ## H2 structure:
+   - ## The Achievement: what happened and why it matters
+   - ## Recent Form: detailed breakdown of last 5 matches with stats
+   - ## Season in Context: how this fits into their overall campaign
+   - ## Playing Style: what makes this player special, tactical role
+   - ## Comparison: how they stack up against peers at their position
+   - ## What's Next: upcoming fixtures and targets
 4. Open by linking to the player's main page
 5. Mention and link to the team
 6. Compare to other players if relevant (link to their pages)
 7. End with forward-looking statement about upcoming matches
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max
+- Open with a vivid description of the player's standout moment
+- Use stats naturally within prose, not as dry lists
+- Vary sentence length for rhythm
+- Use active voice and strong verbs
+- Include analytical insights, not just stat recaps
 
 Slug format: "${ctx.player.slug}-spotlight-${Date.now()}"
 
