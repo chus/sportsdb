@@ -46,3 +46,18 @@ Next.js 15 (App Router) · Tailwind CSS v4 · PostgreSQL via Neon · Drizzle ORM
 | `/matches/:id` | Match detail |
 | `/search?q=...` | Search results |
 # Trigger deploy
+
+## Article Generation Ops
+
+```bash
+# View article generation health and pending counts
+npm run articles:status
+
+# Trigger manual run with defaults
+npm run articles:run
+
+# Trigger manual dry run with overrides
+npm run articles:run -- --dryRun=true --matchReportsLimit=20 --playerSpotlightsLimit=10
+```
+
+Set `SPORTSDB_BASE_URL` for non-local environments, and `CRON_SECRET` if your cron endpoints are protected.

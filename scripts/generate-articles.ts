@@ -45,8 +45,7 @@ const typeArg = args.find((a) => a.startsWith("--type="));
 const articleType = typeArg?.split("=")[1];
 const limitArg = args.find((a) => a.startsWith("--limit="));
 const limit = limitArg ? parseInt(limitArg.split("=")[1], 10) : 10;
-const competitionArg = args.find((a) => a.startsWith("--competition="));
-const competitionSlug = competitionArg?.split("=")[1];
+const competitionSlug = args.find((a) => a.startsWith("--competition="))?.split("=")[1];
 const dryRun = args.includes("--dry-run");
 
 interface ArticleResult {
@@ -58,12 +57,121 @@ interface ArticleResult {
   metaDescription: string;
 }
 
+interface MatchWithoutArticleRow {
+  id: string;
+  matchday: number | null;
+  scheduled_at: string;
+  home_score: number;
+  away_score: number;
+  home_team: string;
+  home_team_slug: string;
+  away_team: string;
+  away_team_slug: string;
+  competition: string;
+  competition_slug: string;
+  competition_season_id: string;
+  season: string;
+  venue: string | null;
+  existing_summary: string | null;
+}
+
+interface MatchEventRow {
+  minute: number;
+  type: string;
+  player_name: string;
+  team_name: string;
+}
+
+interface CompletedMatchdayRow {
+  competition_season_id: string;
+  competition: string;
+  competition_slug: string;
+  season: string;
+  matchday: number;
+}
+
+interface MatchdayMatchRow {
+  id: string;
+  home_team: string;
+  home_team_slug: string;
+  away_team: string;
+  away_team_slug: string;
+  home_score: number;
+  away_score: number;
+}
+
+interface MatchdayGoalScorerRow {
+  match_id: string;
+  player_name: string;
+}
+
+interface TopPerformerRow {
+  player_id: string;
+  player_name: string;
+  player_slug: string;
+  position: string | null;
+  nationality: string | null;
+  team_id: string;
+  team_name: string;
+  team_slug: string;
+  competition: string | null;
+  recent_goals: number;
+  recent_assists: number;
+  matches: number;
+}
+
+interface RecentPlayerMatchRow {
+  opponent: string;
+  result: string;
+  goals: number;
+  assists: number;
+  rating: string | null;
+}
+
+interface UpcomingMatchRow {
+  id: string;
+  matchday: number | null;
+  scheduled_at: string;
+  home_team: string;
+  home_team_slug: string;
+  away_team: string;
+  away_team_slug: string;
+  competition: string;
+  competition_slug: string;
+  season: string;
+  venue: string | null;
+  competition_season_id: string;
+}
+
+interface TeamFormRow {
+  result: string;
+}
+
+interface CompletedSeasonRow {
+  competition_season_id: string;
+  competition: string;
+  competition_slug: string;
+  season: string;
+  winner_team_id: string | null;
+  winner_name: string | null;
+  winner_slug: string | null;
+  match_count: number | string | null;
+  total_goals: number | string | null;
+}
+
+interface PlayerSeasonStatsRow {
+  appearances: number;
+  goals: number;
+  assists: number;
+  competition: string;
+}
+
 async function generateArticle(prompt: string): Promise<ArticleResult | null> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 2000,
+      max_tokens: 6000,
       temperature: 0.7,
     });
 
@@ -84,8 +192,10 @@ async function generateArticle(prompt: string): Promise<ArticleResult | null> {
   }
 }
 
-async function getMatchesWithoutArticles(limitNum: number): Promise<any[]> {
-  return await sql`
+async function getMatchesWithoutArticles(
+  limitNum: number
+): Promise<MatchWithoutArticleRow[]> {
+  return (await sql`
     SELECT
       m.id,
       m.matchday,
@@ -98,6 +208,7 @@ async function getMatchesWithoutArticles(limitNum: number): Promise<any[]> {
       at.slug as away_team_slug,
       c.name as competition,
       c.slug as competition_slug,
+      cs.id as competition_season_id,
       s.label as season,
       v.name as venue,
       ms.summary as existing_summary
@@ -115,11 +226,11 @@ async function getMatchesWithoutArticles(limitNum: number): Promise<any[]> {
       AND a.id IS NULL
     ORDER BY m.scheduled_at DESC
     LIMIT ${limitNum}
-  `;
+  `) as MatchWithoutArticleRow[];
 }
 
-async function getMatchEvents(matchId: string): Promise<any[]> {
-  return await sql`
+async function getMatchEvents(matchId: string): Promise<MatchEventRow[]> {
+  return (await sql`
     SELECT
       me.minute,
       me.type,
@@ -130,7 +241,7 @@ async function getMatchEvents(matchId: string): Promise<any[]> {
     INNER JOIN teams t ON me.team_id = t.id
     WHERE me.match_id = ${matchId}
     ORDER BY me.minute
-  `;
+  `) as MatchEventRow[];
 }
 
 async function insertArticle(
@@ -158,9 +269,9 @@ async function insertArticle(
       ) VALUES (
         ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
         ${article.metaTitle}, ${article.metaDescription},
-        ${matchId || null}, ${competitionSeasonId || null},
-        ${primaryPlayerId || null}, ${primaryTeamId || null},
-        ${matchday || null}, 'published', NOW(), 'gpt-3.5-turbo'
+        ${matchId ?? null}, ${competitionSeasonId ?? null},
+        ${primaryPlayerId ?? null}, ${primaryTeamId ?? null},
+        ${matchday ?? null}, 'published', NOW(), 'gpt-4o-mini'
       )
     `;
     return true;
@@ -215,7 +326,7 @@ async function generateMatchReports(limitNum: number): Promise<number> {
         competitionSlug: match.competition_slug,
         season: match.season,
         matchday: match.matchday,
-        date: match.match_date,
+        date: match.scheduled_at,
         venue: match.venue,
       },
       events: events.map((e) => ({
@@ -237,7 +348,12 @@ async function generateMatchReports(limitNum: number): Promise<number> {
     const article = await generateArticle(prompt);
 
     if (article) {
-      const success = await insertArticle(article, "match_report", match.id);
+      const success = await insertArticle(
+        article,
+        "match_report",
+        match.id,
+        match.competition_season_id
+      );
       if (success) {
         await linkArticleToTeams(article.slug, [match.home_team_slug, match.away_team_slug]);
         console.log(`  Created: "${article.title}"`);
@@ -252,9 +368,9 @@ async function generateMatchReports(limitNum: number): Promise<number> {
   return generated;
 }
 
-async function getCompletedMatchdays(): Promise<any[]> {
+async function getCompletedMatchdays(): Promise<CompletedMatchdayRow[]> {
   // Find matchdays where all matches are finished and no article exists yet
-  return await sql`
+  return (await sql`
     WITH matchday_status AS (
       SELECT
         cs.id as competition_season_id,
@@ -269,6 +385,7 @@ async function getCompletedMatchdays(): Promise<any[]> {
       INNER JOIN competitions c ON cs.competition_id = c.id
       INNER JOIN seasons s ON cs.season_id = s.id
       WHERE m.matchday IS NOT NULL
+        AND (${competitionSlug || null} IS NULL OR c.slug = ${competitionSlug || null})
       GROUP BY cs.id, c.name, c.slug, s.label, m.matchday
     )
     SELECT ms.*
@@ -278,21 +395,24 @@ async function getCompletedMatchdays(): Promise<any[]> {
       AND a.matchday = ms.matchday
       AND a.type = 'round_recap'
     WHERE ms.total_matches = ms.finished_matches
-      AND ms.finished_matches >= 5
+      AND ms.finished_matches >= 3
       AND a.id IS NULL
     ORDER BY ms.competition, ms.matchday DESC
     LIMIT ${limit}
-  `;
+  `) as CompletedMatchdayRow[];
 }
 
 async function getMatchdayMatches(
   competitionSeasonId: string,
   matchday: number
-): Promise<any[]> {
-  return await sql`
+): Promise<MatchdayMatchRow[]> {
+  return (await sql`
     SELECT
+      m.id,
       ht.name as home_team,
+      ht.slug as home_team_slug,
       at.name as away_team,
+      at.slug as away_team_slug,
       m.home_score,
       m.away_score
     FROM matches m
@@ -301,14 +421,14 @@ async function getMatchdayMatches(
     WHERE m.competition_season_id = ${competitionSeasonId}
       AND m.matchday = ${matchday}
     ORDER BY m.scheduled_at
-  `;
+  `) as MatchdayMatchRow[];
 }
 
 async function getMatchdayGoalScorers(
   competitionSeasonId: string,
   matchday: number
 ): Promise<Map<string, string[]>> {
-  const events = await sql`
+  const events = (await sql`
     SELECT
       m.id as match_id,
       p.name as player_name
@@ -317,9 +437,9 @@ async function getMatchdayGoalScorers(
     INNER JOIN players p ON me.player_id = p.id
     WHERE m.competition_season_id = ${competitionSeasonId}
       AND m.matchday = ${matchday}
-      AND me.type = 'goal'
+      AND me.type IN ('goal', 'penalty')
     ORDER BY m.id, me.minute
-  `;
+  `) as MatchdayGoalScorerRow[];
 
   const scorersByMatch = new Map<string, string[]>();
   for (const e of events) {
@@ -351,12 +471,12 @@ async function generateRoundRecaps(): Promise<number> {
       competitionSlug: md.competition_slug,
       season: md.season,
       matchday: md.matchday,
-      matches: matches.map((m, idx) => ({
+      matches: matches.map((m) => ({
         homeTeam: m.home_team,
         awayTeam: m.away_team,
         homeScore: m.home_score,
         awayScore: m.away_score,
-        topScorers: [], // Simplified
+        topScorers: scorersMap.get(m.id) || [],
       })),
     };
 
@@ -380,6 +500,12 @@ async function generateRoundRecaps(): Promise<number> {
         md.matchday
       );
       if (success) {
+        await linkArticleToTeams(
+          article.slug,
+          Array.from(
+            new Set(matches.flatMap((m) => [m.home_team_slug, m.away_team_slug]))
+          )
+        );
         console.log(`  Created: "${article.title}"`);
         generated++;
       }
@@ -391,38 +517,141 @@ async function generateRoundRecaps(): Promise<number> {
   return generated;
 }
 
-async function getTopPerformers(): Promise<any[]> {
-  // Find players with outstanding recent performances (3+ goals or hat-trick)
-  return await sql`
-    WITH recent_stars AS (
+async function getTopPerformers(): Promise<TopPerformerRow[]> {
+  // Find players with standout attacking output over the last two weeks.
+  return (await sql`
+    WITH recent_player_matches AS (
+      SELECT
+        ml.player_id,
+        ml.team_id,
+        m.competition_season_id,
+        m.id as match_id,
+        COALESCE(
+          SUM(CASE WHEN me.player_id = ml.player_id AND me.type IN ('goal', 'penalty') THEN 1 ELSE 0 END),
+          0
+        )::int as goals,
+        COALESCE(
+          SUM(CASE WHEN me.secondary_player_id = ml.player_id AND me.type IN ('goal', 'penalty') THEN 1 ELSE 0 END),
+          0
+        )::int as assists
+      FROM match_lineups ml
+      INNER JOIN matches m ON ml.match_id = m.id
+      LEFT JOIN match_events me ON me.match_id = m.id
+      WHERE COALESCE(ml.minutes_played, 0) > 0
+        AND m.status = 'finished'
+        AND m.scheduled_at >= NOW() - INTERVAL '14 days'
+      GROUP BY ml.player_id, ml.team_id, m.competition_season_id, m.id
+    ),
+    recent_stars AS (
       SELECT
         p.id as player_id,
         p.name as player_name,
         p.slug as player_slug,
         p.position,
         p.nationality,
+        t.id as team_id,
         t.name as team_name,
         t.slug as team_slug,
-        SUM(me.type = 'goal')::int as recent_goals,
-        COUNT(DISTINCT m.id) as matches
-      FROM match_events me
-      INNER JOIN matches m ON me.match_id = m.id
-      INNER JOIN players p ON me.player_id = p.id
-      INNER JOIN teams t ON me.team_id = t.id
-      WHERE me.type = 'goal'
-        AND m.scheduled_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY p.id, p.name, p.slug, p.position, p.nationality, t.name, t.slug
-      HAVING SUM(CASE WHEN me.type = 'goal' THEN 1 ELSE 0 END) >= 3
+        MIN(c.name) as competition,
+        SUM(rpm.goals)::int as recent_goals,
+        SUM(rpm.assists)::int as recent_assists,
+        COUNT(*)::int as matches
+      FROM recent_player_matches rpm
+      INNER JOIN players p ON p.id = rpm.player_id
+      INNER JOIN teams t ON t.id = rpm.team_id
+      INNER JOIN competition_seasons cs ON cs.id = rpm.competition_season_id
+      INNER JOIN competitions c ON cs.competition_id = c.id
+      GROUP BY p.id, p.name, p.slug, p.position, p.nationality, t.id, t.name, t.slug
+      HAVING SUM(rpm.goals) >= 2
     )
     SELECT rs.*
     FROM recent_stars rs
     LEFT JOIN articles a ON a.primary_player_id = rs.player_id
       AND a.type = 'player_spotlight'
-      AND a.generated_at >= CURRENT_DATE - INTERVAL '7 days'
+      AND a.generated_at >= NOW() - INTERVAL '14 days'
     WHERE a.id IS NULL
-    ORDER BY rs.recent_goals DESC
+    ORDER BY rs.recent_goals DESC, rs.recent_assists DESC, rs.matches ASC
     LIMIT ${limit}
-  `;
+  `) as TopPerformerRow[];
+}
+
+async function getRecentPlayerMatches(
+  playerId: string,
+  teamId: string
+): Promise<PlayerSpotlightContext["recentMatches"]> {
+  const rows = (await sql`
+    SELECT
+      CASE WHEN m.home_team_id = ${teamId} THEN at.name ELSE ht.name END as opponent,
+      CASE
+        WHEN (m.home_team_id = ${teamId} AND m.home_score > m.away_score)
+          OR (m.away_team_id = ${teamId} AND m.away_score > m.home_score)
+        THEN 'W'
+        WHEN m.home_score = m.away_score THEN 'D'
+        ELSE 'L'
+      END as result,
+      COALESCE(
+        SUM(CASE WHEN me.player_id = ${playerId} AND me.type IN ('goal', 'penalty') THEN 1 ELSE 0 END),
+        0
+      )::int as goals,
+      COALESCE(
+        SUM(CASE WHEN me.secondary_player_id = ${playerId} AND me.type IN ('goal', 'penalty') THEN 1 ELSE 0 END),
+        0
+      )::int as assists,
+      MAX(ml.rating)::text as rating
+    FROM match_lineups ml
+    INNER JOIN matches m ON ml.match_id = m.id
+    INNER JOIN teams ht ON m.home_team_id = ht.id
+    INNER JOIN teams at ON m.away_team_id = at.id
+    LEFT JOIN match_events me ON me.match_id = m.id
+    WHERE ml.player_id = ${playerId}
+      AND ml.team_id = ${teamId}
+      AND COALESCE(ml.minutes_played, 0) > 0
+      AND m.status = 'finished'
+      AND m.scheduled_at >= NOW() - INTERVAL '14 days'
+    GROUP BY m.id, m.scheduled_at, ht.name, at.name, m.home_team_id, m.away_team_id, m.home_score, m.away_score
+    ORDER BY m.scheduled_at DESC
+    LIMIT 5
+  `) as RecentPlayerMatchRow[];
+
+  return rows.map((row) => ({
+    opponent: row.opponent,
+    result: row.result,
+    goals: Number(row.goals),
+    assists: Number(row.assists),
+    rating: row.rating ? Number(row.rating) : undefined,
+  }));
+}
+
+async function getPlayerSeasonStats(
+  playerId: string,
+  teamId: string
+): Promise<PlayerSeasonStatsRow | null> {
+  const [row] = (await sql`
+    SELECT
+      pss.appearances,
+      pss.goals,
+      pss.assists,
+      c.name as competition
+    FROM player_season_stats pss
+    INNER JOIN competition_seasons cs ON pss.competition_season_id = cs.id
+    INNER JOIN competitions c ON cs.competition_id = c.id
+    INNER JOIN seasons s ON cs.season_id = s.id
+    WHERE pss.player_id = ${playerId}
+      AND pss.team_id = ${teamId}
+    ORDER BY s.is_current DESC, s.start_date DESC
+    LIMIT 1
+  `) as PlayerSeasonStatsRow[];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    appearances: Number(row.appearances),
+    goals: Number(row.goals),
+    assists: Number(row.assists),
+    competition: row.competition,
+  };
 }
 
 async function generatePlayerSpotlights(): Promise<number> {
@@ -436,6 +665,18 @@ async function generatePlayerSpotlights(): Promise<number> {
   for (const player of performers) {
     console.log(`\nProcessing: ${player.player_name} (${player.recent_goals} goals)`);
 
+    const recentMatches = await getRecentPlayerMatches(
+      player.player_id,
+      player.team_id
+    );
+    const seasonStats =
+      (await getPlayerSeasonStats(player.player_id, player.team_id)) || {
+        appearances: player.matches,
+        goals: player.recent_goals,
+        assists: player.recent_assists,
+        competition: player.competition || "League",
+      };
+
     const context: PlayerSpotlightContext = {
       player: {
         name: player.player_name,
@@ -445,14 +686,9 @@ async function generatePlayerSpotlights(): Promise<number> {
         currentTeam: player.team_name,
         currentTeamSlug: player.team_slug,
       },
-      recentMatches: [], // Would need more queries to populate
-      seasonStats: {
-        appearances: player.matches,
-        goals: player.recent_goals,
-        assists: 0,
-        competition: "League",
-      },
-      achievement: `${player.recent_goals} goals in ${player.matches} matches`,
+      recentMatches,
+      seasonStats,
+      achievement: `${player.recent_goals} goals and ${player.recent_assists} assists in ${player.matches} matches`,
     };
 
     if (dryRun) {
@@ -471,9 +707,10 @@ async function generatePlayerSpotlights(): Promise<number> {
         undefined,
         undefined,
         player.player_id,
-        undefined
+        player.team_id
       );
       if (success) {
+        await linkArticleToTeams(article.slug, [player.team_slug]);
         console.log(`  Created: "${article.title}"`);
         generated++;
       }
@@ -485,8 +722,12 @@ async function generatePlayerSpotlights(): Promise<number> {
   return generated;
 }
 
-async function getUpcomingMatches(limitNum: number, daysAhead = 2): Promise<any[]> {
-  return await sql`
+async function getUpcomingMatches(
+  limitNum: number,
+  daysAhead = 2
+): Promise<UpcomingMatchRow[]> {
+  const cutoff = new Date(Date.now() + daysAhead * 86_400_000).toISOString();
+  return (await sql`
     SELECT
       m.id,
       m.matchday,
@@ -509,15 +750,15 @@ async function getUpcomingMatches(limitNum: number, daysAhead = 2): Promise<any[
     LEFT JOIN venues v ON m.venue_id = v.id
     LEFT JOIN articles a ON m.id = a.match_id AND a.type = 'match_preview'
     WHERE m.status = 'scheduled'
-      AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '${daysAhead} days'
+      AND m.scheduled_at BETWEEN NOW() AND ${cutoff}::timestamptz
       AND a.id IS NULL
     ORDER BY m.scheduled_at ASC
     LIMIT ${limitNum}
-  `;
+  `) as UpcomingMatchRow[];
 }
 
 async function getTeamForm(teamId: string): Promise<string> {
-  const results = await sql`
+  const results = (await sql`
     SELECT
       CASE
         WHEN (m.home_team_id = ${teamId} AND m.home_score > m.away_score)
@@ -531,8 +772,8 @@ async function getTeamForm(teamId: string): Promise<string> {
       AND m.status = 'finished'
     ORDER BY m.scheduled_at DESC
     LIMIT 5
-  `;
-  return results.map((r: any) => r.result).join("");
+  `) as TeamFormRow[];
+  return results.map((r) => r.result).join("");
 }
 
 async function generateMatchPreviews(): Promise<number> {
@@ -599,8 +840,8 @@ async function generateMatchPreviews(): Promise<number> {
   return generated;
 }
 
-async function getCompletedSeasons(): Promise<any[]> {
-  return await sql`
+async function getCompletedSeasons(): Promise<CompletedSeasonRow[]> {
+  return (await sql`
     SELECT
       cs.id as competition_season_id,
       c.name as competition,
@@ -620,7 +861,7 @@ async function getCompletedSeasons(): Promise<any[]> {
     WHERE cs.status = 'completed'
       AND a.id IS NULL
     LIMIT ${limit}
-  `;
+  `) as CompletedSeasonRow[];
 }
 
 async function generateSeasonRecaps(): Promise<number> {
@@ -634,8 +875,8 @@ async function generateSeasonRecaps(): Promise<number> {
   for (const season of seasons) {
     console.log(`\nProcessing: ${season.competition} ${season.season}`);
 
-    const matchCount = parseInt(season.match_count) || 0;
-    const totalGoals = parseInt(season.total_goals) || 0;
+    const matchCount = Number(season.match_count) || 0;
+    const totalGoals = Number(season.total_goals) || 0;
 
     const context: SeasonRecapContext = {
       competition: season.competition,
