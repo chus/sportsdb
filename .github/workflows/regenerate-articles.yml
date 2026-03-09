@@ -1,0 +1,51 @@
+name: Regenerate Articles (Improve Quality)
+
+on:
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Article type to regenerate'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - match_report
+          - match_preview
+          - round_recap
+          - player_spotlight
+          - season_review
+      limit:
+        description: 'Max articles to regenerate'
+        required: false
+        default: '10'
+        type: string
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate articles with improved prompts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          npx tsx scripts/regenerate-articles.ts \
+            --type=${{ github.event.inputs.type || 'all' }} \
+            --limit=${{ github.event.inputs.limit || '10' }}
+
+      - name: Log completion
+        run: echo "Article regeneration completed at $(date)"
