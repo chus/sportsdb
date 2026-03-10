@@ -367,6 +367,7 @@ export async function getArticleMatchData(matchId: string) {
         name: venues.name,
         slug: venues.slug,
         city: venues.city,
+        country: venues.country,
       },
       competition: {
         name: competitions.name,

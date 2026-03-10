@@ -178,7 +178,7 @@ export function MatchJsonLd({
   awayScore?: number | null;
   scheduledAt: string;
   status: string;
-  venue?: { name: string; url: string } | null;
+  venue?: { name: string; url: string; city?: string | null; country?: string | null } | null;
   competition?: { name: string; url: string } | null;
   matchUrl: string;
 }) {
@@ -237,10 +237,20 @@ export function MatchJsonLd({
           "@type": "StadiumOrArena",
           name: venue.name,
           url: venue.url,
+          address: {
+            "@type": "PostalAddress",
+            ...(venue.city && { addressLocality: venue.city }),
+            ...(venue.country && { addressCountry: venue.country }),
+            ...(!venue.city && !venue.country && { name: venue.name }),
+          },
         }
       : {
           "@type": "Place",
           name: "TBD",
+          address: {
+            "@type": "PostalAddress",
+            name: "TBD",
+          },
         },
     ...(competition && {
       organizer: {

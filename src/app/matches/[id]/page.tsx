@@ -309,7 +309,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         awayScore={match.awayScore}
         scheduledAt={match.scheduledAt.toISOString()}
         status={match.status}
-        venue={venue ? { name: venue.name, url: `${BASE_URL}/venues/${venue.slug}` } : null}
+        venue={venue ? { name: venue.name, url: `${BASE_URL}/venues/${venue.slug}`, city: venue.city, country: venue.country } : null}
         competition={competition ? { name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` } : null}
         matchUrl={`${BASE_URL}/matches/${id}`}
       />

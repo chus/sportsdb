@@ -282,11 +282,14 @@ export default async function ArticlePage({ params }: Props) {
               ? {
                   "@type": "StadiumOrArena",
                   name: matchData.venue.name,
-                  ...(matchData.venue.city && {
-                    address: { "@type": "PostalAddress", addressLocality: matchData.venue.city },
-                  }),
+                  address: {
+                    "@type": "PostalAddress",
+                    ...(matchData.venue.city && { addressLocality: matchData.venue.city }),
+                    ...(matchData.venue.country && { addressCountry: matchData.venue.country }),
+                    ...(!matchData.venue.city && !matchData.venue.country && { name: matchData.venue.name }),
+                  },
                 }
-              : { "@type": "Place", name: "TBD" },
+              : { "@type": "Place", name: "TBD", address: { "@type": "PostalAddress", name: "TBD" } },
             ...(matchData.competition && {
               organizer: {
                 "@type": "SportsOrganization",
