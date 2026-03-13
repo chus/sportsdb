@@ -7,19 +7,7 @@
  *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --type=all --limit=20
  */
 
-import { db } from "../src/lib/db";
-import {
-  articles,
-  matches,
-  teams,
-  competitions,
-  competitionSeasons,
-  seasons,
-  venues,
-  matchEvents,
-  players,
-} from "../src/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { neon } from "@neondatabase/serverless";
 import OpenAI from "openai";
 import {
   buildMatchReportPrompt,
@@ -34,7 +22,21 @@ import {
   type SeasonRecapContext,
 } from "./content/article-prompts";
 
-const openai = new OpenAI();
+const DATABASE_URL = process.env.DATABASE_URL;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!DATABASE_URL) {
+  console.error("DATABASE_URL environment variable is required");
+  process.exit(1);
+}
+
+if (!OPENAI_API_KEY) {
+  console.error("OPENAI_API_KEY environment variable is required");
+  process.exit(1);
+}
+
+const sql = neon(DATABASE_URL);
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const args = process.argv.slice(2);
 const limitArg = parseInt(args.find(a => a.startsWith("--limit="))?.split("=")[1] || "10");
@@ -44,23 +46,16 @@ const VALID_TYPES = ["match_report", "round_recap", "player_spotlight", "match_p
 
 async function main() {
   if (!VALID_TYPES.includes(typeArg as any)) {
-    console.log(`❌ Invalid type: ${typeArg}. Valid types: ${VALID_TYPES.join(", ")}`);
+    console.log(`Invalid type: ${typeArg}. Valid types: ${VALID_TYPES.join(", ")}`);
     process.exit(1);
   }
 
-  console.log(`\n📝 Regenerating ${limitArg} articles (type: ${typeArg}) with improved prompts\n`);
+  console.log(`\nRegenerating ${limitArg} articles (type: ${typeArg}) with improved prompts\n`);
 
   // Get oldest articles to regenerate, filtered by type
-  const conditions = typeArg !== "all"
-    ? [eq(articles.type, typeArg as any)]
-    : [];
-
-  const oldArticles = await db
-    .select()
-    .from(articles)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(articles.createdAt)
-    .limit(limitArg);
+  const oldArticles = typeArg !== "all"
+    ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND (model_version != 'gpt-4o-mini-improved' OR model_version IS NULL) ORDER BY created_at LIMIT ${limitArg}`
+    : await sql`SELECT * FROM articles WHERE model_version != 'gpt-4o-mini-improved' OR model_version IS NULL ORDER BY created_at LIMIT ${limitArg}`;
 
   console.log(`Found ${oldArticles.length} articles to regenerate\n`);
 
@@ -69,7 +64,7 @@ async function main() {
 
   for (const article of oldArticles) {
     try {
-      console.log(`🔄 [${article.type}] Regenerating: ${article.title}`);
+      console.log(`[${article.type}] Regenerating: ${article.title}`);
 
       let prompt: string | null = null;
 
@@ -90,12 +85,12 @@ async function main() {
           prompt = await buildSeasonRecapPromptFromArticle(article);
           break;
         default:
-          console.log(`   ⏭️  Unsupported type: ${article.type}`);
+          console.log(`   Unsupported type: ${article.type}`);
           continue;
       }
 
       if (!prompt) {
-        console.log(`   ❌ Could not build prompt (missing data)`);
+        console.log(`   Could not build prompt (missing data)`);
         errors++;
         continue;
       }
@@ -103,37 +98,36 @@ async function main() {
       const newArticle = await generateArticle(prompt);
 
       if (!newArticle) {
-        console.log(`   ❌ Generation failed`);
+        console.log(`   Generation failed`);
         errors++;
         continue;
       }
 
       // Update the article (preserve slug for SEO continuity)
-      await db
-        .update(articles)
-        .set({
-          title: newArticle.title,
-          excerpt: newArticle.excerpt,
-          content: newArticle.content,
-          metaTitle: newArticle.metaTitle,
-          metaDescription: newArticle.metaDescription,
-          modelVersion: "gpt-4o-mini-improved",
-          updatedAt: new Date(),
-        })
-        .where(eq(articles.id, article.id));
+      await sql`
+        UPDATE articles SET
+          title = ${newArticle.title},
+          excerpt = ${newArticle.excerpt},
+          content = ${newArticle.content},
+          meta_title = ${newArticle.metaTitle},
+          meta_description = ${newArticle.metaDescription},
+          model_version = ${"gpt-4o-mini-improved"},
+          updated_at = NOW()
+        WHERE id = ${article.id}
+      `;
 
-      console.log(`   ✅ Regenerated (${estimateWordCount(newArticle.content)} words)`);
+      console.log(`   Regenerated (${estimateWordCount(newArticle.content)} words)`);
       regenerated++;
 
       // Rate limit
       await new Promise(r => setTimeout(r, 1000));
     } catch (error: any) {
-      console.log(`   ❌ Error: ${error.message}`);
+      console.log(`   Error: ${error.message}`);
       errors++;
     }
   }
 
-  console.log(`\n✅ Done! Regenerated: ${regenerated}, Errors: ${errors}, Skipped: ${oldArticles.length - regenerated - errors}`);
+  console.log(`\nDone! Regenerated: ${regenerated}, Errors: ${errors}, Skipped: ${oldArticles.length - regenerated - errors}`);
 }
 
 function estimateWordCount(content: string): number {
@@ -143,23 +137,23 @@ function estimateWordCount(content: string): number {
 // --- Prompt builders for each article type ---
 
 async function buildMatchReportPromptFromArticle(article: any): Promise<string | null> {
-  if (!article.matchId) return null;
+  if (!article.match_id) return null;
 
-  const matchData = await getMatchData(article.matchId);
+  const matchData = await getMatchData(article.match_id);
   if (!matchData) return null;
 
-  const events = await db
-    .select({
-      minute: matchEvents.minute,
-      type: matchEvents.type,
-      player_name: players.name,
-      team_name: teams.name,
-    })
-    .from(matchEvents)
-    .innerJoin(players, eq(players.id, matchEvents.playerId))
-    .innerJoin(teams, eq(teams.id, matchEvents.teamId))
-    .where(eq(matchEvents.matchId, article.matchId))
-    .orderBy(matchEvents.minute);
+  const events = await sql`
+    SELECT
+      me.minute,
+      me.type,
+      p.name as player_name,
+      t.name as team_name
+    FROM match_events me
+    INNER JOIN players p ON me.player_id = p.id
+    INNER JOIN teams t ON me.team_id = t.id
+    WHERE me.match_id = ${article.match_id}
+    ORDER BY me.minute
+  `;
 
   const ctx: MatchReportContext = {
     match: {
@@ -177,7 +171,7 @@ async function buildMatchReportPromptFromArticle(article: any): Promise<string |
       date: String(matchData.scheduled_at),
       venue: matchData.venue ?? undefined,
     },
-    events: events.map(e => ({
+    events: events.map((e: any) => ({
       minute: e.minute,
       type: e.type,
       playerName: e.player_name,
@@ -189,61 +183,60 @@ async function buildMatchReportPromptFromArticle(article: any): Promise<string |
 }
 
 async function buildRoundRecapPromptFromArticle(article: any): Promise<string | null> {
-  if (!article.competitionSeasonId || !article.matchday) return null;
+  if (!article.competition_season_id || !article.matchday) return null;
 
-  const [compSeason] = await db
-    .select({
-      competition: competitions,
-      season: seasons,
-    })
-    .from(competitionSeasons)
-    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
-    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
-    .where(eq(competitionSeasons.id, article.competitionSeasonId));
+  const compSeasonRows = await sql`
+    SELECT
+      c.name as competition_name,
+      c.slug as competition_slug,
+      s.label as season_label
+    FROM competition_seasons cs
+    INNER JOIN competitions c ON c.id = cs.competition_id
+    INNER JOIN seasons s ON s.id = cs.season_id
+    WHERE cs.id = ${article.competition_season_id}
+  `;
 
-  if (!compSeason) return null;
+  if (compSeasonRows.length === 0) return null;
+  const compSeason = compSeasonRows[0];
 
   // Get matches for this matchday
-  const matchdayMatches = await db
-    .select()
-    .from(matches)
-    .where(
-      and(
-        eq(matches.competitionSeasonId, article.competitionSeasonId),
-        eq(matches.matchday, article.matchday)
-      )
-    );
+  const matchdayMatches = await sql`
+    SELECT
+      m.id,
+      m.home_score,
+      m.away_score,
+      ht.name as home_team,
+      at2.name as away_team
+    FROM matches m
+    INNER JOIN teams ht ON m.home_team_id = ht.id
+    INNER JOIN teams at2 ON m.away_team_id = at2.id
+    WHERE m.competition_season_id = ${article.competition_season_id}
+      AND m.matchday = ${article.matchday}
+  `;
 
   const matchResults = [];
   for (const m of matchdayMatches) {
-    const [homeTeam] = await db.select().from(teams).where(eq(teams.id, m.homeTeamId));
-    const [awayTeam] = await db.select().from(teams).where(eq(teams.id, m.awayTeamId));
-
-    // Get goal scorers for this match
-    const goalEvents = await db
-      .select({ player_name: players.name })
-      .from(matchEvents)
-      .innerJoin(players, eq(players.id, matchEvents.playerId))
-      .where(
-        and(
-          eq(matchEvents.matchId, m.id),
-          sql`${matchEvents.type} IN ('goal', 'penalty')`
-        )
-      );
+    const goalEvents = await sql`
+      SELECT p.name as player_name
+      FROM match_events me
+      INNER JOIN players p ON p.id = me.player_id
+      WHERE me.match_id = ${m.id}
+        AND me.type IN ('goal', 'penalty')
+    `;
 
     matchResults.push({
-      homeTeam: homeTeam?.name || "Unknown",
-      awayTeam: awayTeam?.name || "Unknown",
-      homeScore: m.homeScore ?? 0,
-      awayScore: m.awayScore ?? 0,
-      topScorers: goalEvents.map(e => e.player_name),
+      homeTeam: m.home_team,
+      awayTeam: m.away_team,
+      homeScore: m.home_score ?? 0,
+      awayScore: m.away_score ?? 0,
+      topScorers: goalEvents.map((e: any) => e.player_name),
     });
   }
 
   const ctx: RoundRecapContext = {
-    competition: compSeason.competition.name,
-    competitionSlug: compSeason.competition.slug,
-    season: compSeason.season.label,
+    competition: compSeason.competition_name,
+    competitionSlug: compSeason.competition_slug,
+    season: compSeason.season_label,
     matchday: article.matchday,
     matches: matchResults,
   };
@@ -252,16 +245,19 @@ async function buildRoundRecapPromptFromArticle(article: any): Promise<string | 
 }
 
 async function buildPlayerSpotlightPromptFromArticle(article: any): Promise<string | null> {
-  if (!article.primaryPlayerId) return null;
+  if (!article.primary_player_id) return null;
 
-  const [player] = await db.select().from(players).where(eq(players.id, article.primaryPlayerId));
-  if (!player) return null;
+  const playerRows = await sql`
+    SELECT * FROM players WHERE id = ${article.primary_player_id}
+  `;
+  if (playerRows.length === 0) return null;
+  const player = playerRows[0];
 
   // Get current team
-  const teamId = article.primaryTeamId;
-  const [team] = teamId
-    ? await db.select().from(teams).where(eq(teams.id, teamId))
-    : [null];
+  const teamRows = article.primary_team_id
+    ? await sql`SELECT * FROM teams WHERE id = ${article.primary_team_id}`
+    : [];
+  const team = teamRows[0] || null;
 
   const ctx: PlayerSpotlightContext = {
     player: {
@@ -272,7 +268,7 @@ async function buildPlayerSpotlightPromptFromArticle(article: any): Promise<stri
       currentTeam: team?.name || "Unknown",
       currentTeamSlug: team?.slug || "unknown",
     },
-    recentMatches: [], // Would need match history query
+    recentMatches: [],
     seasonStats: {
       appearances: 0,
       goals: 0,
@@ -286,9 +282,9 @@ async function buildPlayerSpotlightPromptFromArticle(article: any): Promise<stri
 }
 
 async function buildMatchPreviewPromptFromArticle(article: any): Promise<string | null> {
-  if (!article.matchId) return null;
+  if (!article.match_id) return null;
 
-  const matchData = await getMatchData(article.matchId);
+  const matchData = await getMatchData(article.match_id);
   if (!matchData) return null;
 
   const ctx: MatchPreviewContext = {
@@ -310,36 +306,37 @@ async function buildMatchPreviewPromptFromArticle(article: any): Promise<string 
 }
 
 async function buildSeasonRecapPromptFromArticle(article: any): Promise<string | null> {
-  if (!article.competitionSeasonId) return null;
+  if (!article.competition_season_id) return null;
 
-  const [compSeason] = await db
-    .select({
-      competition: competitions,
-      season: seasons,
-    })
-    .from(competitionSeasons)
-    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
-    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
-    .where(eq(competitionSeasons.id, article.competitionSeasonId));
+  const compSeasonRows = await sql`
+    SELECT
+      c.name as competition_name,
+      c.slug as competition_slug,
+      s.label as season_label
+    FROM competition_seasons cs
+    INNER JOIN competitions c ON c.id = cs.competition_id
+    INNER JOIN seasons s ON s.id = cs.season_id
+    WHERE cs.id = ${article.competition_season_id}
+  `;
 
-  if (!compSeason) return null;
+  if (compSeasonRows.length === 0) return null;
+  const compSeason = compSeasonRows[0];
 
-  // Count matches and goals for the season
-  const matchStats = await db
-    .select({
-      totalMatches: sql<number>`count(*)`,
-      totalGoals: sql<number>`coalesce(sum(${matches.homeScore}) + sum(${matches.awayScore}), 0)`,
-    })
-    .from(matches)
-    .where(eq(matches.competitionSeasonId, article.competitionSeasonId));
+  const matchStats = await sql`
+    SELECT
+      COUNT(*)::int as total_matches,
+      COALESCE(SUM(home_score) + SUM(away_score), 0)::int as total_goals
+    FROM matches
+    WHERE competition_season_id = ${article.competition_season_id}
+  `;
 
-  const totalMatches = Number(matchStats[0]?.totalMatches) || 0;
-  const totalGoals = Number(matchStats[0]?.totalGoals) || 0;
+  const totalMatches = Number(matchStats[0]?.total_matches) || 0;
+  const totalGoals = Number(matchStats[0]?.total_goals) || 0;
 
   const ctx: SeasonRecapContext = {
-    competition: compSeason.competition.name,
-    competitionSlug: compSeason.competition.slug,
-    season: compSeason.season.label,
+    competition: compSeason.competition_name,
+    competitionSlug: compSeason.competition_slug,
+    season: compSeason.season_label,
     keyStats: {
       totalGoals,
       matches: totalMatches,
@@ -353,52 +350,32 @@ async function buildSeasonRecapPromptFromArticle(article: any): Promise<string |
 // --- Shared helpers ---
 
 async function getMatchData(matchId: string) {
-  const [match] = await db
-    .select()
-    .from(matches)
-    .where(eq(matches.id, matchId));
+  const rows = await sql`
+    SELECT
+      m.id,
+      m.matchday,
+      m.scheduled_at,
+      m.home_score,
+      m.away_score,
+      ht.name as home_team,
+      ht.slug as home_team_slug,
+      at2.name as away_team,
+      at2.slug as away_team_slug,
+      c.name as competition,
+      c.slug as competition_slug,
+      s.label as season,
+      v.name as venue
+    FROM matches m
+    INNER JOIN teams ht ON m.home_team_id = ht.id
+    INNER JOIN teams at2 ON m.away_team_id = at2.id
+    INNER JOIN competition_seasons cs ON m.competition_season_id = cs.id
+    INNER JOIN competitions c ON cs.competition_id = c.id
+    INNER JOIN seasons s ON cs.season_id = s.id
+    LEFT JOIN venues v ON m.venue_id = v.id
+    WHERE m.id = ${matchId}
+  `;
 
-  if (!match) return null;
-
-  const [homeTeam] = await db
-    .select()
-    .from(teams)
-    .where(eq(teams.id, match.homeTeamId));
-
-  const [awayTeam] = await db
-    .select()
-    .from(teams)
-    .where(eq(teams.id, match.awayTeamId));
-
-  const [compSeason] = await db
-    .select({
-      competition: competitions,
-      season: seasons,
-    })
-    .from(competitionSeasons)
-    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
-    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
-    .where(eq(competitionSeasons.id, match.competitionSeasonId));
-
-  const venue = match.venueId
-    ? (await db.select().from(venues).where(eq(venues.id, match.venueId)))[0]
-    : null;
-
-  return {
-    id: match.id,
-    matchday: match.matchday,
-    scheduled_at: match.scheduledAt,
-    home_score: match.homeScore,
-    away_score: match.awayScore,
-    home_team: homeTeam?.name || "Unknown",
-    home_team_slug: homeTeam?.slug || "unknown",
-    away_team: awayTeam?.name || "Unknown",
-    away_team_slug: awayTeam?.slug || "unknown",
-    competition: compSeason?.competition.name || "Unknown",
-    competition_slug: compSeason?.competition.slug || "unknown",
-    season: compSeason?.season.label || "Unknown",
-    venue: venue?.name || null,
-  };
+  return rows[0] || null;
 }
 
 async function generateArticle(prompt: string): Promise<any | null> {
