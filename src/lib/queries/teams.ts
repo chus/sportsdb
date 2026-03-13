@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { teams, standings, competitionSeasons, seasons, playerTeamHistory, players } from "@/lib/db/schema";
+import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players } from "@/lib/db/schema";
 import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne } from "drizzle-orm";
 
 /**
@@ -27,6 +27,7 @@ export async function getTeamStats(teamId: string, seasonId?: string) {
     .select({
       standing: standings,
       seasonLabel: seasons.label,
+      competitionName: competitions.name,
     })
     .from(standings)
     .innerJoin(
@@ -34,6 +35,7 @@ export async function getTeamStats(teamId: string, seasonId?: string) {
       eq(competitionSeasons.id, standings.competitionSeasonId)
     )
     .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
     .where(and(eq(standings.teamId, teamId), seasonFilter));
 }
 

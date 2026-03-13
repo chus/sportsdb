@@ -56,6 +56,15 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   };
 }
 
+function renderBioWithLinks(text: string) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, i) => {
+    const match = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (match) return <Link key={i} href={match[2]} className="text-blue-600 font-medium hover:underline">{match[1]}</Link>;
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function StatBox({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="text-center">
@@ -130,6 +139,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const standing = statsData[0]?.standing;
   const seasonLabel = statsData[0]?.seasonLabel;
+  const competitionName = statsData[0]?.competitionName;
 
   // Group players by position
   const goalkeepers = squad.filter((p) => p.player.position === "Goalkeeper");
@@ -153,6 +163,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
     squadSize: squad.length,
     formerPlayersCount: formerPlayers.length,
     seasonLabel,
+    competitionName,
     standing,
   });
   const faqItems = buildTeamFaqs({
@@ -162,6 +173,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
     foundedYear: team.foundedYear,
     squadSize: squad.length,
     seasonLabel,
+    competitionName,
     standing,
   });
 
@@ -294,8 +306,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <section className="bg-white rounded-xl border border-neutral-200 p-6">
               <h2 className="text-xl font-bold text-neutral-900 mb-4">About {team.name}</h2>
               <div className="space-y-4 text-base leading-8 text-neutral-700">
-                {aboutParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                {aboutParagraphs.map((paragraph, i) => (
+                  <p key={i}>{renderBioWithLinks(paragraph)}</p>
                 ))}
               </div>
             </section>

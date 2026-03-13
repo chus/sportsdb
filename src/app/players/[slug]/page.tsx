@@ -58,6 +58,15 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   };
 }
 
+function renderBioWithLinks(text: string) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((part, i) => {
+    const match = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (match) return <Link key={i} href={match[2]} className="text-blue-600 font-medium hover:underline">{match[1]}</Link>;
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function StatCard({ label, value, icon: Icon }: { label: string; value: string | number | null; icon?: React.ElementType }) {
   if (!value) return null;
   return (
@@ -100,19 +109,31 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const playerUrl = `${BASE_URL}/players/${slug}`;
   const teamUrl = currentTeam ? `${BASE_URL}/teams/${currentTeam.slug}` : null;
+  // Build current season stats from most recent stats entry
+  const currentSeasonStats = statsHistory.length > 0
+    ? {
+        appearances: statsHistory[0].stat.appearances,
+        goals: statsHistory[0].stat.goals,
+        assists: statsHistory[0].stat.assists,
+        competition: statsHistory[0].competition.name,
+      }
+    : null;
+
   const aboutParagraphs = buildPlayerAbout({
     name: player.name,
     knownAs: player.knownAs,
     nationality: player.nationality,
-    secondNationality: player.secondNationality,
     position: player.position,
     currentTeamName: currentTeam?.name,
-    shirtNumber,
+    currentTeamSlug: currentTeam?.slug,
+    career: career.map((c) => ({
+      teamName: c.team.name,
+      teamSlug: c.team.slug,
+      validFrom: c.validFrom,
+      validTo: c.validTo,
+    })),
+    currentSeasonStats,
     age,
-    heightCm: player.heightCm,
-    preferredFoot: player.preferredFoot,
-    status: player.status,
-    careerClubCount: career.length,
     totalAppearances: totalApps,
     totalGoals,
     totalAssists,
@@ -123,6 +144,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     position: player.position,
     currentTeamName: currentTeam?.name,
     age,
+    dateOfBirth: player.dateOfBirth,
     preferredFoot: player.preferredFoot,
   });
 
@@ -269,8 +291,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             <section className="bg-white rounded-xl border border-neutral-200 p-6">
               <h2 className="text-xl font-bold text-neutral-900 mb-4">About {player.name}</h2>
               <div className="space-y-4 text-base leading-8 text-neutral-700">
-                {aboutParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                {aboutParagraphs.map((paragraph, i) => (
+                  <p key={i}>{renderBioWithLinks(paragraph)}</p>
                 ))}
               </div>
             </section>
