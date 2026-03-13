@@ -291,7 +291,7 @@ export function buildMatchPreviewPrompt(ctx: MatchPreviewContext): string {
   const awayTeamLink = `[${ctx.match.awayTeam}](/teams/${ctx.match.awayTeamSlug})`;
   const competitionLink = `[${ctx.match.competition}](/competitions/${ctx.match.competitionSlug})`;
 
-  return `You are an SEO-focused sports journalist writing an exciting match preview for a football database website.
+  return `You are an SEO-focused sports journalist writing a professional match preview for a football database website. Write in a factual, authoritative tone like BBC Sport — no tabloid hype or sensationalism.
 
 MATCH DETAILS:
 - Competition: ${ctx.match.competition} (${ctx.match.season})
@@ -313,8 +313,8 @@ INTERNAL LINKS:
 - Competition: ${competitionLink}
 
 REQUIREMENTS:
-1. CLICKBAIT headline that builds excitement (max 80 chars) - use power words like "CLASH", "BATTLE", "SHOWDOWN"
-2. Engaging excerpt that teases the stakes (150 chars max)
+1. Factual, informative headline (max 80 chars) - include both team names and competition. No hype words (no "epic", "showdown", "clash", "battle", "titans"). No exclamation marks. Write like BBC Sport.
+2. Concise excerpt summarizing the stakes (150 chars max)
 3. 700-1000 words covering these sections with ## H2 headings:
    - ## Why This Match Matters: stakes, rivalry history, table implications
    - ## Form Guide: recent results for both teams with context
@@ -350,7 +350,7 @@ export function buildSeasonRecapPrompt(ctx: SeasonRecapContext): string {
   const competitionLink = `[${ctx.competition}](/competitions/${ctx.competitionSlug})`;
   const winnerLink = ctx.winnerSlug ? `[${ctx.winner}](/teams/${ctx.winnerSlug})` : ctx.winner;
 
-  return `You are an SEO-focused sports journalist writing a dramatic season recap for a football database website.
+  return `You are an SEO-focused sports journalist writing a comprehensive season recap for a football database website. Write in a factual, authoritative tone like BBC Sport — no tabloid hype or sensationalism.
 
 SEASON: ${ctx.competition} ${ctx.season}
 
@@ -373,8 +373,8 @@ ${ctx.winnerSlug ? `- Champions: ${winnerLink}` : ""}
 ${ctx.topScorer?.slug ? `- Top Scorer: [${ctx.topScorer.name}](/players/${ctx.topScorer.slug})` : ""}
 
 REQUIREMENTS:
-1. CLICKBAIT headline that captures the season drama (max 80 chars)
-   - Examples: "How [Team] Defied All Odds", "The Season That Changed Everything", "Glory and Heartbreak"
+1. Factual, descriptive headline (max 80 chars) - include competition name and season. No hype words, no exclamation marks. Write like BBC Sport.
+   - Examples: "[Competition] [Season] Season Review: [Winner] Crowned Champions", "[Competition] [Season]: How [Winner] Won the Title"
 2. Engaging excerpt highlighting the main story (150 chars)
 3. 1200-1800 words covering these sections with ## H2 headings:
    - ## The Title Race: narrative arc from early favorites to final outcome
@@ -385,7 +385,7 @@ REQUIREMENTS:
    - ## Memorable Moments: dramatic finishes, upsets, milestones
    - ## Legacy: what this season means in historical context
 4. Use H2 headings for major sections
-5. Include dramatic language and storytelling - this should read like a documentary script
+5. Use clear, engaging storytelling — authoritative and professional, not sensational
 6. ALL team and player mentions must be links
 
 READABILITY GUIDELINES:

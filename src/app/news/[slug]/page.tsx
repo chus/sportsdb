@@ -560,15 +560,16 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Article body */}
           <article
-            className="prose prose-lg max-w-none
-              prose-headings:font-bold prose-headings:text-neutral-900
-              prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-neutral-200
-              prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-neutral-800 prose-p:text-base prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-neutral-900 prose-strong:font-semibold
-              prose-li:text-neutral-800 prose-li:leading-relaxed
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-neutral-700
+            className="max-w-none
+              [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-neutral-900 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-neutral-200
+              [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-neutral-900 [&_h3]:mt-8 [&_h3]:mb-3
+              [&_p]:text-base [&_p]:text-neutral-800 [&_p]:leading-relaxed [&_p]:mb-6
+              [&_a]:text-blue-600 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
+              [&_strong]:text-neutral-900 [&_strong]:font-semibold
+              [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6
+              [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6
+              [&_li]:text-neutral-800 [&_li]:leading-relaxed [&_li]:mb-2
+              [&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:bg-blue-50 [&_blockquote]:py-4 [&_blockquote]:px-6 [&_blockquote]:rounded-r-lg [&_blockquote]:not-italic [&_blockquote]:text-neutral-700
               [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-neutral-700 [&>p:first-of-type]:leading-relaxed [&>p:first-of-type]:font-normal"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
