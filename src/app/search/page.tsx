@@ -7,6 +7,7 @@ import { SearchBar } from "@/components/search/search-bar";
 import { PopularSearches } from "@/components/search/popular-searches";
 import { FeaturedEntities } from "@/components/search/featured-entities";
 import type { SearchResult } from "@/types/entities";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string; type?: string }>;
@@ -183,6 +184,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <PageTracker />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-neutral-900 mb-6">Search</h1>

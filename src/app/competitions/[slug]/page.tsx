@@ -13,6 +13,7 @@ import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface CompetitionPageProps {
   params: Promise<{ slug: string }>;
@@ -89,6 +90,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           { name: competition.name, url: competitionUrl },
         ]}
       />
+      <PageTracker entityType="competition" entityId={competition.id} />
       <div className="min-h-screen bg-neutral-50">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white">

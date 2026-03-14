@@ -17,6 +17,7 @@ import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -172,6 +173,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         team={currentTeam && teamUrl ? { name: currentTeam.name, url: teamUrl } : null}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
+      <PageTracker entityType="player" entityId={player.id} />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">

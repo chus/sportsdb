@@ -15,6 +15,7 @@ import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -196,6 +197,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         memberCount={squad.length}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
+      <PageTracker entityType="team" entityId={team.id} />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div

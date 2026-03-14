@@ -28,6 +28,7 @@ import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { ShareButtons } from "@/components/news/share-buttons";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { marked } from "marked";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -331,6 +332,7 @@ export default async function ArticlePage({ params }: Props) {
         />
       )}
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      <PageTracker />
 
       <div className="min-h-screen bg-white">
         {/* Hero Header */}

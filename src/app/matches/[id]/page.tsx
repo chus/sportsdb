@@ -27,6 +27,7 @@ import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface MatchPageProps {
   params: Promise<{ id: string }>;
@@ -314,6 +315,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         matchUrl={`${BASE_URL}/matches/${id}`}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      <PageTracker entityType="match" entityId={id} />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAuthModal } from "@/components/auth/auth-modal";
+import { useAnalytics } from "@/hooks/use-analytics";
 import { cn } from "@/lib/utils/cn";
 
 interface FollowButtonProps {
@@ -23,6 +24,7 @@ export function FollowButton({
 }: FollowButtonProps) {
   const { user } = useAuth();
   const { openModal } = useAuthModal();
+  const { trackFollow } = useAnalytics();
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -73,6 +75,9 @@ export function FollowButton({
       if (res.ok) {
         const data = await res.json();
         setFollowing(data.following);
+        if (data.following) {
+          trackFollow(entityType, entityId);
+        }
       } else {
         const data = await res.json();
         // Could show a toast here — for now, log

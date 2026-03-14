@@ -12,6 +12,7 @@ import { LandingStats } from "@/components/landing/landing-stats";
 import { LandingFeatures } from "@/components/landing/landing-features";
 import { WorldCupBanner } from "@/components/landing/world-cup-banner";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -90,6 +91,7 @@ export default async function HomePage() {
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      <PageTracker />
       {/* Hero Section */}
       <LandingHero
         stats={stats}
