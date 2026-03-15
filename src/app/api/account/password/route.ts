@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { currentPassword, newPassword } = changePasswordSchema.parse(body);
 
-    // Verify current password
+    // Verify current password (Google-only users have no password)
+    if (!user.passwordHash) {
+      return NextResponse.json({ error: "Cannot change password for Google-only account" }, { status: 400 });
+    }
     const validPassword = await verifyPassword(currentPassword, user.passwordHash);
     if (!validPassword) {
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });

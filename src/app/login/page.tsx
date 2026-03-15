@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { GoogleButton, AuthDivider } from "@/components/auth/google-button";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
@@ -16,7 +17,7 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   if (user) {
-    router.replace("/");
+    router.replace("/dashboard");
     return null;
   }
 
@@ -29,7 +30,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result.success) {
-      router.push("/");
+      router.push("/dashboard");
     } else {
       setError(result.error || "Invalid email or password");
     }
@@ -51,6 +52,9 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+
+          <GoogleButton label="Continue with Google" />
+          <AuthDivider />
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

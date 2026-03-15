@@ -40,6 +40,55 @@ export async function createUser(email: string, password: string, name?: string)
   return user;
 }
 
+// Google OAuth user operations
+export async function createUserFromGoogle(
+  email: string,
+  name: string | null,
+  avatarUrl: string | null,
+  googleId: string
+) {
+  const [user] = await db
+    .insert(users)
+    .values({
+      email: email.toLowerCase(),
+      passwordHash: null,
+      googleId,
+      name,
+      avatarUrl,
+      emailVerified: true,
+    })
+    .returning();
+
+  return user;
+}
+
+export async function getUserByGoogleId(googleId: string) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.googleId, googleId))
+    .limit(1);
+
+  return user || null;
+}
+
+export async function linkGoogleAccount(
+  userId: string,
+  googleId: string,
+  avatarUrl?: string | null
+) {
+  const updates: Record<string, unknown> = {
+    googleId,
+    emailVerified: true,
+    updatedAt: new Date(),
+  };
+  if (avatarUrl) {
+    updates.avatarUrl = avatarUrl;
+  }
+
+  await db.update(users).set(updates).where(eq(users.id, userId));
+}
+
 export async function getUserByEmail(email: string) {
   const [user] = await db
     .select()

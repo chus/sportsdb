@@ -14,6 +14,7 @@ import {
 import { X, Loader2 } from "lucide-react";
 import { useAuth } from "./auth-provider";
 import { cn } from "@/lib/utils/cn";
+import { GoogleButton, AuthDivider } from "./google-button";
 
 type AuthTab = "signin" | "signup";
 
@@ -224,12 +225,15 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       {error && (
         <div role="alert" className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
           {error}
         </div>
       )}
+      <GoogleButton label="Continue with Google" />
+      <AuthDivider />
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="signin-email" className="block text-sm font-medium text-neutral-700 mb-1">
           Email
@@ -266,7 +270,8 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         Sign In
       </button>
-    </form>
+      </form>
+    </div>
   );
 }
 
@@ -294,12 +299,15 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       {error && (
         <div role="alert" className="p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
           {error}
         </div>
       )}
+      <GoogleButton label="Continue with Google" />
+      <AuthDivider />
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="signup-name" className="block text-sm font-medium text-neutral-700 mb-1">
           Name <span className="text-neutral-400">(optional)</span>
@@ -350,6 +358,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         Create Account
       </button>
-    </form>
+      </form>
+    </div>
   );
 }

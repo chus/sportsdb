@@ -26,7 +26,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { password } = deleteAccountSchema.parse(body);
 
-    // Verify password
+    // Verify password (Google-only users have no password)
+    if (!user.passwordHash) {
+      return NextResponse.json({ error: "Cannot verify password for Google-only account" }, { status: 400 });
+    }
     const validPassword = await verifyPassword(password, user.passwordHash);
     if (!validPassword) {
       return NextResponse.json({ error: "Password is incorrect" }, { status: 400 });

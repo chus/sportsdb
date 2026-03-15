@@ -337,7 +337,8 @@ export const users = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     email: text("email").notNull().unique(),
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"),
+    googleId: text("google_id").unique(),
     name: text("name"),
     avatarUrl: text("avatar_url"),
     emailVerified: boolean("email_verified").notNull().default(false),
@@ -415,6 +416,29 @@ export const follows = pgTable(
     uniqueIndex("uq_follow").on(table.userId, table.entityType, table.entityId),
     index("idx_follows_user").on(table.userId),
     index("idx_follows_entity").on(table.entityType, table.entityId),
+  ]
+);
+
+// ============================================================
+// USER LEAGUE PREFERENCES
+// ============================================================
+
+export const userLeaguePreferences = pgTable(
+  "user_league_preferences",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    competitionId: uuid("competition_id")
+      .notNull()
+      .references(() => competitions.id, { onDelete: "cascade" }),
+    displayOrder: integer("display_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_user_league_pref").on(table.userId, table.competitionId),
+    index("idx_user_league_prefs_user").on(table.userId),
   ]
 );
 

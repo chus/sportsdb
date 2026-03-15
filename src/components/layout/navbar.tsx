@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown } from "lucide-react";
+import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -238,6 +238,14 @@ function UserDropdown({
         <p className="text-sm font-medium text-neutral-900 truncate">{userName}</p>
       </div>
       <Link
+        href="/dashboard"
+        onClick={onClose}
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+      >
+        <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+        Dashboard
+      </Link>
+      <Link
         href="/account"
         onClick={onClose}
         className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
@@ -274,6 +282,14 @@ function MobileAuthLinks({ onClose }: { onClose: () => void }) {
 
   return (
     <>
+      <Link
+        href="/dashboard"
+        onClick={onClose}
+        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+      >
+        <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+        Dashboard
+      </Link>
       <Link
         href="/account"
         onClick={onClose}

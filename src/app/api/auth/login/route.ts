@@ -26,7 +26,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
+    // Verify password (Google-only users have no password)
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: "This account uses Google sign-in. Please use the Google button." },
+        { status: 401 }
+      );
+    }
     const validPassword = await verifyPassword(password, user.passwordHash);
     if (!validPassword) {
       return NextResponse.json(
