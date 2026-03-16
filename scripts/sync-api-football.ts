@@ -85,6 +85,13 @@ async function apiFetch(endpoint: string): Promise<any> {
   const data = await response.json();
 
   if (data.errors && Object.keys(data.errors).length > 0) {
+    // Check if we've hit the daily request limit
+    if (data.errors.requests && typeof data.errors.requests === "string" &&
+        data.errors.requests.includes("request limit")) {
+      console.error(`   DAILY LIMIT REACHED — stopping all requests`);
+      requestCount = MAX_REQUESTS; // Prevent further requests
+      return { response: [] }; // Return empty so callers handle gracefully
+    }
     console.error(`   API errors:`, data.errors);
   }
 
@@ -1144,67 +1151,115 @@ async function syncStandingsOnly(leagues: LeagueConfig[]) {
 // ENRICH MODE: fill player images from squad data
 // ============================================================
 
-async function enrichPlayerImages() {
+async function enrichPlayerImages(targetLeagues: LeagueConfig[]) {
   console.log("\n== Enriching player images ==\n");
 
-  // Find teams that have af- externalId (teams we synced from API-Football)
-  const teamsWithAfId = await db
-    .select()
-    .from(schema.teams)
-    .where(drizzleSql`${schema.teams.externalId} LIKE 'af-%'`);
+  let totalEnriched = 0;
 
-  console.log(`Found ${teamsWithAfId.length} teams with API-Football IDs`);
-
-  let enrichedCount = 0;
-
-  for (const team of teamsWithAfId) {
+  for (const league of targetLeagues) {
     if (!canMakeRequest()) {
       console.log(`Budget exhausted — stopping enrichment`);
       break;
     }
 
-    // Check if this team has players missing images
-    const playersNeedingImages = await db.execute(drizzleSql`
-      SELECT p.id FROM players p
-      JOIN player_team_history pth ON pth.player_id = p.id AND pth.team_id = ${team.id} AND pth.valid_to IS NULL
-      WHERE p.image_url IS NULL
-      LIMIT 1
-    `);
+    console.log(`\n-- ${league.name} --`);
 
-    if (playersNeedingImages.rows.length === 0) continue;
+    // Fetch teams from API-Football for this league (1 request)
+    const teamsData = await apiFetch(`/teams?league=${league.apiId}&season=${league.season}`);
+    const apiTeams = teamsData.response || [];
+    console.log(`   API returned ${apiTeams.length} teams`);
 
-    const apiTeamId = parseInt(team.externalId!.replace("af-", ""));
-    const data = await apiFetch(`/players/squads?team=${apiTeamId}`);
+    // Match each API team to our DB and build a map: apiTeamId → dbTeamId
+    const teamsToEnrich: Array<{ apiTeamId: number; dbTeamId: string; name: string }> = [];
 
-    for (const teamEntry of data.response || []) {
-      for (const apiPlayer of teamEntry.players || []) {
-        if (!apiPlayer.photo) continue;
+    for (const entry of apiTeams) {
+      const apiTeam = entry.team;
+      const teamSlug = slugify(apiTeam.name);
 
-        const extId = afId(apiPlayer.id);
+      // Try matching: af- externalId → exact slug → partial slug → name ILIKE
+      let dbTeam: { id: string } | undefined;
 
-        // Update existing player's image
-        const result = await db
-          .update(schema.players)
-          .set({
-            imageUrl: apiPlayer.photo,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(schema.players.externalId, extId),
-              isNull(schema.players.imageUrl)
-            )
-          )
-          .returning();
+      const [byAfId] = await db.select().from(schema.teams)
+        .where(eq(schema.teams.externalId, afId(apiTeam.id))).limit(1);
+      if (byAfId) { dbTeam = byAfId; }
 
-        if (result.length > 0) enrichedCount++;
+      if (!dbTeam) {
+        const [bySlug] = await db.select().from(schema.teams)
+          .where(eq(schema.teams.slug, teamSlug)).limit(1);
+        if (bySlug) dbTeam = bySlug;
+      }
+
+      // Try partial slug match (e.g. "arsenal" matches "arsenal-fc")
+      if (!dbTeam) {
+        const [byPartialSlug] = await db.select().from(schema.teams)
+          .where(drizzleSql`${schema.teams.slug} LIKE ${teamSlug + '%'}`)
+          .limit(1);
+        if (byPartialSlug) dbTeam = byPartialSlug;
+      }
+
+      // Try name contains (e.g. "Arsenal" matches "Arsenal FC")
+      if (!dbTeam) {
+        const [byName] = await db.select().from(schema.teams)
+          .where(drizzleSql`${schema.teams.name} ILIKE ${'%' + apiTeam.name + '%'}`)
+          .limit(1);
+        if (byName) dbTeam = byName;
+      }
+
+      // Try short_name match (e.g. "Wolves" matches short_name "Wolves" or "WOL")
+      if (!dbTeam) {
+        const [byShortName] = await db.select().from(schema.teams)
+          .where(drizzleSql`${schema.teams.shortName} ILIKE ${apiTeam.name}`)
+          .limit(1);
+        if (byShortName) dbTeam = byShortName;
+      }
+
+      if (!dbTeam) {
+        console.log(`   ? No match for: ${apiTeam.name} (${teamSlug})`);
+        continue;
+      }
+
+      // Check if this team has players missing images
+      const needsImages = await db.execute(drizzleSql`
+        SELECT 1 FROM players p
+        JOIN player_team_history pth ON pth.player_id = p.id
+          AND pth.team_id = ${dbTeam.id} AND pth.valid_to IS NULL
+        WHERE p.image_url IS NULL
+        LIMIT 1
+      `);
+
+      if (needsImages.rows.length > 0) {
+        teamsToEnrich.push({ apiTeamId: apiTeam.id, dbTeamId: dbTeam.id, name: apiTeam.name });
       }
     }
 
-    console.log(`   ${team.name}: checked`);
+    console.log(`   ${teamsToEnrich.length} teams need player image enrichment`);
+
+    // Fetch squads for teams that need enrichment
+    for (const team of teamsToEnrich) {
+      if (!canMakeRequest()) {
+        console.log(`   Budget exhausted — stopping`);
+        break;
+      }
+
+      const data = await apiFetch(`/players/squads?team=${team.apiTeamId}`);
+      let enriched = 0;
+
+      for (const teamEntry of data.response || []) {
+        for (const apiPlayer of teamEntry.players || []) {
+          if (!apiPlayer.photo) continue;
+
+          // Try to match player and update image
+          const player = await upsertPlayer(apiPlayer, team.dbTeamId);
+          if (player) enriched++;
+        }
+      }
+
+      console.log(`   ${team.name}: ${enriched} players enriched`);
+      totalEnriched += enriched;
+    }
   }
 
-  console.log(`\nEnriched ${enrichedCount} player images`);
+  console.log(`\nTotal enriched: ${totalEnriched} players`);
 }
 
 // ============================================================
@@ -1322,7 +1377,23 @@ async function main() {
   }
 
   if (args.includes("--enrich")) {
-    await enrichPlayerImages();
+    const slugArg = args.find((a) => a.startsWith("--slug="));
+    let targetLeagues: LeagueConfig[];
+    if (slugArg) {
+      const slug = slugArg.split("=")[1];
+      const league = LEAGUES.find((l) => l.slug === slug);
+      if (!league) {
+        console.error(`Unknown slug: ${slug}`);
+        console.error("Available:", LEAGUES.map((l) => l.slug).join(", "));
+        process.exit(1);
+      }
+      targetLeagues = [league];
+    } else {
+      // Default: all non-LATAM leagues (European leagues that need enrichment)
+      targetLeagues = LEAGUES.filter((l) => !l.isLatam);
+    }
+    console.log(`Enriching ${targetLeagues.length} leagues: ${targetLeagues.map((l) => l.slug).join(", ")}\n`);
+    await enrichPlayerImages(targetLeagues);
     console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
     return;
   }
@@ -1331,7 +1402,8 @@ async function main() {
   console.log("  --standings                        Sync LATAM league standings (~3-4 req)");
   console.log("  --all-standings                    Sync all league standings (~11 req)");
   console.log("  --full --slug=<slug>               Full sync one league (~24 req)");
-  console.log("  --enrich                           Fill player images (~1 req/team)");
+  console.log("  --enrich                           Enrich European league player images (~21 req/league)");
+  console.log("  --enrich --slug=<slug>             Enrich one league's player images");
   console.log("\nAvailable leagues:");
   LEAGUES.forEach((l) => console.log(`  ${l.slug} (af-${l.apiId}) ${l.isLatam ? "[LATAM]" : ""}`));
   process.exit(1);
