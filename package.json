@@ -14,7 +14,10 @@
     "db:seed": "npx tsx scripts/seed.ts",
     "ingest:wikipedia": "npx tsx scripts/ingest-wikipedia.ts",
     "articles:status": "npx tsx scripts/manage-article-generation.ts status",
-    "articles:run": "npx tsx scripts/manage-article-generation.ts run"
+    "articles:run": "npx tsx scripts/manage-article-generation.ts run",
+    "sync:all": "npx tsx scripts/sync-football-data.ts --all",
+    "sync:competition": "npx tsx scripts/sync-football-data.ts --competition",
+    "sync:live": "npx tsx scripts/sync-football-data.ts --live"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

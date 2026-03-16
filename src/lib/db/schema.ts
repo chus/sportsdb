@@ -27,6 +27,7 @@ export const seasons = pgTable("seasons", {
 
 export const competitions = pgTable("competitions", {
   id: uuid("id").primaryKey().defaultRandom(),
+  externalId: text("external_id").unique(), // External API ID for deduplication (e.g., "fd-2021")
   name: text("name").notNull(), // 'Premier League'
   slug: text("slug").notNull().unique(), // 'premier-league'
   country: text("country"),
@@ -42,6 +43,7 @@ export const teams = pgTable(
   "teams",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    externalId: text("external_id").unique(), // External API ID for deduplication (e.g., "fd-65")
     name: text("name").notNull(), // 'Manchester City'
     shortName: text("short_name"), // 'Man City'
     slug: text("slug").notNull().unique(), // 'manchester-city'
@@ -62,6 +64,7 @@ export const players = pgTable(
   "players",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    externalId: text("external_id").unique(), // External API ID for deduplication (e.g., "fd-1234")
     name: text("name").notNull(), // 'Erling Haaland'
     knownAs: text("known_as"), // 'Haaland'
     slug: text("slug").notNull().unique(), // 'erling-haaland'
