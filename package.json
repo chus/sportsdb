@@ -17,7 +17,10 @@
     "articles:run": "npx tsx scripts/manage-article-generation.ts run",
     "sync:all": "npx tsx scripts/sync-football-data.ts --all",
     "sync:competition": "npx tsx scripts/sync-football-data.ts --competition",
-    "sync:live": "npx tsx scripts/sync-football-data.ts --live"
+    "sync:live": "npx tsx scripts/sync-football-data.ts --live",
+    "sync:af": "npx tsx scripts/sync-api-football.ts --full",
+    "sync:af:standings": "npx tsx scripts/sync-api-football.ts --standings",
+    "sync:af:enrich": "npx tsx scripts/sync-api-football.ts --enrich"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
