@@ -5,6 +5,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   trailingSlash: false,
+  async rewrites() {
+    return [
+      {
+        source: "/feed/:slug.xml",
+        destination: "/feed/:slug",
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
