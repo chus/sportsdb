@@ -60,8 +60,24 @@ export const metadata: Metadata = {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
   alternates: {
+    canonical: BASE_URL,
+    languages: {
+      en: BASE_URL,
+      es: BASE_URL,
+      "x-default": BASE_URL,
+    },
     types: {
-      "application/rss+xml": "/feed.xml",
+      "application/rss+xml": [
+        { url: "/feed.xml", title: "SportsDB – All News" },
+        { url: "/feed/premier-league.xml", title: "Premier League News" },
+        { url: "/feed/la-liga.xml", title: "La Liga News" },
+        { url: "/feed/bundesliga.xml", title: "Bundesliga News" },
+        { url: "/feed/serie-a.xml", title: "Serie A News" },
+        { url: "/feed/ligue-1.xml", title: "Ligue 1 News" },
+        { url: "/feed/liga-profesional-argentina.xml", title: "Liga Argentina News" },
+        { url: "/feed/mls.xml", title: "MLS News" },
+        { url: "/feed/liga-mx.xml", title: "Liga MX News" },
+      ],
     },
   },
   verification: {

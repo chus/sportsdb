@@ -68,12 +68,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           title,
           description: desc,
           alternates: { canonical: `${BASE_URL}/news/${slug}` },
+          robots: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large" as const,
+            "max-snippet": -1,
+          },
           openGraph: {
             title,
             description: desc,
             type: "article",
             publishedTime: article.publishedAt?.toISOString(),
-            ...(article.imageUrl && { images: [article.imageUrl] }),
+            images: [
+              {
+                url: `${BASE_URL}/news/${slug}/opengraph-image`,
+                width: 1200,
+                height: 630,
+                alt: title,
+              },
+            ],
           },
           twitter: {
             card: "summary_large_image",
@@ -89,12 +102,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description: article.metaDescription || article.excerpt,
     alternates: { canonical: `${BASE_URL}/news/${slug}` },
+    robots: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large" as const,
+      "max-snippet": -1,
+    },
     openGraph: {
       title: article.title,
       description: article.excerpt,
       type: "article",
       publishedTime: article.publishedAt?.toISOString(),
-      ...(article.imageUrl && { images: [article.imageUrl] }),
+      images: [
+        {
+          url: `${BASE_URL}/news/${slug}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -235,18 +261,42 @@ export default async function ArticlePage({ params }: Props) {
       ? matchContext.standings.slice(0, 8)
       : null;
 
-  // NewsArticle JSON-LD
+  // NewsArticle JSON-LD — enhanced for Google Discover
+  const ogImageUrl = `${BASE_URL}/news/${slug}/opengraph-image`;
   const newsJsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
     description: article.excerpt,
     datePublished: article.publishedAt?.toISOString(),
-    dateModified: article.updatedAt?.toISOString(),
-    author: { "@type": "Organization", name: "SportsDB" },
-    publisher: { "@type": "Organization", name: "SportsDB" },
-    mainEntityOfPage: articleUrl,
-    ...(article.imageUrl && { image: article.imageUrl }),
+    dateModified: (article.updatedAt || article.publishedAt)?.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "SportsDB",
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "SportsDB",
+      url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/favicon.svg`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    image: [ogImageUrl, ...(article.imageUrl ? [article.imageUrl] : [])],
+    isAccessibleForFree: true,
+    ...(competition && {
+      about: {
+        "@type": "SportsOrganization",
+        name: competition.name,
+        url: `${BASE_URL}/competitions/${competition.slug}`,
+      },
+    }),
   };
 
   // SportsEvent JSON-LD for match reports

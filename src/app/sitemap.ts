@@ -135,6 +135,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getDistinctTeamCountries(),
   ]);
 
+  // Helper: add hreflang alternates to a URL
+  function withHreflang(url: string) {
+    return { en: url, es: url };
+  }
+
   // Player pages — filter out Unknown position
   const playerPages: MetadataRoute.Sitemap = allPlayers
     .filter((player) => player.position !== "Unknown")
@@ -143,6 +148,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: player.updatedAt || new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
+      alternates: { languages: withHreflang(`${BASE_URL}/players/${player.slug}`) },
     }));
 
   // Team pages
@@ -151,6 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: team.updatedAt || new Date(),
     changeFrequency: "weekly",
     priority: 0.8,
+    alternates: { languages: withHreflang(`${BASE_URL}/teams/${team.slug}`) },
   }));
 
   // Competition pages
@@ -160,6 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: comp.updatedAt || new Date(),
       changeFrequency: "daily",
       priority: 0.9,
+      alternates: { languages: withHreflang(`${BASE_URL}/competitions/${comp.slug}`) },
     })
   );
 
@@ -169,6 +177,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: venue.updatedAt || new Date(),
     changeFrequency: "monthly",
     priority: 0.5,
+    alternates: { languages: withHreflang(`${BASE_URL}/venues/${venue.slug}`) },
   }));
 
   // Article pages
@@ -177,6 +186,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: article.updatedAt || article.publishedAt || new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
+    alternates: { languages: withHreflang(`${BASE_URL}/news/${article.slug}`) },
   }));
 
   // Competition season pages
