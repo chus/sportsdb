@@ -18,7 +18,7 @@ export function Footer() {
     [t("common.competitions")]: [
       { label: "Premier League", href: "/competitions/premier-league" },
       { label: "La Liga", href: "/competitions/la-liga" },
-      { label: "Champions League", href: "/competitions/champions-league" },
+      { label: "Champions League", href: "/competitions/uefa-champions-league" },
       { label: "Bundesliga", href: "/competitions/bundesliga" },
     ],
     [t("footer.legal")]: [

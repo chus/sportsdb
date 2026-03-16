@@ -198,14 +198,38 @@ async function upsertCompetition(
         ? "league"
         : "international";
 
-  // Try to find existing by slug (pre-existing data without externalId)
-  const [existing] = await db
+  // 1. Find existing by externalId (already synced before)
+  const [byExtId] = await db
+    .select()
+    .from(schema.competitions)
+    .where(eq(schema.competitions.externalId, extId))
+    .limit(1);
+
+  if (byExtId) {
+    // Update fields but NEVER overwrite slug (it may have been manually set)
+    const [updated] = await db
+      .update(schema.competitions)
+      .set({
+        name: apiComp.name,
+        country: compMeta.country,
+        type,
+        logoUrl: apiComp.emblem,
+        description: `${apiComp.name} - ${compMeta.country}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.competitions.id, byExtId.id))
+      .returning();
+    return updated;
+  }
+
+  // 2. Find existing by slug (legacy data without externalId)
+  const [bySlug] = await db
     .select()
     .from(schema.competitions)
     .where(eq(schema.competitions.slug, compSlug))
     .limit(1);
 
-  if (existing) {
+  if (bySlug) {
     const [updated] = await db
       .update(schema.competitions)
       .set({
@@ -217,11 +241,12 @@ async function upsertCompetition(
         description: `${apiComp.name} - ${compMeta.country}`,
         updatedAt: new Date(),
       })
-      .where(eq(schema.competitions.id, existing.id))
+      .where(eq(schema.competitions.id, bySlug.id))
       .returning();
     return updated;
   }
 
+  // 3. Brand new competition — insert
   const [result] = await db
     .insert(schema.competitions)
     .values({
@@ -237,7 +262,6 @@ async function upsertCompetition(
       target: schema.competitions.externalId,
       set: {
         name: apiComp.name,
-        slug: compSlug,
         country: compMeta.country,
         type,
         logoUrl: apiComp.emblem,
@@ -298,14 +322,40 @@ async function upsertTeam(
   const extId = fdId(apiTeam.id);
   const teamSlug = slugify(apiTeam.name);
 
-  // Try to find existing by slug (pre-existing data without externalId)
-  const [existing] = await db
+  // 1. Find existing by externalId (already synced before)
+  const [byExtId] = await db
+    .select()
+    .from(schema.teams)
+    .where(eq(schema.teams.externalId, extId))
+    .limit(1);
+
+  if (byExtId) {
+    const [updated] = await db
+      .update(schema.teams)
+      .set({
+        name: apiTeam.name,
+        shortName: apiTeam.shortName || apiTeam.tla,
+        country: apiTeam.area?.name || "Unknown",
+        city: apiTeam.address?.split(",")[0] || null,
+        foundedYear: apiTeam.founded,
+        logoUrl: apiTeam.crest,
+        primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,
+        secondaryColor: apiTeam.clubColors?.split("/")[1]?.trim() || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.teams.id, byExtId.id))
+      .returning();
+    return updated;
+  }
+
+  // 2. Find existing by slug (legacy data without externalId)
+  const [bySlug] = await db
     .select()
     .from(schema.teams)
     .where(eq(schema.teams.slug, teamSlug))
     .limit(1);
 
-  if (existing) {
+  if (bySlug) {
     const [updated] = await db
       .update(schema.teams)
       .set({
@@ -320,11 +370,12 @@ async function upsertTeam(
         secondaryColor: apiTeam.clubColors?.split("/")[1]?.trim() || null,
         updatedAt: new Date(),
       })
-      .where(eq(schema.teams.id, existing.id))
+      .where(eq(schema.teams.id, bySlug.id))
       .returning();
     return updated;
   }
 
+  // 3. Brand new team — insert
   const [result] = await db
     .insert(schema.teams)
     .values({
@@ -344,7 +395,6 @@ async function upsertTeam(
       set: {
         name: apiTeam.name,
         shortName: apiTeam.shortName || apiTeam.tla,
-        slug: teamSlug,
         country: apiTeam.area?.name || "Unknown",
         city: apiTeam.address?.split(",")[0] || null,
         foundedYear: apiTeam.founded,
@@ -394,14 +444,37 @@ async function upsertPlayer(
   const extId = fdId(apiPlayer.id);
   const playerSlug = slugify(apiPlayer.name);
 
-  // Try to find existing by slug (pre-existing data without externalId)
-  const [existing] = await db
+  // 1. Find existing by externalId (already synced before)
+  const [byExtId] = await db
+    .select()
+    .from(schema.players)
+    .where(eq(schema.players.externalId, extId))
+    .limit(1);
+
+  if (byExtId) {
+    const [updated] = await db
+      .update(schema.players)
+      .set({
+        name: apiPlayer.name,
+        knownAs: apiPlayer.name.split(" ").pop() || null,
+        dateOfBirth: apiPlayer.dateOfBirth,
+        nationality: apiPlayer.nationality,
+        position: mapPosition(apiPlayer.position),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.players.id, byExtId.id))
+      .returning();
+    return updated;
+  }
+
+  // 2. Find existing by slug (legacy data without externalId)
+  const [bySlug] = await db
     .select()
     .from(schema.players)
     .where(eq(schema.players.slug, playerSlug))
     .limit(1);
 
-  if (existing) {
+  if (bySlug) {
     const [updated] = await db
       .update(schema.players)
       .set({
@@ -413,11 +486,12 @@ async function upsertPlayer(
         position: mapPosition(apiPlayer.position),
         updatedAt: new Date(),
       })
-      .where(eq(schema.players.id, existing.id))
+      .where(eq(schema.players.id, bySlug.id))
       .returning();
     return updated;
   }
 
+  // 3. Brand new player — insert
   try {
     const [result] = await db
       .insert(schema.players)
@@ -436,7 +510,6 @@ async function upsertPlayer(
         set: {
           name: apiPlayer.name,
           knownAs: apiPlayer.name.split(" ").pop() || null,
-          slug: playerSlug,
           dateOfBirth: apiPlayer.dateOfBirth,
           nationality: apiPlayer.nationality,
           position: mapPosition(apiPlayer.position),
