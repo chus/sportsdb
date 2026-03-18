@@ -9,8 +9,10 @@ export function BetweenContentAd() {
 
   if (isLoading || canAccess("adFree")) return null;
 
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  if (!clientId) return null;
+
   const slot = process.env.NEXT_PUBLIC_ADSENSE_LEADERBOARD_SLOT;
-  if (!slot) return null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -25,7 +27,7 @@ export function BetweenContentAd() {
           </Link>
         </div>
         <div className="flex justify-center" style={{ minHeight: 90 }}>
-          <AdUnit slot={slot} format="horizontal" style={{ width: "100%", height: 90 }} />
+          <AdUnit slot={slot} format="auto" style={{ width: "100%", height: 90 }} />
         </div>
       </div>
     </div>

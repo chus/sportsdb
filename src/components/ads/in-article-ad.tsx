@@ -9,8 +9,10 @@ export function InArticleAd() {
 
   if (isLoading || canAccess("adFree")) return null;
 
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  if (!clientId) return null;
+
   const slot = process.env.NEXT_PUBLIC_ADSENSE_IN_ARTICLE_SLOT;
-  if (!slot) return null;
 
   return (
     <div className="flex justify-center my-8">

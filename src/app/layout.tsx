@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AdSenseScript } from "@/components/ads/adsense-script";
+import { GoogleAnalytics } from "@/components/analytics/ga-script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -99,6 +100,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <head>
+        <GoogleAnalytics />
         <AdSenseScript />
       </head>
       <body className="font-sans antialiased">

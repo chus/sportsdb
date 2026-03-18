@@ -9,8 +9,10 @@ export function SidebarAd() {
 
   if (isLoading || canAccess("adFree")) return null;
 
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  if (!clientId) return null;
+
   const slot = process.env.NEXT_PUBLIC_ADSENSE_SIDEBAR_SLOT;
-  if (!slot) return null;
 
   return (
     <div className="bg-white rounded-xl border border-neutral-200 p-4">
@@ -24,7 +26,7 @@ export function SidebarAd() {
         </Link>
       </div>
       <div style={{ minHeight: 250 }}>
-        <AdUnit slot={slot} format="rectangle" responsive={false} style={{ width: 300, height: 250 }} />
+        <AdUnit slot={slot} format="auto" style={{ width: 300, height: 250 }} />
       </div>
     </div>
   );

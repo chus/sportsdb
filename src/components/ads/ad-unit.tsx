@@ -10,7 +10,7 @@ declare global {
 }
 
 interface AdUnitProps {
-  slot: string;
+  slot?: string;
   format?: string;
   responsive?: boolean;
   layout?: string;
@@ -54,7 +54,7 @@ export function AdUnit({
       className={`adsbygoogle ${className ?? ""}`}
       style={{ display: "block", ...style }}
       data-ad-client={clientId}
-      data-ad-slot={slot}
+      {...(slot && { "data-ad-slot": slot })}
       data-ad-format={format}
       {...(responsive && { "data-full-width-responsive": "true" })}
       {...(layout && { "data-ad-layout": layout })}
