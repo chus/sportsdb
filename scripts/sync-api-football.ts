@@ -1172,24 +1172,49 @@ async function enrichPlayerImages(targetLeagues: LeagueConfig[]) {
     // Match each API team to our DB and build a map: apiTeamId → dbTeamId
     const teamsToEnrich: Array<{ apiTeamId: number; dbTeamId: string; name: string }> = [];
 
+    // Manual alias map for teams whose API names don't match DB slugs
+    const TEAM_SLUG_ALIASES: Record<string, string> = {
+      "wolves": "wolverhampton-wanderers-fc",
+      "celta-vigo": "rc-celta-de-vigo",
+      "alaves": "deportivo-alaves",
+      "leganes": "cd-leganes",
+      "bayer-leverkusen": "bayer-04-leverkusen",
+      "saint-etienne": "as-saint-etienne",
+      "sc-braga": "sporting-clube-de-braga",
+      "famalicao": "fc-famalicao",
+      "rennes": "stade-rennais-fc",
+    };
+
     for (const entry of apiTeams) {
       const apiTeam = entry.team;
       const teamSlug = slugify(apiTeam.name);
 
-      // Try matching: af- externalId → exact slug → partial slug → name ILIKE
+      // Try matching: alias → af-externalId → exact slug → prefix slug → contains slug → name → shortName
       let dbTeam: { id: string } | undefined;
 
-      const [byAfId] = await db.select().from(schema.teams)
-        .where(eq(schema.teams.externalId, afId(apiTeam.id))).limit(1);
-      if (byAfId) { dbTeam = byAfId; }
+      // 1. Manual alias map
+      const aliasSlug = TEAM_SLUG_ALIASES[teamSlug];
+      if (aliasSlug) {
+        const [byAlias] = await db.select().from(schema.teams)
+          .where(eq(schema.teams.slug, aliasSlug)).limit(1);
+        if (byAlias) dbTeam = byAlias;
+      }
 
+      // 2. af- externalId
+      if (!dbTeam) {
+        const [byAfId] = await db.select().from(schema.teams)
+          .where(eq(schema.teams.externalId, afId(apiTeam.id))).limit(1);
+        if (byAfId) { dbTeam = byAfId; }
+      }
+
+      // 3. Exact slug
       if (!dbTeam) {
         const [bySlug] = await db.select().from(schema.teams)
           .where(eq(schema.teams.slug, teamSlug)).limit(1);
         if (bySlug) dbTeam = bySlug;
       }
 
-      // Try partial slug match (e.g. "arsenal" matches "arsenal-fc")
+      // 4. Prefix slug match (e.g. "arsenal" matches "arsenal-fc")
       if (!dbTeam) {
         const [byPartialSlug] = await db.select().from(schema.teams)
           .where(drizzleSql`${schema.teams.slug} LIKE ${teamSlug + '%'}`)
@@ -1197,7 +1222,15 @@ async function enrichPlayerImages(targetLeagues: LeagueConfig[]) {
         if (byPartialSlug) dbTeam = byPartialSlug;
       }
 
-      // Try name contains (e.g. "Arsenal" matches "Arsenal FC")
+      // 5. Contains slug match (e.g. "leverkusen" matches "bayer-04-leverkusen")
+      if (!dbTeam) {
+        const [byContainsSlug] = await db.select().from(schema.teams)
+          .where(drizzleSql`${schema.teams.slug} LIKE ${'%' + teamSlug + '%'}`)
+          .limit(1);
+        if (byContainsSlug) dbTeam = byContainsSlug;
+      }
+
+      // 6. Name contains (e.g. "Arsenal" matches "Arsenal FC")
       if (!dbTeam) {
         const [byName] = await db.select().from(schema.teams)
           .where(drizzleSql`${schema.teams.name} ILIKE ${'%' + apiTeam.name + '%'}`)
@@ -1205,10 +1238,10 @@ async function enrichPlayerImages(targetLeagues: LeagueConfig[]) {
         if (byName) dbTeam = byName;
       }
 
-      // Try short_name match (e.g. "Wolves" matches short_name "Wolves" or "WOL")
+      // 7. Short name match (e.g. "Wolves" matches shortName "Wolverhampton")
       if (!dbTeam) {
         const [byShortName] = await db.select().from(schema.teams)
-          .where(drizzleSql`${schema.teams.shortName} ILIKE ${apiTeam.name}`)
+          .where(drizzleSql`${schema.teams.shortName} ILIKE ${'%' + apiTeam.name + '%'}`)
           .limit(1);
         if (byShortName) dbTeam = byShortName;
       }
