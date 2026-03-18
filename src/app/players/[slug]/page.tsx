@@ -147,6 +147,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     age,
     dateOfBirth: player.dateOfBirth,
     preferredFoot: player.preferredFoot,
+    totalGoals,
+    totalAssists,
+    totalApps: totalApps,
+    heightCm: player.heightCm,
+    careerTeams: career.length > 1 ? career.map((c) => c.team.name) : undefined,
   });
 
   // Build breadcrumb items

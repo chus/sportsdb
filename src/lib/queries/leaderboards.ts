@@ -158,6 +158,112 @@ export async function getCompetitionBySlug(slug: string) {
 }
 
 // ============================================================
+// HISTORICAL SEASON LEADERBOARDS
+// ============================================================
+
+export async function getTopScorersForCompetitionSeason(
+  competitionSlug: string,
+  seasonLabel: string,
+  limit = 50
+): Promise<LeaderboardEntry[]> {
+  return baseLeaderboardQuery()
+    .where(
+      and(
+        eq(competitions.slug, competitionSlug),
+        eq(seasons.label, seasonLabel),
+        ne(players.position, "Unknown")
+      )
+    )
+    .orderBy(desc(playerSeasonStats.goals))
+    .limit(limit);
+}
+
+export async function getTopAssistsForCompetitionSeason(
+  competitionSlug: string,
+  seasonLabel: string,
+  limit = 50
+): Promise<LeaderboardEntry[]> {
+  return baseLeaderboardQuery()
+    .where(
+      and(
+        eq(competitions.slug, competitionSlug),
+        eq(seasons.label, seasonLabel),
+        ne(players.position, "Unknown")
+      )
+    )
+    .orderBy(desc(playerSeasonStats.assists))
+    .limit(limit);
+}
+
+export async function getCompetitionSeasonLabels(
+  competitionSlug: string
+): Promise<string[]> {
+  const results = await db
+    .selectDistinct({ label: seasons.label })
+    .from(playerSeasonStats)
+    .innerJoin(competitionSeasons, eq(playerSeasonStats.competitionSeasonId, competitionSeasons.id))
+    .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+    .innerJoin(seasons, eq(competitionSeasons.seasonId, seasons.id))
+    .where(eq(competitions.slug, competitionSlug))
+    .orderBy(desc(seasons.label));
+  return results.map((r) => r.label);
+}
+
+// ============================================================
+// PLAYERS BY POSITION
+// ============================================================
+
+export async function getPositionCounts(): Promise<{ position: string; count: number }[]> {
+  return db
+    .select({
+      position: players.position,
+      count: sql<number>`count(*)::int`.as("count"),
+    })
+    .from(players)
+    .where(ne(players.position, "Unknown"))
+    .groupBy(players.position)
+    .orderBy(desc(sql`count(*)`));
+}
+
+export async function getPlayersByPosition(position: string, limit = 100) {
+  const result = await db.execute<{
+    id: string;
+    name: string;
+    slug: string;
+    position: string;
+    nationality: string | null;
+    image_url: string | null;
+    popularity_score: number | null;
+    team_name: string | null;
+    team_slug: string | null;
+    team_logo_url: string | null;
+  }>(sql`
+    SELECT
+      p.id, p.name, p.slug, p.position, p.nationality, p.image_url, p.popularity_score,
+      t.name as team_name, t.slug as team_slug, t.logo_url as team_logo_url
+    FROM players p
+    LEFT JOIN player_team_history pth ON pth.player_id = p.id AND pth.valid_to IS NULL
+    LEFT JOIN teams t ON t.id = pth.team_id
+    WHERE p.position = ${position}
+    ORDER BY coalesce(p.popularity_score, 0) DESC
+    LIMIT ${limit}
+  `);
+
+  return result.rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    position: r.position,
+    nationality: r.nationality,
+    imageUrl: r.image_url,
+    popularityScore: r.popularity_score,
+    team: r.team_name
+      ? { name: r.team_name, slug: r.team_slug!, logoUrl: r.team_logo_url }
+      : null,
+  }));
+}
+
+// ============================================================
 // PLAYERS BY NATIONALITY
 // ============================================================
 

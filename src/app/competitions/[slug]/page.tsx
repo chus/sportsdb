@@ -8,7 +8,8 @@ import {
   getStandings,
   getTopScorers,
 } from "@/lib/queries/competitions";
-import { CompetitionJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { buildCompetitionFaqs } from "@/lib/seo/entity-copy";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
@@ -75,6 +76,21 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
   const competitionUrl = `${BASE_URL}/competitions/${slug}`;
 
+  const leader = standingsData.length > 0
+    ? { name: standingsData[0].team.shortName || standingsData[0].team.name, points: standingsData[0].standing.points }
+    : null;
+  const topScorer = topScorers.length > 0
+    ? { name: topScorers[0].player.name, goals: topScorers[0].stat.goals, teamName: topScorers[0].team.shortName || topScorers[0].team.name }
+    : null;
+  const faqItems = buildCompetitionFaqs({
+    name: competition.name,
+    country: competition.country,
+    teamCount: standingsData.length,
+    seasonLabel: competitionSeason?.season.label,
+    leader,
+    topScorer,
+  });
+
   return (
     <>
       <CompetitionJsonLd
@@ -90,6 +106,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           { name: competition.name, url: competitionUrl },
         ]}
       />
+      {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="competition" entityId={competition.id} />
       <div className="min-h-screen bg-neutral-50">
         {/* Hero Section */}
@@ -293,6 +310,25 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                   </div>
                 </dl>
               </div>
+
+              {faqItems.length > 0 && (
+                <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-4">Competition FAQ</h3>
+                  <div className="space-y-3">
+                    {faqItems.map((item) => (
+                      <details
+                        key={item.question}
+                        className="group rounded-lg border border-neutral-200 px-4 py-3"
+                      >
+                        <summary className="cursor-pointer list-none font-medium text-neutral-900">
+                          {item.question}
+                        </summary>
+                        <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>

@@ -17,7 +17,8 @@ import {
   getVenueMatches,
 } from "@/lib/queries/venues";
 import { getVenueImage } from "@/lib/utils/avatar";
-import { BreadcrumbJsonLd, VenueJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { buildVenueFaqs } from "@/lib/seo/entity-copy";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -185,6 +186,15 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const venueUrl = `${BASE_URL}/venues/${slug}`;
 
+  const faqItems = buildVenueFaqs({
+    name: venue.name,
+    city: venue.city,
+    country: venue.country,
+    capacity: venue.capacity,
+    openedYear: venue.openedYear,
+    homeTeamNames: currentTeams.map((t) => t.team.name),
+  });
+
   return (
     <>
     <BreadcrumbJsonLd
@@ -201,6 +211,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
       address={{ city: venue.city, country: venue.country }}
       capacity={venue.capacity}
     />
+    {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <div
@@ -476,6 +487,25 @@ export default async function VenuePage({ params }: VenuePageProps) {
                   {venue.latitude}, {venue.longitude}
                 </p>
               </div>
+            )}
+
+            {faqItems.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Venue FAQ</h3>
+                <div className="space-y-3">
+                  {faqItems.map((item) => (
+                    <details
+                      key={item.question}
+                      className="group rounded-lg border border-neutral-200 px-4 py-3"
+                    >
+                      <summary className="cursor-pointer list-none font-medium text-neutral-900">
+                        {item.question}
+                      </summary>
+                      <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
             )}
           </div>
         </div>

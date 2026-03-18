@@ -3,6 +3,7 @@ import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Football News & Match Reports | SportsDB",
@@ -37,7 +38,16 @@ export default async function NewsPage({ searchParams }: Props) {
   const featuredArticle = page === 1 ? articles[0] : null;
   const regularArticles = page === 1 ? articles.slice(1) : articles;
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "News", url: `${BASE_URL}/news` },
+      ]}
+    />
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
@@ -119,5 +129,6 @@ export default async function NewsPage({ searchParams }: Props) {
         </>
       )}
     </div>
+    </>
   );
 }

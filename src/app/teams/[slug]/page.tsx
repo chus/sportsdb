@@ -175,6 +175,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
     squadSize: squad.length,
     seasonLabel,
     competitionName,
+    goalsFor: standing?.goalsFor,
+    goalsAgainst: standing?.goalsAgainst,
     standing,
   });
 

@@ -14,6 +14,8 @@ import { eq, sql } from "drizzle-orm";
 import {
   getDistinctNationalities,
   getDistinctTeamCountries,
+  getCompetitionSeasonLabels,
+  getPositionCounts,
 } from "@/lib/queries/leaderboards";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -75,6 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.6,
     },
+    {
+      url: `${BASE_URL}/players/position`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
   ];
 
   // Get competitions that actually have player stats (for top-scorers/assists pages)
@@ -99,6 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     allCompetitionSeasons,
     nationalities,
     teamCountries,
+    positionCounts,
   ] = await Promise.all([
     db
       .select({
@@ -133,6 +142,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .innerJoin(seasons, eq(competitionSeasons.seasonId, seasons.id)),
     getDistinctNationalities(),
     getDistinctTeamCountries(),
+    getPositionCounts(),
   ]);
 
   // Helper: add hreflang alternates to a URL
@@ -233,8 +243,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  // Note: Compare pages excluded from sitemap — they are discoverable
-  // via internal links but don't need to be submitted directly to Google.
+  // Players by position
+  const positionPages: MetadataRoute.Sitemap = positionCounts.map((p) => ({
+    url: `${BASE_URL}/players/position/${p.position.toLowerCase()}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
+  // Historical season leaderboards
+  const historicalSeasonPages: MetadataRoute.Sitemap = [];
+  for (const comp of allCompetitions.filter((c) => competitionSlugsWithStats.has(c.slug))) {
+    const labels = await getCompetitionSeasonLabels(comp.slug);
+    for (const label of labels) {
+      const safeSeason = label.replace("/", "-");
+      historicalSeasonPages.push({
+        url: `${BASE_URL}/top-scorers/${comp.slug}/${safeSeason}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      });
+      historicalSeasonPages.push({
+        url: `${BASE_URL}/top-assists/${comp.slug}/${safeSeason}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.5,
+      });
+    }
+  }
 
   return [
     ...staticPages,
@@ -248,5 +284,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...topAssistCompPages,
     ...nationalityPages,
     ...teamCountryPages,
+    ...positionPages,
+    ...historicalSeasonPages,
   ];
 }

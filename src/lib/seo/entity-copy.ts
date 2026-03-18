@@ -174,6 +174,11 @@ export function buildPlayerFaqs(args: {
   age?: number | null;
   dateOfBirth?: string | null;
   preferredFoot?: string | null;
+  totalGoals?: number;
+  totalAssists?: number;
+  totalApps?: number;
+  heightCm?: number | null;
+  careerTeams?: string[];
 }) {
   const faqs: FaqItem[] = [
     {
@@ -208,6 +213,29 @@ export function buildPlayerFaqs(args: {
     faqs.push({
       question: `What is ${args.name}'s preferred foot?`,
       answer: `${args.name} is ${args.preferredFoot.toLowerCase()}-footed.`,
+    });
+  }
+
+  if (args.totalApps && args.totalApps > 0) {
+    faqs.push({
+      question: `How many goals has ${args.name} scored?`,
+      answer: `${args.name} has scored ${args.totalGoals ?? 0} goals and provided ${args.totalAssists ?? 0} assists in ${args.totalApps} career appearances.`,
+    });
+  }
+
+  if (args.heightCm) {
+    const feet = Math.floor(args.heightCm / 30.48);
+    const inches = Math.round((args.heightCm % 30.48) / 2.54);
+    faqs.push({
+      question: `How tall is ${args.name}?`,
+      answer: `${args.name} is ${args.heightCm} cm (${feet}'${inches}") tall.`,
+    });
+  }
+
+  if (args.careerTeams && args.careerTeams.length > 1) {
+    faqs.push({
+      question: `Which clubs has ${args.name} played for?`,
+      answer: `${args.name} has played for ${args.careerTeams.join(", ")}.`,
     });
   }
 
@@ -283,6 +311,9 @@ export function buildTeamFaqs(args: {
   squadSize: number;
   seasonLabel?: string | null;
   competitionName?: string | null;
+  venueName?: string | null;
+  goalsFor?: number | null;
+  goalsAgainst?: number | null;
   standing?: {
     position: number;
     points: number;
@@ -316,6 +347,108 @@ export function buildTeamFaqs(args: {
     faqs.push({
       question: `What is ${args.name}'s current league position?`,
       answer: `${args.name} are ${ordinal(args.standing.position)} in the ${label} with ${args.standing.points} points.`,
+    });
+  }
+
+  if (args.venueName) {
+    faqs.push({
+      question: `What stadium does ${args.name} play at?`,
+      answer: `${args.name} play their home matches at ${args.venueName}.`,
+    });
+  }
+
+  if (args.goalsFor != null && args.goalsAgainst != null && args.seasonLabel) {
+    const label = args.competitionName || args.seasonLabel;
+    faqs.push({
+      question: `How many goals have ${args.name} scored this season?`,
+      answer: `${args.name} have scored ${args.goalsFor} goals and conceded ${args.goalsAgainst} in the ${label} this season.`,
+    });
+  }
+
+  return faqs;
+}
+
+export function buildCompetitionFaqs(args: {
+  name: string;
+  country?: string | null;
+  teamCount: number;
+  seasonLabel?: string | null;
+  leader?: { name: string; points: number } | null;
+  topScorer?: { name: string; goals: number; teamName: string } | null;
+}) {
+  const faqs: FaqItem[] = [];
+
+  if (args.teamCount > 0) {
+    faqs.push({
+      question: `How many teams are in the ${args.name}?`,
+      answer: `The ${args.name}${args.seasonLabel ? ` ${args.seasonLabel} season` : ""} has ${args.teamCount} teams.`,
+    });
+  }
+
+  if (args.leader && args.seasonLabel) {
+    faqs.push({
+      question: `Who is top of the ${args.name}?`,
+      answer: `${args.leader.name} lead the ${args.name} with ${args.leader.points} points in the ${args.seasonLabel} season.`,
+    });
+  }
+
+  if (args.topScorer) {
+    faqs.push({
+      question: `Who is the top scorer in the ${args.name}?`,
+      answer: `${args.topScorer.name} (${args.topScorer.teamName}) is the leading scorer in the ${args.name} with ${args.topScorer.goals} goal${args.topScorer.goals !== 1 ? "s" : ""}.`,
+    });
+  }
+
+  if (args.country) {
+    faqs.push({
+      question: `Which country is the ${args.name} in?`,
+      answer: `The ${args.name} is the top-flight football league in ${args.country}.`,
+    });
+  }
+
+  return faqs;
+}
+
+export function buildVenueFaqs(args: {
+  name: string;
+  city?: string | null;
+  country?: string | null;
+  capacity?: number | null;
+  openedYear?: number | null;
+  homeTeamNames?: string[];
+}) {
+  const faqs: FaqItem[] = [];
+
+  if (args.city || args.country) {
+    const location = args.city && args.country
+      ? `${args.city}, ${args.country}`
+      : args.city || args.country;
+    faqs.push({
+      question: `Where is ${args.name} located?`,
+      answer: `${args.name} is located in ${location}.`,
+    });
+  }
+
+  if (args.capacity) {
+    faqs.push({
+      question: `What is the capacity of ${args.name}?`,
+      answer: `${args.name} has a capacity of ${args.capacity.toLocaleString()} spectators.`,
+    });
+  }
+
+  if (args.homeTeamNames && args.homeTeamNames.length > 0) {
+    faqs.push({
+      question: `Which teams play at ${args.name}?`,
+      answer: args.homeTeamNames.length === 1
+        ? `${args.homeTeamNames[0]} play their home matches at ${args.name}.`
+        : `${args.name} is home to ${args.homeTeamNames.join(" and ")}.`,
+    });
+  }
+
+  if (args.openedYear) {
+    faqs.push({
+      question: `When was ${args.name} built?`,
+      answer: `${args.name} was opened in ${args.openedYear}.`,
     });
   }
 

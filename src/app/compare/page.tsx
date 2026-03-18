@@ -1,5 +1,8 @@
 import { Metadata } from "next";
 import { ComparePageContent } from "./compare-content";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
   title: "Player Comparison",
@@ -7,5 +10,15 @@ export const metadata: Metadata = {
 };
 
 export default function ComparePage() {
-  return <ComparePageContent />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "Compare Players", url: `${BASE_URL}/compare` },
+        ]}
+      />
+      <ComparePageContent />
+    </>
+  );
 }
