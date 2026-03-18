@@ -3,6 +3,7 @@ import { ArrowRightLeft, User, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getRecentTransfers } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { format } from "date-fns";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -80,10 +81,12 @@ export default async function TransfersPage() {
                           >
                             <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                               {transfer.player.imageUrl ? (
-                                <img
+                                <ImageWithFallback
                                   src={transfer.player.imageUrl}
                                   alt={transfer.player.name}
                                   className="w-8 h-8 rounded-full object-cover"
+                                  width={32}
+                                  height={32}
                                 />
                               ) : (
                                 <User className="w-4 h-4 text-neutral-400" />
@@ -102,7 +105,7 @@ export default async function TransfersPage() {
                               className="flex items-center gap-2 hover:text-blue-600 transition-colors"
                             >
                               {transfer.fromTeam.logoUrl ? (
-                                <img src={transfer.fromTeam.logoUrl} alt={transfer.fromTeam.name} className="w-5 h-5 object-contain" />
+                                <ImageWithFallback src={transfer.fromTeam.logoUrl} alt={transfer.fromTeam.name} className="w-5 h-5 object-contain" width={20} height={20} />
                               ) : (
                                 <Shield className="w-4 h-4 text-neutral-300" />
                               )}
@@ -118,7 +121,7 @@ export default async function TransfersPage() {
                             className="flex items-center gap-2 hover:text-blue-600 transition-colors"
                           >
                             {transfer.toTeam.logoUrl ? (
-                              <img src={transfer.toTeam.logoUrl} alt={transfer.toTeam.name} className="w-5 h-5 object-contain" />
+                              <ImageWithFallback src={transfer.toTeam.logoUrl} alt={transfer.toTeam.name} className="w-5 h-5 object-contain" width={20} height={20} />
                             ) : (
                               <Shield className="w-4 h-4 text-neutral-300" />
                             )}

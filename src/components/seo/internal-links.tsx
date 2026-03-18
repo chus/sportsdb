@@ -151,7 +151,7 @@ export async function PlayerInternalLinks({
             ))}
           </div>
           <Link
-            href={`/search?type=player&q=${encodeURIComponent(nationality)}`}
+            href={`/players/nationality/${encodeURIComponent(nationality)}`}
             className="block mt-3 text-sm text-blue-600 hover:text-blue-700"
           >
             View all {nationality} players →
@@ -192,6 +192,12 @@ export async function PlayerInternalLinks({
               </Link>
             ))}
           </div>
+          <Link
+            href={`/players/position/${position.toLowerCase()}`}
+            className="block mt-3 text-sm text-blue-600 hover:text-blue-700"
+          >
+            View all {position}s →
+          </Link>
         </div>
       )}
     </div>
@@ -244,7 +250,7 @@ export async function TeamInternalLinks({
             ))}
           </div>
           <Link
-            href={`/search?type=team&q=${encodeURIComponent(country)}`}
+            href={`/teams/country/${encodeURIComponent(country)}`}
             className="block mt-3 text-sm text-blue-600 hover:text-blue-700"
           >
             View all {country} teams →

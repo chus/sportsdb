@@ -9,7 +9,7 @@ import {
   getTopScorers,
 } from "@/lib/queries/competitions";
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
-import { buildCompetitionFaqs } from "@/lib/seo/entity-copy";
+import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
@@ -82,6 +82,16 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   const topScorer = topScorers.length > 0
     ? { name: topScorers[0].player.name, goals: topScorers[0].stat.goals, teamName: topScorers[0].team.shortName || topScorers[0].team.name }
     : null;
+  const aboutParagraphs = buildCompetitionAbout({
+    name: competition.name,
+    country: competition.country,
+    type: competition.type,
+    seasonLabel: competitionSeason?.season.label,
+    teamCount: standingsData.length,
+    leader,
+    topScorer,
+  });
+
   const faqItems = buildCompetitionFaqs({
     name: competition.name,
     country: competition.country,
@@ -228,6 +238,18 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                 </div>
               )}
 
+              {/* About */}
+              {aboutParagraphs.length > 0 && (
+                <section className="mt-8">
+                  <h2 className="text-xl font-bold text-neutral-900 mb-4">About {competition.name}</h2>
+                  <div className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
+                    {aboutParagraphs.map((p, i) => (
+                      <p key={i} className="text-neutral-700 leading-relaxed">{p}</p>
+                    ))}
+                  </div>
+                </section>
+              )}
+
               {/* Fixtures */}
               {competitionSeason && (
                 <div className="mt-8">
@@ -273,8 +295,33 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                       </Link>
                     ))}
                   </div>
+                  <Link
+                    href={`/top-scorers/${slug}`}
+                    className="block mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View all Top Scorers →
+                  </Link>
                 </div>
               )}
+
+              {/* Leaderboard Links */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-6 space-y-3">
+                <h3 className="text-sm font-medium text-neutral-500 mb-2">Leaderboards</h3>
+                <Link
+                  href={`/top-scorers/${slug}`}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+                >
+                  <span className="font-medium text-neutral-900 group-hover:text-blue-600">Top Scorers</span>
+                  <span className="text-sm text-neutral-400">→</span>
+                </Link>
+                <Link
+                  href={`/top-assists/${slug}`}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-50 transition-colors group"
+                >
+                  <span className="font-medium text-neutral-900 group-hover:text-blue-600">Top Assists</span>
+                  <span className="text-sm text-neutral-400">→</span>
+                </Link>
+              </div>
 
               <SidebarAd />
 

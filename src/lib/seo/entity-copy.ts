@@ -303,6 +303,110 @@ export function buildTeamAbout(args: {
   return [para1, para2].filter(Boolean);
 }
 
+export function buildCompetitionAbout(args: {
+  name: string;
+  country?: string | null;
+  type?: string | null;
+  seasonLabel?: string | null;
+  teamCount: number;
+  leader?: { name: string; points: number } | null;
+  topScorer?: { name: string; goals: number; teamName: string } | null;
+}): string[] {
+  // --- Paragraph 1: Identity ---
+  let sentence1: string;
+  if (args.country) {
+    sentence1 = `The ${args.name} is the top-flight football ${args.type === "cup" ? "cup competition" : "league"} in ${args.country}.`;
+  } else {
+    sentence1 = `The ${args.name} is ${articleFor(args.type || "league")} ${args.type === "cup" ? "cup competition" : "professional football league"}.`;
+  }
+
+  let sentence2: string;
+  if (args.seasonLabel && args.teamCount > 0) {
+    sentence2 = `The ${args.seasonLabel} season features ${args.teamCount} teams competing for the title.`;
+  } else if (args.teamCount > 0) {
+    sentence2 = `The current campaign features ${args.teamCount} teams.`;
+  } else {
+    sentence2 = "";
+  }
+
+  // --- Paragraph 2: Current state ---
+  let sentence3: string;
+  if (args.leader && args.topScorer) {
+    sentence3 = `${args.leader.name} lead the standings with ${args.leader.points} points, while ${args.topScorer.name} (${args.topScorer.teamName}) tops the scoring charts with ${args.topScorer.goals} goal${args.topScorer.goals !== 1 ? "s" : ""}.`;
+  } else if (args.leader) {
+    sentence3 = `${args.leader.name} currently lead the standings with ${args.leader.points} points.`;
+  } else if (args.topScorer) {
+    sentence3 = `${args.topScorer.name} (${args.topScorer.teamName}) leads the scoring with ${args.topScorer.goals} goal${args.topScorer.goals !== 1 ? "s" : ""}.`;
+  } else {
+    sentence3 = "";
+  }
+
+  const para1 = [sentence1, sentence2].filter(Boolean).join(" ");
+  const para2 = sentence3;
+
+  return [para1, para2].filter(Boolean);
+}
+
+export function buildVenueAbout(args: {
+  name: string;
+  city?: string | null;
+  country?: string | null;
+  capacity?: number | null;
+  openedYear?: number | null;
+  currentTeamNames: string[];
+  historicalTeamCount: number;
+  recentMatchCount: number;
+  upcomingMatchCount: number;
+}): string[] {
+  // --- Paragraph 1: Identity ---
+  const location = args.city && args.country
+    ? `${args.city}, ${args.country}`
+    : args.city || args.country || null;
+
+  let sentence1: string;
+  if (location && args.openedYear) {
+    sentence1 = `${args.name} is a football stadium located in ${location}, opened in ${args.openedYear}.`;
+  } else if (location) {
+    sentence1 = `${args.name} is a football stadium located in ${location}.`;
+  } else {
+    sentence1 = `${args.name} is a professional football stadium.`;
+  }
+
+  let sentence2: string;
+  if (args.capacity) {
+    sentence2 = `The venue has a capacity of ${args.capacity.toLocaleString()} spectators.`;
+  } else {
+    sentence2 = "";
+  }
+
+  // --- Paragraph 2: Teams and activity ---
+  let sentence3: string;
+  if (args.currentTeamNames.length === 1) {
+    sentence3 = `It serves as the home ground for ${args.currentTeamNames[0]}.`;
+  } else if (args.currentTeamNames.length > 1) {
+    sentence3 = `The stadium is shared by ${args.currentTeamNames.join(" and ")}.`;
+  } else {
+    sentence3 = "";
+  }
+
+  let sentence4: string;
+  const totalMatches = args.recentMatchCount + args.upcomingMatchCount;
+  if (totalMatches > 0 && args.historicalTeamCount > 0) {
+    sentence4 = `${totalMatches} matches are scheduled or have been played at the venue recently, and ${args.historicalTeamCount} former clubs have called it home.`;
+  } else if (totalMatches > 0) {
+    sentence4 = `${totalMatches} matches are scheduled or have been played at the venue recently.`;
+  } else if (args.historicalTeamCount > 0) {
+    sentence4 = `${args.historicalTeamCount} clubs have previously called it home.`;
+  } else {
+    sentence4 = "";
+  }
+
+  const para1 = [sentence1, sentence2].filter(Boolean).join(" ");
+  const para2 = [sentence3, sentence4].filter(Boolean).join(" ");
+
+  return [para1, para2].filter(Boolean);
+}
+
 export function buildTeamFaqs(args: {
   name: string;
   city?: string | null;

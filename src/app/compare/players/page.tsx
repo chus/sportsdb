@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { players, playerSeasonStats, competitionSeasons, seasons, teams } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { PlayerSearchSelector } from "@/components/search/player-search-selector";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface ComparePageProps {
   searchParams: Promise<{ p1?: string; p2?: string }>;
@@ -137,7 +138,7 @@ function PlayerCard({ player }: { player: PlayerWithStats }) {
       <div className="text-center p-6 hover:bg-neutral-50 transition-colors rounded-xl">
         <div className="w-24 h-24 bg-neutral-100 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
           {player.imageUrl ? (
-            <img src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" />
+            <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" width={96} height={96} />
           ) : (
             <Users className="w-12 h-12 text-neutral-300" />
           )}
@@ -149,7 +150,7 @@ function PlayerCard({ player }: { player: PlayerWithStats }) {
         {player.team && (
           <div className="flex items-center justify-center gap-2 mt-2">
             {player.team.logoUrl && (
-              <img src={player.team.logoUrl} alt={player.team.name} className="w-5 h-5 object-contain" />
+              <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-5 h-5 object-contain" width={20} height={20} />
             )}
             <span className="text-sm text-neutral-600">{player.team.name}</span>
           </div>

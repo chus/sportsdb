@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface KnowledgeCardProps {
   title: string;
@@ -30,9 +31,11 @@ export function KnowledgeCard({
         <div className={`flex-shrink-0 bg-neutral-200 rounded overflow-hidden ${
           isCompact ? "w-10 h-10" : "w-12 h-12"
         }`}>
-          <img 
-            src={imageUrl} 
-            alt={title} 
+          <ImageWithFallback
+            src={imageUrl}
+            alt={title}
+            width={48}
+            height={48}
             className="w-full h-full object-cover"
           />
         </div>

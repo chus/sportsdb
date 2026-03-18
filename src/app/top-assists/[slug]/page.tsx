@@ -6,8 +6,10 @@ import {
   getTopAssistsForCompetition,
   getAllCompetitionSlugs,
   getCompetitionBySlug,
+  getCompetitionSeasonLabels,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -47,7 +49,10 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
   const competition = await getCompetitionBySlug(slug);
   if (!competition) notFound();
 
-  const leaders = await getTopAssistsForCompetition(slug, 50);
+  const [leaders, allSeasons] = await Promise.all([
+    getTopAssistsForCompetition(slug, 50),
+    getCompetitionSeasonLabels(slug),
+  ]);
 
   return (
     <>
@@ -79,6 +84,23 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
+          {allSeasons.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white">
+                Current
+              </span>
+              {allSeasons.map((s) => (
+                <Link
+                  key={s}
+                  href={`/top-assists/${slug}/${s.replace("/", "-")}`}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-white border border-neutral-200 text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                >
+                  {s}
+                </Link>
+              ))}
+            </div>
+          )}
+
           {leaders.length === 0 ? (
             <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
               <Handshake className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
@@ -112,7 +134,7 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
                           >
                             <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                               {player.imageUrl ? (
-                                <img src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" />
+                                <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" width={32} height={32} />
                               ) : (
                                 <User className="w-4 h-4 text-neutral-400" />
                               )}
@@ -129,7 +151,7 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
                             className="flex items-center gap-2 hover:text-blue-600 transition-colors"
                           >
                             {team.logoUrl ? (
-                              <img src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" />
+                              <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" width={20} height={20} />
                             ) : (
                               <Shield className="w-4 h-4 text-neutral-300" />
                             )}

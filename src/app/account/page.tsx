@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { PricingCards } from "@/components/subscription/pricing-cards";
@@ -477,7 +478,7 @@ export default function AccountPage() {
                           <div className="flex items-center gap-4 mb-3">
                             <div className="w-14 h-14 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center overflow-hidden">
                               {team.logoUrl ? (
-                                <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-2" />
+                                <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-2" width={56} height={56} />
                               ) : (
                                 <span className="text-white font-bold">
                                   {team.name.substring(0, 2).toUpperCase()}

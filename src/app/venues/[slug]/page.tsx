@@ -18,7 +18,7 @@ import {
 } from "@/lib/queries/venues";
 import { getVenueImage } from "@/lib/utils/avatar";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
-import { buildVenueFaqs } from "@/lib/seo/entity-copy";
+import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -186,6 +186,18 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const venueUrl = `${BASE_URL}/venues/${slug}`;
 
+  const aboutParagraphs = buildVenueAbout({
+    name: venue.name,
+    city: venue.city,
+    country: venue.country,
+    capacity: venue.capacity,
+    openedYear: venue.openedYear,
+    currentTeamNames: currentTeams.map((t) => t.team.name),
+    historicalTeamCount: historicalTeams.length,
+    recentMatchCount: recentMatches.length,
+    upcomingMatchCount: upcomingMatches.length,
+  });
+
   const faqItems = buildVenueFaqs({
     name: venue.name,
     city: venue.city,
@@ -293,6 +305,18 @@ export default async function VenuePage({ params }: VenuePageProps) {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* About */}
+            {aboutParagraphs.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                <h2 className="text-lg font-bold text-neutral-900 mb-4">About {venue.name}</h2>
+                <div className="space-y-4">
+                  {aboutParagraphs.map((p, i) => (
+                    <p key={i} className="text-neutral-700 leading-relaxed">{p}</p>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Current Teams */}
             {currentTeams.length > 0 && (
               <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">

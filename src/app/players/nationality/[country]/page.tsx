@@ -7,6 +7,7 @@ import {
   getPlayersByNationality,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -140,7 +141,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                     {player.imageUrl ? (
-                      <img src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                      <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" width={48} height={48} />
                     ) : (
                       <User className="w-6 h-6 text-neutral-400" />
                     )}
@@ -153,7 +154,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                     {player.team && (
                       <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                         {player.team.logoUrl ? (
-                          <img src={player.team.logoUrl} alt="" className="w-3 h-3 object-contain" />
+                          <ImageWithFallback src={player.team.logoUrl} alt="" className="w-3 h-3 object-contain" width={12} height={12} />
                         ) : (
                           <Shield className="w-3 h-3" />
                         )}
@@ -164,6 +165,22 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Cross-link to positions */}
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-neutral-900 mb-4">Browse by Position</h2>
+            <div className="flex flex-wrap gap-3">
+              {["Goalkeeper", "Defender", "Midfielder", "Forward"].map((pos) => (
+                <Link
+                  key={pos}
+                  href={`/players/position/${pos.toLowerCase()}`}
+                  className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-purple-300 hover:text-purple-600 transition-colors"
+                >
+                  {pos}s
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

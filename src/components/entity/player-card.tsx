@@ -1,4 +1,5 @@
 import { TrendingUp } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface PlayerCardProps {
   name: string;
@@ -27,9 +28,11 @@ export function PlayerCard({
       {/* Image */}
       <div className="relative h-56 bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden">
         {imageUrl ? (
-          <img 
-            src={imageUrl} 
+          <ImageWithFallback
+            src={imageUrl}
             alt={name}
+            width={400}
+            height={224}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (

@@ -4,6 +4,7 @@ import { User, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayersByPosition } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -99,7 +100,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                     {player.imageUrl ? (
-                      <img src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                      <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" width={48} height={48} />
                     ) : (
                       <User className="w-6 h-6 text-neutral-400" />
                     )}
@@ -112,7 +113,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
                     {player.team && (
                       <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                         {player.team.logoUrl ? (
-                          <img src={player.team.logoUrl} alt="" className="w-3 h-3 object-contain" />
+                          <ImageWithFallback src={player.team.logoUrl} alt="" className="w-3 h-3 object-contain" width={12} height={12} />
                         ) : (
                           <Shield className="w-3 h-3" />
                         )}
@@ -123,6 +124,16 @@ export default async function PositionPlayersPage({ params }: PageProps) {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Cross-link to nationalities */}
+          <div className="mt-8">
+            <Link
+              href="/players/nationality"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+            >
+              Browse by Nationality →
+            </Link>
           </div>
         </div>
       </div>

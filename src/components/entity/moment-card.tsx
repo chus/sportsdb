@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface MomentCardProps {
   title: string;
@@ -22,9 +23,11 @@ export function MomentCard({
     >
       {/* Image with overlay */}
       <div className="relative h-64 overflow-hidden">
-        <img 
-          src={imageUrl} 
+        <ImageWithFallback
+          src={imageUrl}
           alt={title}
+          width={400}
+          height={256}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />

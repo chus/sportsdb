@@ -2,6 +2,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Trophy, Minus } from "lucide-react";
 import { getHeadToHead } from "@/lib/queries/related";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface HeadToHeadProps {
   team1Id: string;
@@ -73,7 +74,7 @@ export async function HeadToHead({
         <div className="flex items-center justify-center gap-8 py-3 border-y border-neutral-100">
           <div className="text-center">
             {team1Logo ? (
-              <img src={team1Logo} alt={team1Name} className="w-8 h-8 mx-auto mb-1 object-contain" />
+              <ImageWithFallback src={team1Logo} alt={team1Name} width={32} height={32} className="w-8 h-8 mx-auto mb-1 object-contain" />
             ) : (
               <div className="w-8 h-8 bg-neutral-100 rounded mx-auto mb-1" />
             )}
@@ -83,7 +84,7 @@ export async function HeadToHead({
           <Minus className="w-4 h-4 text-neutral-300" />
           <div className="text-center">
             {team2Logo ? (
-              <img src={team2Logo} alt={team2Name} className="w-8 h-8 mx-auto mb-1 object-contain" />
+              <ImageWithFallback src={team2Logo} alt={team2Name} width={32} height={32} className="w-8 h-8 mx-auto mb-1 object-contain" />
             ) : (
               <div className="w-8 h-8 bg-neutral-100 rounded mx-auto mb-1" />
             )}

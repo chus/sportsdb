@@ -7,6 +7,7 @@ import {
   getTeamsByCountry,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -116,7 +117,7 @@ export default async function CountryTeamsPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     {team.logoUrl ? (
-                      <img src={team.logoUrl} alt={team.name} className="w-8 h-8 object-contain" />
+                      <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-8 h-8 object-contain" width={32} height={32} />
                     ) : (
                       <Shield className="w-6 h-6 text-neutral-400" />
                     )}
