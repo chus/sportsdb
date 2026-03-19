@@ -25,12 +25,27 @@ export async function searchEntities(
     ? sql`AND si.entity_type = ${entityType}`
     : sql``;
 
-  // Patterns for different match types
+  // Split query into individual words for AND matching
+  const words = trimmedQuery.split(/\s+/).filter((w) => w.length >= 2);
+  if (words.length === 0) return [];
+
+  // Build per-word WHERE conditions: every word must appear in name, subtitle, or meta
+  const wordFilters = words.map(
+    (word) => {
+      const pattern = `%${word}%`;
+      return sql`(
+        lower(si.name) LIKE ${pattern}
+        OR lower(coalesce(si.subtitle, '')) LIKE ${pattern}
+        OR lower(coalesce(si.meta, '')) LIKE ${pattern}
+      )`;
+    }
+  );
+  const combinedFilter = wordFilters.reduce((acc, f) => sql`${acc} AND ${f}`);
+
+  // For ranking, use the full query as-is (best match detection)
   const exactPattern = trimmedQuery;
   const prefixPattern = `${trimmedQuery}%`;
-  const wordPrefixPattern = `% ${trimmedQuery}%`; // Matches word boundaries (space before)
-  const exactWordPattern = `% ${trimmedQuery} %`; // Exact word match with spaces
-  const exactWordEndPattern = `% ${trimmedQuery}`; // Word at end of name
+  const wordPrefixPattern = `% ${trimmedQuery}%`;
   const containsPattern = `%${trimmedQuery}%`;
 
   // Autocomplete search with smart ranking
@@ -61,24 +76,19 @@ export async function searchEntities(
         WHEN lower(si.name) LIKE ${prefixPattern} THEN 5000
         -- Any word in name starts with query (e.g., "Mes" in "Lionel Messi")
         WHEN lower(si.name) LIKE ${wordPrefixPattern} THEN 3000
+        -- Full query found as substring in name
+        WHEN lower(si.name) LIKE ${containsPattern} THEN 2000
         -- Subtitle matches
         WHEN lower(coalesce(si.subtitle, '')) LIKE ${prefixPattern} THEN 1000
         WHEN lower(coalesce(si.subtitle, '')) LIKE ${wordPrefixPattern} THEN 800
-        -- Name contains query anywhere
-        WHEN lower(si.name) LIKE ${containsPattern} THEN 500
-        -- Subtitle/meta contains query
-        WHEN lower(coalesce(si.subtitle, '')) LIKE ${containsPattern} THEN 200
-        WHEN lower(coalesce(si.meta, '')) LIKE ${containsPattern} THEN 100
+        -- Name contains all words but not as a single substring
+        WHEN TRUE THEN 500
         ELSE 0
       END as match_rank
     FROM search_index si
     LEFT JOIN players p ON si.entity_type = 'player' AND si.id = p.id
     LEFT JOIN teams t ON si.entity_type = 'team' AND si.id = t.id
-    WHERE (
-      lower(si.name) LIKE ${containsPattern}
-      OR lower(coalesce(si.subtitle, '')) LIKE ${containsPattern}
-      OR lower(coalesce(si.meta, '')) LIKE ${containsPattern}
-    )
+    WHERE ${combinedFilter}
     AND (si.entity_type != 'player' OR coalesce(p.position, '') != 'Unknown')
     ${typeFilter}
     ORDER BY
@@ -114,7 +124,15 @@ export async function searchArticles(
   const trimmedQuery = query.trim().toLowerCase();
   if (!trimmedQuery || trimmedQuery.length < 2) return [];
 
-  const containsPattern = `%${trimmedQuery}%`;
+  // Split into words for AND matching
+  const words = trimmedQuery.split(/\s+/).filter((w) => w.length >= 2);
+  if (words.length === 0) return [];
+
+  const wordFilters = words.map((word) => {
+    const pattern = `%${word}%`;
+    return sql`(lower(title) LIKE ${pattern} OR lower(excerpt) LIKE ${pattern})`;
+  });
+  const combinedFilter = wordFilters.reduce((acc, f) => sql`${acc} AND ${f}`);
 
   const results = await db.execute<{
     id: string;
@@ -126,10 +144,7 @@ export async function searchArticles(
     SELECT id, slug, title, type, excerpt
     FROM articles
     WHERE status = 'published'
-      AND (
-        lower(title) LIKE ${containsPattern}
-        OR lower(excerpt) LIKE ${containsPattern}
-      )
+      AND ${combinedFilter}
     ORDER BY published_at DESC
     LIMIT ${limit}
   `);
