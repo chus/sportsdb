@@ -6,6 +6,7 @@ import {
   competitions,
   venues,
   articles,
+  matches,
   competitionSeasons,
   seasons,
   playerSeasonStats,
@@ -108,6 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     nationalities,
     teamCountries,
     positionCounts,
+    allMatches,
   ] = await Promise.all([
     db
       .select({
@@ -143,6 +145,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getDistinctNationalities(),
     getDistinctTeamCountries(),
     getPositionCounts(),
+    db
+      .select({
+        id: matches.id,
+        updatedAt: matches.updatedAt,
+        scheduledAt: matches.scheduledAt,
+      })
+      .from(matches),
   ]);
 
   // Helper: add hreflang alternates to a URL
@@ -272,6 +281,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // Match pages
+  const matchPages: MetadataRoute.Sitemap = allMatches.map((match) => ({
+    url: `${BASE_URL}/matches/${match.id}`,
+    lastModified: match.updatedAt || match.scheduledAt || new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
+
   return [
     ...staticPages,
     ...competitionPages,
@@ -280,6 +297,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...playerPages,
     ...venuePages,
     ...articlePages,
+    ...matchPages,
     ...topScorerCompPages,
     ...topAssistCompPages,
     ...nationalityPages,
