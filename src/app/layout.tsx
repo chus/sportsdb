@@ -11,10 +11,6 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { AuthModalProvider } from "@/components/auth/auth-modal";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
-import { PostHogProvider } from "@/components/analytics/posthog-provider";
-import { PostHogPageview } from "@/components/analytics/posthog-pageview";
-import { PostHogIdentify } from "@/components/analytics/posthog-identify";
-import { Suspense } from "react";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -106,22 +102,16 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            <PostHogProvider>
-              <Suspense fallback={null}>
-                <PostHogPageview />
-              </Suspense>
-              <PostHogIdentify />
-              <SubscriptionProvider>
-                <AuthModalProvider>
-                  <OnboardingProvider>
-                    <Navbar />
-                    <main className="min-h-screen">{children}</main>
-                    <Footer />
-                    <SpeedInsights />
-                  </OnboardingProvider>
-                </AuthModalProvider>
-              </SubscriptionProvider>
-            </PostHogProvider>
+            <SubscriptionProvider>
+              <AuthModalProvider>
+                <OnboardingProvider>
+                  <Navbar />
+                  <main className="min-h-screen">{children}</main>
+                  <Footer />
+                  <SpeedInsights />
+                </OnboardingProvider>
+              </AuthModalProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
