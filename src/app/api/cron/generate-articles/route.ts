@@ -538,6 +538,7 @@ async function insertArticle(
         `;
       }
     }
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "));
   }
 }
 
@@ -578,6 +579,7 @@ async function insertRoundRecap(
         `;
       }
     }
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "));
   }
 }
 
@@ -610,6 +612,48 @@ async function insertPlayerSpotlight(
     await sql`
       INSERT INTO article_teams (article_id, team_id, role)
       VALUES (${insertedArticle.id}, ${team.id}, 'featured')
+      ON CONFLICT DO NOTHING
+    `;
+  }
+  if (insertedArticle) {
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playerId);
+  }
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function linkArticleToPlayers(
+  sql: NeonQueryFunction<false, false>,
+  articleId: string,
+  text: string,
+  primaryPlayerId?: string | null
+): Promise<void> {
+  const players = await sql`
+    SELECT id, name, known_as FROM players
+    WHERE position != 'Unknown' AND length(name) > 3
+  `;
+
+  const matched = new Set<string>();
+  if (primaryPlayerId) matched.add(primaryPlayerId);
+
+  for (const p of players) {
+    if (p.name && p.name.includes(" ")) {
+      const re = new RegExp(`\\b${escapeRegex(p.name)}\\b`, "i");
+      if (re.test(text)) matched.add(p.id);
+    }
+    if (p.known_as && p.known_as.length >= 5 && p.known_as !== p.name) {
+      const re = new RegExp(`\\b${escapeRegex(p.known_as)}\\b`, "i");
+      if (re.test(text)) matched.add(p.id);
+    }
+  }
+
+  for (const playerId of matched) {
+    const role = playerId === primaryPlayerId ? "featured" : "mentioned";
+    await sql`
+      INSERT INTO article_players (article_id, player_id, role)
+      VALUES (${articleId}, ${playerId}, ${role})
       ON CONFLICT DO NOTHING
     `;
   }

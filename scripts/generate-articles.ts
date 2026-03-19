@@ -196,6 +196,44 @@ async function linkArticleToTeams(
   }
 }
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+async function linkArticleToPlayers(
+  articleId: string,
+  text: string,
+  primaryPlayerId?: string | null
+): Promise<void> {
+  const players = await sql`
+    SELECT id, name, known_as FROM players
+    WHERE position != 'Unknown' AND length(name) > 3
+  `;
+
+  const matched = new Set<string>();
+  if (primaryPlayerId) matched.add(primaryPlayerId);
+
+  for (const p of players) {
+    if (p.name && p.name.includes(" ")) {
+      const re = new RegExp(`\\b${escapeRegex(p.name)}\\b`, "i");
+      if (re.test(text)) matched.add(p.id);
+    }
+    if (p.known_as && p.known_as.length >= 5 && p.known_as !== p.name) {
+      const re = new RegExp(`\\b${escapeRegex(p.known_as)}\\b`, "i");
+      if (re.test(text)) matched.add(p.id);
+    }
+  }
+
+  for (const playerId of matched) {
+    const role = playerId === primaryPlayerId ? "featured" : "mentioned";
+    await sql`
+      INSERT INTO article_players (article_id, player_id, role)
+      VALUES (${articleId}, ${playerId}, ${role})
+      ON CONFLICT DO NOTHING
+    `;
+  }
+}
+
 async function generateMatchReports(limitNum: number): Promise<number> {
   console.log(`\nGenerating match report articles (limit: ${limitNum})...`);
 
@@ -247,6 +285,10 @@ async function generateMatchReports(limitNum: number): Promise<number> {
       const success = await insertArticle(article, "match_report", match.id);
       if (success) {
         await linkArticleToTeams(article.slug, [match.home_team_slug, match.away_team_slug]);
+        const [inserted] = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
+        if (inserted) {
+          await linkArticleToPlayers(inserted.id, [article.title, article.excerpt, article.content].join(" "));
+        }
         console.log(`  Created: "${article.title}"`);
         generated++;
       }
@@ -639,6 +681,10 @@ async function generateMatchPreviews(): Promise<number> {
       );
       if (success) {
         await linkArticleToTeams(article.slug, [match.home_team_slug, match.away_team_slug]);
+        const [inserted] = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
+        if (inserted) {
+          await linkArticleToPlayers(inserted.id, [article.title, article.excerpt, article.content].join(" "));
+        }
         console.log(`  Created: "${article.title}"`);
         generated++;
       }

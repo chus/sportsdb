@@ -112,12 +112,20 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ tier: newTier }),
         });
 
-        if (res.ok) {
-          await fetchSubscription();
-        } else {
-          const data = await res.json();
+        const data = await res.json();
+
+        if (!res.ok) {
           throw new Error(data.error || "Failed to upgrade");
         }
+
+        // If Stripe returns a checkout URL, redirect to it
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+          return;
+        }
+
+        // Otherwise it was an inline upgrade (existing subscription)
+        await fetchSubscription();
       } catch (error) {
         console.error("Error upgrading:", error);
         throw error;

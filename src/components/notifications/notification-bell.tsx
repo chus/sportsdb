@@ -13,6 +13,9 @@ const ENTITY_ROUTES: Record<string, string> = {
 };
 
 export function NotificationBell() {
+  // HIDDEN: waiting for notification triggers
+  return null;
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =

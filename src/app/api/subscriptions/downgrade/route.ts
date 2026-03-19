@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { downgradeSubscription } from "@/lib/queries/subscriptions";
-import { getTierConfig } from "@/lib/subscriptions/tiers";
+import { stripe } from "@/lib/stripe";
+import { db } from "@/lib/db";
+import { subscriptions } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST() {
   try {
@@ -11,15 +13,36 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const subscription = await downgradeSubscription(user.id);
-    const tierConfig = getTierConfig(subscription.tier);
+    const [sub] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, user.id))
+      .limit(1);
+
+    if (!sub) {
+      return NextResponse.json({ error: "No subscription found" }, { status: 404 });
+    }
+
+    // Cancel Stripe subscription if it exists
+    if (sub.stripeSubscriptionId) {
+      await stripe.subscriptions.cancel(sub.stripeSubscriptionId);
+    }
+
+    // Downgrade to free in DB
+    await db
+      .update(subscriptions)
+      .set({
+        tier: "free",
+        status: "active",
+        stripeSubscriptionId: null,
+        endDate: null,
+        cancelledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.userId, user.id));
 
     return NextResponse.json({
       success: true,
-      subscription: {
-        ...subscription,
-        tierConfig,
-      },
       message: "Downgraded to Free tier",
     });
   } catch (error) {
