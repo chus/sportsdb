@@ -1183,6 +1183,7 @@ async function enrichPlayerImages(targetLeagues: LeagueConfig[]) {
       "sc-braga": "sporting-clube-de-braga",
       "famalicao": "fc-famalicao",
       "rennes": "stade-rennais-fc",
+      "guimaraes": "vitoria-sc",
     };
 
     for (const entry of apiTeams) {
