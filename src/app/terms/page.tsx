@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
-  const lastUpdated = "February 2026";
+  const lastUpdated = "March 2026";
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -97,7 +97,24 @@ export default function TermsPage() {
                 Automated access to our data (including scraping, crawling, or API access) requires prior authorization.
               </p>
 
-              <h2>8. Disclaimer of Warranties</h2>
+              <h2>8. Subscriptions and Payments</h2>
+              <p>
+                SportsDB offers optional paid subscription plans (Pro and Ultimate) that unlock additional features. By subscribing, you agree to the following:
+              </p>
+              <ul>
+                <li>Subscription fees are billed monthly and charged at the beginning of each billing period.</li>
+                <li>All payments are processed securely by Stripe. We never store or have access to your full credit card information.</li>
+                <li>You may cancel your subscription at any time through your account settings. Your access to paid features continues until the end of the current billing period.</li>
+                <li>Refunds for the current billing period are available by contacting support within 7 days of the charge date.</li>
+                <li>We reserve the right to change subscription pricing with 30 days advance notice. Existing subscribers will be notified by email before any price change takes effect.</li>
+              </ul>
+
+              <h2>9. Free Trial and Tier Changes</h2>
+              <p>
+                The Free tier provides access to core features at no cost. You may upgrade or downgrade your plan at any time. When downgrading, your paid features remain active until the end of the current billing period.
+              </p>
+
+              <h2>10. Disclaimer of Warranties</h2>
               <p>
                 THE SITE IS PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS. WE MAKE NO WARRANTIES, EXPRESS OR IMPLIED, REGARDING THE SITE&apos;S OPERATION OR THE INFORMATION, CONTENT, OR MATERIALS INCLUDED.
               </p>
@@ -116,32 +133,32 @@ export default function TermsPage() {
                 TO THE FULLEST EXTENT PERMITTED BY LAW, SPORTSDB SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE SITE.
               </p>
 
-              <h2>10. Indemnification</h2>
+              <h2>11. Indemnification</h2>
               <p>
                 You agree to indemnify and hold harmless SportsDB and its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Site or violation of these Terms.
               </p>
 
-              <h2>11. Third-Party Links</h2>
+              <h2>12. Third-Party Links</h2>
               <p>
                 Our Site may contain links to third-party websites. We are not responsible for the content or practices of these external sites. We encourage you to review their terms and privacy policies.
               </p>
 
-              <h2>12. Modifications to Terms</h2>
+              <h2>13. Modifications to Terms</h2>
               <p>
                 We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting. Your continued use of the Site constitutes acceptance of the modified Terms.
               </p>
 
-              <h2>13. Termination</h2>
+              <h2>14. Termination</h2>
               <p>
                 We may terminate or suspend your access to the Site immediately, without prior notice, for any reason, including breach of these Terms. Upon termination, your right to use the Site will cease immediately.
               </p>
 
-              <h2>14. Governing Law</h2>
+              <h2>15. Governing Law</h2>
               <p>
                 These Terms shall be governed by and construed in accordance with applicable laws, without regard to conflict of law principles.
               </p>
 
-              <h2>15. Contact Information</h2>
+              <h2>16. Contact Information</h2>
               <p>
                 If you have any questions about these Terms, please contact us:
               </p>

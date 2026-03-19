@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
-  const lastUpdated = "February 2026";
+  const lastUpdated = "March 2026";
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -97,8 +97,10 @@ export default function PrivacyPage() {
                 We may use third-party services that collect, monitor, and analyze usage data:
               </p>
               <ul>
-                <li><strong>Analytics:</strong> We use analytics services to understand how visitors use our Site.</li>
+                <li><strong>Analytics:</strong> We use Google Analytics to understand how visitors use our Site.</li>
                 <li><strong>Hosting:</strong> Our Site is hosted on Vercel, which may collect technical information.</li>
+                <li><strong>Payment Processing:</strong> Subscription payments are processed by <strong>Stripe</strong> (stripe.com). When you subscribe, your payment information is collected and processed directly by Stripe. We never receive, store, or have access to your full credit card number. Stripe&apos;s use of your data is governed by their <a href="https://stripe.com/privacy" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</li>
+                <li><strong>Advertising:</strong> We use Google AdSense to display advertisements. AdSense may use cookies and similar technologies to serve relevant ads.</li>
               </ul>
 
               <h2>Data Security</h2>

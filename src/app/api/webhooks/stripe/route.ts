@@ -97,6 +97,21 @@ export async function POST(request: NextRequest) {
       break;
     }
 
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId =
+        typeof invoice.customer === "string"
+          ? invoice.customer
+          : invoice.customer?.id;
+
+      console.log(
+        `Payment failed: customer=${customerId} amount=${invoice.amount_due} attempt=${invoice.attempt_count}`
+      );
+      // Don't downgrade — Stripe retries automatically.
+      // Status will update via customer.subscription.updated → past_due if retries exhaust.
+      break;
+    }
+
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
       const customerId =

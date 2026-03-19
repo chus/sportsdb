@@ -749,91 +749,7 @@ export default function AccountPage() {
 
         {/* ==================== BILLING TAB ==================== */}
         {activeTab === "billing" && (
-          <div className="space-y-8">
-            {/* Current Plan */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-bold">Current Plan</h2>
-                <span
-                  className={cn(
-                    "px-3 py-1 rounded-full text-sm font-semibold",
-                    tier === "free" && "bg-neutral-100 text-neutral-700",
-                    tier === "pro" && "bg-blue-100 text-blue-700",
-                    tier === "ultimate" && "bg-purple-100 text-purple-700"
-                  )}
-                >
-                  {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                </span>
-              </div>
-              {subscription?.endDate && (
-                <p className="text-sm text-neutral-600">
-                  {subscription.autoRenew ? "Renews" : "Expires"} on{" "}
-                  {new Date(subscription.endDate).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-
-            {/* Pricing Cards */}
-            <div>
-              <h2 className="text-2xl font-bold text-neutral-900 mb-6">
-                {tier === "free" ? "Upgrade Your Plan" : "Manage Your Plan"}
-              </h2>
-              <PricingCards />
-            </div>
-
-            {/* Mock Payment Method */}
-            {tier !== "free" && (
-              <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Payment Method</h2>
-                <div className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl">
-                  <div className="w-12 h-8 bg-gradient-to-r from-blue-700 to-blue-900 rounded flex items-center justify-center text-white text-xs font-bold">
-                    VISA
-                  </div>
-                  <div>
-                    <p className="font-medium text-neutral-900">Visa ending in 4242</p>
-                    <p className="text-sm text-neutral-500">Expires 12/2027</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Mock Invoice History */}
-            {tier !== "free" && (
-              <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Invoice History</h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-neutral-200">
-                        <th className="text-left py-3 text-neutral-500 font-medium">Date</th>
-                        <th className="text-left py-3 text-neutral-500 font-medium">Description</th>
-                        <th className="text-right py-3 text-neutral-500 font-medium">Amount</th>
-                        <th className="text-right py-3 text-neutral-500 font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-100">
-                      {[
-                        { date: "Mar 1, 2026", desc: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`, amount: tier === "pro" ? "$4.99" : "$9.99" },
-                        { date: "Feb 1, 2026", desc: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`, amount: tier === "pro" ? "$4.99" : "$9.99" },
-                        { date: "Jan 1, 2026", desc: `${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`, amount: tier === "pro" ? "$4.99" : "$9.99" },
-                      ].map((inv, i) => (
-                        <tr key={i}>
-                          <td className="py-3 text-neutral-900">{inv.date}</td>
-                          <td className="py-3 text-neutral-600">{inv.desc}</td>
-                          <td className="py-3 text-right text-neutral-900 font-medium">{inv.amount}</td>
-                          <td className="py-3 text-right">
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                              Paid
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
+          <BillingTab tier={tier} subscription={subscription} />
         )}
       </div>
 
@@ -907,6 +823,85 @@ export default function AccountPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function BillingTab({
+  tier,
+  subscription,
+}: {
+  tier: string;
+  subscription: { endDate: Date | null; autoRenew: boolean } | null;
+}) {
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Could not open subscription portal");
+      }
+    } catch {
+      alert("Something went wrong");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Current Plan */}
+      <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-bold">Current Plan</h2>
+          <span
+            className={cn(
+              "px-3 py-1 rounded-full text-sm font-semibold",
+              tier === "free" && "bg-neutral-100 text-neutral-700",
+              tier === "pro" && "bg-blue-100 text-blue-700",
+              tier === "ultimate" && "bg-purple-100 text-purple-700"
+            )}
+          >
+            {tier.charAt(0).toUpperCase() + tier.slice(1)}
+          </span>
+        </div>
+        {subscription?.endDate && (
+          <p className="text-sm text-neutral-600">
+            {subscription.autoRenew ? "Renews" : "Expires"} on{" "}
+            {new Date(subscription.endDate).toLocaleDateString()}
+          </p>
+        )}
+        {tier !== "free" && (
+          <button
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            className="mt-4 px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+            Manage Subscription
+          </button>
+        )}
+      </div>
+
+      {/* Pricing Cards */}
+      <div>
+        <h2 className="text-2xl font-bold text-neutral-900 mb-6">
+          {tier === "free" ? "Upgrade Your Plan" : "Change Plan"}
+        </h2>
+        <PricingCards />
+        <p className="text-xs text-neutral-500 text-center mt-4">
+          By subscribing you agree to our{" "}
+          <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+          {" "}Payments are processed securely by Stripe.
+        </p>
+      </div>
     </div>
   );
 }
