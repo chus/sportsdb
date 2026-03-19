@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
     const { entityType, entityId, action } = followSchema.parse(body);
 
     if (action === "follow") {
-      const { allowed, reason } = await canUserFollow(user.id);
+      const { allowed, reason, currentCount, maxCount } = await canUserFollow(user.id);
       if (!allowed) {
         return NextResponse.json(
-          { error: reason || "Follow limit reached" },
+          { error: reason || "Follow limit reached", currentCount, maxCount },
           { status: 403 }
         );
       }

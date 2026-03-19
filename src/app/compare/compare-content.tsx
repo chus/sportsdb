@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, X, TrendingUp, Search, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, X, TrendingUp, Search, Loader2, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
@@ -129,13 +129,34 @@ export function ComparePageContent() {
             Add up to 4 players to compare their statistics
           </p>
           {!isPro && (
-            <p className="text-sm text-amber-600 mt-2">
-              Free tier: {MAX_FREE_COMPARISONS - comparisonsToday} comparisons
-              remaining today.{" "}
-              <Link href="/pricing" className="underline">
-                Upgrade for unlimited
-              </Link>
-            </p>
+            <div className="mt-4 max-w-xs mx-auto">
+              <div className="flex items-center justify-between text-sm mb-1.5">
+                <span className="text-neutral-600">
+                  {comparisonsToday}/{MAX_FREE_COMPARISONS} comparisons used
+                </span>
+                <Link
+                  href="/pricing"
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  Upgrade
+                </Link>
+              </div>
+              <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500",
+                    comparisonsToday >= MAX_FREE_COMPARISONS
+                      ? "bg-red-500"
+                      : comparisonsToday >= MAX_FREE_COMPARISONS - 1
+                      ? "bg-amber-500"
+                      : "bg-blue-500"
+                  )}
+                  style={{
+                    width: `${(comparisonsToday / MAX_FREE_COMPARISONS) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
           )}
         </div>
 
@@ -291,7 +312,29 @@ export function ComparePageContent() {
           </div>
         )}
 
-        {selectedPlayers.length < 2 && (
+        {!canCompare && (
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-8 text-center max-w-lg mx-auto mb-8">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Zap className="w-7 h-7 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-neutral-900 mb-2">
+              Daily Limit Reached
+            </h3>
+            <p className="text-neutral-600 mb-6">
+              You&apos;ve used all {MAX_FREE_COMPARISONS} free comparisons for today.
+              Upgrade to Pro for unlimited player comparisons, advanced stats, and more.
+            </p>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+            >
+              <Zap className="w-5 h-5" />
+              Upgrade to Pro — $4.99/mo
+            </Link>
+          </div>
+        )}
+
+        {selectedPlayers.length < 2 && canCompare && (
           <div className="text-center py-12 text-neutral-500">
             Add at least 2 players to compare their statistics
           </div>

@@ -20,8 +20,9 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
-import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { InArticleAd } from "@/components/ads/in-article-ad";
+import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
+import { UpgradeBanner } from "@/components/subscription/upgrade-banner";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
@@ -628,6 +629,8 @@ export default async function ArticlePage({ params }: Props) {
 
           <InArticleAd />
 
+          <UpgradeBanner variant="inline" context="article" className="my-8" />
+
           {/* Player Ratings Section */}
           {article.type === "match_report" && matchData && hasRatings && homeLineups && awayLineups && (
             <div className="mt-12 pt-8 border-t border-neutral-200">
@@ -990,7 +993,7 @@ export default async function ArticlePage({ params }: Props) {
                 </Link>
               )}
 
-              <SidebarAd />
+              <SidebarUpgradeOrAd context="article" />
             </div>
           </div>
         </div>

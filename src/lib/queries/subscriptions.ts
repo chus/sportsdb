@@ -141,7 +141,7 @@ export async function cancelSubscription(userId: string): Promise<void> {
 // Check if user can follow more entities
 export async function canUserFollow(
   userId: string
-): Promise<{ allowed: boolean; reason?: string }> {
+): Promise<{ allowed: boolean; reason?: string; currentCount?: number; maxCount?: number }> {
   const subscription = await getUserSubscription(userId);
   const limit = getFeatureLimit(subscription.tier, "maxFollows");
 
@@ -158,6 +158,8 @@ export async function canUserFollow(
     return {
       allowed: false,
       reason: `Free tier is limited to ${limit} follows. Upgrade to Pro for unlimited follows.`,
+      currentCount: result.count,
+      maxCount: limit,
     };
   }
 

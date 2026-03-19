@@ -13,8 +13,9 @@ import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerProfileSummary } from "@/components/player/player-profile-summary";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
-import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
+import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
+import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
 import { PageTracker } from "@/components/analytics/page-tracker";
@@ -560,7 +561,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             {/* Related Articles */}
             <RelatedArticles playerId={player.id} limit={5} />
 
-            <SidebarAd />
+            <SidebarUpgradeOrAd context="player" />
 
             {/* Player Profile Summary */}
             <PlayerProfileSummary playerId={player.id} />

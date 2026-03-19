@@ -8,6 +8,7 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   SubscriptionTier,
@@ -50,6 +51,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -82,6 +84,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchSubscription();
   }, [fetchSubscription]);
+
+  // Re-fetch after returning from Stripe checkout (webhook may need a moment)
+  useEffect(() => {
+    const upgraded = searchParams.get("upgraded");
+    if (upgraded && user) {
+      const timer = setTimeout(() => fetchSubscription(), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, user, fetchSubscription]);
 
   const tier: SubscriptionTier = subscription?.tier ?? "free";
   const isPro = tier === "pro" || tier === "ultimate";
