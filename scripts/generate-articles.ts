@@ -91,7 +91,41 @@ async function generateArticle(prompt: string): Promise<ArticleResult | null> {
   }
 }
 
-async function getMatchesWithoutArticles(limitNum: number): Promise<any[]> {
+async function getMatchesWithoutArticles(limitNum: number, filterCompetitionSlug?: string): Promise<any[]> {
+  if (filterCompetitionSlug) {
+    return await sql`
+      SELECT
+        m.id,
+        m.matchday,
+        m.scheduled_at,
+        m.home_score,
+        m.away_score,
+        ht.name as home_team,
+        ht.slug as home_team_slug,
+        at.name as away_team,
+        at.slug as away_team_slug,
+        c.name as competition,
+        c.slug as competition_slug,
+        s.label as season,
+        v.name as venue,
+        ms.summary as existing_summary
+      FROM matches m
+      INNER JOIN teams ht ON m.home_team_id = ht.id
+      INNER JOIN teams at ON m.away_team_id = at.id
+      INNER JOIN competition_seasons cs ON m.competition_season_id = cs.id
+      INNER JOIN competitions c ON cs.competition_id = c.id
+      INNER JOIN seasons s ON cs.season_id = s.id
+      LEFT JOIN venues v ON m.venue_id = v.id
+      LEFT JOIN match_summaries ms ON m.id = ms.match_id
+      LEFT JOIN articles a ON m.id = a.match_id AND a.type = 'match_report'
+      WHERE m.status = 'finished'
+        AND m.home_score IS NOT NULL
+        AND a.id IS NULL
+        AND c.slug = ${filterCompetitionSlug}
+      ORDER BY m.scheduled_at DESC
+      LIMIT ${limitNum}
+    `;
+  }
   return await sql`
     SELECT
       m.id,
@@ -234,10 +268,13 @@ async function linkArticleToPlayers(
   }
 }
 
-async function generateMatchReports(limitNum: number): Promise<number> {
+async function generateMatchReports(limitNum: number, filterCompetitionSlug?: string): Promise<number> {
   console.log(`\nGenerating match report articles (limit: ${limitNum})...`);
+  if (filterCompetitionSlug) {
+    console.log(`Filtering by competition: ${filterCompetitionSlug}`);
+  }
 
-  const matches = await getMatchesWithoutArticles(limitNum);
+  const matches = await getMatchesWithoutArticles(limitNum, filterCompetitionSlug);
   console.log(`Found ${matches.length} matches without articles`);
 
   let generated = 0;
@@ -787,7 +824,7 @@ async function main() {
 
   // Generate based on type or all
   if (!articleType || articleType === "match_report") {
-    totalGenerated += await generateMatchReports(limit);
+    totalGenerated += await generateMatchReports(limit, competitionSlug);
   }
 
   if (!articleType || articleType === "match_preview") {
