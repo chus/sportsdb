@@ -11,6 +11,8 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { AuthModalProvider } from "@/components/auth/auth-modal";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
+import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consent-provider";
+import { CookieConsentBanner } from "@/components/cookie-consent/cookie-consent-banner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -95,24 +97,25 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <head>
-        <GoogleAnalytics />
-        <AdSenseScript />
-      </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <SubscriptionProvider>
-              <AuthModalProvider>
-                <OnboardingProvider>
-                  <Navbar />
-                  <main className="min-h-screen">{children}</main>
-                  <Footer />
-                  <SpeedInsights />
-                </OnboardingProvider>
-              </AuthModalProvider>
-            </SubscriptionProvider>
-          </AuthProvider>
+          <CookieConsentProvider>
+            <AuthProvider>
+              <SubscriptionProvider>
+                <AuthModalProvider>
+                  <OnboardingProvider>
+                    <GoogleAnalytics />
+                    <AdSenseScript />
+                    <Navbar />
+                    <main className="min-h-screen">{children}</main>
+                    <Footer />
+                    <CookieConsentBanner />
+                    <SpeedInsights />
+                  </OnboardingProvider>
+                </AuthModalProvider>
+              </SubscriptionProvider>
+            </AuthProvider>
+          </CookieConsentProvider>
         </NextIntlClientProvider>
       </body>
     </html>

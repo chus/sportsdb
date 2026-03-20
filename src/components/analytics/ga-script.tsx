@@ -1,11 +1,14 @@
 "use client";
 
 import Script from "next/script";
+import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export function GoogleAnalytics() {
-  if (!GA_ID) return null;
+  const { consent } = useCookieConsent();
+
+  if (!GA_ID || consent !== "accepted") return null;
 
   return (
     <>
