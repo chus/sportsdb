@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Trophy, Shield, User, ChevronRight } from "lucide-react";
+import { Trophy, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
@@ -93,17 +93,19 @@ export default async function TopScorersPage() {
                             href={`/players/${player.slug}`}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
-                            <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                              {player.imageUrl ? (
+                            {player.imageUrl ? (
+                              <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                                 <img
                                   src={player.imageUrl}
                                   alt={player.name}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />
-                              ) : (
-                                <User className="w-4 h-4 text-neutral-400" />
-                              )}
-                            </div>
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                <span className="text-white text-xs font-bold">{player.name.substring(0, 2).toUpperCase()}</span>
+                              </div>
+                            )}
                             <div>
                               <div className="font-medium">{player.name}</div>
                               <div className="text-xs text-neutral-500">{player.nationality}</div>

@@ -66,8 +66,8 @@ export default async function PositionIndexPage() {
                   className="bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-xl transition-shadow flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center">
-                      <User className={`w-6 h-6 ${meta?.color || "text-neutral-500"}`} />
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">{item.position.substring(0, 2).toUpperCase()}</span>
                     </div>
                     <div>
                       <span className="text-lg font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">

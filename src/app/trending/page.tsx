@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TrendingUp, Users, Search, Shield, User } from "lucide-react";
+import { TrendingUp, Search, Shield, User } from "lucide-react";
 import type { Metadata } from "next";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
@@ -78,17 +78,19 @@ export default async function TrendingPage() {
                       <span className="text-2xl font-bold text-neutral-200 w-8">
                         {index + 1}
                       </span>
-                      <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                        {player.imageUrl ? (
+                      {player.imageUrl ? (
+                        <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
                           <img
                             src={player.imageUrl}
                             alt={player.name}
                             className="w-12 h-12 rounded-full object-cover"
                           />
-                        ) : (
-                          <User className="w-6 h-6 text-neutral-400" />
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-sm font-bold">{player.name.substring(0, 2).toUpperCase()}</span>
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
                           {player.name}
@@ -128,17 +130,19 @@ export default async function TrendingPage() {
                       <span className="text-2xl font-bold text-neutral-200 w-8">
                         {index + 1}
                       </span>
-                      <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 p-2">
-                        {team.logoUrl ? (
+                      {team.logoUrl ? (
+                        <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 p-2">
                           <img
                             src={team.logoUrl}
                             alt={team.name}
                             className="w-full h-full object-contain"
                           />
-                        ) : (
-                          <Shield className="w-6 h-6 text-neutral-400" />
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-sm font-bold">{team.name.substring(0, 2).toUpperCase()}</span>
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
                           {team.name}

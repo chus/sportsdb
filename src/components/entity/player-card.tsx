@@ -36,8 +36,8 @@ export function PlayerCard({
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl">
-            👤
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600">
+            <span className="text-white text-4xl font-bold">{name.substring(0, 2).toUpperCase()}</span>
           </div>
         )}
         

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { User, Shield, Calendar } from "lucide-react";
+import { Shield, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import {
   getRelatedPlayers,
@@ -31,17 +31,19 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
             href={`/players/${player.slug}`}
             className="flex items-center gap-3 group"
           >
-            <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
-              {player.imageUrl ? (
+            {player.imageUrl ? (
+              <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
                 <img
                   src={player.imageUrl}
                   alt={player.name}
                   className="w-full h-full object-cover rounded-full"
                 />
-              ) : (
-                <User className="w-5 h-5 text-neutral-400 group-hover:text-blue-500" />
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-bold">{player.name.substring(0, 2).toUpperCase()}</span>
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
                 {player.name}
@@ -82,17 +84,19 @@ export async function RelatedTeams({ teamId, limit = 6 }: RelatedTeamsProps) {
             href={`/teams/${team.slug}`}
             className="flex items-center gap-3 group"
           >
-            <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors p-1">
-              {team.logoUrl ? (
+            {team.logoUrl ? (
+              <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors p-1">
                 <img
                   src={team.logoUrl}
                   alt={team.name}
                   className="w-full h-full object-contain"
                 />
-              ) : (
-                <Shield className="w-5 h-5 text-neutral-400 group-hover:text-blue-500" />
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-bold">{team.name.substring(0, 2).toUpperCase()}</span>
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
                 {team.name}

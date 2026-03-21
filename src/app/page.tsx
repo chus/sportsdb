@@ -200,8 +200,8 @@ export default async function HomePage() {
                   href={`/players/${player.slug}`}
                   className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
                 >
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
-                    <Users className="w-6 h-6 text-neutral-400 group-hover:text-blue-500" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-sm font-bold">{player.name.substring(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
