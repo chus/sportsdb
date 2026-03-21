@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -52,7 +52,7 @@ jobs:
           if [ "$MODE" = "enrich-next" ]; then
             # Round-robin: pick league based on day of year
             LEAGUES=("premier-league" "la-liga" "bundesliga" "serie-a" "ligue-1" "eredivisie" "primeira-liga" "liga-profesional-argentina" "liga-mx" "mls" "brasileirao-serie-a")
-            DAY_OF_YEAR=$(date +%j)
+            DAY_OF_YEAR=$(date +%-j)
             INDEX=$((DAY_OF_YEAR % ${#LEAGUES[@]}))
             SLUG="${LEAGUES[$INDEX]}"
             echo "mode=enrich" >> $GITHUB_OUTPUT
