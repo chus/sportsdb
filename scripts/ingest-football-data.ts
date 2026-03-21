@@ -246,7 +246,7 @@ async function ingestTeamsAndPlayers(
       const teamSlug = slugify(apiTeam.name);
       const [team] = await db.insert(schema.teams).values({
         name: apiTeam.name,
-        shortName: apiTeam.shortName || apiTeam.tla,
+        shortName: apiTeam.shortName || null,
         slug: teamSlug,
         country: apiTeam.area?.name || "Unknown",
         city: apiTeam.address?.split(",")[0] || null,

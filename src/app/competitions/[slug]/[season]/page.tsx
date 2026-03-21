@@ -207,18 +207,18 @@ export default async function CompetitionSeasonPage({
                   </p>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                        <th className="px-4 py-3 font-medium">#</th>
-                        <th className="px-4 py-3 font-medium">Team</th>
-                        <th className="px-4 py-3 font-medium text-center">P</th>
-                        <th className="px-4 py-3 font-medium text-center">W</th>
-                        <th className="px-4 py-3 font-medium text-center">D</th>
-                        <th className="px-4 py-3 font-medium text-center">L</th>
-                        <th className="px-4 py-3 font-medium text-center">GD</th>
-                        <th className="px-4 py-3 font-medium text-center">
+                        <th className="px-2 sm:px-4 py-3 font-medium">#</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium">Team</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">P</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">W</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">D</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">L</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">GD</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">
                           Pts
                         </th>
                       </tr>
@@ -236,7 +236,7 @@ export default async function CompetitionSeasonPage({
                               isChampion ? "bg-yellow-50" : ""
                             }`}
                           >
-                            <td className="px-4 py-3 font-medium text-neutral-900">
+                            <td className="px-2 sm:px-4 py-3 font-medium text-neutral-900">
                               <div className="flex items-center gap-2">
                                 {isChampion && (
                                   <Crown className="w-4 h-4 text-yellow-500" />
@@ -244,17 +244,17 @@ export default async function CompetitionSeasonPage({
                                 {standing.position}
                               </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-2 sm:px-4 py-3">
                               <Link
                                 href={`/teams/${team.slug}`}
-                                className="flex items-center gap-3 hover:text-blue-600 transition-colors"
+                                className="flex items-center gap-2 sm:gap-3 hover:text-blue-600 transition-colors"
                               >
-                                <div className="w-8 h-8 bg-neutral-100 rounded flex items-center justify-center">
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-neutral-100 rounded flex items-center justify-center flex-shrink-0">
                                   {team.logoUrl ? (
                                     <img
                                       src={team.logoUrl}
                                       alt={team.name}
-                                      className="w-6 h-6 object-contain"
+                                      className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                                     />
                                   ) : (
                                     <Shield className="w-4 h-4 text-neutral-400" />
@@ -263,7 +263,8 @@ export default async function CompetitionSeasonPage({
                                 <span
                                   className={`font-medium ${isChampion ? "text-yellow-700" : ""}`}
                                 >
-                                  {team.shortName || team.name}
+                                  <span className="hidden md:inline">{team.name}</span>
+                                  <span className="md:hidden">{team.shortName || team.name}</span>
                                   {isChampion && (
                                     <span className="ml-2 text-xs text-yellow-600 font-normal">
                                       Champion
@@ -272,20 +273,20 @@ export default async function CompetitionSeasonPage({
                                 </span>
                               </Link>
                             </td>
-                            <td className="px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
                               {standing.played}
                             </td>
-                            <td className="px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
                               {standing.won}
                             </td>
-                            <td className="px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600 hidden sm:table-cell">
                               {standing.drawn}
                             </td>
-                            <td className="px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
                               {standing.lost}
                             </td>
                             <td
-                              className={`px-4 py-3 text-center font-medium ${
+                              className={`px-2 sm:px-4 py-3 text-center font-medium hidden sm:table-cell ${
                                 standing.goalDifference > 0
                                   ? "text-green-600"
                                   : standing.goalDifference < 0
@@ -296,7 +297,7 @@ export default async function CompetitionSeasonPage({
                               {standing.goalDifference > 0 ? "+" : ""}
                               {standing.goalDifference}
                             </td>
-                            <td className="px-4 py-3 text-center font-bold text-neutral-900">
+                            <td className="px-2 sm:px-4 py-3 text-center font-bold text-neutral-900">
                               {standing.points}
                             </td>
                           </tr>
@@ -331,7 +332,7 @@ export default async function CompetitionSeasonPage({
                             {player.name}
                           </div>
                           <div className="text-xs text-neutral-500 truncate">
-                            {team.shortName || team.name}
+                            {team.name}
                           </div>
                         </div>
                         <span className="font-bold text-neutral-900">

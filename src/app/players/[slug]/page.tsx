@@ -510,22 +510,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                        <th className="px-4 py-3 font-medium">Season</th>
-                        <th className="px-4 py-3 font-medium">Team</th>
-                        <th className="px-4 py-3 font-medium">Competition</th>
-                        <th className="px-4 py-3 font-medium text-center">Apps</th>
-                        <th className="px-4 py-3 font-medium text-center">Goals</th>
-                        <th className="px-4 py-3 font-medium text-center">Assists</th>
-                        <th className="px-4 py-3 font-medium text-center">Mins</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium">Season</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium">Team</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium hidden sm:table-cell">Competition</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">Apps</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center">Assists</th>
+                        <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">Mins</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100">
                       {statsHistory.map(({ stat, team, season, competition }) => (
                         <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-neutral-900">
+                          <td className="px-2 sm:px-4 py-3 font-medium text-neutral-900">
                             {season.label}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 sm:px-4 py-3">
                             <Link
                               href={`/teams/${team.slug}`}
                               className="flex items-center gap-2 hover:text-blue-600 transition-colors"
@@ -541,10 +541,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                               ) : (
                                 <Shield className="w-5 h-5 text-neutral-300" />
                               )}
-                              <span className="text-sm">{team.shortName || team.name}</span>
+                              <span className="text-sm hidden md:inline">{team.name}</span>
+                              <span className="text-sm md:hidden">{team.shortName || team.name}</span>
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-sm text-neutral-600">
+                          <td className="px-2 sm:px-4 py-3 text-sm text-neutral-600 hidden sm:table-cell">
                             <Link
                               href={`/competitions/${competition.slug}`}
                               className="hover:text-blue-600 transition-colors"
@@ -552,16 +553,16 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                               {competition.name}
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-center text-neutral-600">
+                          <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
                             {stat.appearances}
                           </td>
-                          <td className="px-4 py-3 text-center font-medium text-neutral-900">
+                          <td className="px-2 sm:px-4 py-3 text-center font-medium text-neutral-900">
                             {stat.goals}
                           </td>
-                          <td className="px-4 py-3 text-center text-neutral-600">
+                          <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
                             {stat.assists}
                           </td>
-                          <td className="px-4 py-3 text-center text-neutral-500 text-sm">
+                          <td className="px-2 sm:px-4 py-3 text-center text-neutral-500 text-sm hidden sm:table-cell">
                             {stat.minutesPlayed.toLocaleString()}
                           </td>
                         </tr>
@@ -570,19 +571,20 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {statsHistory.length > 0 && (
                       <tfoot className="bg-neutral-50 border-t border-neutral-200">
                         <tr className="font-medium">
-                          <td className="px-4 py-3" colSpan={3}>
+                          <td className="px-2 sm:px-4 py-3" colSpan={2}>
                             Career Total
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-2 sm:px-4 py-3 hidden sm:table-cell"></td>
+                          <td className="px-2 sm:px-4 py-3 text-center">
                             {statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0)}
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-2 sm:px-4 py-3 text-center">
                             {statsHistory.reduce((sum, s) => sum + s.stat.goals, 0)}
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-2 sm:px-4 py-3 text-center">
                             {statsHistory.reduce((sum, s) => sum + s.stat.assists, 0)}
                           </td>
-                          <td className="px-4 py-3 text-center text-sm">
+                          <td className="px-2 sm:px-4 py-3 text-center text-sm hidden sm:table-cell">
                             {statsHistory.reduce((sum, s) => sum + s.stat.minutesPlayed, 0).toLocaleString()}
                           </td>
                         </tr>

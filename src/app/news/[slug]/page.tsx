@@ -766,9 +766,9 @@ export default async function ArticlePage({ params }: Props) {
                       <th className="text-left py-2 font-medium">Team</th>
                       <th className="text-center py-2 font-medium w-8">P</th>
                       <th className="text-center py-2 font-medium w-8">W</th>
-                      <th className="text-center py-2 font-medium w-8">D</th>
+                      <th className="text-center py-2 font-medium w-8 hidden sm:table-cell">D</th>
                       <th className="text-center py-2 font-medium w-8">L</th>
-                      <th className="text-center py-2 font-medium w-10">GD</th>
+                      <th className="text-center py-2 font-medium w-10 hidden sm:table-cell">GD</th>
                       <th className="text-center py-2 font-medium w-10">Pts</th>
                     </tr>
                   </thead>
@@ -798,9 +798,9 @@ export default async function ArticlePage({ params }: Props) {
                           </td>
                           <td className="text-center text-neutral-600">{row.standing.played}</td>
                           <td className="text-center text-neutral-600">{row.standing.won}</td>
-                          <td className="text-center text-neutral-600">{row.standing.drawn}</td>
+                          <td className="text-center text-neutral-600 hidden sm:table-cell">{row.standing.drawn}</td>
                           <td className="text-center text-neutral-600">{row.standing.lost}</td>
-                          <td className="text-center text-neutral-600">
+                          <td className="text-center text-neutral-600 hidden sm:table-cell">
                             {row.standing.goalDifference > 0 ? "+" : ""}
                             {row.standing.goalDifference}
                           </td>

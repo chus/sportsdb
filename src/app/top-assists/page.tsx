@@ -72,20 +72,20 @@ export default async function TopAssistsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                      <th className="px-4 py-3 font-medium">#</th>
-                      <th className="px-4 py-3 font-medium">Player</th>
-                      <th className="px-4 py-3 font-medium">Team</th>
-                      <th className="px-4 py-3 font-medium hidden md:table-cell">Competition</th>
-                      <th className="px-4 py-3 font-medium text-center">Apps</th>
-                      <th className="px-4 py-3 font-medium text-center">Assists</th>
-                      <th className="px-4 py-3 font-medium text-center">Goals</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium">#</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium">Player</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium">Team</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium hidden md:table-cell">Competition</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">Apps</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium text-center">Assists</th>
+                      <th className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
                     {leaders.map(({ stat, player, team, competition }, index) => (
                       <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-neutral-400">{index + 1}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3 font-medium text-neutral-400">{index + 1}</td>
+                        <td className="px-2 sm:px-4 py-3">
                           <Link
                             href={`/players/${player.slug}`}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
@@ -103,7 +103,7 @@ export default async function TopAssistsPage() {
                             </div>
                           </Link>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3">
                           <Link
                             href={`/teams/${team.slug}`}
                             className="flex items-center gap-2 hover:text-blue-600 transition-colors"
@@ -113,10 +113,11 @@ export default async function TopAssistsPage() {
                             ) : (
                               <Shield className="w-4 h-4 text-neutral-300" />
                             )}
-                            <span className="text-sm">{team.shortName || team.name}</span>
+                            <span className="text-sm hidden md:inline">{team.name}</span>
+                            <span className="text-sm md:hidden">{team.shortName || team.name}</span>
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-sm text-neutral-600 hidden md:table-cell">
+                        <td className="px-2 sm:px-4 py-3 text-sm text-neutral-600 hidden md:table-cell">
                           <Link
                             href={`/competitions/${competition.slug}`}
                             className="hover:text-blue-600 transition-colors"
@@ -124,9 +125,9 @@ export default async function TopAssistsPage() {
                             {competition.name}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-center text-neutral-600">{stat.appearances}</td>
-                        <td className="px-4 py-3 text-center font-bold text-neutral-900">{stat.assists}</td>
-                        <td className="px-4 py-3 text-center text-neutral-600">{stat.goals}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600 hidden sm:table-cell">{stat.appearances}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center font-bold text-neutral-900">{stat.assists}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">{stat.goals}</td>
                       </tr>
                     ))}
                   </tbody>

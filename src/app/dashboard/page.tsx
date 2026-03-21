@@ -225,10 +225,11 @@ export default async function DashboardPage() {
                           <ChevronRight className="h-3 w-3" />
                         </Link>
                       </div>
+                      <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="text-xs text-gray-500 border-b border-neutral-100">
-                            <th className="text-left py-2 px-4 font-medium w-8">
+                            <th className="text-left py-2 px-2 sm:px-4 font-medium w-8">
                               #
                             </th>
                             <th className="text-left py-2 px-2 font-medium">
@@ -240,16 +241,16 @@ export default async function DashboardPage() {
                             <th className="text-center py-2 px-2 font-medium">
                               W
                             </th>
-                            <th className="text-center py-2 px-2 font-medium">
+                            <th className="text-center py-2 px-2 font-medium hidden sm:table-cell">
                               D
                             </th>
                             <th className="text-center py-2 px-2 font-medium">
                               L
                             </th>
-                            <th className="text-center py-2 px-2 font-medium">
+                            <th className="text-center py-2 px-2 font-medium hidden sm:table-cell">
                               GD
                             </th>
-                            <th className="text-center py-2 px-4 font-medium">
+                            <th className="text-center py-2 px-2 sm:px-4 font-medium">
                               Pts
                             </th>
                           </tr>
@@ -260,7 +261,7 @@ export default async function DashboardPage() {
                               key={standing.id}
                               className="border-b border-neutral-50 last:border-0 hover:bg-gray-50"
                             >
-                              <td className="py-2 px-4 text-gray-500 font-medium">
+                              <td className="py-2 px-2 sm:px-4 text-gray-500 font-medium">
                                 {standing.position}
                               </td>
                               <td className="py-2 px-2">
@@ -277,7 +278,10 @@ export default async function DashboardPage() {
                                   ) : (
                                     <Shield className="h-5 w-5 text-gray-300" />
                                   )}
-                                  <span className="font-medium text-gray-900 truncate">
+                                  <span className="font-medium text-gray-900 truncate hidden md:inline">
+                                    {team.name}
+                                  </span>
+                                  <span className="font-medium text-gray-900 truncate md:hidden">
                                     {team.shortName || team.name}
                                   </span>
                                 </Link>
@@ -288,24 +292,25 @@ export default async function DashboardPage() {
                               <td className="py-2 px-2 text-center text-gray-600">
                                 {standing.won}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600">
+                              <td className="py-2 px-2 text-center text-gray-600 hidden sm:table-cell">
                                 {standing.drawn}
                               </td>
                               <td className="py-2 px-2 text-center text-gray-600">
                                 {standing.lost}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600">
+                              <td className="py-2 px-2 text-center text-gray-600 hidden sm:table-cell">
                                 {standing.goalDifference > 0
                                   ? `+${standing.goalDifference}`
                                   : standing.goalDifference}
                               </td>
-                              <td className="py-2 px-4 text-center font-bold text-gray-900">
+                              <td className="py-2 px-2 sm:px-4 text-center font-bold text-gray-900">
                                 {standing.points}
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   ))}
                 </div>
