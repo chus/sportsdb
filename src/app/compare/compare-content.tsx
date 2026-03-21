@@ -23,7 +23,7 @@ interface Player {
 
 export function ComparePageContent() {
   const { subscription } = useSubscription();
-  const isPro = subscription?.tier === "pro" || subscription?.tier === "ultimate";
+  const isPro = subscription?.tier === "pro" || subscription?.tier === "premium";
 
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [searchResults, setSearchResults] = useState<Player[]>([]);

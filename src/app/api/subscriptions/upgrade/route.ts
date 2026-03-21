@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
-import { getStripePriceId } from "@/lib/stripe/prices";
+import { getStripePriceId, type BillingPeriod } from "@/lib/stripe/prices";
 import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 const upgradeSchema = z.object({
-  tier: z.enum(["pro", "ultimate"]),
+  tier: z.enum(["pro", "premium"]),
+  period: z.enum(["monthly", "annual"]).default("monthly"),
 });
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tier } = upgradeSchema.parse(body);
+    const { tier, period } = upgradeSchema.parse(body);
 
     // Get or create Stripe customer
     const [sub] = await db
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
 
       if (stripeSub.status === "active") {
-        const priceId = await getStripePriceId(tier);
+        const priceId = await getStripePriceId(tier, period);
         await stripe.subscriptions.update(sub.stripeSubscriptionId, {
           items: [
             {
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Stripe Checkout session
-    const priceId = await getStripePriceId(tier);
+    const priceId = await getStripePriceId(tier, period);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

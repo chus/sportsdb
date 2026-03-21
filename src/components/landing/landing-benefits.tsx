@@ -8,7 +8,7 @@ import { useSubscription } from "@/components/subscription/subscription-provider
 export function LandingBenefits() {
   const { user, isLoading } = useAuth();
   const { subscription } = useSubscription();
-  const isPro = subscription?.tier === "pro" || subscription?.tier === "ultimate";
+  const isPro = subscription?.tier === "pro" || subscription?.tier === "premium";
 
   const benefits = [
     {

@@ -19,6 +19,8 @@ import {
   Check,
   Eye,
   EyeOff,
+  Download,
+  Shield,
 } from "lucide-react";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -86,6 +88,13 @@ export default function AccountPage() {
   const [notifSettings, setNotifSettings] = useState<NotificationSettings | null>(null);
   const [notifLoading, setNotifLoading] = useState(true);
 
+  // Data export
+  const [exporting, setExporting] = useState(false);
+
+  // Referral
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCopied, setReferralCopied] = useState(false);
+
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
@@ -102,6 +111,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (user) {
       setName(user.name || "");
+      setReferralCode(user.referralCode || null);
       fetchFollows();
       fetchNotificationSettings();
       fetchProfile();
@@ -247,10 +257,16 @@ export default function AccountPage() {
     }
     setDeleting(true);
     try {
+      const body: Record<string, string> = { confirmation: deleteConfirmation };
+      if (user?.hasPassword) {
+        body.password = deletePassword;
+      } else {
+        body.email = deletePassword; // reuse field for email input
+      }
       const res = await fetch("/api/account/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: deletePassword, confirmation: deleteConfirmation }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (res.ok) {
@@ -723,6 +739,96 @@ export default function AccountPage() {
               )}
             </div>
 
+            {/* Refer a Friend */}
+            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-neutral-900">Refer a Friend</h2>
+                  <p className="text-sm text-neutral-600">Share SportsDB and earn rewards</p>
+                </div>
+              </div>
+              <p className="text-sm text-neutral-600 mb-4">
+                Share your referral link. When someone subscribes through your link, you both get 3 months free.
+              </p>
+              {referralCode && (
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={`https://datasports.co/signup?ref=${referralCode}`}
+                    className="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 font-mono"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://datasports.co/signup?ref=${referralCode}`);
+                      setReferralCopied(true);
+                      setTimeout(() => setReferralCopied(false), 2000);
+                    }}
+                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                  >
+                    {referralCopied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Privacy & Data */}
+            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-neutral-900">Privacy & Data</h2>
+                  <p className="text-sm text-neutral-600">Manage your personal data</p>
+                </div>
+              </div>
+              <p className="text-sm text-neutral-600 mb-4">
+                Download a copy of all your data or review our privacy policy to understand how we handle your information.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={async () => {
+                    setExporting(true);
+                    try {
+                      const res = await fetch("/api/account/export");
+                      if (!res.ok) throw new Error("Export failed");
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "sportsdb-data-export.json";
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                    } catch {
+                      alert("Failed to export data. Please try again.");
+                    } finally {
+                      setExporting(false);
+                    }
+                  }}
+                  disabled={exporting}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {exporting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  {exporting ? "Exporting..." : "Download My Data"}
+                </button>
+                <Link
+                  href="/privacy"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
+            </div>
+
             {/* Danger Zone */}
             <div className="bg-white rounded-2xl p-6 border border-red-200 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
@@ -771,12 +877,13 @@ export default function AccountPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-1.5">
-                  Enter your password
+                  {user?.hasPassword ? "Enter your password" : "Enter your email address"}
                 </label>
                 <input
-                  type="password"
+                  type={user?.hasPassword ? "password" : "email"}
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder={user?.hasPassword ? undefined : user?.email}
                   className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
                 />
               </div>
@@ -864,7 +971,7 @@ function BillingTab({
               "px-3 py-1 rounded-full text-sm font-semibold",
               tier === "free" && "bg-neutral-100 text-neutral-700",
               tier === "pro" && "bg-blue-100 text-blue-700",
-              tier === "ultimate" && "bg-purple-100 text-purple-700"
+              tier === "premium" && "bg-purple-100 text-purple-700"
             )}
           >
             {tier.charAt(0).toUpperCase() + tier.slice(1)}

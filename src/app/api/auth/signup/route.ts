@@ -7,17 +7,21 @@ import {
   setSessionCookie,
   createEmailVerificationToken,
 } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1).optional(),
+  referralCode: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name } = signupSchema.parse(body);
+    const { email, password, name, referralCode } = signupSchema.parse(body);
 
     // Check if user already exists
     const existingUser = await getUserByEmail(email);
@@ -28,8 +32,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create user
-    const user = await createUser(email, password, name);
+    // Create user with consent timestamp
+    const user = await createUser(email, password, name, true);
+
+    // Link referral if provided
+    if (referralCode) {
+      const [referrer] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.referralCode, referralCode))
+        .limit(1);
+
+      if (referrer) {
+        await db
+          .update(users)
+          .set({ referredBy: referrer.id })
+          .where(eq(users.id, user.id));
+      }
+    }
 
     // Create email verification token (for future email sending)
     await createEmailVerificationToken(user.id);

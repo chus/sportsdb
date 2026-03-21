@@ -8,7 +8,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 export function GoogleAnalytics() {
   const { consent } = useCookieConsent();
 
-  if (!GA_ID || consent !== "accepted") return null;
+  if (!GA_ID || !consent?.analytics) return null;
 
   return (
     <>

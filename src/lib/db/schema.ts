@@ -346,6 +346,10 @@ export const users = pgTable(
     avatarUrl: text("avatar_url"),
     emailVerified: boolean("email_verified").notNull().default(false),
     onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
+    role: text("role").notNull().default("user"),
+    consentGivenAt: timestamp("consent_given_at", { withTimezone: true }),
+    referralCode: text("referral_code").unique(),
+    referredBy: uuid("referred_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -674,7 +678,7 @@ export const subscriptions = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" })
       .unique(),
-    tier: text("tier").notNull().default("free"), // 'free' | 'pro' | 'ultimate'
+    tier: text("tier").notNull().default("free"), // 'free' | 'pro' | 'premium'
     status: text("status").notNull().default("active"), // 'active' | 'cancelled' | 'past_due'
     startDate: timestamp("start_date", { withTimezone: true }).defaultNow(),
     endDate: timestamp("end_date", { withTimezone: true }),
@@ -895,4 +899,77 @@ export const bookmarkCollections = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [index("idx_bookmark_collections_user").on(table.userId)]
+);
+
+// ============================================================
+// VOUCHER CODES & REFERRALS
+// ============================================================
+
+export const voucherCodes = pgTable(
+  "voucher_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: text("code").notNull().unique(),
+    type: text("type").notNull(), // 'referral' | 'promo'
+    discountType: text("discount_type").notNull(), // 'free_months' | 'percent_off'
+    discountValue: integer("discount_value").notNull(),
+    maxUses: integer("max_uses"),
+    currentUses: integer("current_uses").notNull().default(0),
+    validFrom: timestamp("valid_from", { withTimezone: true }).defaultNow(),
+    validTo: timestamp("valid_to", { withTimezone: true }),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_voucher_codes_code").on(table.code)]
+);
+
+export const voucherRedemptions = pgTable(
+  "voucher_redemptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    voucherCodeId: uuid("voucher_code_id")
+      .notNull()
+      .references(() => voucherCodes.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    redeemedAt: timestamp("redeemed_at", { withTimezone: true }).defaultNow(),
+    appliedToSubscriptionId: text("applied_to_subscription_id"),
+  },
+  (table) => [
+    index("idx_voucher_redemptions_user").on(table.userId),
+    index("idx_voucher_redemptions_voucher").on(table.voucherCodeId),
+  ]
+);
+
+// ============================================================
+// MARKETING AI AGENT
+// ============================================================
+
+export const socialPosts = pgTable(
+  "social_posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    platform: text("platform").notNull(), // 'twitter' | 'linkedin' | 'bluesky'
+    content: text("content").notNull(),
+    linkUrl: text("link_url"),
+    postedAt: timestamp("posted_at", { withTimezone: true }),
+    engagementClicks: integer("engagement_clicks").default(0),
+    engagementImpressions: integer("engagement_impressions").default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_social_posts_platform").on(table.platform)]
+);
+
+export const agentLogs = pgTable(
+  "agent_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agentLayer: text("agent_layer").notNull(), // 'analyze' | 'generate' | 'distribute' | 'track'
+    action: text("action").notNull(),
+    input: text("input"),
+    output: text("output"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_agent_logs_layer").on(table.agentLayer)]
 );

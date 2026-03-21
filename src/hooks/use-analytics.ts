@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
 
 type EventType = "page_view" | "search" | "follow" | "click" | "share";
 type EntityType = "player" | "team" | "competition" | "match";
@@ -18,6 +19,7 @@ const BATCH_SIZE = 10;
 const FLUSH_INTERVAL = 5000; // 5 seconds
 
 export function useAnalytics() {
+  const { consent } = useCookieConsent();
   const eventQueue = useRef<AnalyticsEvent[]>([]);
   const sessionId = useRef<string | null>(null);
   const flushTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -68,6 +70,7 @@ export function useAnalytics() {
 
   const track = useCallback(
     (event: AnalyticsEvent) => {
+      if (!consent?.analytics) return;
       eventQueue.current.push({
         ...event,
         referrer: typeof document !== "undefined" ? document.referrer : undefined,

@@ -3,9 +3,11 @@
 import { Trophy } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
 
 export function Footer() {
   const t = useTranslations();
+  const { openSettings } = useCookieConsent();
 
   const footerLinks = {
     [t("footer.explore")]: [
@@ -26,6 +28,7 @@ export function Footer() {
       { label: t("footer.contact"), href: "/contact" },
       { label: t("footer.privacy"), href: "/privacy" },
       { label: t("footer.terms"), href: "/terms" },
+      { label: "Cookie Settings", href: "#", onClick: openSettings },
     ],
   };
 
@@ -59,13 +62,22 @@ export function Footer() {
               </h3>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-neutral-400 hover:text-white transition-colors"
-                    >
-                      {link.label}
-                    </Link>
+                  <li key={link.label}>
+                    {"onClick" in link && link.onClick ? (
+                      <button
+                        onClick={link.onClick}
+                        className="text-sm text-neutral-400 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </button>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-neutral-400 hover:text-white transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

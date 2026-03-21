@@ -35,12 +35,12 @@ interface SubscriptionContextType {
   isLoading: boolean;
   tier: SubscriptionTier;
   isPro: boolean;
-  isUltimate: boolean;
+  isPremium: boolean;
   canAccess: (feature: keyof TierFeatures) => boolean;
   getLimit: (
     feature: "maxFollows" | "comparisonsPerDay" | "apiCallsPerDay"
   ) => number;
-  upgrade: (tier: "pro" | "ultimate") => Promise<void>;
+  upgrade: (tier: "pro" | "premium", period?: "monthly" | "annual") => Promise<void>;
   downgrade: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -95,8 +95,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [searchParams, user, fetchSubscription]);
 
   const tier: SubscriptionTier = subscription?.tier ?? "free";
-  const isPro = tier === "pro" || tier === "ultimate";
-  const isUltimate = tier === "ultimate";
+  const isPro = tier === "pro" || tier === "premium";
+  const isPremium = tier === "premium";
 
   const canAccess = useCallback(
     (feature: keyof TierFeatures): boolean => {
@@ -115,12 +115,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   );
 
   const upgrade = useCallback(
-    async (newTier: "pro" | "ultimate") => {
+    async (newTier: "pro" | "premium", period: "monthly" | "annual" = "monthly") => {
       try {
         const res = await fetch("/api/subscriptions/upgrade", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tier: newTier }),
+          body: JSON.stringify({ tier: newTier, period }),
         });
 
         const data = await res.json();
@@ -170,7 +170,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         isLoading,
         tier,
         isPro,
-        isUltimate,
+        isPremium,
         canAccess,
         getLimit,
         upgrade,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -10,9 +10,12 @@ import { GoogleButton, AuthDivider } from "@/components/auth/google-button";
 export default function SignupPage() {
   const { signup, user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref") || undefined;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +30,7 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
 
-    const result = await signup(email, password, name || undefined);
+    const result = await signup(email, password, name || undefined, refCode);
     setLoading(false);
 
     if (result.success) {
@@ -100,9 +103,24 @@ export default function SignupPage() {
                 placeholder="At least 8 characters"
               />
             </div>
+            <div className="flex items-start gap-2">
+              <input
+                id="terms"
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="terms" className="text-xs text-neutral-500 leading-relaxed">
+                I agree to the{" "}
+                <Link href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</Link>
+                {" "}and{" "}
+                <Link href="/privacy" target="_blank" className="text-blue-600 hover:underline">Privacy Policy</Link>
+              </label>
+            </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !agreedToTerms}
               className="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}

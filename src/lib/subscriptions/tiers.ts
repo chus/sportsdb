@@ -1,4 +1,4 @@
-export type SubscriptionTier = "free" | "pro" | "ultimate";
+export type SubscriptionTier = "free" | "pro" | "premium";
 
 export interface TierFeatures {
   maxFollows: number;
@@ -16,6 +16,7 @@ export interface TierFeatures {
 export interface TierConfig {
   name: string;
   price: number;
+  annualPrice: number | null;
   period: "month" | "forever";
   description: string;
   features: TierFeatures;
@@ -25,6 +26,7 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
   free: {
     name: "Free",
     price: 0,
+    annualPrice: null,
     period: "forever",
     description: "Perfect for casual fans",
     features: {
@@ -42,7 +44,8 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
   },
   pro: {
     name: "Pro",
-    price: 4.99,
+    price: 1,
+    annualPrice: 8,
     period: "month",
     description: "For serious sports enthusiasts",
     features: {
@@ -58,9 +61,10 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
       earlyAccess: true,
     },
   },
-  ultimate: {
-    name: "Ultimate",
-    price: 9.99,
+  premium: {
+    name: "Premium",
+    price: 3,
+    annualPrice: 24,
     period: "month",
     description: "For data analysts & power users",
     features: {

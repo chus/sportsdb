@@ -25,7 +25,13 @@ export function generateToken(): string {
 }
 
 // User operations
-export async function createUser(email: string, password: string, name?: string) {
+function generateReferralCode(name?: string): string {
+  const prefix = (name || "user").replace(/[^a-zA-Z]/g, "").substring(0, 6).toUpperCase() || "USER";
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `REF-${prefix}-${random}`;
+}
+
+export async function createUser(email: string, password: string, name?: string, consentGiven?: boolean) {
   const passwordHash = await hashPassword(password);
 
   const [user] = await db
@@ -34,6 +40,8 @@ export async function createUser(email: string, password: string, name?: string)
       email: email.toLowerCase(),
       passwordHash,
       name,
+      consentGivenAt: consentGiven ? new Date() : null,
+      referralCode: generateReferralCode(name),
     })
     .returning();
 
@@ -56,6 +64,8 @@ export async function createUserFromGoogle(
       name,
       avatarUrl,
       emailVerified: true,
+      consentGivenAt: new Date(),
+      referralCode: generateReferralCode(name || undefined),
     })
     .returning();
 

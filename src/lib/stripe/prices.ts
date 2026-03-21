@@ -1,30 +1,55 @@
 import { stripe } from "./index";
 import type { SubscriptionTier } from "@/lib/subscriptions/tiers";
 
-const TIER_PRICES: Record<
-  "pro" | "ultimate",
-  { name: string; amount: number; lookupKey: string }
-> = {
+export type BillingPeriod = "monthly" | "annual";
+
+interface PriceConfig {
+  name: string;
+  amount: number; // in cents (EUR)
+  lookupKey: string;
+  interval: "month" | "year";
+}
+
+const TIER_PRICES: Record<"pro" | "premium", Record<BillingPeriod, PriceConfig>> = {
   pro: {
-    name: "SportsDB Pro",
-    amount: 499, // $4.99 in cents
-    lookupKey: "sportsdb_pro_monthly",
+    monthly: {
+      name: "SportsDB Pro (Monthly)",
+      amount: 100, // €1.00
+      lookupKey: "sportsdb_pro_monthly",
+      interval: "month",
+    },
+    annual: {
+      name: "SportsDB Pro (Annual)",
+      amount: 800, // €8.00
+      lookupKey: "sportsdb_pro_annual",
+      interval: "year",
+    },
   },
-  ultimate: {
-    name: "SportsDB Ultimate",
-    amount: 999, // $9.99 in cents
-    lookupKey: "sportsdb_ultimate_monthly",
+  premium: {
+    monthly: {
+      name: "SportsDB Premium (Monthly)",
+      amount: 300, // €3.00
+      lookupKey: "sportsdb_premium_monthly",
+      interval: "month",
+    },
+    annual: {
+      name: "SportsDB Premium (Annual)",
+      amount: 2400, // €24.00
+      lookupKey: "sportsdb_premium_annual",
+      interval: "year",
+    },
   },
 };
 
 /**
- * Get or create a Stripe Price for the given tier.
+ * Get or create a Stripe Price for the given tier and billing period.
  * Uses lookup_key for idempotent retrieval.
  */
 export async function getStripePriceId(
-  tier: "pro" | "ultimate"
+  tier: "pro" | "premium",
+  period: BillingPeriod = "monthly"
 ): Promise<string> {
-  const config = TIER_PRICES[tier];
+  const config = TIER_PRICES[tier][period];
 
   // Try to find existing price by lookup key
   const existing = await stripe.prices.list({
@@ -39,22 +64,33 @@ export async function getStripePriceId(
   // Create product and price
   const product = await stripe.products.create({
     name: config.name,
-    metadata: { tier },
+    metadata: { tier, period },
   });
 
   const price = await stripe.prices.create({
     product: product.id,
     unit_amount: config.amount,
-    currency: "usd",
-    recurring: { interval: "month" },
+    currency: "eur",
+    recurring: { interval: config.interval },
     lookup_key: config.lookupKey,
   });
 
   return price.id;
 }
 
+export function tierFromLookupKey(lookupKey: string): { tier: SubscriptionTier; period: BillingPeriod } | null {
+  for (const [tier, periods] of Object.entries(TIER_PRICES)) {
+    for (const [period, config] of Object.entries(periods)) {
+      if (config.lookupKey === lookupKey) {
+        return { tier: tier as SubscriptionTier, period: period as BillingPeriod };
+      }
+    }
+  }
+  return null;
+}
+
 export function tierFromPriceAmount(amount: number): SubscriptionTier | null {
-  if (amount === 499) return "pro";
-  if (amount === 999) return "ultimate";
+  if (amount === 100 || amount === 800) return "pro";
+  if (amount === 300 || amount === 2400) return "premium";
   return null;
 }

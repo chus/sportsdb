@@ -16,6 +16,9 @@ export async function GET() {
         name: user.name,
         avatarUrl: user.avatarUrl,
         emailVerified: user.emailVerified,
+        hasPassword: !!user.passwordHash,
+        referralCode: user.referralCode,
+        role: user.role,
       },
     });
   } catch (error) {

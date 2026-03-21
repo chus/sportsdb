@@ -8,7 +8,7 @@ const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 export function AdSenseScript() {
   const { consent } = useCookieConsent();
 
-  if (!ADSENSE_CLIENT_ID || consent !== "accepted") return null;
+  if (!ADSENSE_CLIENT_ID || !consent?.ads) return null;
 
   return (
     <Script

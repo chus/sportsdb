@@ -99,7 +99,7 @@ export default function TermsPage() {
 
               <h2>8. Subscriptions and Payments</h2>
               <p>
-                SportsDB offers optional paid subscription plans (Pro and Ultimate) that unlock additional features. By subscribing, you agree to the following:
+                SportsDB offers optional paid subscription plans (Pro and Premium) that unlock additional features. By subscribing, you agree to the following:
               </p>
               <ul>
                 <li>Subscription fees are billed monthly and charged at the beginning of each billing period.</li>
