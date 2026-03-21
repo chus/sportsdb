@@ -7,6 +7,7 @@ import {
   date,
   timestamp,
   decimal,
+  jsonb,
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
@@ -939,6 +940,27 @@ export const voucherRedemptions = pgTable(
   (table) => [
     index("idx_voucher_redemptions_user").on(table.userId),
     index("idx_voucher_redemptions_voucher").on(table.voucherCodeId),
+  ]
+);
+
+export const referralEvents = pgTable(
+  "referral_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    referrerUserId: uuid("referrer_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    referredUserId: uuid("referred_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    eventType: text("event_type").notNull(), // 'link_clicked' | 'signup_completed' | 'subscription_activated' | 'reward_applied'
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_referral_events_referrer").on(table.referrerUserId),
+    index("idx_referral_events_referred").on(table.referredUserId),
+    index("idx_referral_events_type").on(table.eventType),
   ]
 );
 

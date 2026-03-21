@@ -85,7 +85,7 @@ export function UpgradeBanner({
               {copy.headline}
             </p>
             <p className="text-xs text-neutral-500">
-              Starting at $4.99/month
+              Pro from €8/year
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ export function UpgradeBanner({
           href="/pricing"
           className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
         >
-          Upgrade to Pro — $4.99/mo
+          Upgrade to Pro — from €8/yr
         </Link>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { subscriptions } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { subscriptions, users, referralEvents } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import type Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
@@ -58,6 +58,85 @@ export async function POST(request: NextRequest) {
         .where(eq(subscriptions.userId, userId));
 
       console.log(`Subscription activated: user=${userId} tier=${tier}`);
+
+      // Handle referral reward for the referrer
+      try {
+        const [subscriber] = await db
+          .select({ id: users.id, referredBy: users.referredBy })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+
+        if (subscriber?.referredBy) {
+          // Log subscription_activated event
+          await db.insert(referralEvents).values({
+            referrerUserId: subscriber.referredBy,
+            referredUserId: subscriber.id,
+            eventType: "subscription_activated",
+          });
+
+          // Find the referrer's Stripe subscription to apply reward
+          const [referrerSub] = await db
+            .select({
+              stripeSubscriptionId: subscriptions.stripeSubscriptionId,
+              stripeCustomerId: subscriptions.stripeCustomerId,
+            })
+            .from(subscriptions)
+            .where(
+              and(
+                eq(subscriptions.userId, subscriber.referredBy),
+                eq(subscriptions.status, "active")
+              )
+            )
+            .limit(1);
+
+          if (
+            referrerSub?.stripeSubscriptionId &&
+            referrerSub?.stripeCustomerId
+          ) {
+            // Create a coupon for 1 month free and apply to referrer
+            const coupon = await stripe.coupons.create({
+              duration: "once",
+              percent_off: 100,
+              name: `Referral reward - 1 month free`,
+              max_redemptions: 1,
+            });
+
+            await stripe.subscriptions.update(
+              referrerSub.stripeSubscriptionId,
+              { discounts: [{ coupon: coupon.id }] }
+            );
+
+            // Log reward_applied event
+            await db.insert(referralEvents).values({
+              referrerUserId: subscriber.referredBy,
+              referredUserId: subscriber.id,
+              eventType: "reward_applied",
+              metadata: { couponId: coupon.id, reward: "1_month_free" },
+            });
+
+            console.log(
+              `Referral reward applied: referrer=${subscriber.referredBy} coupon=${coupon.id}`
+            );
+          } else {
+            // Referrer doesn't have an active subscription — store pending credit
+            await db.insert(referralEvents).values({
+              referrerUserId: subscriber.referredBy,
+              referredUserId: subscriber.id,
+              eventType: "reward_applied",
+              metadata: { status: "pending", reason: "referrer_not_subscribed" },
+            });
+
+            console.log(
+              `Referral reward pending: referrer=${subscriber.referredBy} (no active subscription)`
+            );
+          }
+        }
+      } catch (refErr) {
+        // Don't fail the webhook for referral errors
+        console.error("Referral reward error:", refErr);
+      }
+
       break;
     }
 

@@ -1,4 +1,4 @@
-import { TrendingUp, Users, ChevronRight, Shield } from "lucide-react";
+import { TrendingUp, Users, ChevronRight, Shield, Ban, BarChart3, Heart } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
@@ -220,6 +220,35 @@ export default async function HomePage() {
 
       {/* Exploration Hooks */}
       <LandingFeatures />
+
+      {/* Go Pro Section */}
+      <section className="py-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">Unlock the Full Experience</h2>
+          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+            Get ad-free browsing, advanced player stats, unlimited follows and comparisons — all for less than a coffee per month.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
+            {[
+              { icon: Ban, label: "Ad-Free", desc: "Clean, distraction-free experience" },
+              { icon: BarChart3, label: "Advanced Stats", desc: "Deep analytics and radar charts" },
+              { icon: Heart, label: "Unlimited Follows", desc: "Follow all the players you want" },
+            ].map((f) => (
+              <div key={f.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-5 text-white">
+                <f.icon className="w-8 h-8 mx-auto mb-3" />
+                <h3 className="font-semibold text-lg mb-1">{f.label}</h3>
+                <p className="text-sm text-blue-100">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg"
+          >
+            Go Pro — from €8/year
+          </Link>
+        </div>
+      </section>
 
       {/* Top Teams */}
       {featuredTeams.length > 0 && (

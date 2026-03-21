@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Capture referral code from ?ref= param on any page
+  const refCode = searchParams.get("ref");
+  let response: NextResponse | null = null;
+
+  if (refCode) {
+    // Strip ?ref= from URL to keep URLs clean, then set cookie
+    const cleanUrl = new URL(request.url);
+    cleanUrl.searchParams.delete("ref");
+    response = NextResponse.redirect(cleanUrl);
+    response.cookies.set("ref_code", refCode, {
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+    });
+    return response;
+  }
+
   // Only protect /admin routes
-  if (!request.nextUrl.pathname.startsWith("/admin")) {
+  if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
@@ -30,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
 };

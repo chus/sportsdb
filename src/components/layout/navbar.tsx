@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown, LayoutDashboard } from "lucide-react";
+import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown, LayoutDashboard, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import { Logo } from "@/components/layout/logo";
 import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAuthModal } from "@/components/auth/auth-modal";
+import { useSubscription } from "@/components/subscription/subscription-provider";
 
 export function Navbar() {
   const t = useTranslations();
@@ -16,6 +17,7 @@ export function Navbar() {
   const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { openModal } = useAuthModal();
+  const { tier, isLoading: subLoading } = useSubscription();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -76,6 +78,17 @@ export function Navbar() {
           <div className="hidden md:block flex-1 max-w-md mx-4">
             <SearchBar size="default" placeholder="Search players, teams..." />
           </div>
+
+          {/* Upgrade pill for free users */}
+          {!authLoading && !subLoading && user && tier === "free" && (
+            <Link
+              href="/pricing"
+              className="hidden md:inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Go Pro
+            </Link>
+          )}
 
           {/* Right side */}
           <div className="flex items-center gap-2">
@@ -189,6 +202,16 @@ export function Navbar() {
                         </span>
                       </div>
                       <MobileAuthLinks onClose={() => setMobileMenuOpen(false)} />
+                      {user && tier === "free" && (
+                        <Link
+                          href="/pricing"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg"
+                        >
+                          <Zap className="w-4 h-4" />
+                          Go Pro — from €8/year
+                        </Link>
+                      )}
                     </>
                   ) : (
                     <div className="flex flex-col gap-2 px-4">

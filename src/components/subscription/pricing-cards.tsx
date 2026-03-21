@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, Crown, Zap, Sparkles } from "lucide-react";
+import { Check, X, Crown, Zap, Sparkles, ChevronDown, Tag, Loader2 } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { SUBSCRIPTION_TIERS, SubscriptionTier } from "@/lib/subscriptions/tiers";
 import { cn } from "@/lib/utils/cn";
@@ -13,6 +13,14 @@ interface PricingCardsProps {
 export function PricingCards({ onUpgrade }: PricingCardsProps) {
   const { tier: currentTier, upgrade, downgrade, isLoading } = useSubscription();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("annual");
+  const [showPromoInput, setShowPromoInput] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoValidating, setPromoValidating] = useState(false);
+  const [promoResult, setPromoResult] = useState<{
+    valid: boolean;
+    discount?: string;
+    message?: string;
+  } | null>(null);
 
   const tiers: {
     id: SubscriptionTier;
@@ -93,6 +101,29 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
       return (config.annualPrice / 12).toFixed(2);
     }
     return null;
+  };
+
+  const validatePromoCode = async (code: string) => {
+    const trimmed = code.trim();
+    if (!trimmed) {
+      setPromoResult(null);
+      return;
+    }
+    setPromoValidating(true);
+    setPromoResult(null);
+    try {
+      const res = await fetch(`/api/vouchers/validate?code=${encodeURIComponent(trimmed)}`);
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        setPromoResult({ valid: true, discount: data.discount, message: data.message });
+      } else {
+        setPromoResult({ valid: false, message: data.message || "Invalid promo code" });
+      }
+    } catch {
+      setPromoResult({ valid: false, message: "Could not validate code. Try again." });
+    } finally {
+      setPromoValidating(false);
+    }
   };
 
   return (
@@ -260,6 +291,80 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
             </div>
           );
         })}
+      </div>
+
+      {/* Promo code section */}
+      <div className="mt-10 max-w-md mx-auto">
+        <button
+          onClick={() => setShowPromoInput(!showPromoInput)}
+          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 transition-colors mx-auto"
+        >
+          <Tag className="w-4 h-4" />
+          Have a promo code?
+          <ChevronDown
+            className={cn(
+              "w-4 h-4 transition-transform",
+              showPromoInput && "rotate-180"
+            )}
+          />
+        </button>
+
+        {showPromoInput && (
+          <div className="mt-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value);
+                  setPromoResult(null);
+                }}
+                onBlur={() => validatePromoCode(promoCode)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") validatePromoCode(promoCode);
+                }}
+                placeholder="Enter promo code"
+                className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button
+                onClick={() => validatePromoCode(promoCode)}
+                disabled={promoValidating || !promoCode.trim()}
+                className="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {promoValidating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </div>
+
+            {promoResult && (
+              <div
+                className={cn(
+                  "mt-3 px-4 py-3 rounded-lg text-sm flex items-start gap-2",
+                  promoResult.valid
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                )}
+              >
+                {promoResult.valid ? (
+                  <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <X className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                )}
+                <div>
+                  <p>{promoResult.message}</p>
+                  {promoResult.valid && promoResult.discount && (
+                    <p className="font-semibold mt-1">
+                      Discount: {promoResult.discount}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ export function Footer() {
       { label: t("common.competitions"), href: "/search?type=competition" },
       { label: t("common.matches"), href: "/search?type=match" },
       { label: t("common.news"), href: "/news" },
+      { label: "Pricing", href: "/pricing" },
     ],
     [t("common.competitions")]: [
       { label: "Premier League", href: "/competitions/premier-league" },
@@ -52,6 +53,7 @@ export function Footer() {
             <p className="text-sm text-neutral-400 leading-relaxed">
               {t("footer.tagline")}
             </p>
+            <p className="text-xs text-blue-400 mt-2">Pro from €8/year</p>
           </div>
 
           {/* Link columns */}

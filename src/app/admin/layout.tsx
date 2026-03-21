@@ -9,6 +9,7 @@ import {
   Database,
   Puzzle,
   CreditCard,
+  Gift,
   ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -20,6 +21,7 @@ const navItems = [
   { label: "Data", href: "/admin/data", icon: Database },
   { label: "Integrations", href: "/admin/integrations", icon: Puzzle },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
+  { label: "Referrals", href: "/admin/referrals", icon: Gift },
 ];
 
 export default function AdminLayout({

@@ -8,7 +8,7 @@ import {
   createEmailVerificationToken,
 } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { users, referralEvents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 const signupSchema = z.object({
@@ -21,7 +21,8 @@ const signupSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, referralCode } = signupSchema.parse(body);
+    const { email, password, name, referralCode: bodyRefCode } =
+      signupSchema.parse(body);
 
     // Check if user already exists
     const existingUser = await getUserByEmail(email);
@@ -35,12 +36,15 @@ export async function POST(request: NextRequest) {
     // Create user with consent timestamp
     const user = await createUser(email, password, name, true);
 
-    // Link referral if provided
-    if (referralCode) {
+    // Resolve referral code: body param takes priority, then cookie fallback
+    const refCode =
+      bodyRefCode || request.cookies.get("ref_code")?.value || null;
+
+    if (refCode) {
       const [referrer] = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.referralCode, referralCode))
+        .where(eq(users.referralCode, refCode))
         .limit(1);
 
       if (referrer) {
@@ -48,6 +52,13 @@ export async function POST(request: NextRequest) {
           .update(users)
           .set({ referredBy: referrer.id })
           .where(eq(users.id, user.id));
+
+        // Log signup_completed referral event
+        await db.insert(referralEvents).values({
+          referrerUserId: referrer.id,
+          referredUserId: user.id,
+          eventType: "signup_completed",
+        });
       }
     }
 
@@ -56,13 +67,15 @@ export async function POST(request: NextRequest) {
 
     // Create session
     const userAgent = request.headers.get("user-agent") || undefined;
-    const ipAddress = request.headers.get("x-forwarded-for")?.split(",")[0] || undefined;
+    const ipAddress =
+      request.headers.get("x-forwarded-for")?.split(",")[0] || undefined;
     const session = await createSession(user.id, userAgent, ipAddress);
 
     // Set session cookie
     await setSessionCookie(session.token);
 
-    return NextResponse.json({
+    // Build response and clear ref_code cookie
+    const response = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
@@ -70,6 +83,13 @@ export async function POST(request: NextRequest) {
         emailVerified: user.emailVerified,
       },
     });
+
+    // Clear the referral cookie after use
+    if (refCode) {
+      response.cookies.set("ref_code", "", { maxAge: 0, path: "/" });
+    }
+
+    return response;
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

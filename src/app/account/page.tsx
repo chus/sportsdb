@@ -94,6 +94,12 @@ export default function AccountPage() {
   // Referral
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [referralStats, setReferralStats] = useState<{
+    signups: number;
+    subscriptions: number;
+    rewardsEarned: number;
+    referredUsers: { name: string; joinedAt: string | null; status: string }[];
+  } | null>(null);
 
   // Delete account
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -115,8 +121,18 @@ export default function AccountPage() {
       fetchFollows();
       fetchNotificationSettings();
       fetchProfile();
+      fetchReferralStats();
     }
   }, [user]);
+
+  const fetchReferralStats = async () => {
+    try {
+      const res = await fetch("/api/referral/stats");
+      if (res.ok) {
+        setReferralStats(await res.json());
+      }
+    } catch {}
+  };
 
   const fetchProfile = async () => {
     try {
@@ -750,26 +766,113 @@ export default function AccountPage() {
                   <p className="text-sm text-neutral-600">Share SportsDB and earn rewards</p>
                 </div>
               </div>
+
+              {/* Referral Stats */}
+              {referralStats && (
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-center">
+                    <p className="text-2xl font-bold text-green-700">{referralStats.signups}</p>
+                    <p className="text-xs text-green-600">Signed up</p>
+                  </div>
+                  <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-center">
+                    <p className="text-2xl font-bold text-blue-700">{referralStats.subscriptions}</p>
+                    <p className="text-xs text-blue-600">Subscribed</p>
+                  </div>
+                  <div className="rounded-lg bg-purple-50 border border-purple-200 p-3 text-center">
+                    <p className="text-2xl font-bold text-purple-700">{referralStats.rewardsEarned}</p>
+                    <p className="text-xs text-purple-600">Months earned</p>
+                  </div>
+                </div>
+              )}
+
               <p className="text-sm text-neutral-600 mb-4">
-                Share your referral link. When someone subscribes through your link, you both get 3 months free.
+                Share your referral link. When someone subscribes through your link, you get 1 month free.
               </p>
+
               {referralCode && (
-                <div className="flex items-center gap-2">
-                  <input
-                    readOnly
-                    value={`https://datasports.co/signup?ref=${referralCode}`}
-                    className="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 font-mono"
-                  />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`https://datasports.co/signup?ref=${referralCode}`);
-                      setReferralCopied(true);
-                      setTimeout(() => setReferralCopied(false), 2000);
-                    }}
-                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                  >
-                    {referralCopied ? "Copied!" : "Copy"}
-                  </button>
+                <>
+                  <div className="flex items-center gap-2 mb-4">
+                    <input
+                      readOnly
+                      value={`https://datasports.co?ref=${referralCode}`}
+                      className="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 font-mono"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://datasports.co?ref=${referralCode}`);
+                        setReferralCopied(true);
+                        setTimeout(() => setReferralCopied(false), 2000);
+                      }}
+                      className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                    >
+                      {referralCopied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+
+                  {/* Share buttons */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[
+                      {
+                        label: "WhatsApp",
+                        href: `https://wa.me/?text=${encodeURIComponent(`Check out SportsDB — the best football database! https://datasports.co?ref=${referralCode}`)}`,
+                        bg: "bg-green-500 hover:bg-green-600",
+                      },
+                      {
+                        label: "Telegram",
+                        href: `https://t.me/share/url?url=${encodeURIComponent(`https://datasports.co?ref=${referralCode}`)}&text=${encodeURIComponent("Check out SportsDB — the best football database!")}`,
+                        bg: "bg-blue-500 hover:bg-blue-600",
+                      },
+                      {
+                        label: "X",
+                        href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out SportsDB — the best football database! https://datasports.co?ref=${referralCode}`)}`,
+                        bg: "bg-neutral-800 hover:bg-neutral-900",
+                      },
+                      {
+                        label: "Email",
+                        href: `mailto:?subject=${encodeURIComponent("Check out SportsDB")}&body=${encodeURIComponent(`I've been using SportsDB and thought you'd like it: https://datasports.co?ref=${referralCode}`)}`,
+                        bg: "bg-neutral-600 hover:bg-neutral-700",
+                      },
+                    ].map((share) => (
+                      <a
+                        key={share.label}
+                        href={share.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-3 py-1.5 text-xs font-medium text-white rounded-full transition-colors ${share.bg}`}
+                      >
+                        {share.label}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Referred users table */}
+              {referralStats && referralStats.referredUsers.length > 0 && (
+                <div className="border-t border-neutral-200 pt-4">
+                  <h3 className="text-sm font-semibold text-neutral-700 mb-2">Your Referrals</h3>
+                  <div className="space-y-2">
+                    {referralStats.referredUsers.map((ref, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm py-1.5">
+                        <span className="text-neutral-700">{ref.name}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-neutral-400">
+                            {ref.joinedAt ? new Date(ref.joinedAt).toLocaleDateString() : "—"}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-xs font-medium px-2 py-0.5 rounded-full",
+                              ref.status === "subscribed"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-neutral-100 text-neutral-600"
+                            )}
+                          >
+                            {ref.status === "subscribed" ? "Subscribed" : "Signed up"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
