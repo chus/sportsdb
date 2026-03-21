@@ -25,22 +25,22 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "SportsDB – The International Sports Database",
-    template: "%s | SportsDB",
+    default: "DataSports – The International Sports Database",
+    template: "%s | DataSports",
   },
   description:
     "The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data.",
   openGraph: {
     type: "website",
-    siteName: "SportsDB",
-    title: "SportsDB – The International Sports Database",
+    siteName: "DataSports",
+    title: "DataSports – The International Sports Database",
     description:
       "The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SportsDB – The International Sports Database",
+    title: "DataSports – The International Sports Database",
     description:
       "The comprehensive, structured database for football. Search players, teams, and competitions.",
   },
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     },
     types: {
       "application/rss+xml": [
-        { url: "/feed.xml", title: "SportsDB – All News" },
+        { url: "/feed.xml", title: "DataSports – All News" },
         { url: "/feed/premier-league.xml", title: "Premier League News" },
         { url: "/feed/la-liga.xml", title: "La Liga News" },
         { url: "/feed/bundesliga.xml", title: "Bundesliga News" },

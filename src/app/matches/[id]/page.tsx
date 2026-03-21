@@ -52,7 +52,7 @@ export async function generateMetadata({
     match.status === "finished" || match.status === "live"
       ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`
       : "vs";
-  const title = `${homeTeam} ${score} ${awayTeam} | SportsDB`;
+  const title = `${homeTeam} ${score} ${awayTeam} | DataSports`;
   const description = `${match.homeTeam.name} vs ${match.awayTeam.name}${
     match.competition ? ` - ${match.competition.name}` : ""
   }${match.venue ? ` at ${match.venue.name}` : ""}. Match events, lineups, and statistics.`;
@@ -64,7 +64,7 @@ export async function generateMetadata({
       title,
       description,
       url: `${BASE_URL}/matches/${id}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "website",
     },
     twitter: {

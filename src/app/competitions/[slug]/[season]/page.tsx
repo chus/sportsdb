@@ -30,8 +30,8 @@ export async function generateMetadata({
 
   // Convert URL format to display format
   const displaySeason = season.replace("-", "/");
-  const title = `${competition.name} ${displaySeason} – Standings & Stats | SportsDB`;
-  const description = `${competition.name} ${displaySeason} season standings, teams, top scorers, and statistics on SportsDB.`;
+  const title = `${competition.name} ${displaySeason} – Standings & Stats | DataSports`;
+  const description = `${competition.name} ${displaySeason} season standings, teams, top scorers, and statistics on DataSports.`;
 
   return {
     title,
@@ -40,7 +40,7 @@ export async function generateMetadata({
       title,
       description,
       url: `${BASE_URL}/competitions/${slug}/${season}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "website",
       ...(competition.logoUrl && {
         images: [{ url: competition.logoUrl, alt: competition.name }],

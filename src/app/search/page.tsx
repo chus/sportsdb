@@ -23,7 +23,7 @@ export async function generateMetadata({
     title: query ? `Search: ${query}` : "Search",
     description: query
       ? `Search results for "${query}" - Find players, teams, competitions, and venues`
-      : "Search players, teams, competitions, and venues in SportsDB",
+      : "Search players, teams, competitions, and venues in DataSports",
   };
 }
 

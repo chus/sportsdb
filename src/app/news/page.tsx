@@ -6,7 +6,7 @@ import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Football News & Match Reports | SportsDB",
+  title: "Football News & Match Reports | DataSports",
   description:
     "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.",
 };

@@ -5,13 +5,13 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Contact Us – SportsDB",
-  description: "Get in touch with the SportsDB team. We welcome feedback, partnership inquiries, and data correction requests.",
+  title: "Contact Us – DataSports",
+  description: "Get in touch with the DataSports team. We welcome feedback, partnership inquiries, and data correction requests.",
   openGraph: {
-    title: "Contact SportsDB",
-    description: "Get in touch with the SportsDB team for feedback, partnerships, or data corrections.",
+    title: "Contact DataSports",
+    description: "Get in touch with the DataSports team for feedback, partnerships, or data corrections.",
     url: `${BASE_URL}/contact`,
-    siteName: "SportsDB",
+    siteName: "DataSports",
     type: "website",
   },
   alternates: {

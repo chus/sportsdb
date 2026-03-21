@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Trophy, ArrowLeft, Shield, Users, TrendingUp } from "lucide-react";
+
+export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
 import {
   getCompetitionBySlug,
@@ -30,17 +32,22 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
     return { title: "Competition Not Found" };
   }
 
-  const title = `${competition.name} – Standings, Teams & Stats | SportsDB`;
-  const description = `${competition.name}${competition.country ? ` (${competition.country})` : ""} standings, teams, top scorers, and statistics on SportsDB.`;
+  // Thin page check: competition needs at least one season
+  const competitionSeason = await getCompetitionSeason(slug);
+  const isThin = !competitionSeason;
+
+  const title = `${competition.name} Standings & Results 2025/26 | DataSports`;
+  const description = `Full ${competition.name} 2025/26 standings, fixtures, results, and top scorers. Updated regularly.`;
 
   return {
     title,
     description,
+    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,
       url: `${BASE_URL}/competitions/${slug}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "website",
       ...(competition.logoUrl && { images: [{ url: competition.logoUrl, alt: competition.name }] }),
     },

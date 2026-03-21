@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!VALID_POSITIONS.includes(position as ValidPosition)) return { title: "Not Found" };
 
   const posName = capitalize(position);
-  const title = `Football ${posName}s – Full Player List | SportsDB`;
+  const title = `Football ${posName}s – Full Player List | DataSports`;
   const description = `Browse all ${position}s in our football database. View profiles, current teams, and nationalities for ${position}s across top leagues.`;
 
   return {

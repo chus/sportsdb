@@ -5,7 +5,7 @@ import {
   Footprints, Shield, ArrowLeft, BarChart3
 } from "lucide-react";
 import type { Metadata } from "next";
-import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory } from "@/lib/queries/players";
+import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
@@ -19,6 +19,8 @@ import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
 import { PageTracker } from "@/components/analytics/page-tracker";
+
+export const revalidate = 3600; // ISR: revalidate every hour
 
 interface PlayerPageProps {
   params: Promise<{ slug: string }>;
@@ -34,17 +36,43 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
     return { title: "Player Not Found" };
   }
 
-  const title = `${player.name} – Career, Teams & Stats | SportsDB`;
-  const description = `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}. View full career history, current team, and player profile on SportsDB.`;
+  const [currentTeamData, statsHistory, career] = await Promise.all([
+    getPlayerCurrentTeam(player.id),
+    getPlayerStatsHistory(player.id),
+    getPlayerCareer(player.id),
+  ]);
+
+  // Thin page check: player needs position + at least 1 team
+  const isThin = !player.position || player.position === "Unknown" || career.length === 0;
+
+  const currentTeam = currentTeamData?.team;
+  const totalGoals = statsHistory.reduce((sum, s) => sum + s.stat.goals, 0);
+  const totalAssists = statsHistory.reduce((sum, s) => sum + s.stat.assists, 0);
+  const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
+
+  const title = `${player.name} – Stats, Goals & Career History 2025/26 | DataSports`;
+
+  // Build data-rich description
+  const statsParts: string[] = [];
+  if (totalGoals > 0) statsParts.push(`${totalGoals} goals`);
+  if (totalAssists > 0) statsParts.push(`${totalAssists} assists`);
+  if (totalApps > 0) statsParts.push(`in ${totalApps} appearances`);
+
+  const statsStr = statsParts.length > 0 ? statsParts.join(" and ") : "";
+  const teamStr = currentTeam ? ` for ${currentTeam.name}` : "";
+  const description = statsStr
+    ? `${player.name} has ${statsStr}${teamStr}. Full career history, season stats, and player profile.`
+    : `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}. View career history, teams, and stats on DataSports.`;
 
   return {
     title,
     description,
+    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,
       url: `${BASE_URL}/players/${slug}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "profile",
       ...(player.imageUrl && { images: [{ url: player.imageUrl, alt: player.name }] }),
     },
@@ -91,10 +119,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
 
-  const [currentTeamData, career, statsHistory] = await Promise.all([
+  const [currentTeamData, career, statsHistory, rankings, recentMatches] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerCareer(player.id),
     getPlayerStatsHistory(player.id),
+    getPlayerRankings(player.id),
+    getPlayerRecentMatches(player.id, 5),
   ]);
 
   const currentTeam = currentTeamData?.team;
@@ -346,6 +376,59 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               );
             })()}
 
+            {/* Competition Rankings */}
+            {rankings.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Current Season Rankings</h2>
+                <div className="space-y-4">
+                  {rankings.map((r) => (
+                    <div key={r.competitionSlug} className="border border-neutral-100 rounded-lg p-4">
+                      <Link
+                        href={`/competitions/${r.competitionSlug}`}
+                        className="text-sm font-medium text-blue-600 hover:underline"
+                      >
+                        {r.competitionName}
+                      </Link>
+                      <div className="grid grid-cols-2 gap-4 mt-3">
+                        {r.goals > 0 && (
+                          <Link
+                            href={`/top-scorers/${r.competitionSlug}`}
+                            className="flex items-center gap-3 group"
+                          >
+                            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600 font-bold text-sm">
+                              #{r.goalsRank}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                                {r.goals} goals
+                              </div>
+                              <div className="text-xs text-neutral-500">Top Scorers</div>
+                            </div>
+                          </Link>
+                        )}
+                        {r.assists > 0 && (
+                          <Link
+                            href={`/top-assists/${r.competitionSlug}`}
+                            className="flex items-center gap-3 group"
+                          >
+                            <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 font-bold text-sm">
+                              #{r.assistsRank}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                                {r.assists} assists
+                              </div>
+                              <div className="text-xs text-neutral-500">Top Assists</div>
+                            </div>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Career History */}
             {career.length > 0 && (
               <section>
@@ -487,6 +570,51 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </tfoot>
                     )}
                   </table>
+                </div>
+              </section>
+            )}
+            {/* Recent Match Appearances */}
+            {recentMatches.length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-neutral-900 mb-4">Recent Appearances</h2>
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                  <div className="divide-y divide-neutral-100">
+                    {recentMatches.map((m) => (
+                      <Link
+                        key={m.match.id}
+                        href={`/matches/${m.match.id}`}
+                        className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="font-medium text-neutral-900">{m.homeTeam.name}</span>
+                            {m.match.status === "finished" ? (
+                              <span className="font-bold text-neutral-900">
+                                {m.match.homeScore} - {m.match.awayScore}
+                              </span>
+                            ) : (
+                              <span className="text-neutral-400">vs</span>
+                            )}
+                            <span className="font-medium text-neutral-900">{m.awayTeam.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
+                            <span>{m.competition.name}</span>
+                            {m.match.scheduledAt && (
+                              <span>{format(new Date(m.match.scheduledAt), "MMM d, yyyy")}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right text-xs text-neutral-500">
+                          <span className={m.lineup.isStarter ? "text-green-600 font-medium" : "text-neutral-500"}>
+                            {m.lineup.isStarter ? "Starter" : "Sub"}
+                          </span>
+                          {m.lineup.minutesPlayed != null && (
+                            <div>{m.lineup.minutesPlayed}&apos;</div>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </section>
             )}

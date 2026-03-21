@@ -10,11 +10,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Top Assists 2025/26 – Football Assist Leaders",
+  title: "Top Assists 2025/26 – Assists & Stats | DataSports",
   description:
     "Top assist providers across all major football competitions for the 2025/26 season. See assists, goals, and appearances for the leading playmakers.",
   openGraph: {
-    title: "Top Assists 2025/26 – Football Assist Leaders | SportsDB",
+    title: "Top Assists 2025/26 – Assists & Stats | DataSports",
     description:
       "Top assist providers across all major football competitions for the 2025/26 season.",
     url: `${BASE_URL}/top-assists`,

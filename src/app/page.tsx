@@ -17,19 +17,19 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "SportsDB – The International Sports Database",
+  title: "DataSports – The International Sports Database",
   description: "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data.",
   openGraph: {
-    title: "SportsDB – The International Sports Database",
+    title: "DataSports – The International Sports Database",
     description: "The comprehensive, structured database for football. Search across players, teams, and competitions.",
     url: BASE_URL,
-    siteName: "SportsDB",
+    siteName: "DataSports",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SportsDB – The International Sports Database",
+    title: "DataSports – The International Sports Database",
     description: "The comprehensive, structured database for football. Search players, teams, competitions, and venues.",
   },
   alternates: {

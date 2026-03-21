@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!p1 || !p2) return { title: "Not Found" };
 
-  const title = `${p1.name} vs ${p2.name} – Stats Comparison | SportsDB`;
+  const title = `${p1.name} vs ${p2.name} – Stats Comparison | DataSports`;
   const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, and career statistics.`;
 
   return {

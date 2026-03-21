@@ -211,6 +211,10 @@ export function MatchJsonLd({
     ? `${scoreStr}. ${competition ? competition.name + " match" : "Football match"} between ${homeTeam.name} and ${awayTeam.name}.`
     : `${competition ? competition.name + " match" : "Football match"}: ${homeTeam.name} vs ${awayTeam.name}.`;
 
+  // Estimate endDate as startDate + 2 hours
+  const startDateObj = new Date(scheduledAt);
+  const endDate = new Date(startDateObj.getTime() + 2 * 60 * 60 * 1000).toISOString();
+
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
@@ -218,9 +222,12 @@ export function MatchJsonLd({
     description,
     url: matchUrl,
     startDate: scheduledAt,
+    endDate,
     eventStatus: getEventStatus(status),
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     sport: "Football",
-    competitor: [
+    image: `${matchUrl}/opengraph-image`,
+    performer: [
       {
         "@type": "SportsTeam",
         name: homeTeam.name,
@@ -252,6 +259,13 @@ export function MatchJsonLd({
             name: "TBD",
           },
         },
+    offers: {
+      "@type": "Offer",
+      url: matchUrl,
+      price: "0",
+      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
+    },
     ...(competition && {
       organizer: {
         "@type": "SportsOrganization",

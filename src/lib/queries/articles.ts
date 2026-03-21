@@ -198,7 +198,13 @@ export async function getArticlesForPlayer(
   playerId: string,
   limit = 5
 ): Promise<ArticleWithRelations[]> {
-  // Get articles where player is primary or mentioned
+  // Get article IDs where player is mentioned (via junction table)
+  const mentionedArticleIds = db
+    .selectDistinct({ articleId: articlePlayers.articleId })
+    .from(articlePlayers)
+    .where(eq(articlePlayers.playerId, playerId));
+
+  // Get articles where player is primary OR mentioned in article_players
   const results = await db
     .select({
       article: articles,
@@ -229,7 +235,13 @@ export async function getArticlesForPlayer(
     .leftJoin(players, eq(articles.primaryPlayerId, players.id))
     .leftJoin(teams, eq(articles.primaryTeamId, teams.id))
     .where(
-      and(eq(articles.status, "published"), eq(articles.primaryPlayerId, playerId))
+      and(
+        eq(articles.status, "published"),
+        or(
+          eq(articles.primaryPlayerId, playerId),
+          sql`${articles.id} IN (${mentionedArticleIds})`
+        )
+      )
     )
     .orderBy(desc(articles.publishedAt))
     .limit(limit);

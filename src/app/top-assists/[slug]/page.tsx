@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const competition = await getCompetitionBySlug(slug);
   if (!competition) return { title: "Not Found" };
 
-  const title = `${competition.name} Top Assists 2025/26 | SportsDB`;
+  const title = `${competition.name} Top Assists 2025/26 – Assists & Stats | DataSports`;
   const description = `Top assist providers in the ${competition.name} for the 2025/26 season. See assists, goals, and appearances.`;
 
   return {

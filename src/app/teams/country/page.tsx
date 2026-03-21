@@ -9,11 +9,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Football Teams by Country | SportsDB",
+  title: "Football Teams by Country | DataSports",
   description:
     "Browse football clubs and teams by country. Find teams from every football nation in our comprehensive database.",
   openGraph: {
-    title: "Football Teams by Country | SportsDB",
+    title: "Football Teams by Country | DataSports",
     description: "Browse football clubs and teams by country.",
     url: `${BASE_URL}/teams/country`,
   },

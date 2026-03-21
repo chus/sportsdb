@@ -13,7 +13,7 @@ interface ComparePageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Compare Players | SportsDB",
+  title: "Compare Players – Head to Head Stats Comparison | DataSports",
   description: "Compare two football players side by side - stats, career, and performance metrics.",
 };
 

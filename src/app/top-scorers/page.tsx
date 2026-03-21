@@ -9,11 +9,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Top Scorers 2025/26 – Football Goal Leaders",
+  title: "Top Scorers 2025/26 – Goals & Stats | DataSports",
   description:
     "Top scorers across all major football competitions for the 2025/26 season. See goals, assists, and appearances for the leading strikers.",
   openGraph: {
-    title: "Top Scorers 2025/26 – Football Goal Leaders | SportsDB",
+    title: "Top Scorers 2025/26 – Goals & Stats | DataSports",
     description:
       "Top scorers across all major football competitions for the 2025/26 season.",
     url: `${BASE_URL}/top-scorers`,

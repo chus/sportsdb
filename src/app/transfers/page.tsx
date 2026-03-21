@@ -11,11 +11,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Football Transfers 2025/26 – Latest Signings | SportsDB",
+  title: "Football Transfers 2025/26 – Latest Signings | DataSports",
   description:
     "Latest football transfers and signings for the 2025/26 season. Track player movements between clubs.",
   openGraph: {
-    title: "Football Transfers 2025/26 – Latest Signings | SportsDB",
+    title: "Football Transfers 2025/26 – Latest Signings | DataSports",
     description: "Latest football transfers and signings for the 2025/26 season.",
     url: `${BASE_URL}/transfers`,
   },

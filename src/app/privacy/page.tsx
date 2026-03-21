@@ -4,13 +4,13 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – SportsDB",
-  description: "Learn how SportsDB collects, uses, and protects your personal information. Our commitment to your privacy.",
+  title: "Privacy Policy – DataSports",
+  description: "Learn how DataSports collects, uses, and protects your personal information. Our commitment to your privacy.",
   openGraph: {
-    title: "Privacy Policy – SportsDB",
-    description: "Learn how SportsDB handles your personal information.",
+    title: "Privacy Policy – DataSports",
+    description: "Learn how DataSports handles your personal information.",
     url: `${BASE_URL}/privacy`,
-    siteName: "SportsDB",
+    siteName: "DataSports",
     type: "website",
   },
   alternates: {

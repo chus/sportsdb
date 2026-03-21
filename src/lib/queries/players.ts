@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons } from "@/lib/db/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups } from "@/lib/db/schema";
+import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
 
 /**
  * Get a player by their URL slug.
@@ -99,4 +99,106 @@ export async function getPlayerStatsHistory(playerId: string) {
     .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
     .where(eq(playerSeasonStats.playerId, playerId))
     .orderBy(desc(seasons.startDate));
+}
+
+/**
+ * Get player's ranking in their current-season competition(s) for goals and assists.
+ */
+export async function getPlayerRankings(playerId: string) {
+  // Get player's current season stats with competition info
+  const currentStats = await db
+    .select({
+      competitionSeasonId: playerSeasonStats.competitionSeasonId,
+      goals: playerSeasonStats.goals,
+      assists: playerSeasonStats.assists,
+      competitionName: competitions.name,
+      competitionSlug: competitions.slug,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, playerSeasonStats.competitionSeasonId))
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(and(eq(playerSeasonStats.playerId, playerId), eq(seasons.isCurrent, true)));
+
+  if (currentStats.length === 0) return [];
+
+  const rankings = [];
+
+  for (const stat of currentStats) {
+    // Count players with more goals in same competition season
+    const [goalsRank] = await db
+      .select({ count: sql<number>`count(*) + 1` })
+      .from(playerSeasonStats)
+      .where(
+        and(
+          eq(playerSeasonStats.competitionSeasonId, stat.competitionSeasonId),
+          sql`${playerSeasonStats.goals} > ${stat.goals}`
+        )
+      );
+
+    // Count players with more assists in same competition season
+    const [assistsRank] = await db
+      .select({ count: sql<number>`count(*) + 1` })
+      .from(playerSeasonStats)
+      .where(
+        and(
+          eq(playerSeasonStats.competitionSeasonId, stat.competitionSeasonId),
+          sql`${playerSeasonStats.assists} > ${stat.assists}`
+        )
+      );
+
+    rankings.push({
+      competitionName: stat.competitionName,
+      competitionSlug: stat.competitionSlug,
+      goals: stat.goals,
+      assists: stat.assists,
+      goalsRank: goalsRank?.count ?? 0,
+      assistsRank: assistsRank?.count ?? 0,
+    });
+  }
+
+  return rankings;
+}
+
+/**
+ * Get recent match appearances for a player from match_lineups.
+ */
+export async function getPlayerRecentMatches(playerId: string, limit = 5) {
+  return db
+    .select({
+      match: {
+        id: matches.id,
+        scheduledAt: matches.scheduledAt,
+        status: matches.status,
+        homeScore: matches.homeScore,
+        awayScore: matches.awayScore,
+      },
+      homeTeam: {
+        name: sql<string>`ht.name`,
+        slug: sql<string>`ht.slug`,
+        logoUrl: sql<string>`ht.logo_url`,
+      },
+      awayTeam: {
+        name: sql<string>`at.name`,
+        slug: sql<string>`at.slug`,
+        logoUrl: sql<string>`at.logo_url`,
+      },
+      lineup: {
+        isStarter: matchLineups.isStarter,
+        minutesPlayed: matchLineups.minutesPlayed,
+      },
+      competition: {
+        name: competitions.name,
+        slug: competitions.slug,
+      },
+    })
+    .from(matchLineups)
+    .innerJoin(matches, eq(matches.id, matchLineups.matchId))
+    .innerJoin(sql`teams ht`, sql`ht.id = ${matches.homeTeamId}`)
+    .innerJoin(sql`teams at`, sql`at.id = ${matches.awayTeamId}`)
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, matches.competitionSeasonId))
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    .where(eq(matchLineups.playerId, playerId))
+    .orderBy(desc(matches.scheduledAt))
+    .limit(limit);
 }

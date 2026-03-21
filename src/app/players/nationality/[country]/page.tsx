@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const nationality = decodeURIComponent(country);
   const adjective = nationalityAdjective(nationality);
 
-  const title = `${adjective} Football Players – Full List | SportsDB`;
+  const title = `${adjective} Football Players – Full List | DataSports`;
   const description = `Browse all ${adjective} football players. View profiles, positions, and current teams for players from ${nationality}.`;
 
   return {

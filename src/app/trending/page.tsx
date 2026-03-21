@@ -9,13 +9,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Trending – Popular Football Players & Teams",
+  title: "Trending – Popular Football Players & Teams | DataSports",
   description:
-    "Discover the most trending football players, popular teams, and top searches right now on SportsDB.",
+    "Discover the most trending football players, popular teams, and top searches right now on DataSports.",
   openGraph: {
-    title: "Trending – Popular Football Players & Teams | SportsDB",
+    title: "Trending – Popular Football Players & Teams | DataSports",
     description:
-      "Discover the most trending football players, popular teams, and top searches right now on SportsDB.",
+      "Discover the most trending football players, popular teams, and top searches right now on DataSports.",
     url: `${BASE_URL}/trending`,
   },
   alternates: {

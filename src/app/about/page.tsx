@@ -5,13 +5,13 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "About SportsDB – The International Sports Database",
-  description: "Learn about SportsDB, the structured canonical database for football. Our mission is to provide accurate, time-aware sports data for fans, researchers, and developers.",
+  title: "About DataSports – The International Sports Database",
+  description: "Learn about DataSports, the structured canonical database for football. Our mission is to provide accurate, time-aware sports data for fans, researchers, and developers.",
   openGraph: {
-    title: "About SportsDB",
+    title: "About DataSports",
     description: "The structured canonical database for football. Accurate, time-aware sports data.",
     url: `${BASE_URL}/about`,
-    siteName: "SportsDB",
+    siteName: "DataSports",
     type: "website",
   },
   alternates: {

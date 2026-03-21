@@ -3,6 +3,8 @@ import Link from "next/link";
 import {
   Shield, MapPin, Calendar, Users, ArrowLeft
 } from "lucide-react";
+
+export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/queries/teams";
 import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
@@ -32,17 +34,21 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
     return { title: "Team Not Found" };
   }
 
-  const title = `${team.name} – Squad, Stats & Info | SportsDB`;
-  const description = `${team.name}${team.city ? ` based in ${team.city}` : ""}${team.country ? `, ${team.country}` : ""}. View full squad, standings, and club information on SportsDB.`;
+  // Thin page check: team needs country
+  const isThin = !team.country;
+
+  const title = `${team.name} – Squad, Results & Standings 2025/26 | DataSports`;
+  const description = `${team.name} squad, fixtures, results, and standings for the 2025/26 season. View full roster, recent matches, and league position.`;
 
   return {
     title,
     description,
+    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,
       url: `${BASE_URL}/teams/${slug}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "website",
       ...(team.logoUrl && { images: [{ url: team.logoUrl, alt: team.name }] }),
     },

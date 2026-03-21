@@ -5,13 +5,13 @@ import type { Metadata } from "next";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Terms of Service – SportsDB",
-  description: "Read the terms and conditions for using SportsDB. Understand your rights and responsibilities when using our platform.",
+  title: "Terms of Service – DataSports",
+  description: "Read the terms and conditions for using DataSports. Understand your rights and responsibilities when using our platform.",
   openGraph: {
-    title: "Terms of Service – SportsDB",
-    description: "Terms and conditions for using SportsDB.",
+    title: "Terms of Service – DataSports",
+    description: "Terms and conditions for using DataSports.",
     url: `${BASE_URL}/terms`,
-    siteName: "SportsDB",
+    siteName: "DataSports",
     type: "website",
   },
   alternates: {

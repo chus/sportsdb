@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+
+export const revalidate = 3600; // ISR: revalidate every hour
+
 import {
   ArrowLeft,
   MapPin,
@@ -37,17 +40,21 @@ export async function generateMetadata({
     return { title: "Venue Not Found" };
   }
 
-  const title = `${venue.name} – Stadium Info & Matches | SportsDB`;
+  // Thin page check: venue needs at least a city
+  const isThin = !venue.city;
+
+  const title = `${venue.name} – Stadium Info & History | DataSports`;
   const description = `${venue.name}${venue.city ? ` in ${venue.city}` : ""}${venue.country ? `, ${venue.country}` : ""}. Capacity: ${venue.capacity?.toLocaleString() || "N/A"}. View teams, matches, and stadium information.`;
 
   return {
     title,
     description,
+    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,
       url: `${BASE_URL}/venues/${slug}`,
-      siteName: "SportsDB",
+      siteName: "DataSports",
       type: "website",
       ...(venue.imageUrl && { images: [{ url: venue.imageUrl, alt: venue.name }] }),
     },

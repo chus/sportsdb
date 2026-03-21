@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+export const revalidate = 3600; // ISR: revalidate every hour
 import Link from "next/link";
 import { format } from "date-fns";
 import {
@@ -273,12 +275,12 @@ export default async function ArticlePage({ params }: Props) {
     dateModified: (article.updatedAt || article.publishedAt)?.toISOString(),
     author: {
       "@type": "Organization",
-      name: "SportsDB",
+      name: "DataSports",
       url: BASE_URL,
     },
     publisher: {
       "@type": "Organization",
-      name: "SportsDB",
+      name: "DataSports",
       url: BASE_URL,
       logo: {
         "@type": "ImageObject",
