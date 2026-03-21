@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { AdUnit } from "./ad-unit";
 
 export function BetweenContentAd() {
   const { canAccess, isLoading } = useSubscription();
+  const { openUpgradeModal } = useUpgradeModal();
 
   if (isLoading || canAccess("adFree")) return null;
 
@@ -19,12 +20,12 @@ export function BetweenContentAd() {
       <div className="bg-white rounded-xl border border-neutral-200 p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-neutral-400">Advertisement</span>
-          <Link
-            href="/pricing"
+          <button
+            onClick={() => openUpgradeModal("ad_free")}
             className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
           >
             Remove ads
-          </Link>
+          </button>
         </div>
         <div className="flex justify-center" style={{ minHeight: 90 }}>
           <AdUnit slot={slot} format="auto" style={{ width: "100%", height: 90 }} />

@@ -3,17 +3,15 @@
 import { useState, useEffect } from "react";
 import {
   ArrowLeft,
-  TrendingUp,
-  Target,
-  Activity,
   BarChart3,
-  Lock,
   Loader2,
   Search,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
+import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { cn } from "@/lib/utils/cn";
 
 interface Player {
@@ -27,6 +25,7 @@ interface Player {
 
 export function AdvancedStatsContent() {
   const { subscription } = useSubscription();
+  const { openUpgradeModal } = useUpgradeModal();
   const isPro = subscription?.tier === "pro";
 
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -78,81 +77,6 @@ export function AdvancedStatsContent() {
       setLoading(false);
     }
   };
-
-  // Pro paywall
-  if (!isPro) {
-    return (
-      <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <h1 className="text-4xl font-bold">Advanced Stats</h1>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center max-w-2xl mx-auto">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Lock className="w-10 h-10 text-white" />
-            </div>
-
-            <h2 className="text-3xl font-bold text-neutral-900 mb-4">
-              Unlock Advanced Stats
-            </h2>
-            <p className="text-lg text-neutral-600 mb-8">
-              Get access to radar charts, heat maps, passing networks, xG
-              analytics, and much more with a Pro subscription.
-            </p>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-blue-50 rounded-xl p-4">
-                <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-neutral-900">
-                  Radar Charts
-                </p>
-              </div>
-              <div className="bg-green-50 rounded-xl p-4">
-                <Activity className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-neutral-900">
-                  Heat Maps
-                </p>
-              </div>
-              <div className="bg-purple-50 rounded-xl p-4">
-                <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-neutral-900">
-                  xG Analytics
-                </p>
-              </div>
-              <div className="bg-orange-50 rounded-xl p-4">
-                <BarChart3 className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-neutral-900">
-                  Passing Networks
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/pricing"
-              className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold text-lg"
-            >
-              Upgrade to Pro - $4.99/month
-            </Link>
-
-            <p className="text-sm text-neutral-500 mt-4">
-              Cancel anytime
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -255,6 +179,7 @@ export function AdvancedStatsContent() {
           </div>
 
           {/* Content */}
+          <ProTeaser onUnlock={() => openUpgradeModal("advanced_stats")}>
           <div className="max-w-7xl mx-auto px-4 py-8">
             {selectedStat === "radar" && (
               <div className="grid md:grid-cols-2 gap-8">
@@ -449,6 +374,7 @@ export function AdvancedStatsContent() {
               </div>
             )}
           </div>
+          </ProTeaser>
         </>
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">

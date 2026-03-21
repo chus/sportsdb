@@ -15,7 +15,7 @@ import { PlayerInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
-import { ProTeaser } from "@/components/subscription/pro-teaser";
+import { ProTeaserWithModal } from "@/components/subscription/pro-teaser-with-modal";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
 import { scorePlayerPage } from "@/lib/seo/page-quality";
@@ -506,6 +506,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             {statsHistory.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-neutral-900 mb-4">Season Statistics</h2>
+                <ProTeaserWithModal feature="historical_data" label="Unlock Full History">
                 <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -592,6 +593,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     )}
                   </table>
                 </div>
+                </ProTeaserWithModal>
               </section>
             )}
             {/* Recent Match Appearances */}

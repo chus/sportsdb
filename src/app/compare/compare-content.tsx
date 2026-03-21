@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, X, TrendingUp, Search, Loader2, Zap } from "lucide-rea
 import Link from "next/link";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { cn } from "@/lib/utils/cn";
 
 interface Player {
@@ -23,6 +24,7 @@ interface Player {
 
 export function ComparePageContent() {
   const { subscription } = useSubscription();
+  const { openUpgradeModal } = useUpgradeModal();
   const isPro = subscription?.tier === "pro";
 
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
@@ -88,6 +90,7 @@ export function ComparePageContent() {
           if (res.status === 429) {
             const data = await res.json();
             setComparisonsToday(data.used ?? comparisonLimit);
+            openUpgradeModal("comparison_limit");
             return;
           }
           if (res.ok) {
@@ -356,7 +359,7 @@ export function ComparePageContent() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
             >
               <Zap className="w-5 h-5" />
-              Upgrade to Pro — $4.99/mo
+              Upgrade to Pro — €8/year
             </Link>
           </div>
         )}

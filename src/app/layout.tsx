@@ -11,6 +11,7 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { AuthModalProvider } from "@/components/auth/auth-modal";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
 import { OnboardingProvider } from "@/components/onboarding/onboarding-provider";
+import { UpgradeModalProvider } from "@/components/subscription/upgrade-modal";
 import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consent-provider";
 import { CookieConsentBanner } from "@/components/cookie-consent/cookie-consent-banner";
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
             <AuthProvider>
               <SubscriptionProvider>
                 <AuthModalProvider>
+                  <UpgradeModalProvider>
                   <OnboardingProvider>
                     <GoogleAnalytics />
                     <AdSenseScript />
@@ -112,6 +114,7 @@ export default async function RootLayout({
                     <CookieConsentBanner />
                     <SpeedInsights />
                   </OnboardingProvider>
+                  </UpgradeModalProvider>
                 </AuthModalProvider>
               </SubscriptionProvider>
             </AuthProvider>

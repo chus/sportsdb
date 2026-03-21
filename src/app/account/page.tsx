@@ -25,6 +25,7 @@ import {
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { PricingCards } from "@/components/subscription/pricing-cards";
 import { cn } from "@/lib/utils/cn";
 
@@ -59,6 +60,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { user, isLoading: authLoading, refreshUser } = useAuth();
   const { tier, subscription } = useSubscription();
+  const { openUpgradeModal } = useUpgradeModal();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 
   // Profile state
@@ -894,6 +896,10 @@ export default function AccountPage() {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={async () => {
+                    if (tier === "free") {
+                      openUpgradeModal("export_data");
+                      return;
+                    }
                     setExporting(true);
                     try {
                       const res = await fetch("/api/account/export");

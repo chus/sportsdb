@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { Heart, Loader2, Zap } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAuthModal } from "@/components/auth/auth-modal";
+import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { cn } from "@/lib/utils/cn";
 
@@ -25,14 +25,11 @@ export function FollowButton({
 }: FollowButtonProps) {
   const { user } = useAuth();
   const { openModal } = useAuthModal();
+  const { openUpgradeModal } = useUpgradeModal();
   const { trackFollow } = useAnalytics();
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [limitInfo, setLimitInfo] = useState<{
-    currentCount: number;
-    maxCount: number;
-  } | null>(null);
 
   const checkFollowStatus = useCallback(async () => {
     if (!user) {
@@ -59,23 +56,9 @@ export function FollowButton({
     checkFollowStatus();
   }, [checkFollowStatus]);
 
-  // Auto-dismiss limit info after 5 seconds
-  useEffect(() => {
-    if (limitInfo) {
-      const timer = setTimeout(() => setLimitInfo(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [limitInfo]);
-
   const handleClick = async () => {
     if (!user) {
       openModal("signup");
-      return;
-    }
-
-    // Dismiss limit info on click
-    if (limitInfo) {
-      setLimitInfo(null);
       return;
     }
 
@@ -98,13 +81,7 @@ export function FollowButton({
           trackFollow(entityType, entityId);
         }
       } else if (res.status === 403) {
-        const data = await res.json();
-        if (data.currentCount && data.maxCount) {
-          setLimitInfo({
-            currentCount: data.currentCount,
-            maxCount: data.maxCount,
-          });
-        }
+        openUpgradeModal("follow_limit");
       }
     } catch {
       console.error("Follow request failed");
@@ -114,24 +91,6 @@ export function FollowButton({
   };
 
   if (!initialized) return null;
-
-  const limitPopover = limitInfo && (
-    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 w-64 bg-white rounded-xl shadow-xl border border-blue-200 p-4 text-left animate-in fade-in slide-in-from-top-1">
-      <p className="text-sm font-semibold text-neutral-900 mb-1">
-        Follow limit reached ({limitInfo.currentCount}/{limitInfo.maxCount})
-      </p>
-      <p className="text-xs text-neutral-500 mb-3">
-        Upgrade to Pro for unlimited follows.
-      </p>
-      <Link
-        href="/pricing"
-        className="flex items-center justify-center gap-1.5 w-full px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
-      >
-        <Zap className="w-3.5 h-3.5" />
-        Upgrade to Pro
-      </Link>
-    </div>
-  );
 
   if (variant === "hero") {
     return (
@@ -157,7 +116,7 @@ export function FollowButton({
           )}
           {following ? "Following" : "Follow"}
         </button>
-        {limitPopover}
+
       </div>
     );
   }
@@ -183,7 +142,7 @@ export function FollowButton({
             <Heart className={cn("w-4 h-4", following && "fill-current")} />
           )}
         </button>
-        {limitPopover}
+
       </div>
     );
   }
@@ -210,7 +169,6 @@ export function FollowButton({
         )}
         {following ? "Following" : "Follow"}
       </button>
-      {limitPopover}
     </div>
   );
 }

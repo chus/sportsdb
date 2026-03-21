@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
 
-type EventType = "page_view" | "search" | "follow" | "click" | "share";
+type EventType = "page_view" | "search" | "follow" | "click" | "share" | "upgrade_impression" | "upgrade_click" | "upgrade_dismiss";
 type EntityType = "player" | "team" | "competition" | "match";
 
 interface AnalyticsEvent {
