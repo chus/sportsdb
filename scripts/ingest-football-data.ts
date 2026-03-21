@@ -211,9 +211,8 @@ async function ingestTeamsAndPlayers(
     }
 
     for (const apiTeam of teamsData.teams || []) {
-      // Skip if already processed
+      // If already processed, just link to this competition (squad already fetched)
       if (teamMap.has(apiTeam.id)) {
-        // Just link to this competition
         await db.insert(schema.teamSeasons).values({
           teamId: teamMap.get(apiTeam.id)!.id,
           competitionSeasonId: compSeason.id,
@@ -286,25 +285,28 @@ async function ingestTeamsAndPlayers(
       }
 
       for (const apiPlayer of squadData.squad || []) {
-        if (playerMap.has(apiPlayer.id)) continue;
+        let player = playerMap.get(apiPlayer.id);
 
-        const playerSlug = slugify(apiPlayer.name);
+        if (!player) {
+          const playerSlug = slugify(apiPlayer.name);
 
-        const [player] = await db.insert(schema.players).values({
-          name: apiPlayer.name,
-          knownAs: apiPlayer.name.split(" ").pop() || null,
-          slug: playerSlug,
-          dateOfBirth: apiPlayer.dateOfBirth,
-          nationality: apiPlayer.nationality,
-          position: mapPosition(apiPlayer.position),
-          status: "active",
-        }).onConflictDoNothing().returning();
+          const [newPlayer] = await db.insert(schema.players).values({
+            name: apiPlayer.name,
+            knownAs: apiPlayer.name.split(" ").pop() || null,
+            slug: playerSlug,
+            dateOfBirth: apiPlayer.dateOfBirth,
+            nationality: apiPlayer.nationality,
+            position: mapPosition(apiPlayer.position),
+            status: "active",
+          }).onConflictDoNothing().returning();
 
-        if (!player) continue;
+          if (!newPlayer) continue;
 
-        playerMap.set(apiPlayer.id, player);
+          player = newPlayer;
+          playerMap.set(apiPlayer.id, player);
+        }
 
-        // Player-team history
+        // Player-team history (always link, even if player already existed)
         await db.insert(schema.playerTeamHistory).values({
           playerId: player.id,
           teamId: team.id,

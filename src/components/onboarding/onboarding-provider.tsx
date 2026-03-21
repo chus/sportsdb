@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { OnboardingWizard } from "./onboarding-wizard";
+import { PaywallScreen } from "./paywall-screen";
 
 interface OnboardingContextType {
   isOnboardingComplete: boolean;
@@ -25,6 +26,7 @@ interface OnboardingProviderProps {
 export function OnboardingProvider({ children }: OnboardingProviderProps) {
   const { user, isLoading } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [isComplete, setIsComplete] = useState(true);
   const [hasChecked, setHasChecked] = useState(false);
 
@@ -54,6 +56,11 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
   const handleComplete = () => {
     setShowWizard(false);
+    setShowPaywall(true);
+  };
+
+  const handlePaywallDone = () => {
+    setShowPaywall(false);
     setIsComplete(true);
   };
 
@@ -83,6 +90,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       {showWizard && (
         <OnboardingWizard onComplete={handleComplete} onSkip={handleSkip} />
       )}
+      {showPaywall && <PaywallScreen onContinue={handlePaywallDone} />}
     </OnboardingContext.Provider>
   );
 }

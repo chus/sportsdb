@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
   try {
     if (type === "players") {
       // Get popular players (by popularity score) with their current team
-      const results = await db
+      // Fetch extra rows to account for duplicates from multiple team history records
+      const rawResults = await db
         .select({
           id: players.id,
           name: players.name,
@@ -30,7 +31,15 @@ export async function GET(request: NextRequest) {
         .leftJoin(teams, eq(playerTeamHistory.teamId, teams.id))
         .where(eq(players.status, "active"))
         .orderBy(desc(players.popularityScore))
-        .limit(8);
+        .limit(20);
+
+      // Deduplicate by player ID, keeping first occurrence (highest popularity)
+      const seen = new Set<string>();
+      const results = rawResults.filter((player) => {
+        if (seen.has(player.id)) return false;
+        seen.add(player.id);
+        return true;
+      }).slice(0, 8);
 
       return NextResponse.json(results);
     }
