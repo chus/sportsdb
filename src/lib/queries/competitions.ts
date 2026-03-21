@@ -8,7 +8,8 @@ import {
   playerSeasonStats,
   players,
 } from "@/lib/db/schema";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { matches } from "@/lib/db/schema";
 
 /**
  * Get a competition by slug.
@@ -87,21 +88,29 @@ export async function getCompetitionSeason(
     return result[0] ? { ...result[0], competition: comp } : null;
   }
 
-  // Otherwise, try current season first
-  const currentResult = await db
+  // Otherwise, try current season first — prefer one that has actual data (standings/matches)
+  const currentResults = await db
     .select({
       competitionSeason: competitionSeasons,
       season: seasons,
+      matchCount: sql<number>`(
+        SELECT count(*) FROM matches m
+        WHERE m.competition_season_id = ${competitionSeasons.id}
+      )`,
     })
     .from(competitionSeasons)
     .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
     .where(
       and(eq(competitionSeasons.competitionId, comp.id), eq(seasons.isCurrent, true))
     )
-    .limit(1);
+    .orderBy(desc(seasons.startDate));
 
-  if (currentResult[0]) {
-    return { ...currentResult[0], competition: comp };
+  // Pick the current season with the most data; fall back to any current season
+  const withData = currentResults.find((r) => r.matchCount > 0);
+  const currentPick = withData || currentResults[0];
+
+  if (currentPick) {
+    return { competitionSeason: currentPick.competitionSeason, season: currentPick.season, competition: comp };
   }
 
   // Fallback: get most recent season by start date

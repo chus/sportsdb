@@ -18,7 +18,11 @@ import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or
 import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
+import { scoreTeamPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { db } from "@/lib/db";
+import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons } from "@/lib/db/schema";
+import { eq, and, isNull, ne, sql } from "drizzle-orm";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -34,8 +38,33 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
     return { title: "Team Not Found" };
   }
 
-  // Thin page check: team needs country
-  const isThin = !team.country;
+  // Multi-signal thin page scoring
+  const [squadCountResult, standingsCountResult] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` })
+      .from(playerTeamHistory)
+      .innerJoin(players, eq(players.id, playerTeamHistory.playerId))
+      .where(and(
+        eq(playerTeamHistory.teamId, team.id),
+        isNull(playerTeamHistory.validTo),
+        ne(players.position, "Unknown")
+      )),
+    db.select({ count: sql<number>`count(*)` })
+      .from(standingsTable)
+      .innerJoin(competitionSeasons, eq(competitionSeasons.id, standingsTable.competitionSeasonId))
+      .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+      .where(and(eq(standingsTable.teamId, team.id), eq(seasons.isCurrent, true))),
+  ]);
+
+  const quality = scoreTeamPage({
+    country: team.country,
+    city: team.city,
+    foundedYear: team.foundedYear,
+    logoUrl: team.logoUrl,
+    squadSize: Number(squadCountResult[0]?.count ?? 0),
+    hasStandings: Number(standingsCountResult[0]?.count ?? 0) > 0,
+    hasMatches: true, // all teams we show have matches (sitemap-filtered)
+  });
+  const isThin = quality.isThin;
 
   const title = `${team.name} – Squad, Results & Standings 2025/26 | DataSports`;
   const description = `${team.name} squad, fixtures, results, and standings for the 2025/26 season. View full roster, recent matches, and league position.`;

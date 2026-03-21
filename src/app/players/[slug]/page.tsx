@@ -18,7 +18,11 @@ import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or
 import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
+import { scorePlayerPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { db } from "@/lib/db";
+import { matchLineups, articlePlayers } from "@/lib/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
@@ -36,14 +40,29 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
     return { title: "Player Not Found" };
   }
 
-  const [currentTeamData, statsHistory, career] = await Promise.all([
+  const [currentTeamData, statsHistory, career, lineupCountResult, articleCountResult] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerStatsHistory(player.id),
     getPlayerCareer(player.id),
+    db.select({ count: sql<number>`count(*)` }).from(matchLineups).where(eq(matchLineups.playerId, player.id)),
+    db.select({ count: sql<number>`count(*)` }).from(articlePlayers).where(eq(articlePlayers.playerId, player.id)),
   ]);
 
-  // Thin page check: player needs position + at least 1 team
-  const isThin = !player.position || player.position === "Unknown" || career.length === 0;
+  // Multi-signal thin page scoring
+  const quality = scorePlayerPage({
+    position: player.position,
+    nationality: player.nationality,
+    dateOfBirth: player.dateOfBirth,
+    heightCm: player.heightCm,
+    preferredFoot: player.preferredFoot,
+    imageUrl: player.imageUrl,
+    careerCount: career.length,
+    hasCurrentTeam: !!currentTeamData,
+    statsCount: statsHistory.length,
+    lineupCount: Number(lineupCountResult[0]?.count ?? 0),
+    articleCount: Number(articleCountResult[0]?.count ?? 0),
+  });
+  const isThin = quality.isThin;
 
   const currentTeam = currentTeamData?.team;
   const totalGoals = statsHistory.reduce((sum, s) => sum + s.stat.goals, 0);

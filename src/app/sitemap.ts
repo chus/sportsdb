@@ -12,7 +12,8 @@ import {
   playerSeasonStats,
   teamVenueHistory,
 } from "@/lib/db/schema";
-import { eq, sql, or, inArray } from "drizzle-orm";
+import { eq, sql, or, inArray, and, isNull, ne } from "drizzle-orm";
+import { playerTeamHistory } from "@/lib/db/schema";
 import {
   getDistinctNationalities,
   getDistinctTeamCountries,
@@ -117,11 +118,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         slug: players.slug,
         updatedAt: players.updatedAt,
         position: players.position,
+        nationality: players.nationality,
       })
       .from(players),
-    // Only teams that appear in at least 1 match
+    // Only teams that appear in at least 1 match, with squad count for priority
     db
-      .selectDistinct({ slug: teams.slug, updatedAt: teams.updatedAt })
+      .selectDistinct({
+        slug: teams.slug,
+        updatedAt: teams.updatedAt,
+        squadCount: sql<number>`(
+          SELECT count(*) FROM player_team_history pth
+          JOIN players p ON p.id = pth.player_id
+          WHERE pth.team_id = ${teams.id} AND pth.valid_to IS NULL AND p.position != 'Unknown'
+        )`,
+      })
       .from(teams)
       .innerJoin(
         matches,
@@ -183,9 +193,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return { en: url, es: url };
   }
 
-  // Player pages — filter out Unknown position
+  // Player pages — filter out Unknown position AND require nationality for content quality
   const playerPages: MetadataRoute.Sitemap = allPlayers
-    .filter((player) => player.position !== "Unknown")
+    .filter((player) => player.position !== "Unknown" && player.position !== null && player.nationality !== null)
     .map((player) => ({
       url: `${BASE_URL}/players/${player.slug}`,
       lastModified: player.updatedAt || new Date(),
@@ -194,12 +204,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: withHreflang(`${BASE_URL}/players/${player.slug}`) },
     }));
 
-  // Team pages
+  // Team pages — lower priority for teams with empty squads
   const teamPages: MetadataRoute.Sitemap = allTeams.map((team) => ({
     url: `${BASE_URL}/teams/${team.slug}`,
     lastModified: team.updatedAt || new Date(),
     changeFrequency: "weekly",
-    priority: 0.8,
+    priority: (team.squadCount ?? 0) > 0 ? 0.8 : 0.5,
     alternates: { languages: withHreflang(`${BASE_URL}/teams/${team.slug}`) },
   }));
 
