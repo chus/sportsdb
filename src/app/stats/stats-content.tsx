@@ -27,7 +27,7 @@ interface Player {
 
 export function AdvancedStatsContent() {
   const { subscription } = useSubscription();
-  const isPro = subscription?.tier === "pro" || subscription?.tier === "premium";
+  const isPro = subscription?.tier === "pro";
 
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);

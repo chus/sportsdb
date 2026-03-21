@@ -7,7 +7,6 @@ import {
   Plus,
   Trash2,
   Loader2,
-  Crown,
   Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -58,7 +57,6 @@ const emptyForm: VoucherForm = {
 
 export default function AdminSubscriptionsPage() {
   const [proSubscribers, setProSubscribers] = useState<Subscriber[]>([]);
-  const [premiumSubscribers, setPremiumSubscribers] = useState<Subscriber[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,20 +65,14 @@ export default function AdminSubscriptionsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchSubscribers = useCallback(async () => {
-    const [proRes, premiumRes] = await Promise.all([
-      fetch("/api/admin/users?tier=pro&limit=100"),
-      fetch("/api/admin/users?tier=premium&limit=100"),
-    ]);
+    const proRes = await fetch("/api/admin/users?tier=pro&limit=100");
 
-    if (!proRes.ok || !premiumRes.ok) {
+    if (!proRes.ok) {
       throw new Error("Failed to fetch subscribers");
     }
 
     const proData = await proRes.json();
-    const premiumData = await premiumRes.json();
-
     setProSubscribers(proData.users);
-    setPremiumSubscribers(premiumData.users);
   }, []);
 
   const fetchVouchers = useCallback(async () => {
@@ -201,46 +193,6 @@ export default function AdminSubscriptionsPage() {
           <h3 className="text-lg font-semibold text-neutral-900">
             Active Subscribers
           </h3>
-        </div>
-
-        {/* Premium Subscribers */}
-        <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Crown className="h-4 w-4 text-purple-600" />
-            <h4 className="text-sm font-medium text-neutral-700">
-              Premium ({premiumSubscribers.length})
-            </h4>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
-            {premiumSubscribers.length === 0 ? (
-              <div className="p-6 text-center text-sm text-neutral-400">
-                No premium subscribers yet.
-              </div>
-            ) : (
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-neutral-100 bg-neutral-50">
-                  <tr>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Name</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Email</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Joined</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100">
-                  {premiumSubscribers.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-neutral-50">
-                      <td className="px-4 py-3 font-medium text-neutral-900">
-                        {sub.name || "--"}
-                      </td>
-                      <td className="px-4 py-3 text-neutral-600">{sub.email}</td>
-                      <td className="px-4 py-3 text-neutral-500">
-                        {formatDate(sub.createdAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
         </div>
 
         {/* Pro Subscribers */}

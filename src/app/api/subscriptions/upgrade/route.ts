@@ -8,7 +8,7 @@ import { subscriptions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 const upgradeSchema = z.object({
-  tier: z.enum(["pro", "premium"]),
+  tier: z.enum(["pro"]),
   period: z.enum(["monthly", "annual"]).default("monthly"),
 });
 

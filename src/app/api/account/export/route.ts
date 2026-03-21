@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {
   users,
@@ -13,7 +13,24 @@ import {
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function GET() {
+function jsonToCsv(rows: Record<string, unknown>[]): string {
+  if (rows.length === 0) return "";
+  const headers = Object.keys(rows[0]);
+  const escape = (val: unknown): string => {
+    const str = val === null || val === undefined ? "" : String(val);
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+  const lines = [headers.join(",")];
+  for (const row of rows) {
+    lines.push(headers.map((h) => escape(row[h])).join(","));
+  }
+  return lines.join("\n");
+}
+
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -129,6 +146,45 @@ export async function GET() {
       notificationSettings: notificationSettingsRows[0] ?? null,
       subscription: subscriptionRows[0] ?? null,
     };
+
+    const format = request.nextUrl.searchParams.get("format");
+
+    if (format === "csv") {
+      const sections: string[] = [];
+
+      sections.push("# Profile");
+      sections.push(jsonToCsv(profileRows.length > 0 ? profileRows as Record<string, unknown>[] : []));
+
+      sections.push("\n# Follows");
+      sections.push(jsonToCsv(followRows as Record<string, unknown>[]));
+
+      sections.push("\n# League Preferences");
+      sections.push(jsonToCsv(leaguePreferenceRows as Record<string, unknown>[]));
+
+      sections.push("\n# Bookmarks");
+      sections.push(jsonToCsv(bookmarkRows as Record<string, unknown>[]));
+
+      sections.push("\n# Bookmark Collections");
+      sections.push(jsonToCsv(bookmarkCollectionRows as Record<string, unknown>[]));
+
+      sections.push("\n# Predictions");
+      sections.push(jsonToCsv(predictionRows as Record<string, unknown>[]));
+
+      sections.push("\n# Notification Settings");
+      sections.push(jsonToCsv(notificationSettingsRows.length > 0 ? notificationSettingsRows as Record<string, unknown>[] : []));
+
+      sections.push("\n# Subscription");
+      sections.push(jsonToCsv(subscriptionRows.length > 0 ? subscriptionRows as Record<string, unknown>[] : []));
+
+      return new NextResponse(sections.join("\n"), {
+        status: 200,
+        headers: {
+          "Content-Type": "text/csv",
+          "Content-Disposition":
+            'attachment; filename="sportsdb-data-export.csv"',
+        },
+      });
+    }
 
     return new NextResponse(JSON.stringify(exportData, null, 2), {
       status: 200,

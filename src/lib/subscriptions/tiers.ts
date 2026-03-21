@@ -1,4 +1,4 @@
-export type SubscriptionTier = "free" | "pro" | "premium";
+export type SubscriptionTier = "free" | "pro";
 
 export interface TierFeatures {
   maxFollows: number;
@@ -6,11 +6,7 @@ export interface TierFeatures {
   advancedStats: boolean;
   adFree: boolean;
   exportData: boolean;
-  fantasyOptimizer: boolean;
-  aiAnalytics: boolean;
-  apiCallsPerDay: number;
   historicalData: boolean;
-  earlyAccess: boolean;
 }
 
 export interface TierConfig {
@@ -35,11 +31,7 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
       advancedStats: false,
       adFree: false,
       exportData: false,
-      fantasyOptimizer: false,
-      aiAnalytics: false,
-      apiCallsPerDay: 0,
       historicalData: false,
-      earlyAccess: false,
     },
   },
   pro: {
@@ -54,30 +46,7 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
       advancedStats: true,
       adFree: true,
       exportData: true,
-      fantasyOptimizer: false,
-      aiAnalytics: false,
-      apiCallsPerDay: 100,
       historicalData: true,
-      earlyAccess: true,
-    },
-  },
-  premium: {
-    name: "Premium",
-    price: 3,
-    annualPrice: 24,
-    period: "month",
-    description: "For data analysts & power users",
-    features: {
-      maxFollows: Infinity,
-      comparisonsPerDay: Infinity,
-      advancedStats: true,
-      adFree: true,
-      exportData: true,
-      fantasyOptimizer: true,
-      aiAnalytics: true,
-      apiCallsPerDay: 1000,
-      historicalData: true,
-      earlyAccess: true,
     },
   },
 } as const;
@@ -108,7 +77,7 @@ export function canAccessFeature(
 
 export function getFeatureLimit(
   tier: SubscriptionTier,
-  feature: "maxFollows" | "comparisonsPerDay" | "apiCallsPerDay"
+  feature: "maxFollows" | "comparisonsPerDay"
 ): number {
   return getTierFeatures(tier)[feature];
 }

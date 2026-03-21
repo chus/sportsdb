@@ -13,7 +13,7 @@ interface AdminUser {
   createdAt: string;
 }
 
-const TIERS = ["free", "pro", "premium"] as const;
+const TIERS = ["free", "pro"] as const;
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -190,8 +190,6 @@ export default function AdminUsersPage() {
                         disabled={updatingId === user.id}
                         className={cn(
                           "rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
-                          user.tier === "premium" &&
-                            "border-purple-200 bg-purple-50 text-purple-700",
                           user.tier === "pro" &&
                             "border-blue-200 bg-blue-50 text-blue-700",
                           user.tier === "free" &&

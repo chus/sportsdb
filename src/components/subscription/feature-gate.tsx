@@ -59,7 +59,7 @@ const featureDescriptions: Record<keyof TierFeatures, { title: string; descripti
   },
   advancedStats: {
     title: "Advanced Stats",
-    description: "Access detailed player analytics, radar charts, and more",
+    description: "Access detailed player analytics and advanced statistics",
   },
   adFree: {
     title: "Ad-Free Experience",
@@ -67,27 +67,11 @@ const featureDescriptions: Record<keyof TierFeatures, { title: string; descripti
   },
   exportData: {
     title: "Export Data",
-    description: "Download player and team data in CSV or PDF format",
-  },
-  fantasyOptimizer: {
-    title: "Fantasy Team Optimizer",
-    description: "AI-powered team suggestions for fantasy leagues",
-  },
-  aiAnalytics: {
-    title: "AI Predictive Analytics",
-    description: "Machine learning insights and predictions",
-  },
-  apiCallsPerDay: {
-    title: "API Access",
-    description: "Programmatic access to SportsDB data",
+    description: "Download data in JSON or CSV format",
   },
   historicalData: {
     title: "Historical Data",
-    description: "Access 20+ years of historical statistics",
-  },
-  earlyAccess: {
-    title: "Early Access",
-    description: "Be the first to try new features",
+    description: "Access multi-season historical statistics",
   },
 };
 

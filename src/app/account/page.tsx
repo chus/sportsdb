@@ -1073,8 +1073,7 @@ function BillingTab({
             className={cn(
               "px-3 py-1 rounded-full text-sm font-semibold",
               tier === "free" && "bg-neutral-100 text-neutral-700",
-              tier === "pro" && "bg-blue-100 text-blue-700",
-              tier === "premium" && "bg-purple-100 text-purple-700"
+              tier === "pro" && "bg-blue-100 text-blue-700"
             )}
           >
             {tier.charAt(0).toUpperCase() + tier.slice(1)}

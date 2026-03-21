@@ -17,6 +17,6 @@ export function SidebarUpgradeOrAd({ context = "default" }: SidebarUpgradeOrAdPr
     return <UpgradeBanner variant="sidebar" context={context} />;
   }
 
-  // Pro/Premium users see the ad component (which itself returns null for adFree users)
+  // Pro users see the ad component (which itself returns null for adFree users)
   return <SidebarAd />;
 }

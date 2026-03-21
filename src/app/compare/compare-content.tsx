@@ -23,16 +23,29 @@ interface Player {
 
 export function ComparePageContent() {
   const { subscription } = useSubscription();
-  const isPro = subscription?.tier === "pro" || subscription?.tier === "premium";
+  const isPro = subscription?.tier === "pro";
 
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [searchResults, setSearchResults] = useState<Player[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [comparisonsToday, setComparisonsToday] = useState(0);
+  const [comparisonLimit, setComparisonLimit] = useState(3);
 
-  const MAX_FREE_COMPARISONS = 3;
-  const canCompare = isPro || comparisonsToday < MAX_FREE_COMPARISONS;
+  const canCompare = isPro || comparisonsToday < comparisonLimit;
+
+  // Load server-side comparison usage on mount
+  useEffect(() => {
+    if (!isPro) {
+      fetch("/api/comparisons/check")
+        .then((res) => res.json())
+        .then((data) => {
+          if (typeof data.used === "number") setComparisonsToday(data.used);
+          if (typeof data.limit === "number") setComparisonLimit(data.limit);
+        })
+        .catch(() => {});
+    }
+  }, [isPro]);
 
   useEffect(() => {
     if (searchQuery.length >= 2) {
@@ -65,9 +78,27 @@ export function ComparePageContent() {
     }
   };
 
-  const addPlayer = (player: Player) => {
+  const addPlayer = async (player: Player) => {
     if (selectedPlayers.length < 4) {
-      // Add mock stats for demo
+      if (!isPro) {
+        try {
+          const res = await fetch("/api/comparisons/increment", {
+            method: "POST",
+          });
+          if (res.status === 429) {
+            const data = await res.json();
+            setComparisonsToday(data.used ?? comparisonLimit);
+            return;
+          }
+          if (res.ok) {
+            const data = await res.json();
+            setComparisonsToday(data.used);
+          }
+        } catch {
+          // Fall through — allow comparison on network error
+        }
+      }
+
       const playerWithStats = {
         ...player,
         stats: {
@@ -79,10 +110,6 @@ export function ComparePageContent() {
       setSelectedPlayers([...selectedPlayers, playerWithStats]);
       setSearchQuery("");
       setSearchResults([]);
-
-      if (!isPro) {
-        setComparisonsToday((prev) => prev + 1);
-      }
     }
   };
 
@@ -132,7 +159,7 @@ export function ComparePageContent() {
             <div className="mt-4 max-w-xs mx-auto">
               <div className="flex items-center justify-between text-sm mb-1.5">
                 <span className="text-neutral-600">
-                  {comparisonsToday}/{MAX_FREE_COMPARISONS} comparisons used
+                  {comparisonsToday}/{comparisonLimit} comparisons used
                 </span>
                 <Link
                   href="/pricing"
@@ -145,14 +172,14 @@ export function ComparePageContent() {
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-500",
-                    comparisonsToday >= MAX_FREE_COMPARISONS
+                    comparisonsToday >= comparisonLimit
                       ? "bg-red-500"
-                      : comparisonsToday >= MAX_FREE_COMPARISONS - 1
+                      : comparisonsToday >= comparisonLimit - 1
                       ? "bg-amber-500"
                       : "bg-blue-500"
                   )}
                   style={{
-                    width: `${(comparisonsToday / MAX_FREE_COMPARISONS) * 100}%`,
+                    width: `${(comparisonsToday / comparisonLimit) * 100}%`,
                   }}
                 />
               </div>
@@ -321,7 +348,7 @@ export function ComparePageContent() {
               Daily Limit Reached
             </h3>
             <p className="text-neutral-600 mb-6">
-              You&apos;ve used all {MAX_FREE_COMPARISONS} free comparisons for today.
+              You&apos;ve used all {comparisonLimit} free comparisons for today.
               Upgrade to Pro for unlimited player comparisons, advanced stats, and more.
             </p>
             <Link

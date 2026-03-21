@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, Crown, Zap, Sparkles, ChevronDown, Tag, Loader2 } from "lucide-react";
+import { Check, X, Zap, Sparkles, ChevronDown, Tag, Loader2, Clock } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { SUBSCRIPTION_TIERS, SubscriptionTier } from "@/lib/subscriptions/tiers";
 import { cn } from "@/lib/utils/cn";
@@ -26,9 +26,8 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
     id: SubscriptionTier;
     icon: typeof Sparkles;
     gradient: string;
-    popular?: boolean;
-    bestValue?: boolean;
-    features: { text: string; included: boolean }[];
+    recommended?: boolean;
+    features: { text: string; included: boolean; comingSoon?: boolean }[];
   }[] = [
     {
       id: "free",
@@ -37,43 +36,25 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
       features: [
         { text: "Follow up to 10 entities", included: true },
         { text: "Basic stats & timelines", included: true },
-        { text: "3 player comparisons/day", included: true },
-        { text: "Advanced stats", included: false },
-        { text: "Export data", included: false },
+        { text: "3 player comparisons per day", included: true },
+        { text: "Community access", included: true },
         { text: "Ad-free experience", included: false },
+        { text: "Data export", included: false },
       ],
     },
     {
       id: "pro",
       icon: Zap,
       gradient: "from-blue-600 to-indigo-600",
-      popular: true,
+      recommended: true,
       features: [
+        { text: "Everything in Free", included: true },
         { text: "Unlimited follows", included: true },
-        { text: "Advanced stats & visualizations", included: true },
         { text: "Unlimited player comparisons", included: true },
-        { text: "Export data (CSV, PDF)", included: true },
         { text: "Ad-free experience", included: true },
-        { text: "Historical data (20+ years)", included: true },
-        { text: "Early access to features", included: true },
-        { text: "Fantasy team optimizer", included: false },
-        { text: "AI predictive analytics", included: false },
-      ],
-    },
-    {
-      id: "premium",
-      icon: Crown,
-      gradient: "from-purple-600 to-pink-600",
-      bestValue: billingPeriod === "annual",
-      features: [
-        { text: "Everything in Pro", included: true },
-        { text: "Fantasy team optimizer", included: true },
-        { text: "AI predictive analytics", included: true },
-        { text: "API access (1000 calls/day)", included: true },
-        { text: "White-label embeds", included: true },
-        { text: "Downloadable reports", included: true },
-        { text: "Custom alerts", included: true },
-        { text: "Priority support", included: true },
+        { text: "Data export (JSON, CSV)", included: true },
+        { text: "Multi-season historical data", included: true },
+        { text: "Custom alerts", included: true, comingSoon: true },
       ],
     },
   ];
@@ -82,7 +63,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
     if (tier === "free") {
       await downgrade();
     } else {
-      await upgrade(tier as "pro" | "premium", billingPeriod);
+      await upgrade("pro", billingPeriod);
     }
     onUpgrade?.();
   };
@@ -167,16 +148,13 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         )}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
         {tiers.map((tierItem) => {
           const config = SUBSCRIPTION_TIERS[tierItem.id];
           const Icon = tierItem.icon;
           const isCurrentTier = currentTier === tierItem.id;
-          const canUpgrade =
-            (currentTier === "free" && tierItem.id !== "free") ||
-            (currentTier === "pro" && tierItem.id === "premium");
-          const canDowngrade =
-            tierItem.id === "free" && currentTier !== "free";
+          const canUpgrade = currentTier === "free" && tierItem.id === "pro";
+          const canDowngrade = tierItem.id === "free" && currentTier !== "free";
           const displayPrice = getDisplayPrice(tierItem.id);
           const monthlyEquiv = getMonthlyEquivalent(tierItem.id);
 
@@ -185,17 +163,12 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
               key={tierItem.id}
               className={cn(
                 "relative bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-2xl",
-                tierItem.popular && "ring-4 ring-blue-600 scale-105"
+                tierItem.recommended && "ring-4 ring-blue-600 scale-105"
               )}
             >
-              {tierItem.popular && (
+              {tierItem.recommended && (
                 <div className="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 text-xs font-bold rounded-bl-lg">
-                  MOST POPULAR
-                </div>
-              )}
-              {tierItem.bestValue && (
-                <div className="absolute top-0 left-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-1 text-xs font-bold rounded-br-lg">
-                  BEST VALUE
+                  RECOMMENDED
                 </div>
               )}
 
@@ -233,9 +206,6 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                 {tierItem.id === "pro" && (
                   <p className="text-xs text-white/60 mt-2">Less than a coffee per month</p>
                 )}
-                {tierItem.id === "premium" && billingPeriod === "monthly" && (
-                  <p className="text-xs text-white/60 mt-2">Less than a coffee per week</p>
-                )}
               </div>
 
               <div className="p-6">
@@ -254,6 +224,12 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                         )}
                       >
                         {feature.text}
+                        {feature.comingSoon && (
+                          <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded">
+                            <Clock className="w-3 h-3" />
+                            Soon
+                          </span>
+                        )}
                       </span>
                     </li>
                   ))}
@@ -282,11 +258,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                   >
                     Downgrade to Free
                   </button>
-                ) : (
-                  <div className="w-full px-4 py-3 bg-neutral-50 text-neutral-500 rounded-lg text-center font-semibold">
-                    {tierItem.id === "pro" ? "Included in Current Plan" : "N/A"}
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
           );

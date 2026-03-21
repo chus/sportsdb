@@ -35,12 +35,11 @@ interface SubscriptionContextType {
   isLoading: boolean;
   tier: SubscriptionTier;
   isPro: boolean;
-  isPremium: boolean;
   canAccess: (feature: keyof TierFeatures) => boolean;
   getLimit: (
-    feature: "maxFollows" | "comparisonsPerDay" | "apiCallsPerDay"
+    feature: "maxFollows" | "comparisonsPerDay"
   ) => number;
-  upgrade: (tier: "pro" | "premium", period?: "monthly" | "annual") => Promise<void>;
+  upgrade: (tier: "pro", period?: "monthly" | "annual") => Promise<void>;
   downgrade: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -94,9 +93,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, [searchParams, user, fetchSubscription]);
 
-  const tier: SubscriptionTier = subscription?.tier ?? "free";
-  const isPro = tier === "pro" || tier === "premium";
-  const isPremium = tier === "premium";
+  const tier: SubscriptionTier = subscription?.tier === "pro" ? "pro" : "free";
+  const isPro = tier === "pro";
 
   const canAccess = useCallback(
     (feature: keyof TierFeatures): boolean => {
@@ -107,7 +105,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const getLimit = useCallback(
     (
-      feature: "maxFollows" | "comparisonsPerDay" | "apiCallsPerDay"
+      feature: "maxFollows" | "comparisonsPerDay"
     ): number => {
       return getFeatureLimit(tier, feature);
     },
@@ -115,7 +113,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   );
 
   const upgrade = useCallback(
-    async (newTier: "pro" | "premium", period: "monthly" | "annual" = "monthly") => {
+    async (newTier: "pro", period: "monthly" | "annual" = "monthly") => {
       try {
         const res = await fetch("/api/subscriptions/upgrade", {
           method: "POST",
@@ -170,7 +168,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         isLoading,
         tier,
         isPro,
-        isPremium,
         canAccess,
         getLimit,
         upgrade,

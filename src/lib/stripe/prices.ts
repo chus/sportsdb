@@ -10,7 +10,7 @@ interface PriceConfig {
   interval: "month" | "year";
 }
 
-const TIER_PRICES: Record<"pro" | "premium", Record<BillingPeriod, PriceConfig>> = {
+const TIER_PRICES: Record<"pro", Record<BillingPeriod, PriceConfig>> = {
   pro: {
     monthly: {
       name: "SportsDB Pro (Monthly)",
@@ -25,20 +25,6 @@ const TIER_PRICES: Record<"pro" | "premium", Record<BillingPeriod, PriceConfig>>
       interval: "year",
     },
   },
-  premium: {
-    monthly: {
-      name: "SportsDB Premium (Monthly)",
-      amount: 300, // €3.00
-      lookupKey: "sportsdb_premium_monthly",
-      interval: "month",
-    },
-    annual: {
-      name: "SportsDB Premium (Annual)",
-      amount: 2400, // €24.00
-      lookupKey: "sportsdb_premium_annual",
-      interval: "year",
-    },
-  },
 };
 
 /**
@@ -46,7 +32,7 @@ const TIER_PRICES: Record<"pro" | "premium", Record<BillingPeriod, PriceConfig>>
  * Uses lookup_key for idempotent retrieval.
  */
 export async function getStripePriceId(
-  tier: "pro" | "premium",
+  tier: "pro",
   period: BillingPeriod = "monthly"
 ): Promise<string> {
   const config = TIER_PRICES[tier][period];
@@ -91,6 +77,5 @@ export function tierFromLookupKey(lookupKey: string): { tier: SubscriptionTier; 
 
 export function tierFromPriceAmount(amount: number): SubscriptionTier | null {
   if (amount === 100 || amount === 800) return "pro";
-  if (amount === 300 || amount === 2400) return "premium";
   return null;
 }

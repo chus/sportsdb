@@ -192,12 +192,10 @@ export async function getRemainingFollows(userId: string): Promise<number> {
 // Check and increment daily usage
 export async function checkDailyUsage(
   userId: string,
-  featureType: "comparison" | "api_call"
+  featureType: "comparison"
 ): Promise<{ allowed: boolean; used: number; limit: number }> {
   const subscription = await getUserSubscription(userId);
-  const limitKey =
-    featureType === "comparison" ? "comparisonsPerDay" : "apiCallsPerDay";
-  const limit = getFeatureLimit(subscription.tier, limitKey);
+  const limit = getFeatureLimit(subscription.tier, "comparisonsPerDay");
 
   if (isUnlimited(limit)) {
     return { allowed: true, used: 0, limit: Infinity };
@@ -229,7 +227,7 @@ export async function checkDailyUsage(
 // Increment daily usage
 export async function incrementDailyUsage(
   userId: string,
-  featureType: "comparison" | "api_call"
+  featureType: "comparison"
 ): Promise<void> {
   const today = new Date().toISOString().split("T")[0];
 

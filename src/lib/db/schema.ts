@@ -679,7 +679,7 @@ export const subscriptions = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" })
       .unique(),
-    tier: text("tier").notNull().default("free"), // 'free' | 'pro' | 'premium'
+    tier: text("tier").notNull().default("free"), // 'free' | 'pro'
     status: text("status").notNull().default("active"), // 'active' | 'cancelled' | 'past_due'
     startDate: timestamp("start_date", { withTimezone: true }).defaultNow(),
     endDate: timestamp("end_date", { withTimezone: true }),

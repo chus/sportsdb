@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Crown, Sparkles, Zap, Loader2 } from "lucide-react";
+import { Check, Sparkles, Zap, Loader2, Clock } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import {
   SUBSCRIPTION_TIERS,
@@ -12,12 +12,11 @@ interface PaywallScreenProps {
   onContinue: () => void;
 }
 
-const TIER_ORDER: SubscriptionTier[] = ["free", "pro", "premium"];
+const TIER_ORDER: SubscriptionTier[] = ["free", "pro"];
 
 const TIER_ICONS: Record<SubscriptionTier, React.ElementType> = {
   free: Sparkles,
   pro: Zap,
-  premium: Crown,
 };
 
 const TIER_COLORS: Record<
@@ -38,25 +37,15 @@ const TIER_COLORS: Record<
       "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg",
     badge: "bg-blue-600 text-white",
   },
-  premium: {
-    border: "border-purple-600",
-    bg: "bg-white",
-    button:
-      "bg-gradient-to-r from-purple-600 to-purple-800 text-white hover:shadow-lg",
-    badge: "bg-purple-700 text-white",
-  },
 };
 
-const FEATURE_LABELS: { key: string; label: string }[] = [
+const FEATURE_LABELS: { key: string; label: string; comingSoon?: boolean }[] = [
   { key: "follows", label: "Player & team follows" },
   { key: "comparisons", label: "Daily comparisons" },
   { key: "advancedStats", label: "Advanced statistics" },
   { key: "adFree", label: "Ad-free experience" },
   { key: "exportData", label: "Export data" },
-  { key: "historicalData", label: "Historical data access" },
-  { key: "apiAccess", label: "API access" },
-  { key: "fantasyOptimizer", label: "Fantasy optimizer" },
-  { key: "aiAnalytics", label: "AI-powered analytics" },
+  { key: "historicalData", label: "Multi-season historical data" },
 ];
 
 function getFeatureValue(tier: SubscriptionTier, key: string): string | boolean {
@@ -76,14 +65,6 @@ function getFeatureValue(tier: SubscriptionTier, key: string): string | boolean 
       return features.exportData;
     case "historicalData":
       return features.historicalData;
-    case "apiAccess":
-      return features.apiCallsPerDay > 0
-        ? `${features.apiCallsPerDay}/day`
-        : false;
-    case "fantasyOptimizer":
-      return features.fantasyOptimizer;
-    case "aiAnalytics":
-      return features.aiAnalytics;
     default:
       return false;
   }
@@ -101,7 +82,7 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
 
     setUpgrading(tier);
     try {
-      await upgrade(tier as "pro" | "premium");
+      await upgrade("pro");
       onContinue();
     } catch {
       // Error already logged in provider
@@ -111,11 +92,11 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <Crown className="w-8 h-8" />
+            <Zap className="w-8 h-8" />
             <h2 className="text-3xl font-bold">Choose Your Plan</h2>
           </div>
           <p className="text-blue-100 text-lg max-w-xl mx-auto">
@@ -125,23 +106,23 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
 
         {/* Pricing Cards */}
         <div className="p-8 overflow-y-auto max-h-[60vh]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {TIER_ORDER.map((tierKey) => {
               const config = SUBSCRIPTION_TIERS[tierKey];
               const colors = TIER_COLORS[tierKey];
               const Icon = TIER_ICONS[tierKey];
-              const isPopular = tierKey === "pro";
+              const isRecommended = tierKey === "pro";
 
               return (
                 <div
                   key={tierKey}
                   className={`relative rounded-2xl border-2 ${colors.border} ${colors.bg} p-6 flex flex-col`}
                 >
-                  {isPopular && (
+                  {isRecommended && (
                     <div
                       className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold ${colors.badge}`}
                     >
-                      MOST POPULAR
+                      RECOMMENDED
                     </div>
                   )}
 
@@ -150,18 +131,14 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
                       className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${
                         tierKey === "free"
                           ? "bg-neutral-100"
-                          : tierKey === "pro"
-                          ? "bg-blue-100"
-                          : "bg-purple-100"
+                          : "bg-blue-100"
                       }`}
                     >
                       <Icon
                         className={`w-6 h-6 ${
                           tierKey === "free"
                             ? "text-neutral-600"
-                            : tierKey === "pro"
-                            ? "text-blue-600"
-                            : "text-purple-700"
+                            : "text-blue-600"
                         }`}
                       />
                     </div>
@@ -172,17 +149,23 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
                       {config.description}
                     </p>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-neutral-900">
-                        ${config.price}
-                      </span>
-                      {config.period === "month" && (
-                        <span className="text-neutral-500 text-sm">/month</span>
+                      {config.price === 0 ? (
+                        <span className="text-4xl font-bold text-neutral-900">
+                          Free
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-4xl font-bold text-neutral-900">
+                            &euro;{config.annualPrice}
+                          </span>
+                          <span className="text-neutral-500 text-sm">/year</span>
+                        </>
                       )}
                     </div>
                   </div>
 
                   <ul className="space-y-3 mb-6 flex-1">
-                    {FEATURE_LABELS.map(({ key, label }) => {
+                    {FEATURE_LABELS.map(({ key, label, comingSoon }) => {
                       const value = getFeatureValue(tierKey, key);
                       const available = value !== false;
                       return (
@@ -203,6 +186,12 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
                               <span className="font-medium text-neutral-900">
                                 {" "}
                                 ({value})
+                              </span>
+                            )}
+                            {comingSoon && available && (
+                              <span className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded">
+                                <Clock className="w-3 h-3" />
+                                Soon
                               </span>
                             )}
                           </span>
