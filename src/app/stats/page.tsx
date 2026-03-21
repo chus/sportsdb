@@ -4,6 +4,7 @@ import { AdvancedStatsContent } from "./stats-content";
 export const metadata: Metadata = {
   title: "Advanced Stats",
   description: "Access advanced player statistics including radar charts, heat maps, and xG analytics",
+  robots: { index: false, follow: false },
 };
 
 export default function AdvancedStatsPage() {

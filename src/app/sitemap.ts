@@ -10,8 +10,9 @@ import {
   competitionSeasons,
   seasons,
   playerSeasonStats,
+  teamVenueHistory,
 } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, or, inArray } from "drizzle-orm";
 import {
   getDistinctNationalities,
   getDistinctTeamCountries,
@@ -118,11 +119,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         position: players.position,
       })
       .from(players),
-    db.select({ slug: teams.slug, updatedAt: teams.updatedAt }).from(teams),
+    // Only teams that appear in at least 1 match
     db
-      .select({ slug: competitions.slug, updatedAt: competitions.updatedAt })
-      .from(competitions),
-    db.select({ slug: venues.slug, updatedAt: venues.updatedAt }).from(venues),
+      .selectDistinct({ slug: teams.slug, updatedAt: teams.updatedAt })
+      .from(teams)
+      .innerJoin(
+        matches,
+        or(eq(matches.homeTeamId, teams.id), eq(matches.awayTeamId, teams.id))
+      ),
+    // Only competitions that have at least 1 match
+    db
+      .selectDistinct({
+        slug: competitions.slug,
+        updatedAt: competitions.updatedAt,
+      })
+      .from(competitions)
+      .innerJoin(
+        competitionSeasons,
+        eq(competitionSeasons.competitionId, competitions.id)
+      )
+      .innerJoin(
+        matches,
+        eq(matches.competitionSeasonId, competitionSeasons.id)
+      ),
+    // Only venues linked to at least 1 team
+    db
+      .selectDistinct({ slug: venues.slug, updatedAt: venues.updatedAt })
+      .from(venues)
+      .innerJoin(teamVenueHistory, eq(teamVenueHistory.venueId, venues.id)),
     db
       .select({
         slug: articles.slug,
