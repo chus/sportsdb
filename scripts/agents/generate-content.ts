@@ -2,7 +2,7 @@
  * Marketing AI Agent — Layer 2: Generate Content
  *
  * Reads content-gaps.json and generates article ideas (title + outline)
- * using Claude API. Saves to data/generated-content/ for human review.
+ * using OpenAI API. Saves to data/generated-content/ for human review.
  * Does NOT auto-publish.
  *
  * Usage:
@@ -14,24 +14,24 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 if (!DATABASE_URL) {
   console.error("DATABASE_URL environment variable is required");
   process.exit(1);
 }
-if (!ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY environment variable is required");
+if (!OPENAI_API_KEY) {
+  console.error("OPENAI_API_KEY environment variable is required");
   process.exit(1);
 }
 
 const sql = neon(DATABASE_URL);
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const args = process.argv.slice(2);
 const limitArg = args.find((a) => a.startsWith("--limit="));
@@ -84,13 +84,13 @@ Return ONLY valid JSON, no markdown fences.`;
 
 async function generateIdea(gap: ContentGap): Promise<GeneratedIdea | null> {
   try {
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 1024,
       messages: [{ role: "user", content: buildPrompt(gap) }],
     });
 
-    const text = response.content[0]?.type === "text" ? response.content[0].text : "";
+    const text = response.choices[0]?.message?.content || "";
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return null;
 
@@ -106,7 +106,7 @@ async function generateIdea(gap: ContentGap): Promise<GeneratedIdea | null> {
       generatedAt: new Date().toISOString(),
     };
   } catch (error) {
-    console.error(`  Claude API error for ${gap.entityName}:`, error);
+    console.error(`  OpenAI API error for ${gap.entityName}:`, error);
     return null;
   }
 }

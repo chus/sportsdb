@@ -2,7 +2,7 @@
  * Marketing AI Agent — Layer 3: Distribute to Social
  *
  * Reads recently published articles and generates short social post text
- * using Claude API. Saves to social_posts table and data/social-queue/.
+ * using OpenAI API. Saves to social_posts table and data/social-queue/.
  * Does NOT actually post — output is for manual review.
  *
  * Usage:
@@ -13,24 +13,24 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 if (!DATABASE_URL) {
   console.error("DATABASE_URL environment variable is required");
   process.exit(1);
 }
-if (!ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY environment variable is required");
+if (!OPENAI_API_KEY) {
+  console.error("OPENAI_API_KEY environment variable is required");
   process.exit(1);
 }
 
 const sql = neon(DATABASE_URL);
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sportsdb.com";
 
@@ -71,16 +71,16 @@ Return ONLY the post text, nothing else.`;
 
 async function generateSocialPost(article: RecentArticle): Promise<string | null> {
   try {
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 256,
       messages: [{ role: "user", content: buildSocialPrompt(article) }],
     });
 
-    const text = response.content[0]?.type === "text" ? response.content[0].text : "";
+    const text = response.choices[0]?.message?.content || "";
     return text.trim().slice(0, 280) || null;
   } catch (error) {
-    console.error(`  Claude API error for "${article.title}":`, error);
+    console.error(`  OpenAI API error for "${article.title}":`, error);
     return null;
   }
 }

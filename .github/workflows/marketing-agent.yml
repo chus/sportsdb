@@ -31,18 +31,18 @@ jobs:
         run: npx tsx scripts/agents/run-agent.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Run social distribution (daily)
         if: github.event.schedule == '0 10 * * *'
         run: npx tsx scripts/agents/run-agent.ts --only=distribute
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Run specific layers (manual)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.layers != 'all'
         run: npx tsx scripts/agents/run-agent.ts --only=${{ github.event.inputs.layers }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
