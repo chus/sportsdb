@@ -349,6 +349,7 @@ export const users = pgTable(
     onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
     role: text("role").notNull().default("user"),
     consentGivenAt: timestamp("consent_given_at", { withTimezone: true }),
+    marketingEmailConsentAt: timestamp("marketing_email_consent_at", { withTimezone: true }),
     referralCode: text("referral_code").unique(),
     referredBy: uuid("referred_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

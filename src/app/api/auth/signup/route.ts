@@ -16,12 +16,13 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1).optional(),
   referralCode: z.string().optional(),
+  marketingEmailConsent: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, referralCode: bodyRefCode } =
+    const { email, password, name, referralCode: bodyRefCode, marketingEmailConsent } =
       signupSchema.parse(body);
 
     // Check if user already exists
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user with consent timestamp
-    const user = await createUser(email, password, name, true);
+    const user = await createUser(email, password, name, true, marketingEmailConsent);
 
     // Resolve referral code: body param takes priority, then cookie fallback
     const refCode =

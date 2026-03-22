@@ -10,13 +10,14 @@ interface User {
   emailVerified: boolean;
   hasPassword: boolean;
   referralCode: string | null;
+  marketingEmailConsent: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (email: string, password: string, name?: string, referralCode?: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string, name?: string, referralCode?: string, marketingEmailConsent?: boolean) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -64,12 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string, name?: string, referralCode?: string) => {
+  const signup = async (email: string, password: string, name?: string, referralCode?: string, marketingEmailConsent?: boolean) => {
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, referralCode }),
+        body: JSON.stringify({ email, password, name, referralCode, marketingEmailConsent }),
       });
 
       const data = await res.json();

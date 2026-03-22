@@ -37,7 +37,7 @@ export async function TournamentRecap({ competitionSeasonId }: TournamentRecapPr
 
         {/* Summary paragraphs */}
         <div className="prose prose-neutral prose-sm max-w-none mb-6">
-          {summary.summary.split("\n\n").map((paragraph: string, idx: number) => (
+          {(summary.summary || "").split("\n\n").map((paragraph: string, idx: number) => (
             <p key={idx} className="text-neutral-700 leading-relaxed">
               {paragraph}
             </p>
@@ -45,7 +45,7 @@ export async function TournamentRecap({ competitionSeasonId }: TournamentRecapPr
         </div>
 
         {/* Top Performers */}
-        {summary.topPerformers.length > 0 && (
+        {Array.isArray(summary.topPerformers) && summary.topPerformers.length > 0 && (
           <div className="mb-6">
             <h4 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3 flex items-center gap-2">
               <Users className="w-4 h-4" />

@@ -90,6 +90,9 @@ export default function AccountPage() {
   const [notifSettings, setNotifSettings] = useState<NotificationSettings | null>(null);
   const [notifLoading, setNotifLoading] = useState(true);
 
+  // Marketing consent
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
   // Data export
   const [exporting, setExporting] = useState(false);
 
@@ -120,6 +123,7 @@ export default function AccountPage() {
     if (user) {
       setName(user.name || "");
       setReferralCode(user.referralCode || null);
+      setMarketingConsent(!!user.marketingEmailConsent);
       fetchFollows();
       fetchNotificationSettings();
       fetchProfile();
@@ -317,33 +321,47 @@ export default function AccountPage() {
     { id: "billing", label: "Billing", icon: CreditCard },
   ];
 
+  const handleToggleMarketingConsent = async (value: boolean) => {
+    const prev = marketingConsent;
+    setMarketingConsent(value);
+    try {
+      const res = await fetch("/api/auth/marketing-consent", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ consent: value }),
+      });
+      if (!res.ok) setMarketingConsent(prev);
+    } catch {
+      setMarketingConsent(prev);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center gap-6 mb-8">
-            <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-4xl font-bold">
+    <div className="min-h-screen bg-neutral-50">
+      {/* Compact Header */}
+      <section className="bg-neutral-900 text-white">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/15 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">
               {userInitial}
             </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{user.name || "Sports Fan"}</h1>
-              <p className="text-blue-100">Member since {memberSince}</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold truncate">{user.name || "Sports Fan"}</h1>
+              <p className="text-sm text-neutral-400">{user.email} · Member since {memberSince}</p>
             </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold">{totalFollowing}</div>
-              <div className="text-sm text-blue-100 mt-1">Following</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold">{followedPlayers.length}</div>
-              <div className="text-sm text-blue-100 mt-1">Players</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-              <div className="text-3xl font-bold">{followedTeams.length}</div>
-              <div className="text-sm text-blue-100 mt-1">Teams</div>
+            <div className="hidden sm:flex items-center gap-4 text-center">
+              <div>
+                <div className="text-xl font-bold">{totalFollowing}</div>
+                <div className="text-xs text-neutral-400">Following</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold">{followedPlayers.length}</div>
+                <div className="text-xs text-neutral-400">Players</div>
+              </div>
+              <div>
+                <div className="text-xl font-bold">{followedTeams.length}</div>
+                <div className="text-xs text-neutral-400">Teams</div>
+              </div>
             </div>
           </div>
         </div>
@@ -735,26 +753,36 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              {notifSettings && (
-                <div className="divide-y divide-neutral-100">
-                  <ToggleRow
-                    label="Email Updates"
-                    description="Weekly digest of activity"
-                    icon={<Mail className="w-5 h-5 text-neutral-400" />}
-                    checked={notifSettings.emailEnabled}
-                    onChange={(v) => handleToggleNotification("emailEnabled", v)}
-                    color="purple"
-                  />
-                  <ToggleRow
-                    label="Push Notifications"
-                    description="Real-time alerts on your device"
-                    icon={<Smartphone className="w-5 h-5 text-neutral-400" />}
-                    checked={notifSettings.pushEnabled}
-                    onChange={(v) => handleToggleNotification("pushEnabled", v)}
-                    color="purple"
-                  />
-                </div>
-              )}
+              <div className="divide-y divide-neutral-100">
+                {notifSettings && (
+                  <>
+                    <ToggleRow
+                      label="Email Updates"
+                      description="Weekly digest of activity"
+                      icon={<Mail className="w-5 h-5 text-neutral-400" />}
+                      checked={notifSettings.emailEnabled}
+                      onChange={(v) => handleToggleNotification("emailEnabled", v)}
+                      color="purple"
+                    />
+                    <ToggleRow
+                      label="Push Notifications"
+                      description="Real-time alerts on your device"
+                      icon={<Smartphone className="w-5 h-5 text-neutral-400" />}
+                      checked={notifSettings.pushEnabled}
+                      onChange={(v) => handleToggleNotification("pushEnabled", v)}
+                      color="purple"
+                    />
+                  </>
+                )}
+                <ToggleRow
+                  label="Marketing Emails"
+                  description="Football news and product updates"
+                  icon={<Mail className="w-5 h-5 text-neutral-400" />}
+                  checked={marketingConsent}
+                  onChange={handleToggleMarketingConsent}
+                  color="purple"
+                />
+              </div>
             </div>
 
             {/* Refer a Friend */}

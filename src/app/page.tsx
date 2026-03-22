@@ -285,7 +285,7 @@ export default async function HomePage() {
                 <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white">
                   <h3 className="font-bold text-lg mb-2">Create a free account</h3>
                   <p className="text-sm text-blue-100 mb-4">
-                    Follow teams, track players, and get personalized updates.
+                    Get your personal dashboard, follow teams, track players, and stay updated with the latest stats.
                   </p>
                   <Link
                     href="/signup"
@@ -297,20 +297,18 @@ export default async function HomePage() {
               )}
 
               {currentUser && (
-                <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                  <h3 className="font-bold text-sm text-neutral-900 mb-3">Quick Links</h3>
-                  <div className="space-y-2">
-                    <Link href="/dashboard" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
-                      <ChevronRight className="w-4 h-4" /> Dashboard
-                    </Link>
-                    <Link href="/news" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
-                      <ChevronRight className="w-4 h-4" /> Latest News
-                    </Link>
-                    <Link href="/trending" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
-                      <ChevronRight className="w-4 h-4" /> Trending
-                    </Link>
-                  </div>
-                </div>
+                <Link
+                  href="/dashboard"
+                  className="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white hover:shadow-lg transition-shadow group"
+                >
+                  <h3 className="font-bold text-lg mb-1 group-hover:underline">Your Dashboard</h3>
+                  <p className="text-sm text-blue-100 mb-3">
+                    Follow leagues, check standings, and see upcoming fixtures — all in one place.
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                    Open Dashboard <ChevronRight className="w-4 h-4" />
+                  </span>
+                </Link>
               )}
             </div>
           </div>

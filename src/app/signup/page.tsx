@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +31,7 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
 
-    const result = await signup(email, password, name || undefined, refCode);
+    const result = await signup(email, password, name || undefined, refCode, marketingConsent);
     setLoading(false);
 
     if (result.success) {
@@ -116,6 +117,18 @@ export default function SignupPage() {
                 <Link href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</Link>
                 {" "}and{" "}
                 <Link href="/privacy" target="_blank" className="text-blue-600 hover:underline">Privacy Policy</Link>
+              </label>
+            </div>
+            <div className="flex items-start gap-2">
+              <input
+                id="marketing"
+                type="checkbox"
+                checked={marketingConsent}
+                onChange={(e) => setMarketingConsent(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="marketing" className="text-xs text-neutral-500 leading-relaxed">
+                Send me football news and product updates
               </label>
             </div>
             <button

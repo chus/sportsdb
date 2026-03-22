@@ -16,6 +16,7 @@ export function Footer() {
       { label: t("common.competitions"), href: "/search?type=competition" },
       { label: t("common.matches"), href: "/search?type=match" },
       { label: t("common.news"), href: "/news" },
+      { label: "Dashboard", href: "/dashboard" },
       { label: "Pricing", href: "/pricing" },
     ],
     [t("common.competitions")]: [

@@ -31,7 +31,7 @@ function generateReferralCode(name?: string): string {
   return `REF-${prefix}-${random}`;
 }
 
-export async function createUser(email: string, password: string, name?: string, consentGiven?: boolean) {
+export async function createUser(email: string, password: string, name?: string, consentGiven?: boolean, marketingEmailConsent?: boolean) {
   const passwordHash = await hashPassword(password);
 
   const [user] = await db
@@ -41,6 +41,7 @@ export async function createUser(email: string, password: string, name?: string,
       passwordHash,
       name,
       consentGivenAt: consentGiven ? new Date() : null,
+      marketingEmailConsentAt: marketingEmailConsent ? new Date() : null,
       referralCode: generateReferralCode(name),
     })
     .returning();

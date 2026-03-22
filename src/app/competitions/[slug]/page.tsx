@@ -76,14 +76,21 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     notFound();
   }
 
-  const competitionSeason = await getCompetitionSeason(slug);
+  let competitionSeason: Awaited<ReturnType<typeof getCompetitionSeason>> = null;
+  let standingsData: Awaited<ReturnType<typeof getStandings>> = [];
+  let topScorers: Awaited<ReturnType<typeof getTopScorers>> = [];
 
-  const [standingsData, topScorers] = competitionSeason
-    ? await Promise.all([
+  try {
+    competitionSeason = await getCompetitionSeason(slug);
+    if (competitionSeason) {
+      [standingsData, topScorers] = await Promise.all([
         getStandings(competitionSeason.competitionSeason.id),
         getTopScorers(competitionSeason.competitionSeason.id, 10),
-      ])
-    : [[], []];
+      ]);
+    }
+  } catch (e) {
+    console.error(`[CompetitionPage] Error loading data for ${slug}:`, e);
+  }
 
   const competitionUrl = `${BASE_URL}/competitions/${slug}`;
 

@@ -9,6 +9,16 @@ import {
 } from "@/lib/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeJsonParse(value: string | null | undefined, fallback: any): any {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
 /**
  * Get match summary with MOTM player details.
  */
@@ -32,7 +42,7 @@ export async function getMatchSummary(matchId: string) {
     matchId: summary.matchId,
     headline: summary.headline,
     summary: summary.summary,
-    keyMoments: summary.keyMoments ? JSON.parse(summary.keyMoments) : [],
+    keyMoments: safeJsonParse(summary.keyMoments, []),
     manOfTheMatch: motmPlayer
       ? {
           id: motmPlayer.id,
@@ -67,7 +77,7 @@ export async function getPlayerMatchSummaries(playerId: string, limit = 5) {
     matchId: match.id,
     rating: summary.rating ? parseFloat(summary.rating) : null,
     summary: summary.summary,
-    highlights: summary.highlights ? JSON.parse(summary.highlights) : [],
+    highlights: safeJsonParse(summary.highlights, []),
     scheduledAt: match.scheduledAt,
     homeScore: match.homeScore,
     awayScore: match.awayScore,
@@ -98,7 +108,7 @@ export async function getMatchPlayerSummaries(matchId: string) {
     playerImageUrl: player.imageUrl,
     rating: summary.rating ? parseFloat(summary.rating) : null,
     summary: summary.summary,
-    highlights: summary.highlights ? JSON.parse(summary.highlights) : [],
+    highlights: safeJsonParse(summary.highlights, []),
   }));
 }
 
@@ -135,10 +145,8 @@ export async function getTournamentSummary(
     periodEnd: summary.periodEnd,
     headline: summary.headline,
     summary: summary.summary,
-    topPerformers: summary.topPerformers ? JSON.parse(summary.topPerformers) : [],
-    standingsMovement: summary.standingsMovement
-      ? JSON.parse(summary.standingsMovement)
-      : null,
+    topPerformers: safeJsonParse(summary.topPerformers, []),
+    standingsMovement: safeJsonParse(summary.standingsMovement, null),
     generatedAt: summary.generatedAt,
   };
 }
@@ -167,10 +175,8 @@ export async function getLatestTournamentSummary(competitionSeasonId: string) {
     periodEnd: summary.periodEnd,
     headline: summary.headline,
     summary: summary.summary,
-    topPerformers: summary.topPerformers ? JSON.parse(summary.topPerformers) : [],
-    standingsMovement: summary.standingsMovement
-      ? JSON.parse(summary.standingsMovement)
-      : null,
+    topPerformers: safeJsonParse(summary.topPerformers, []),
+    standingsMovement: safeJsonParse(summary.standingsMovement, null),
     generatedAt: summary.generatedAt,
   };
 }

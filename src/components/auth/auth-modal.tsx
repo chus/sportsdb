@@ -281,6 +281,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -289,7 +290,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
     setError("");
     setLoading(true);
 
-    const result = await signup(email, password, name || undefined);
+    const result = await signup(email, password, name || undefined, undefined, marketingConsent);
     setLoading(false);
 
     if (result.success) {
@@ -364,6 +365,18 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           <a href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</a>
           {" "}and{" "}
           <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">Privacy Policy</a>
+        </label>
+      </div>
+      <div className="flex items-start gap-2">
+        <input
+          id="signup-marketing"
+          type="checkbox"
+          checked={marketingConsent}
+          onChange={(e) => setMarketingConsent(e.target.checked)}
+          className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor="signup-marketing" className="text-xs text-neutral-500 leading-relaxed">
+          Send me football news and product updates
         </label>
       </div>
       <button

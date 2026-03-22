@@ -19,6 +19,7 @@ export async function GET() {
         hasPassword: !!user.passwordHash,
         referralCode: user.referralCode,
         role: user.role,
+        marketingEmailConsent: !!user.marketingEmailConsentAt,
       },
     });
   } catch (error) {
