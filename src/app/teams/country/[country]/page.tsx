@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MapPin, Shield } from "lucide-react";
 import type { Metadata } from "next";
@@ -8,6 +9,7 @@ import {
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -97,7 +99,14 @@ export default async function CountryTeamsPage({ params }: PageProps) {
               <span className="text-white/40">/</span>
             </div>
             <div className="flex items-center gap-3 mb-4">
-              <MapPin className="w-8 h-8" />
+              {(() => {
+                const flagUrl = getCountryFlagUrl(decodedCountry);
+                return flagUrl ? (
+                  <Image src={flagUrl} alt={`${decodedCountry} flag`} width={48} height={32} className="rounded shadow-sm" />
+                ) : (
+                  <MapPin className="w-8 h-8" />
+                );
+              })()}
               <h1 className="text-3xl md:text-5xl font-bold">{adjective} Football Teams</h1>
             </div>
             <p className="text-lg text-white/80 max-w-2xl">

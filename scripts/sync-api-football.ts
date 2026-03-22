@@ -244,6 +244,7 @@ async function upsertCompetition(
   league: LeagueConfig
 ): Promise<typeof schema.competitions.$inferSelect> {
   const extId = afId(league.apiId);
+  const logoUrl = `https://media.api-sports.io/football/leagues/${league.apiId}.png`;
 
   // 1. Find existing by externalId
   const [byExtId] = await db
@@ -253,13 +254,14 @@ async function upsertCompetition(
     .limit(1);
 
   if (byExtId) {
-    // Update but NEVER overwrite slug
+    // Update but NEVER overwrite slug. Set logo only if missing.
     const [updated] = await db
       .update(schema.competitions)
       .set({
         name: league.name,
         country: league.country,
         type: league.type,
+        logoUrl: byExtId.logoUrl || logoUrl,
         updatedAt: new Date(),
       })
       .where(eq(schema.competitions.id, byExtId.id))
@@ -280,6 +282,7 @@ async function upsertCompetition(
     const updates: any = {
       country: league.country,
       type: league.type,
+      logoUrl: bySlug.logoUrl || logoUrl,
       updatedAt: new Date(),
     };
     if (!bySlug.externalId) {
@@ -302,6 +305,7 @@ async function upsertCompetition(
       slug: league.slug,
       country: league.country,
       type: league.type,
+      logoUrl,
       description: `${league.name} - ${league.country}`,
     })
     .onConflictDoUpdate({
@@ -310,6 +314,7 @@ async function upsertCompetition(
         name: league.name,
         country: league.country,
         type: league.type,
+        logoUrl,
         updatedAt: new Date(),
       },
     })
