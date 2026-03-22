@@ -10,6 +10,7 @@ import {
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -65,23 +66,17 @@ export default async function CompetitionTopScorersPage({ params }: PageProps) {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/top-scorers" className="text-white/70 hover:text-white transition-colors text-sm">
-                Top Scorers
-              </Link>
-              <span className="text-white/40">/</span>
-            </div>
-            <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">{competition.name} Top Scorers</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Leading goal scorers in the {competition.name} this season.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title={`${competition.name} Top Scorers`}
+          subtitle={`Leading goal scorers in the ${competition.name} this season`}
+          accentColor="bg-orange-700"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Top Scorers", href: "/top-scorers" },
+            { label: competition.name },
+          ]}
+          icon={<Trophy className="w-7 h-7 text-orange-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {allSeasons.length > 0 && (

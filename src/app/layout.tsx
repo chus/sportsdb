@@ -7,6 +7,7 @@ import { GoogleAnalytics } from "@/components/analytics/ga-script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { ScoreStrip } from "@/components/live/score-strip";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AuthModalProvider } from "@/components/auth/auth-modal";
 import { SubscriptionProvider } from "@/components/subscription/subscription-provider";
@@ -20,7 +21,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2563eb",
+  themeColor: "#171717",
 };
 
 export const metadata: Metadata = {
@@ -109,6 +110,7 @@ export default async function RootLayout({
                     <GoogleAnalytics />
                     <AdSenseScript />
                     <Navbar />
+                    <ScoreStrip />
                     <main className="min-h-screen">{children}</main>
                     <Footer />
                     <CookieConsentBanner />

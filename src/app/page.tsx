@@ -1,18 +1,18 @@
-import { TrendingUp, Users, ChevronRight, Shield, Ban, BarChart3, Heart } from "lucide-react";
+import { TrendingUp, ChevronRight, Shield, Ban, BarChart3, Heart, Search } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { players, teams, competitions, venues, matches } from "@/lib/db/schema";
+import { players, teams, competitions, matches } from "@/lib/db/schema";
 import { count, ne, desc } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
-import { LandingHero } from "@/components/landing/landing-hero";
-import { LandingStats } from "@/components/landing/landing-stats";
-import { LandingFeatures } from "@/components/landing/landing-features";
-import { WorldCupBanner } from "@/components/landing/world-cup-banner";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { SearchBar } from "@/components/search/search-bar";
+import { getPublishedArticles } from "@/lib/queries/articles";
+import { getCompetitionSeason, getStandings } from "@/lib/queries/competitions";
+import { StandingsTable } from "@/components/competition/standings-table";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -42,23 +42,17 @@ async function getStats() {
   const [playersCount] = await db.select({ count: count() }).from(players);
   const [teamsCount] = await db.select({ count: count() }).from(teams);
   const [competitionsCount] = await db.select({ count: count() }).from(competitions);
-  const [venuesCount] = await db.select({ count: count() }).from(venues);
   const [matchesCount] = await db.select({ count: count() }).from(matches);
 
   return {
     players: playersCount.count,
     teams: teamsCount.count,
     competitions: competitionsCount.count,
-    venues: venuesCount.count,
     matches: matchesCount.count,
   };
 }
 
-async function getFeaturedTeams(limit = 8) {
-  return db.select().from(teams).limit(limit);
-}
-
-async function getFeaturedPlayers(limit = 8) {
+async function getTrendingPlayers(limit = 6) {
   return db
     .select()
     .from(players)
@@ -67,13 +61,30 @@ async function getFeaturedPlayers(limit = 8) {
     .limit(limit);
 }
 
+async function getTopCompetitions() {
+  return db
+    .select()
+    .from(competitions)
+    .limit(12);
+}
+
+async function getPremierLeagueStandings() {
+  const cs = await getCompetitionSeason("premier-league");
+  if (!cs) return null;
+  const standingsData = await getStandings(cs.competitionSeason.id);
+  return { standings: standingsData, season: cs.season };
+}
+
 export default async function HomePage() {
-  const [stats, featuredTeams, featuredPlayers, currentUser] = await Promise.all([
-    getStats(),
-    getFeaturedTeams(),
-    getFeaturedPlayers(),
-    getCurrentUser(),
-  ]);
+  const [stats, trendingPlayers, recentArticles, plStandings, topCompetitions, currentUser] =
+    await Promise.all([
+      getStats(),
+      getTrendingPlayers(),
+      getPublishedArticles(5),
+      getPremierLeagueStandings(),
+      getTopCompetitions(),
+      getCurrentUser(),
+    ]);
 
   const viewerName = currentUser?.name || currentUser?.email?.split("@")[0] || null;
 
@@ -90,225 +101,282 @@ export default async function HomePage() {
         url={BASE_URL}
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
-      <PageTracker />
-      {/* Hero Section */}
-      <LandingHero
-        stats={stats}
-        isAuthenticated={!!currentUser}
-        viewerName={viewerName}
-      />
 
-      {/* World Cup 2026 Banner */}
-      <WorldCupBanner />
+      <div className="min-h-screen bg-neutral-50">
+        <PageTracker />
 
-      {/* Live Matches */}
-      <LiveMatchesSection />
+        {/* Compact search header */}
+        <section className="bg-neutral-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
+              {viewerName ? `Welcome back, ${viewerName}` : "The Sports Database"}
+            </h1>
+            <p className="text-neutral-400 mb-6 text-sm">
+              {stats.players.toLocaleString()} players · {stats.teams.toLocaleString()} teams · {stats.matches.toLocaleString()} matches
+            </p>
+            <div className="max-w-xl">
+              <SearchBar size="default" placeholder="Search players, teams, competitions..." variant="dark" />
+            </div>
+          </div>
+        </section>
 
-      <section className="border-y border-neutral-200 bg-white/80">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {currentUser ? (
-            <div className="grid gap-6 rounded-3xl border border-neutral-200 bg-gradient-to-r from-blue-50 via-white to-emerald-50 p-6 md:grid-cols-[1.4fr_1fr] md:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-                  Personalized Home
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-neutral-900">
-                  {viewerName ? `${viewerName}, your football workspace is ready.` : "Your football workspace is ready."}
-                </h2>
-                <p className="mt-3 max-w-2xl text-neutral-600">
-                  Jump back into the parts of SportsDB that matter most: account settings, live coverage, and the latest reporting.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 md:justify-end">
-                <Link
-                  href="/account"
-                  className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-                >
-                  Open Account
-                </Link>
+        {/* Live Matches */}
+        <LiveMatchesSection />
+
+        {/* Main content grid */}
+        <section className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left column — Articles */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-neutral-900">Latest News</h2>
                 <Link
                   href="/news"
-                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
-                  Browse News
-                </Link>
-                <Link
-                  href="/trending"
-                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
-                >
-                  See Trending
+                  View All <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
-          ) : (
-            <div className="grid gap-6 rounded-3xl border border-neutral-200 bg-gradient-to-r from-amber-50 via-white to-blue-50 p-6 md:grid-cols-[1.3fr_1fr] md:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
-                  Free Account
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-neutral-900">
-                  Follow clubs, track players, and come back to the stories you care about.
-                </h2>
-                <p className="mt-3 max-w-2xl text-neutral-600">
-                  A SportsDB account lets you follow entities, build a football habit, and turn search traffic into repeat visits.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 md:justify-end">
-                <Link
-                  href="/signup"
-                  className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-                >
-                  Create Free Account
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-semibold text-neutral-800 transition-colors hover:border-blue-300 hover:text-blue-600"
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* Trending Players */}
-      {featuredPlayers.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <TrendingUp className="w-6 h-6 text-orange-500" />
-                  <h2 className="text-3xl font-bold text-neutral-900">Trending Players</h2>
+              {recentArticles.length > 0 && (
+                <div className="space-y-0">
+                  {/* Featured article */}
+                  <Link
+                    href={`/news/${recentArticles[0].article.slug}`}
+                    className="block bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow mb-4 group"
+                  >
+                    <div className="p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        {recentArticles[0].competition && (
+                          <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                            {recentArticles[0].competition.name}
+                          </span>
+                        )}
+                        <span className="text-xs text-neutral-400">
+                          {recentArticles[0].article.publishedAt
+                            ? new Date(recentArticles[0].article.publishedAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : ""}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-neutral-900 group-hover:text-blue-600 transition-colors mb-2">
+                        {recentArticles[0].article.title}
+                      </h3>
+                      {recentArticles[0].article.excerpt && (
+                        <p className="text-sm text-neutral-600 line-clamp-2">
+                          {recentArticles[0].article.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+
+                  {/* Article list */}
+                  <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
+                    {recentArticles.slice(1).map(({ article, competition }) => (
+                      <Link
+                        key={article.id}
+                        href={`/news/${article.slug}`}
+                        className="flex items-start gap-4 p-4 hover:bg-neutral-50 transition-colors group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            {competition && (
+                              <span className="text-xs font-medium text-blue-600">
+                                {competition.name}
+                              </span>
+                            )}
+                            <span className="text-xs text-neutral-400">
+                              {article.publishedAt
+                                ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                : ""}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold text-sm text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                            {article.title}
+                          </h4>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-neutral-600">Most searched this week</p>
-              </div>
-              <Link
-                href="/search?type=player"
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                See all
-                <ChevronRight className="w-4 h-4" />
-              </Link>
+              )}
+
+              {/* Trending Players */}
+              {trendingPlayers.length > 0 && (
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-orange-500" />
+                      <h2 className="text-lg font-bold text-neutral-900">Trending Players</h2>
+                    </div>
+                    <Link
+                      href="/trending"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                      See all <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {trendingPlayers.map((player) => (
+                      <Link
+                        key={player.id}
+                        href={`/players/${player.slug}`}
+                        className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 hover:shadow-md transition-shadow group"
+                      >
+                        <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          {player.imageUrl ? (
+                            <ImageWithFallback
+                              src={player.imageUrl}
+                              alt={player.name}
+                              width={40}
+                              height={40}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-bold text-neutral-500">
+                              {player.name.substring(0, 2).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                            {player.name}
+                          </div>
+                          <div className="text-xs text-neutral-500 truncate">
+                            {player.position}{player.nationality && ` · ${player.nationality}`}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredPlayers.map((player) => (
-                <Link
-                  key={player.id}
-                  href={`/players/${player.slug}`}
-                  className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-sm font-bold">{player.name.substring(0, 2).toUpperCase()}</span>
+
+            {/* Right sidebar */}
+            <div className="space-y-6">
+              {/* Standings snapshot */}
+              {plStandings && plStandings.standings.length > 0 && (
+                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
+                    <h3 className="font-bold text-sm text-neutral-900">Premier League</h3>
+                    <Link
+                      href="/competitions/premier-league"
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Full Table
+                    </Link>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                      {player.name}
-                    </div>
-                    <div className="text-sm text-neutral-500 truncate">
-                      {player.position} {player.nationality && `· ${player.nationality}`}
-                    </div>
+                  <StandingsTable
+                    standings={plStandings.standings}
+                    compact
+                    limit={8}
+                  />
+                </div>
+              )}
+
+              {/* Quick CTA */}
+              {!currentUser && (
+                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white">
+                  <h3 className="font-bold text-lg mb-2">Create a free account</h3>
+                  <p className="text-sm text-blue-100 mb-4">
+                    Follow teams, track players, and get personalized updates.
+                  </p>
+                  <Link
+                    href="/signup"
+                    className="inline-block px-5 py-2.5 bg-white text-blue-600 font-semibold text-sm rounded-lg hover:shadow-lg transition-shadow"
+                  >
+                    Sign Up Free
+                  </Link>
+                </div>
+              )}
+
+              {currentUser && (
+                <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                  <h3 className="font-bold text-sm text-neutral-900 mb-3">Quick Links</h3>
+                  <div className="space-y-2">
+                    <Link href="/dashboard" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
+                      <ChevronRight className="w-4 h-4" /> Dashboard
+                    </Link>
+                    <Link href="/news" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
+                      <ChevronRight className="w-4 h-4" /> Latest News
+                    </Link>
+                    <Link href="/trending" className="flex items-center gap-2 text-sm text-neutral-600 hover:text-blue-600 transition-colors">
+                      <ChevronRight className="w-4 h-4" /> Trending
+                    </Link>
                   </div>
-                </Link>
-              ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
-      )}
 
-      {/* Exploration Hooks */}
-      <LandingFeatures />
-
-      {/* Go Pro Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Unlock the Full Experience</h2>
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-            Get ad-free browsing, advanced player stats, unlimited follows and comparisons — all for less than a coffee per month.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 max-w-3xl mx-auto">
-            {[
-              { icon: Ban, label: "Ad-Free", desc: "Clean, distraction-free experience" },
-              { icon: BarChart3, label: "Advanced Stats", desc: "Deep analytics and radar charts" },
-              { icon: Heart, label: "Unlimited Follows", desc: "Follow all the players you want" },
-            ].map((f) => (
-              <div key={f.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-5 text-white">
-                <f.icon className="w-8 h-8 mx-auto mb-3" />
-                <h3 className="font-semibold text-lg mb-1">{f.label}</h3>
-                <p className="text-sm text-blue-100">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl hover:-translate-y-0.5 transition-all text-lg"
-          >
-            Go Pro — from €8/year
-          </Link>
-        </div>
-      </section>
-
-      {/* Top Teams */}
-      {featuredTeams.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Users className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-3xl font-bold text-neutral-900">Top Teams</h2>
-                </div>
-                <p className="text-neutral-600">Elite clubs from around the world</p>
-              </div>
-              <Link
-                href="/search?type=team"
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                See all teams
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredTeams.map((team) => (
-                <Link
-                  key={team.id}
-                  href={`/teams/${team.slug}`}
-                  className="p-6 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group text-center"
-                >
-                  <div className="relative w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors p-2">
-                    {team.logoUrl ? (
+        {/* Competition quick links */}
+        {topCompetitions.length > 0 && (
+          <section className="border-y border-neutral-200 bg-white">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+              <h2 className="text-lg font-bold text-neutral-900 mb-4">Competitions</h2>
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+                {topCompetitions.map((comp) => (
+                  <Link
+                    key={comp.id}
+                    href={`/competitions/${comp.slug}`}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    {comp.logoUrl ? (
                       <ImageWithFallback
-                        src={team.logoUrl}
-                        alt={`${team.name} logo`}
-                        fill
-                        sizes="64px"
-                        className="object-contain"
+                        src={comp.logoUrl}
+                        alt={comp.name}
+                        width={20}
+                        height={20}
+                        className="w-5 h-5 object-contain"
                       />
                     ) : (
-                      <Shield className="w-8 h-8 text-neutral-400 group-hover:text-blue-500" />
+                      <Shield className="w-4 h-4 text-neutral-400" />
                     )}
-                  </div>
-                  <div className="font-medium text-neutral-900 text-sm truncate group-hover:text-blue-600 transition-colors">
-                    {team.shortName || team.name}
-                  </div>
-                  <div className="text-xs text-neutral-500 mt-1">{team.country}</div>
-                </Link>
+                    <span className="text-sm font-medium text-neutral-700 whitespace-nowrap">
+                      {comp.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Go Pro Section */}
+        <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+          <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+            <h2 className="text-2xl font-bold text-white mb-3">Unlock the Full Experience</h2>
+            <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
+              Ad-free browsing, advanced stats, unlimited follows and comparisons — all for less than a coffee per month.
+            </p>
+            <div className="flex items-center justify-center gap-6 mb-8">
+              {[
+                { icon: Ban, label: "Ad-Free" },
+                { icon: BarChart3, label: "Advanced Stats" },
+                { icon: Heart, label: "Unlimited Follows" },
+              ].map((f) => (
+                <div key={f.label} className="text-white text-center">
+                  <f.icon className="w-6 h-6 mx-auto mb-1" />
+                  <span className="text-xs font-medium">{f.label}</span>
+                </div>
               ))}
             </div>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
+            >
+              Go Pro — from &euro;8/year
+            </Link>
           </div>
         </section>
-      )}
-
-      {/* Premium Statistics */}
-      <LandingStats
-        players={stats.players}
-        teams={stats.teams}
-        competitions={stats.competitions}
-        matches={stats.matches}
-      />
-    </div>
+      </div>
     </>
   );
 }

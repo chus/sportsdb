@@ -3,6 +3,7 @@ import { Globe, ChevronRight, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { getDistinctNationalities } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -36,17 +37,17 @@ export default async function NationalityIndexPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-green-500 via-teal-500 to-cyan-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <Globe className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Players by Nationality</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Browse football players from {nationalities.length} countries around the world.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Players by Nationality"
+          subtitle={`Browse football players from ${nationalities.length} countries around the world`}
+          accentColor="bg-teal-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Players", href: "/search?type=player" },
+            { label: "By Nationality" },
+          ]}
+          icon={<Globe className="w-7 h-7 text-teal-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

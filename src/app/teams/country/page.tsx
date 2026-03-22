@@ -3,6 +3,7 @@ import { MapPin, ChevronRight, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { getDistinctTeamCountries } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -36,17 +37,17 @@ export default async function TeamCountryIndexPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Teams by Country</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Browse football clubs from {countries.length} countries around the world.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Teams by Country"
+          subtitle={`Browse football clubs from ${countries.length} countries around the world`}
+          accentColor="bg-indigo-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Teams", href: "/search?type=team" },
+            { label: "By Country" },
+          ]}
+          icon={<MapPin className="w-7 h-7 text-indigo-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

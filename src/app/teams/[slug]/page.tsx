@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  Shield, MapPin, Calendar, Users, ArrowLeft
-} from "lucide-react";
+import { Shield, Users } from "lucide-react";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
@@ -20,6 +18,8 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { PageHeader } from "@/components/layout/page-header";
+import { TeamTabs } from "./team-tabs";
 import { db } from "@/lib/db";
 import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons } from "@/lib/db/schema";
 import { eq, and, isNull, ne, sql } from "drizzle-orm";
@@ -236,340 +236,228 @@ export default async function TeamPage({ params }: TeamPageProps) {
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="team" entityId={team.id} />
+
     <div className="min-h-screen bg-neutral-50">
-      {/* Hero Section */}
-      <div
-        className="text-white"
-        style={{
-          background: `linear-gradient(135deg, ${primaryColor} 0%, #1e1b4b 100%)`,
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Back button */}
-          <Link
-            href="/search?type=team"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            All Teams
-          </Link>
-
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Team Logo */}
-            <div className="relative w-32 h-32 md:w-40 md:h-40 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
+      {/* Compact Header */}
+      <div className="text-white" style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #1e1b4b 100%)` }}>
+        <PageHeader
+          title={team.name}
+          subtitle={[team.city, team.country, team.foundedYear ? `Est. ${team.foundedYear}` : null].filter(Boolean).join(" · ")}
+          accentColor=""
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Teams", href: "/search?type=team" },
+            { label: team.name },
+          ]}
+          icon={
+            <div className="relative w-16 h-16 bg-white rounded-xl flex items-center justify-center flex-shrink-0 p-2">
               {team.logoUrl ? (
-                <ImageWithFallback
-                  src={team.logoUrl}
-                  alt={team.name}
-                  fill
-                  sizes="160px"
-                  className="object-contain"
-                />
+                <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="64px" className="object-contain" />
               ) : (
-                <Shield className="w-16 h-16 md:w-20 md:h-20 text-neutral-300" />
+                <Shield className="w-8 h-8 text-neutral-300" />
               )}
             </div>
-
-            {/* Team Info */}
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-5xl font-bold mb-2">{team.name}</h1>
-              {team.shortName && team.shortName !== team.name && (
-                <p className="text-xl text-white/80 mb-4">{team.shortName}</p>
-              )}
-
-              <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
-                {team.country && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-white/60" />
-                    <span>{team.city ? `${team.city}, ${team.country}` : team.country}</span>
-                  </div>
-                )}
-                {team.foundedYear && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-white/60" />
-                    <span>Founded {team.foundedYear}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-white/60" />
-                  <span>{squad.length} Players</span>
-                </div>
-                <FollowButton entityType="team" entityId={team.id} entityName={team.name} variant="hero" />
-              </div>
-
-              {/* Standing Stats */}
-              {standing && (
-                <div className="flex flex-wrap gap-8 mt-4 pt-4 border-t border-white/20">
-                  <StatBox label="Position" value={`#${standing.position}`} />
-                  <StatBox label="Points" value={standing.points} />
-                  <StatBox label="Played" value={standing.played} />
-                  <StatBox label="Won" value={standing.won} />
-                  <StatBox label="Drawn" value={standing.drawn} />
-                  <StatBox label="Lost" value={standing.lost} />
-                  <StatBox label="GD" value={standing.goalDifference > 0 ? `+${standing.goalDifference}` : standing.goalDifference} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+          }
+          stats={standing ? [
+            { label: "Pos", value: `#${standing.position}` },
+            { label: "Pts", value: standing.points },
+            { label: "W-D-L", value: `${standing.won}-${standing.drawn}-${standing.lost}` },
+            { label: "GD", value: standing.goalDifference > 0 ? `+${standing.goalDifference}` : standing.goalDifference },
+          ] : undefined}
+          actions={
+            <FollowButton entityType="team" entityId={team.id} entityName={team.name} variant="hero" />
+          }
+        />
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content - Squad */}
-          <div className="lg:col-span-2 space-y-8">
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-neutral-900">
-                  Squad {seasonLabel && `(${seasonLabel})`}
-                </h2>
-                <span className="text-sm text-neutral-500">{squad.length} players</span>
-              </div>
+      {/* Tabs */}
+      <TeamTabs squadCount={squad.length}>
+        {(activeTab) => (
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-8">
 
-              {squad.length === 0 ? (
-                <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                  <Users className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500">No squad data available</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <PositionGroup title="Goalkeepers" players={goalkeepers} />
-                  <PositionGroup title="Defenders" players={defenders} />
-                  <PositionGroup title="Midfielders" players={midfielders} />
-                  <PositionGroup title="Forwards" players={forwards} />
-                  <PositionGroup title="Other" players={unknown} />
-                </div>
-              )}
-            </section>
-
-            <section className="bg-white rounded-xl border border-neutral-200 p-6">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">About {team.name}</h2>
-              <div className="space-y-4 text-base leading-8 text-neutral-700">
-                {aboutParagraphs.map((paragraph, i) => (
-                  <p key={i}>{renderBioWithLinks(paragraph)}</p>
-                ))}
-              </div>
-            </section>
-
-            <BetweenContentAd />
-
-            {/* Former Players */}
-            {formerPlayers.length > 0 && (() => {
-              const visiblePlayers = formerPlayers.slice(0, 3);
-              const hiddenPlayers = formerPlayers.slice(3);
-
-              const renderPlayerRow = ({ player, shirtNumber, validFrom, validTo }: typeof formerPlayers[number]) => (
-                <Link
-                  key={player.id}
-                  href={`/players/${player.slug}`}
-                  className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 font-medium group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                      {shirtNumber || "—"}
-                    </div>
-                    <div>
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
-                        {player.name}
+                {/* === OVERVIEW TAB === */}
+                {activeTab === "overview" && (
+                  <>
+                    <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                      <h2 className="text-lg font-bold text-neutral-900 mb-3">About {team.name}</h2>
+                      <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                        {aboutParagraphs.map((paragraph, i) => (
+                          <p key={i}>{renderBioWithLinks(paragraph)}</p>
+                        ))}
                       </div>
-                      <div className="text-sm text-neutral-500">
-                        {player.position} • {new Date(validFrom).getFullYear()} - {validTo ? new Date(validTo).getFullYear() : "Present"}
-                      </div>
-                    </div>
-                  </div>
-                  {player.nationality && (
-                    <span className="text-sm text-neutral-500 hidden sm:block">
-                      {player.nationality}
-                    </span>
-                  )}
-                </Link>
-              );
+                    </section>
 
-              return (
-                <section>
-                  <h2 className="text-xl font-bold text-neutral-900 mb-4">Former Players</h2>
-                  <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                    <div className="divide-y divide-neutral-100">
-                      {visiblePlayers.map(renderPlayerRow)}
-                    </div>
-                    {hiddenPlayers.length > 0 && (
-                      <ProTeaser label={`Unlock all ${formerPlayers.length} former players`}>
-                        <div className="divide-y divide-neutral-100">
-                          {hiddenPlayers.map(renderPlayerRow)}
-                        </div>
-                      </ProTeaser>
-                    )}
-                  </div>
-                </section>
-              );
-            })()}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Team Fixtures */}
-            <TeamFixtures teamId={team.id} limit={5} />
-
-            {/* Related Articles */}
-            <RelatedArticles teamId={team.id} limit={5} />
-
-            <SidebarUpgradeOrAd context="team" />
-
-            {faqItems.length > 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Team FAQ</h3>
-                <div className="space-y-3">
-                  {faqItems.map((item) => (
-                    <details
-                      key={item.question}
-                      className="group rounded-lg border border-neutral-200 px-4 py-3"
-                    >
-                      <summary className="cursor-pointer list-none font-medium text-neutral-900">
-                        {item.question}
-                      </summary>
-                      <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
-                    </details>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Club Info Card */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-6">
-              <h3 className="text-sm font-medium text-neutral-500 mb-4">Club Info</h3>
-              <dl className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <dt className="text-neutral-600">Full Name</dt>
-                  <dd className="font-medium text-neutral-900 text-right">{team.name}</dd>
-                </div>
-                {team.shortName && (
-                  <div className="flex justify-between text-sm">
-                    <dt className="text-neutral-600">Short Name</dt>
-                    <dd className="font-medium text-neutral-900">{team.shortName}</dd>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm">
-                  <dt className="text-neutral-600">Country</dt>
-                  <dd className="font-medium text-neutral-900">{team.country}</dd>
-                </div>
-                {team.city && (
-                  <div className="flex justify-between text-sm">
-                    <dt className="text-neutral-600">City</dt>
-                    <dd className="font-medium text-neutral-900">{team.city}</dd>
-                  </div>
-                )}
-                {team.foundedYear && (
-                  <div className="flex justify-between text-sm">
-                    <dt className="text-neutral-600">Founded</dt>
-                    <dd className="font-medium text-neutral-900">{team.foundedYear}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
-            {/* Season Stats Card */}
-            {standing && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-sm font-medium text-neutral-500 mb-4">
-                  {seasonLabel} Stats
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-neutral-600">League Position</span>
-                    <span className="text-2xl font-bold text-neutral-900">
-                      #{standing.position}
-                    </span>
-                  </div>
-                  <div className="h-px bg-neutral-100" />
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-semibold text-green-600">{standing.won}</div>
-                      <div className="text-xs text-neutral-500">Won</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold text-neutral-600">{standing.drawn}</div>
-                      <div className="text-xs text-neutral-500">Drawn</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold text-red-600">{standing.lost}</div>
-                      <div className="text-xs text-neutral-500">Lost</div>
-                    </div>
-                  </div>
-                  <div className="h-px bg-neutral-100" />
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-600">Goals For</span>
-                    <span className="font-medium">{standing.goalsFor}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-600">Goals Against</span>
-                    <span className="font-medium">{standing.goalsAgainst}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-600">Goal Difference</span>
-                    <span className={`font-medium ${standing.goalDifference > 0 ? "text-green-600" : standing.goalDifference < 0 ? "text-red-600" : ""}`}>
-                      {standing.goalDifference > 0 ? "+" : ""}{standing.goalDifference}
-                    </span>
-                  </div>
-                  {standing.form && (
-                    <>
-                      <div className="h-px bg-neutral-100" />
-                      <div>
-                        <div className="text-xs text-neutral-500 mb-2">Recent Form</div>
-                        <div className="flex gap-1">
+                    {/* Recent Form */}
+                    {standing?.form && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <h3 className="text-sm font-bold text-neutral-900 mb-3">Recent Form</h3>
+                        <div className="flex gap-1.5">
                           {standing.form.split("").map((result, i) => (
-                            <span
-                              key={i}
-                              className={`w-6 h-6 rounded flex items-center justify-center text-xs font-medium text-white ${
-                                result === "W"
-                                  ? "bg-green-500"
-                                  : result === "D"
-                                  ? "bg-neutral-400"
-                                  : "bg-red-500"
-                              }`}
-                            >
+                            <span key={i} className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white ${result === "W" ? "bg-green-500" : result === "D" ? "bg-neutral-400" : "bg-red-500"}`}>
                               {result}
                             </span>
                           ))}
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
+                    )}
 
-            {/* Squad Stats */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-6">
-              <h3 className="text-sm font-medium text-neutral-500 mb-4">Squad Breakdown</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Goalkeepers</span>
-                  <span className="font-medium text-neutral-900">{goalkeepers.length}</span>
+                    {/* Upcoming fixtures */}
+                    <TeamFixtures teamId={team.id} limit={5} />
+                  </>
+                )}
+
+                {/* === SQUAD TAB === */}
+                {activeTab === "squad" && (
+                  <>
+                    {squad.length === 0 ? (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                        <Users className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                        <p className="text-neutral-500">No squad data available</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <PositionGroup title="Goalkeepers" players={goalkeepers} />
+                        <PositionGroup title="Defenders" players={defenders} />
+                        <PositionGroup title="Midfielders" players={midfielders} />
+                        <PositionGroup title="Forwards" players={forwards} />
+                        <PositionGroup title="Other" players={unknown} />
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* === FIXTURES TAB === */}
+                {activeTab === "fixtures" && (
+                  <TeamFixtures teamId={team.id} limit={50} />
+                )}
+
+                {/* === STATS TAB === */}
+                {activeTab === "stats" && (
+                  <>
+                    {standing && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+                        <h2 className="text-lg font-bold text-neutral-900 mb-4">{seasonLabel} Season Stats</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                            <div className="text-2xl font-bold">#{standing.position}</div>
+                            <div className="text-xs text-neutral-500">Position</div>
+                          </div>
+                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                            <div className="text-2xl font-bold">{standing.points}</div>
+                            <div className="text-xs text-neutral-500">Points</div>
+                          </div>
+                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600">{standing.goalsFor}</div>
+                            <div className="text-xs text-neutral-500">Goals For</div>
+                          </div>
+                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                            <div className="text-2xl font-bold text-red-600">{standing.goalsAgainst}</div>
+                            <div className="text-xs text-neutral-500">Goals Against</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div className="p-3 bg-green-50 rounded-lg"><div className="text-lg font-bold text-green-600">{standing.won}</div><div className="text-xs text-neutral-500">Won</div></div>
+                          <div className="p-3 bg-neutral-50 rounded-lg"><div className="text-lg font-bold text-neutral-600">{standing.drawn}</div><div className="text-xs text-neutral-500">Drawn</div></div>
+                          <div className="p-3 bg-red-50 rounded-lg"><div className="text-lg font-bold text-red-600">{standing.lost}</div><div className="text-xs text-neutral-500">Lost</div></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Squad Breakdown */}
+                    <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <h3 className="text-sm font-bold text-neutral-900 mb-3">Squad Breakdown</h3>
+                      <div className="space-y-2 text-sm">
+                        {[
+                          { label: "Goalkeepers", count: goalkeepers.length },
+                          { label: "Defenders", count: defenders.length },
+                          { label: "Midfielders", count: midfielders.length },
+                          { label: "Forwards", count: forwards.length },
+                        ].map(({ label, count }) => (
+                          <div key={label} className="flex justify-between">
+                            <span className="text-neutral-600">{label}</span>
+                            <span className="font-medium text-neutral-900">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Former Players */}
+                    {formerPlayers.length > 0 && (() => {
+                      const visiblePlayers = formerPlayers.slice(0, 3);
+                      const hiddenPlayers = formerPlayers.slice(3);
+                      const renderPlayerRow = ({ player, shirtNumber, validFrom, validTo }: typeof formerPlayers[number]) => (
+                        <Link key={player.id} href={`/players/${player.slug}`} className="flex items-center justify-between p-3 hover:bg-neutral-50 transition-colors group">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 text-xs font-medium">{shirtNumber || "—"}</div>
+                            <div>
+                              <div className="font-medium text-sm text-neutral-900 group-hover:text-blue-600">{player.name}</div>
+                              <div className="text-xs text-neutral-500">{player.position} · {new Date(validFrom).getFullYear()}-{validTo ? new Date(validTo).getFullYear() : "Present"}</div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                      return (
+                        <section>
+                          <h2 className="text-lg font-bold text-neutral-900 mb-4">Former Players</h2>
+                          <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                            {visiblePlayers.map(renderPlayerRow)}
+                            {hiddenPlayers.length > 0 && (
+                              <ProTeaser label={`Unlock all ${formerPlayers.length} former players`}>
+                                <div className="divide-y divide-neutral-100">{hiddenPlayers.map(renderPlayerRow)}</div>
+                              </ProTeaser>
+                            )}
+                          </div>
+                        </section>
+                      );
+                    })()}
+                  </>
+                )}
+
+                <BetweenContentAd />
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Club Info */}
+                <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                  <h3 className="text-sm font-bold text-neutral-900 mb-3">Club Info</h3>
+                  <dl className="space-y-2 text-sm">
+                    <div className="flex justify-between"><dt className="text-neutral-500">Full Name</dt><dd className="font-medium text-neutral-900 text-right">{team.name}</dd></div>
+                    {team.shortName && <div className="flex justify-between"><dt className="text-neutral-500">Short Name</dt><dd className="font-medium text-neutral-900">{team.shortName}</dd></div>}
+                    <div className="flex justify-between"><dt className="text-neutral-500">Country</dt><dd className="font-medium text-neutral-900">{team.country}</dd></div>
+                    {team.city && <div className="flex justify-between"><dt className="text-neutral-500">City</dt><dd className="font-medium text-neutral-900">{team.city}</dd></div>}
+                    {team.foundedYear && <div className="flex justify-between"><dt className="text-neutral-500">Founded</dt><dd className="font-medium text-neutral-900">{team.foundedYear}</dd></div>}
+                  </dl>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Defenders</span>
-                  <span className="font-medium text-neutral-900">{defenders.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Midfielders</span>
-                  <span className="font-medium text-neutral-900">{midfielders.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Forwards</span>
-                  <span className="font-medium text-neutral-900">{forwards.length}</span>
-                </div>
+
+                <RelatedArticles teamId={team.id} limit={5} />
+
+                <SidebarUpgradeOrAd context="team" />
+
+                {faqItems.length > 0 && (
+                  <section className="bg-white rounded-xl border border-neutral-200 p-5">
+                    <h3 className="text-sm font-bold text-neutral-900 mb-3">Team FAQ</h3>
+                    <div className="space-y-2">
+                      {faqItems.map((item) => (
+                        <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
+                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                <RelatedTeams teamId={team.id} />
+                <TeamInternalLinks teamId={team.id} country={team.country} />
               </div>
             </div>
-
-            {/* Related Teams */}
-            <RelatedTeams teamId={team.id} />
-
-            {/* Internal Links for SEO */}
-            <TeamInternalLinks teamId={team.id} country={team.country} />
           </div>
-        </div>
-      </div>
+        )}
+      </TeamTabs>
     </div>
     </>
   );

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getRecentTransfers } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PageHeader } from "@/components/layout/page-header";
 import { format } from "date-fns";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -37,17 +38,16 @@ export default async function TransfersPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <ArrowRightLeft className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Transfers</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Latest football transfers, signings, and player movements.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Transfers"
+          subtitle="Latest football transfers, signings, and player movements"
+          accentColor="bg-emerald-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Transfers" },
+          ]}
+          icon={<ArrowRightLeft className="w-7 h-7 text-emerald-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {transfers.length === 0 ? (

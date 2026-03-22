@@ -3,9 +3,10 @@ import Link from "next/link";
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
+  variant?: "light" | "dark";
 }
 
-export function Logo({ size = "md", showText = true }: LogoProps) {
+export function Logo({ size = "md", showText = true, variant = "light" }: LogoProps) {
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-10 h-10",
@@ -17,6 +18,8 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
     md: "text-lg",
     lg: "text-xl",
   };
+
+  const isDark = variant === "dark";
 
   return (
     <Link
@@ -51,10 +54,10 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
 
       {showText && (
         <div className="hidden sm:block">
-          <div className={`font-bold ${textSizeClasses[size]} tracking-tight text-neutral-900`}>
+          <div className={`font-bold ${textSizeClasses[size]} tracking-tight ${isDark ? "text-white" : "text-neutral-900"}`}>
             DataSports
           </div>
-          <div className="text-xs text-neutral-500 -mt-0.5 leading-tight">
+          <div className={`text-xs -mt-0.5 leading-tight ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
             The Sports Database
           </div>
         </div>

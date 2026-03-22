@@ -10,6 +10,7 @@ import {
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -114,30 +115,25 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-green-500 via-teal-500 to-cyan-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/players/nationality" className="text-white/70 hover:text-white transition-colors text-sm">
-                All Nationalities
-              </Link>
-              <span className="text-white/40">/</span>
-            </div>
-            <div className="flex items-center gap-3 mb-4">
-              {(() => {
-                const flagUrl = getCountryFlagUrl(nationality);
-                return flagUrl ? (
-                  <Image src={flagUrl} alt={`${nationality} flag`} width={48} height={32} className="rounded shadow-sm" />
-                ) : (
-                  <Globe className="w-8 h-8" />
-                );
-              })()}
-              <h1 className="text-3xl md:text-5xl font-bold">{adjective} Football Players</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              {playersList.length} players from {nationality} in our database.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title={`${adjective} Football Players`}
+          subtitle={`${playersList.length} players from ${nationality} in our database`}
+          accentColor="bg-teal-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Players", href: "/search?type=player" },
+            { label: "By Nationality", href: "/players/nationality" },
+            { label: nationality },
+          ]}
+          icon={(() => {
+            const flagUrl = getCountryFlagUrl(nationality);
+            return flagUrl ? (
+              <Image src={flagUrl} alt={`${nationality} flag`} width={48} height={32} className="rounded shadow-sm" />
+            ) : (
+              <Globe className="w-7 h-7 text-teal-300" />
+            );
+          })()}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

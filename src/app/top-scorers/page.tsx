@@ -3,6 +3,8 @@ import { Trophy, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageHeader } from "@/components/layout/page-header";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -45,18 +47,16 @@ export default async function TopScorersPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Top Scorers</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Leading goal scorers across all major football competitions this season.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Top Scorers"
+          subtitle="Leading goal scorers across all major football competitions this season"
+          accentColor="bg-orange-700"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Top Scorers" },
+          ]}
+          icon={<Trophy className="w-7 h-7 text-orange-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {scorers.length === 0 ? (
@@ -95,9 +95,11 @@ export default async function TopScorersPage() {
                           >
                             {player.imageUrl ? (
                               <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                                <img
+                                <ImageWithFallback
                                   src={player.imageUrl}
                                   alt={player.name}
+                                  width={32}
+                                  height={32}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />
                               </div>
@@ -118,9 +120,11 @@ export default async function TopScorersPage() {
                             className="flex items-center gap-2 hover:text-blue-600 transition-colors"
                           >
                             {team.logoUrl ? (
-                              <img
+                              <ImageWithFallback
                                 src={team.logoUrl}
                                 alt={team.name}
+                                width={20}
+                                height={20}
                                 className="w-5 h-5 object-contain"
                               />
                             ) : (

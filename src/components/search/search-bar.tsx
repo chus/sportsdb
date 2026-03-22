@@ -13,6 +13,7 @@ interface SearchBarProps {
   initialQuery?: string;
   onSubmit?: (query: string) => void;
   size?: "default" | "large";
+  variant?: "light" | "dark";
 }
 
 const ENTITY_ROUTES: Record<string, string> = {
@@ -70,7 +71,9 @@ export function SearchBar({
   initialQuery = "",
   onSubmit,
   size = "default",
+  variant = "light",
 }: SearchBarProps) {
+  const isDark = variant === "dark";
   const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -302,7 +305,11 @@ export function SearchBar({
             aria-autocomplete="list"
             aria-controls={listboxId}
             aria-activedescendant={activeDescendantId}
-            className={`w-full ${inputSizeClasses} border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-500 placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400 transition-all`}
+            className={`w-full ${inputSizeClasses} border-2 rounded-xl font-medium focus:outline-none focus:ring-4 transition-all ${
+              isDark
+                ? "border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 placeholder:font-normal focus:ring-blue-900/40 focus:border-blue-500 shadow-none hover:border-neutral-600"
+                : "border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-500 placeholder:font-normal focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400"
+            }`}
           />
           {query && (
             <button

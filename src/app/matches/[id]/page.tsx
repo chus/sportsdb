@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Calendar,
   MapPin,
   Users,
@@ -10,6 +9,7 @@ import {
   Trophy,
   User,
 } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
 import { format } from "date-fns";
 import {
@@ -317,69 +317,55 @@ export default async function MatchPage({ params }: MatchPageProps) {
       <BreadcrumbJsonLd items={breadcrumbItems} />
       <PageTracker entityType="match" entityId={id} />
     <div className="min-h-screen bg-neutral-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Back button & Competition */}
-          <div className="flex items-center justify-between mb-6">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Link>
+      {/* Scoreboard Header */}
+      <div className="bg-neutral-900 text-white">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Breadcrumb row */}
+          <nav className="flex items-center gap-2 pt-4 pb-2 text-xs text-neutral-400">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
             {competition && (
-              <Link
-                href={`/competitions/${competition.slug}`}
-                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-              >
-                <Trophy className="w-4 h-4" />
-                <span>
+              <>
+                <span>/</span>
+                <Link href={`/competitions/${competition.slug}`} className="hover:text-white transition-colors">
                   {competition.name}
-                  {season && ` ${season.label}`}
-                </span>
-              </Link>
+                </Link>
+              </>
             )}
-          </div>
+            <span>/</span>
+            <span className="text-neutral-300">{homeTeam.shortName || homeTeam.name} vs {awayTeam.shortName || awayTeam.name}</span>
+          </nav>
 
-          {/* Match Score Display */}
-          <div className="flex items-center justify-center gap-4 md:gap-8 py-8">
+          {/* Scoreboard */}
+          <div className="flex items-center justify-center gap-4 md:gap-10 py-6">
             {/* Home Team */}
             <Link
               href={`/teams/${homeTeam.slug}`}
-              className="flex flex-col items-center gap-3 flex-1 max-w-48 group"
+              className="flex items-center gap-3 md:gap-4 flex-1 justify-end group"
             >
-              <div className="w-20 h-20 md:w-28 md:h-28 bg-white rounded-2xl flex items-center justify-center p-3 group-hover:shadow-lg transition-shadow">
-                {homeTeam.logoUrl ? (
-                  <img
-                    src={homeTeam.logoUrl}
-                    alt={homeTeam.name}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <Shield className="w-12 h-12 md:w-16 md:h-16 text-neutral-300" />
-                )}
-              </div>
-              <span className="text-center font-semibold group-hover:underline">
+              <span className="text-right font-semibold text-sm md:text-lg group-hover:text-blue-400 transition-colors">
                 {homeTeam.shortName || homeTeam.name}
               </span>
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
+                {homeTeam.logoUrl ? (
+                  <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={48} height={48} className="w-full h-full object-contain" />
+                ) : (
+                  <Shield className="w-8 h-8 text-neutral-300" />
+                )}
+              </div>
             </Link>
 
             {/* Score */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-3 md:gap-6">
-                <span className="text-4xl md:text-6xl font-bold">
+            <div className="flex flex-col items-center gap-1.5 min-w-[120px]">
+              <div className="flex items-center gap-3 md:gap-5">
+                <span className="text-4xl md:text-5xl font-bold tabular-nums">
                   {match.homeScore ?? "-"}
                 </span>
-                <span className="text-2xl md:text-4xl text-white/60">:</span>
-                <span className="text-4xl md:text-6xl font-bold">
+                <span className="text-xl md:text-2xl text-neutral-500">-</span>
+                <span className="text-4xl md:text-5xl font-bold tabular-nums">
                   {match.awayScore ?? "-"}
                 </span>
               </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.className}`}
-              >
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusDisplay.className}`}>
                 {statusDisplay.label}
               </span>
             </div>
@@ -387,56 +373,49 @@ export default async function MatchPage({ params }: MatchPageProps) {
             {/* Away Team */}
             <Link
               href={`/teams/${awayTeam.slug}`}
-              className="flex flex-col items-center gap-3 flex-1 max-w-48 group"
+              className="flex items-center gap-3 md:gap-4 flex-1 group"
             >
-              <div className="w-20 h-20 md:w-28 md:h-28 bg-white rounded-2xl flex items-center justify-center p-3 group-hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
                 {awayTeam.logoUrl ? (
-                  <img
-                    src={awayTeam.logoUrl}
-                    alt={awayTeam.name}
-                    className="w-full h-full object-contain"
-                  />
+                  <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={48} height={48} className="w-full h-full object-contain" />
                 ) : (
-                  <Shield className="w-12 h-12 md:w-16 md:h-16 text-neutral-300" />
+                  <Shield className="w-8 h-8 text-neutral-300" />
                 )}
               </div>
-              <span className="text-center font-semibold group-hover:underline">
+              <span className="font-semibold text-sm md:text-lg group-hover:text-blue-400 transition-colors">
                 {awayTeam.shortName || awayTeam.name}
               </span>
             </Link>
           </div>
 
           {/* Match Info Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/80">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>
-                {format(new Date(match.scheduledAt), "EEEE, MMMM d, yyyy")}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{format(new Date(match.scheduledAt), "HH:mm")}</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 pb-4 text-xs text-neutral-400">
+            {competition && (
+              <Link href={`/competitions/${competition.slug}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
+                <Trophy className="w-3.5 h-3.5" />
+                <span>{competition.name}{season ? ` · ${season.label}` : ""}{match.matchday ? ` · MD ${match.matchday}` : ""}</span>
+              </Link>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{format(new Date(match.scheduledAt), "EEE, MMM d, yyyy · HH:mm")}</span>
             </div>
             {venue && (
-              <Link
-                href={`/venues/${venue.slug}`}
-                className="flex items-center gap-2 hover:text-white transition-colors"
-              >
-                <MapPin className="w-4 h-4" />
+              <Link href={`/venues/${venue.slug}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
+                <MapPin className="w-3.5 h-3.5" />
                 <span>{venue.name}</span>
               </Link>
             )}
             {match.attendance && (
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>{match.attendance.toLocaleString()} attendance</span>
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                <span>{match.attendance.toLocaleString()}</span>
               </div>
             )}
             {match.referee && (
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span>Referee: {match.referee}</span>
+              <div className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5" />
+                <span>{match.referee}</span>
               </div>
             )}
           </div>
@@ -534,11 +513,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-4">
                       {homeTeam.logoUrl ? (
-                        <img
-                          src={homeTeam.logoUrl}
-                          alt={homeTeam.name}
-                          className="w-8 h-8 object-contain"
-                        />
+                        <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={32} height={32} className="w-8 h-8 object-contain" />
                       ) : (
                         <Shield className="w-8 h-8 text-neutral-300" />
                       )}
@@ -598,11 +573,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-4">
                       {awayTeam.logoUrl ? (
-                        <img
-                          src={awayTeam.logoUrl}
-                          alt={awayTeam.name}
-                          className="w-8 h-8 object-contain"
-                        />
+                        <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={32} height={32} className="w-8 h-8 object-contain" />
                       ) : (
                         <Shield className="w-8 h-8 text-neutral-300" />
                       )}
@@ -757,11 +728,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         {homeTeam.logoUrl ? (
-                          <img
-                            src={homeTeam.logoUrl}
-                            alt={homeTeam.name}
-                            className="w-5 h-5 object-contain"
-                          />
+                          <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         ) : (
                           <Shield className="w-5 h-5 text-neutral-300" />
                         )}
@@ -800,11 +767,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         {awayTeam.logoUrl ? (
-                          <img
-                            src={awayTeam.logoUrl}
-                            alt={awayTeam.name}
-                            className="w-5 h-5 object-contain"
-                          />
+                          <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         ) : (
                           <Shield className="w-5 h-5 text-neutral-300" />
                         )}

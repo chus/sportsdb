@@ -10,6 +10,7 @@ import {
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -90,30 +91,25 @@ export default async function CountryTeamsPage({ params }: PageProps) {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/teams/country" className="text-white/70 hover:text-white transition-colors text-sm">
-                All Countries
-              </Link>
-              <span className="text-white/40">/</span>
-            </div>
-            <div className="flex items-center gap-3 mb-4">
-              {(() => {
-                const flagUrl = getCountryFlagUrl(decodedCountry);
-                return flagUrl ? (
-                  <Image src={flagUrl} alt={`${decodedCountry} flag`} width={48} height={32} className="rounded shadow-sm" />
-                ) : (
-                  <MapPin className="w-8 h-8" />
-                );
-              })()}
-              <h1 className="text-3xl md:text-5xl font-bold">{adjective} Football Teams</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              {teamsList.length} football clubs from {decodedCountry}.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title={`${adjective} Football Teams`}
+          subtitle={`${teamsList.length} football clubs from ${decodedCountry}`}
+          accentColor="bg-indigo-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Teams", href: "/search?type=team" },
+            { label: "By Country", href: "/teams/country" },
+            { label: decodedCountry },
+          ]}
+          icon={(() => {
+            const flagUrl = getCountryFlagUrl(decodedCountry);
+            return flagUrl ? (
+              <Image src={flagUrl} alt={`${decodedCountry} flag`} width={48} height={32} className="rounded shadow-sm" />
+            ) : (
+              <MapPin className="w-7 h-7 text-indigo-300" />
+            );
+          })()}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getTopAssistsGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -45,17 +46,16 @@ export default async function TopAssistsPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <Handshake className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Top Assists</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              Leading assist providers across all major football competitions this season.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Top Assists"
+          subtitle="Leading assist providers across all major football competitions this season"
+          accentColor="bg-indigo-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Top Assists" },
+          ]}
+          icon={<Handshake className="w-7 h-7 text-indigo-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {leaders.length === 0 ? (

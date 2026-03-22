@@ -3,6 +3,8 @@ import { TrendingUp, Search, Shield, User } from "lucide-react";
 import type { Metadata } from "next";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageHeader } from "@/components/layout/page-header";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -40,18 +42,16 @@ export default async function TrendingPage() {
       />
 
       <div className="min-h-screen bg-neutral-50">
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="w-8 h-8" />
-              <h1 className="text-3xl md:text-5xl font-bold">Trending Now</h1>
-            </div>
-            <p className="text-lg text-white/80 max-w-2xl">
-              The most viewed players, popular teams, and top searches in the last 24 hours.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Trending Now"
+          subtitle="The most viewed players, popular teams, and top searches in the last 24 hours"
+          accentColor="bg-red-800"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Trending" },
+          ]}
+          icon={<TrendingUp className="w-7 h-7 text-red-300" />}
+        />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
@@ -80,9 +80,11 @@ export default async function TrendingPage() {
                       </span>
                       {player.imageUrl ? (
                         <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                          <img
+                          <ImageWithFallback
                             src={player.imageUrl}
                             alt={player.name}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         </div>
@@ -132,9 +134,11 @@ export default async function TrendingPage() {
                       </span>
                       {team.logoUrl ? (
                         <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 p-2">
-                          <img
+                          <ImageWithFallback
                             src={team.logoUrl}
                             alt={team.name}
+                            width={32}
+                            height={32}
                             className="w-full h-full object-contain"
                           />
                         </div>

@@ -4,6 +4,7 @@ import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
   title: "Football News & Match Reports | DataSports",
@@ -48,15 +49,18 @@ export default async function NewsPage({ searchParams }: Props) {
         { name: "News", url: `${BASE_URL}/news` },
       ]}
     />
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-neutral-900 mb-2">News</h1>
-        <p className="text-neutral-600">
-          Latest match reports, analysis, and football coverage
-        </p>
-      </div>
-
+    <div className="min-h-screen bg-neutral-50">
+      <PageHeader
+        title="News"
+        subtitle="Latest match reports, analysis, and football coverage"
+        accentColor="bg-neutral-800"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "News" },
+        ]}
+        icon={<Newspaper className="w-7 h-7 text-neutral-300" />}
+      />
+      <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Type Filter */}
       <div className="flex flex-wrap gap-2 mb-8">
         {ARTICLE_TYPES.map((t) => {
@@ -128,6 +132,7 @@ export default async function NewsPage({ searchParams }: Props) {
           )}
         </>
       )}
+    </div>
     </div>
     </>
   );

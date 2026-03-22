@@ -35,8 +35,8 @@ export function Footer() {
 
   return (
     <footer className="bg-neutral-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -62,7 +62,7 @@ export function Footer() {
               <h3 className="font-semibold text-sm text-white mb-4">
                 {title}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.label}>
                     {"onClick" in link && link.onClick ? (
@@ -88,7 +88,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 pt-8 border-t border-neutral-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-10 pt-6 border-t border-neutral-800 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-neutral-500">
             {t("footer.copyright", { year: new Date().getFullYear() })}
           </p>

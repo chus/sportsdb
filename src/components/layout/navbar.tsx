@@ -46,14 +46,14 @@ export function Navbar() {
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?";
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4">
+    <nav className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Logo size="md" showText />
+          <Logo size="md" showText variant="dark" />
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map((link) => {
               const isActive =
                 pathname === link.path &&
@@ -62,10 +62,10 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
                     isActive
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-neutral-700 hover:text-blue-600 hover:bg-blue-50"
+                      ? "border-blue-500 text-white"
+                      : "border-transparent text-neutral-400 hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -75,8 +75,8 @@ export function Navbar() {
           </div>
 
           {/* Desktop Inline Search */}
-          <div className="hidden md:block flex-1 max-w-md mx-4">
-            <SearchBar size="default" placeholder="Search players, teams..." />
+          <div className="hidden md:block flex-1 max-w-sm mx-4">
+            <SearchBar size="default" placeholder="Search players, teams..." variant="dark" />
           </div>
 
           {/* Upgrade pill for free users */}
@@ -95,7 +95,7 @@ export function Navbar() {
             {/* Mobile search icon */}
             <Link
               href="/search"
-              className="md:hidden p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="md:hidden p-2 text-neutral-400 hover:text-white rounded-lg transition-colors"
               aria-label={t("common.search")}
             >
               <Search className="w-5 h-5" />
@@ -112,7 +112,7 @@ export function Navbar() {
                       aria-label="Open user menu"
                       aria-haspopup="menu"
                       aria-expanded={userMenuOpen}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-800 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
                         {userInitial}
@@ -132,7 +132,7 @@ export function Navbar() {
                   <div className="hidden lg:flex items-center gap-2">
                     <button
                       onClick={() => openModal("signin")}
-                      className="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-neutral-400 hover:text-white transition-colors"
                     >
                       Sign In
                     </button>
@@ -153,7 +153,7 @@ export function Navbar() {
               aria-label={mobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation"
-              className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900 rounded-lg"
+              className="lg:hidden p-2 text-neutral-400 hover:text-white rounded-lg"
             >
               {mobileMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -166,7 +166,7 @@ export function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div id="mobile-navigation" className="lg:hidden mt-4 pt-4 border-t border-neutral-200">
+          <div id="mobile-navigation" className="lg:hidden mt-3 pt-3 border-t border-neutral-800">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const isActive =
@@ -179,8 +179,8 @@ export function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                       isActive
-                        ? "text-blue-600 bg-blue-50"
-                        : "text-neutral-700 hover:text-blue-600 hover:bg-blue-50"
+                        ? "text-white bg-neutral-800"
+                        : "text-neutral-400 hover:text-white hover:bg-neutral-800"
                     }`}
                   >
                     {link.label}
@@ -190,14 +190,14 @@ export function Navbar() {
 
               {/* Mobile auth items */}
               {!authLoading && (
-                <div className="mt-3 pt-3 border-t border-neutral-200">
+                <div className="mt-3 pt-3 border-t border-neutral-800">
                   {user ? (
                     <>
                       <div className="px-4 py-2 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
                           {userInitial}
                         </div>
-                        <span className="text-sm font-medium text-neutral-900 truncate">
+                        <span className="text-sm font-medium text-white truncate">
                           {user.name || user.email}
                         </span>
                       </div>
@@ -209,7 +209,7 @@ export function Navbar() {
                           className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg"
                         >
                           <Zap className="w-4 h-4" />
-                          Go Pro — from €8/year
+                          Go Pro
                         </Link>
                       )}
                     </>
@@ -220,7 +220,7 @@ export function Navbar() {
                           setMobileMenuOpen(false);
                           openModal("signin");
                         }}
-                        className="w-full px-4 py-2.5 text-sm font-medium text-neutral-700 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+                        className="w-full px-4 py-2.5 text-sm font-medium text-neutral-300 border border-neutral-700 rounded-lg hover:bg-neutral-800 transition-colors"
                       >
                         Sign In
                       </button>
@@ -308,25 +308,25 @@ function MobileAuthLinks({ onClose }: { onClose: () => void }) {
       <Link
         href="/dashboard"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+        <LayoutDashboard className="w-4 h-4 text-neutral-500" />
         Dashboard
       </Link>
       <Link
         href="/account"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <User className="w-4 h-4 text-neutral-400" />
+        <User className="w-4 h-4 text-neutral-500" />
         Account
       </Link>
       <Link
         href="/pricing"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <CreditCard className="w-4 h-4 text-neutral-400" />
+        <CreditCard className="w-4 h-4 text-neutral-500" />
         Pricing
       </Link>
       <button
@@ -335,7 +335,7 @@ function MobileAuthLinks({ onClose }: { onClose: () => void }) {
           await logout();
           router.refresh();
         }}
-        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-500 hover:bg-red-950/20 rounded-lg transition-colors"
       >
         <LogOut className="w-4 h-4" />
         Sign Out
