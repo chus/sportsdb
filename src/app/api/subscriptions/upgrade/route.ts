@@ -115,9 +115,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error("Error upgrading subscription:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error upgrading subscription:", message, error);
     return NextResponse.json(
-      { error: "Failed to upgrade subscription" },
+      { error: message || "Failed to upgrade subscription" },
       { status: 500 }
     );
   }

@@ -172,6 +172,7 @@ function UpgradeModal({
   const { upgrade } = useSubscription();
   const { track } = useAnalytics();
   const [upgrading, setUpgrading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const content = FEATURE_CONTENT[feature];
   const Icon = content.icon;
 
@@ -215,9 +216,11 @@ function UpgradeModal({
       metadata: { feature, context },
     });
     setUpgrading(true);
+    setError(null);
     try {
       await upgrade("pro", "annual");
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
       setUpgrading(false);
     }
   };
@@ -275,6 +278,12 @@ function UpgradeModal({
               Less than a coffee per month
             </p>
           </div>
+
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+              {error}
+            </p>
+          )}
 
           <button
             onClick={handleUpgrade}
