@@ -19,6 +19,7 @@ interface Player {
     appearances: number;
     goals: number;
     assists: number;
+    minutesPlayed: number;
   };
 }
 
@@ -102,15 +103,20 @@ export function ComparePageContent() {
         }
       }
 
-      const playerWithStats = {
-        ...player,
-        stats: {
-          appearances: Math.floor(Math.random() * 30) + 10,
-          goals: Math.floor(Math.random() * 25),
-          assists: Math.floor(Math.random() * 15),
-        },
-      };
-      setSelectedPlayers([...selectedPlayers, playerWithStats]);
+      try {
+        const statsRes = await fetch(`/api/players/stats?ids=${player.id}`);
+        const statsData = statsRes.ok ? await statsRes.json() : null;
+        const s = statsData?.stats?.[player.id];
+        const playerWithStats = {
+          ...player,
+          stats: s
+            ? { appearances: s.appearances, goals: s.goals, assists: s.assists, minutesPlayed: s.minutesPlayed }
+            : { appearances: 0, goals: 0, assists: 0, minutesPlayed: 0 },
+        };
+        setSelectedPlayers([...selectedPlayers, playerWithStats]);
+      } catch {
+        setSelectedPlayers([...selectedPlayers, { ...player, stats: { appearances: 0, goals: 0, assists: 0, minutesPlayed: 0 } }]);
+      }
       setSearchQuery("");
       setSearchResults([]);
     }
@@ -337,6 +343,14 @@ export function ComparePageContent() {
                 players={selectedPlayers}
                 statKey="assists"
                 maxValue={getMaxValue("assists")}
+              />
+
+              {/* Minutes Played */}
+              <StatComparisonBar
+                label="Minutes Played"
+                players={selectedPlayers}
+                statKey="minutesPlayed"
+                maxValue={getMaxValue("minutesPlayed")}
               />
             </div>
           </div>
