@@ -55,6 +55,36 @@ export default async function TrendingPage() {
         />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Engagement Summary */}
+          {(trendingPlayers.length > 0 || trendingTeams.length > 0) && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+              {trendingPlayers[0] && (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Viewed Player</div>
+                  <div className="text-lg font-bold text-neutral-900 truncate">{trendingPlayers[0].name}</div>
+                  <div className="text-xs text-neutral-500">{trendingPlayers[0].views} views today</div>
+                </div>
+              )}
+              {trendingTeams[0] && (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Viewed Team</div>
+                  <div className="text-lg font-bold text-neutral-900 truncate">{trendingTeams[0].name}</div>
+                  <div className="text-xs text-neutral-500">{trendingTeams[0].views} views today</div>
+                </div>
+              )}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Player Views</div>
+                <div className="text-2xl font-bold text-neutral-900">{trendingPlayers.reduce((sum, p) => sum + p.views, 0)}</div>
+                <div className="text-xs text-neutral-500">last 24 hours</div>
+              </div>
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Team Views</div>
+                <div className="text-2xl font-bold text-neutral-900">{trendingTeams.reduce((sum, t) => sum + t.views, 0)}</div>
+                <div className="text-xs text-neutral-500">last 24 hours</div>
+              </div>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Trending Players */}
             <div className="lg:col-span-2">

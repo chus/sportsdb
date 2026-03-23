@@ -30,9 +30,12 @@ export default async function NewsPage({ searchParams }: Props) {
   const pageSize = 12;
   const offset = (page - 1) * pageSize;
 
-  const [articles, totalCount] = await Promise.all([
+  const [articles, totalCount, matchReportCount, recapCount, spotlightCount] = await Promise.all([
     getPublishedArticles(pageSize, offset, type || undefined),
     getArticleCount(type || undefined),
+    getArticleCount("match_report"),
+    getArticleCount("round_recap"),
+    getArticleCount("player_spotlight"),
   ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -61,6 +64,32 @@ export default async function NewsPage({ searchParams }: Props) {
         icon={<Newspaper className="w-7 h-7 text-neutral-300" />}
       />
       <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Summary Stats */}
+      {page === 1 && !type && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Articles</div>
+            <div className="text-2xl font-bold text-neutral-900">{totalCount}</div>
+            <div className="text-xs text-neutral-500">published stories</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Match Reports</div>
+            <div className="text-2xl font-bold text-neutral-900">{matchReportCount}</div>
+            <div className="text-xs text-neutral-500">post-match analysis</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Matchday Recaps</div>
+            <div className="text-2xl font-bold text-neutral-900">{recapCount}</div>
+            <div className="text-xs text-neutral-500">round summaries</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Player Spotlights</div>
+            <div className="text-2xl font-bold text-neutral-900">{spotlightCount}</div>
+            <div className="text-xs text-neutral-500">player features</div>
+          </div>
+        </div>
+      )}
+
       {/* Type Filter */}
       <div className="flex flex-wrap gap-2 mb-8">
         {ARTICLE_TYPES.map((t) => {

@@ -51,6 +51,42 @@ export default async function TransfersPage() {
         />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Transfer Summary Stats */}
+          {transfers.length > 0 && (() => {
+            const buyCount: Record<string, number> = {};
+            const sellCount: Record<string, number> = {};
+            for (const t of transfers) {
+              buyCount[t.toTeam.name] = (buyCount[t.toTeam.name] || 0) + 1;
+              if (t.fromTeam) sellCount[t.fromTeam.name] = (sellCount[t.fromTeam.name] || 0) + 1;
+            }
+            const topBuyer = Object.entries(buyCount).sort((a, b) => b[1] - a[1])[0];
+            const topSeller = Object.entries(sellCount).sort((a, b) => b[1] - a[1])[0];
+            return (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Transfers</div>
+                  <div className="text-2xl font-bold text-neutral-900">{transfers.length}</div>
+                  <div className="text-xs text-neutral-500">player movements</div>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Active Buyer</div>
+                  <div className="text-lg font-bold text-neutral-900 truncate">{topBuyer?.[0] ?? "—"}</div>
+                  <div className="text-xs text-neutral-500">{topBuyer?.[1] ?? 0} signings</div>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Active Seller</div>
+                  <div className="text-lg font-bold text-neutral-900 truncate">{topSeller?.[0] ?? "—"}</div>
+                  <div className="text-xs text-neutral-500">{topSeller?.[1] ?? 0} departures</div>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Latest Transfer</div>
+                  <div className="text-lg font-bold text-neutral-900 truncate">{transfers[0].player.name}</div>
+                  <div className="text-xs text-neutral-500">to {transfers[0].toTeam.name}</div>
+                </div>
+              </div>
+            );
+          })()}
+
           {transfers.length === 0 ? (
             <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
               <ArrowRightLeft className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
