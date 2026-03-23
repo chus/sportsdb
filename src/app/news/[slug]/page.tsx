@@ -388,21 +388,21 @@ export default async function ArticlePage({ params }: Props) {
       <PageTracker />
 
       <div className="min-h-screen bg-white">
-        {/* Hero Header */}
+        {/* Compact Hero Header */}
         <div className="bg-gradient-to-br from-neutral-900 via-blue-950 to-indigo-950 text-white">
-          <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+          <div className="max-w-3xl mx-auto px-4 py-6 md:py-8">
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-sm text-neutral-400 mb-6">
+            <nav className="flex items-center gap-2 text-sm text-neutral-400 mb-4">
               <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
               <Link href="/news" className="hover:text-white transition-colors">
                 News
               </Link>
               {competition && (
                 <>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3.5 h-3.5" />
                   <Link
                     href={`/competitions/${competition.slug}`}
                     className="hover:text-white transition-colors"
@@ -411,60 +411,40 @@ export default async function ArticlePage({ params }: Props) {
                   </Link>
                 </>
               )}
-              <ChevronRight className="w-4 h-4" />
-              <span className="text-neutral-300 truncate max-w-[200px]">
-                {article.title}
-              </span>
             </nav>
 
-            {/* Meta info */}
-            <div className="flex flex-wrap items-center gap-3 mb-5">
+            {/* Badges + meta on one row */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <span
-                className={`text-sm font-semibold px-3 py-1.5 rounded-full border ${typeInfo.bg} ${typeInfo.color}`}
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${typeInfo.bg} ${typeInfo.color}`}
               >
                 {typeInfo.label}
+              </span>
+              {article.publishedAt && (
+                <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {format(new Date(article.publishedAt), "MMM d, yyyy")}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+                <Clock className="w-3.5 h-3.5" />
+                {readingTime} min read
               </span>
               {competition && (
                 <Link
                   href={`/competitions/${competition.slug}`}
-                  className="flex items-center gap-1.5 text-sm text-neutral-300 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white transition-colors"
                 >
-                  <Trophy className="w-4 h-4" />
-                  {competition.name}
+                  <Trophy className="w-3.5 h-3.5" />
+                  {competition.name}{season ? ` · ${season.label}` : ""}
                 </Link>
-              )}
-              {season && (
-                <span className="text-sm text-neutral-500">{season.label}</span>
               )}
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
               {article.title}
             </h1>
-
-            {/* Excerpt */}
-            <p className="text-lg md:text-xl text-neutral-300 leading-relaxed mb-8 max-w-3xl">
-              {article.excerpt}
-            </p>
-
-            {/* Article meta */}
-            <div className="flex flex-wrap items-center gap-6 text-sm text-neutral-400">
-              {article.publishedAt && (
-                <span className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {format(new Date(article.publishedAt), "MMMM d, yyyy")}
-                </span>
-              )}
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {readingTime} min read
-              </span>
-              <span className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                SportsDB Editorial
-              </span>
-            </div>
           </div>
         </div>
 
@@ -561,16 +541,116 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         )}
 
+        {/* Data Dashboard — 4 cards for match reports */}
+        {matchData && matchContext && matchContext.events.length > 0 && (
+          <div className="max-w-3xl mx-auto px-4 pt-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Goal Scorers */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm">⚽</span>
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Goals</h3>
+                </div>
+                {(() => {
+                  const goals = matchContext.events.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty");
+                  return goals.length > 0 ? (
+                    <div className="space-y-1">
+                      {goals.sort((a, b) => a.minute - b.minute).slice(0, 4).map((e) => (
+                        <div key={e.id} className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-neutral-900 truncate">
+                            {e.player?.name ?? "Unknown"}
+                            {e.type === "own_goal" && " (OG)"}
+                            {e.type === "penalty" && " (P)"}
+                          </span>
+                          <span className="text-neutral-500 flex-shrink-0 ml-1">{e.minute}&apos;</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-neutral-400">No goals</p>
+                  );
+                })()}
+              </div>
+
+              {/* Cards */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-sm">🟨</span>
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Cards</h3>
+                </div>
+                {(() => {
+                  const homeEvts = matchContext.events.filter((e) => e.teamId === matchData.match.homeTeamId);
+                  const awayEvts = matchContext.events.filter((e) => e.teamId === matchData.match.awayTeamId);
+                  const hY = homeEvts.filter((e) => e.type === "yellow_card").length;
+                  const hR = homeEvts.filter((e) => e.type === "red_card").length;
+                  const aY = awayEvts.filter((e) => e.type === "yellow_card").length;
+                  const aR = awayEvts.filter((e) => e.type === "red_card").length;
+                  return (hY + hR + aY + aR) > 0 ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-neutral-700 font-medium">{matchData.homeTeam.name}</span>
+                        <span className="text-neutral-500">{hY > 0 ? `🟨${hY}` : ""} {hR > 0 ? `🟥${hR}` : ""}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-neutral-700 font-medium">{matchData.awayTeam.name}</span>
+                        <span className="text-neutral-500">{aY > 0 ? `🟨${aY}` : ""} {aR > 0 ? `🟥${aR}` : ""}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-neutral-400">No cards</p>
+                  );
+                })()}
+              </div>
+
+              {/* Competition */}
+              {competition ? (
+                <Link
+                  href={`/competitions/${competition.slug}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                  </div>
+                  <div className="text-sm font-bold text-neutral-900 truncate">{competition.name}</div>
+                  <p className="text-xs text-neutral-500">
+                    {season ? season.label : ""}
+                  </p>
+                </Link>
+              ) : (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Trophy className="w-3.5 h-3.5 text-neutral-400" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                  </div>
+                  <p className="text-sm text-neutral-400">Unknown</p>
+                </div>
+              )}
+
+              {/* Venue */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <MapPin className="w-3.5 h-3.5 text-blue-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Venue</h3>
+                </div>
+                {matchData.venue?.name ? (
+                  <>
+                    <div className="text-sm font-bold text-neutral-900 truncate">{matchData.venue.name}</div>
+                    <p className="text-xs text-neutral-500">
+                      {[matchData.venue.city, matchData.match.attendance ? `${matchData.match.attendance.toLocaleString()} att.` : null].filter(Boolean).join(" · ")}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-neutral-400">Not available</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Match Timeline & Stats */}
         {matchContext && matchContext.events.length > 0 && matchData && (
-          <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-            <MatchTimeline
-              events={matchContext.events}
-              homeTeamId={matchData.match.homeTeamId}
-              awayTeamId={matchData.match.awayTeamId}
-              homeTeamName={matchData.homeTeam.name}
-              awayTeamName={matchData.awayTeam.name}
-            />
+          <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
             <MatchStatBars
               homeTeamName={matchData.homeTeam.name}
               awayTeamName={matchData.awayTeam.name}
@@ -580,38 +660,50 @@ export default async function ArticlePage({ params }: Props) {
               homeTeamId={matchData.match.homeTeamId}
               awayTeamId={matchData.match.awayTeamId}
             />
+            <MatchTimeline
+              events={matchContext.events}
+              homeTeamId={matchData.match.homeTeamId}
+              awayTeamId={matchData.match.awayTeamId}
+              homeTeamName={matchData.homeTeam.name}
+              awayTeamName={matchData.awayTeam.name}
+            />
           </div>
         )}
 
         {/* Main Content */}
-        <div className="max-w-3xl mx-auto px-4 py-12">
-          {/* Team badge for non-match articles */}
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          {/* Quick context bar for non-match articles */}
           {primaryTeam && !matchData && (
-            <div className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 mb-8">
+            <div className="flex items-center gap-3 mb-6">
               {primaryTeam.logoUrl && (
                 <ImageWithFallback
                   src={primaryTeam.logoUrl}
                   alt={primaryTeam.name}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 object-contain"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
                 />
               )}
-              <div>
-                <div className="text-xs text-neutral-500 uppercase tracking-wide">Featured Team</div>
-                <Link
-                  href={`/teams/${primaryTeam.slug}`}
-                  className="font-semibold text-neutral-900 hover:text-blue-600 transition-colors"
-                >
-                  {primaryTeam.name}
-                </Link>
-              </div>
+              <Link
+                href={`/teams/${primaryTeam.slug}`}
+                className="text-sm font-medium text-neutral-700 hover:text-blue-600 transition-colors"
+              >
+                {primaryTeam.name}
+              </Link>
+              <span className="text-neutral-300">·</span>
+              <ShareButtons title={article.title} url={articleUrl} />
+            </div>
+          )}
+          {(matchData || !primaryTeam) && (
+            <div className="mb-6">
+              <ShareButtons title={article.title} url={articleUrl} />
             </div>
           )}
 
-          <div className="mb-8">
-            <ShareButtons title={article.title} url={articleUrl} />
-          </div>
+          {/* Lead paragraph */}
+          <p className="text-lg text-neutral-700 leading-relaxed mb-8 font-medium">
+            {article.excerpt}
+          </p>
 
           {/* Article body */}
           <article
@@ -976,27 +1068,10 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         </div>
 
-        {/* Sidebar content moved to bottom for single-column layout */}
+        {/* Upgrade CTA */}
         <div className="bg-neutral-50 border-t border-neutral-200">
-          <div className="max-w-3xl mx-auto px-4 py-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Competition card */}
-              {competition && (
-                <Link
-                  href={`/competitions/${competition.slug}`}
-                  className="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white hover:shadow-lg transition-shadow"
-                >
-                  <Trophy className="w-8 h-8 mb-3 opacity-80" />
-                  <div className="text-sm opacity-80">Competition</div>
-                  <div className="font-semibold text-lg">{competition.name}</div>
-                  {season && (
-                    <div className="text-sm opacity-80 mt-1">{season.label}</div>
-                  )}
-                </Link>
-              )}
-
-              <SidebarUpgradeOrAd context="article" />
-            </div>
+          <div className="max-w-3xl mx-auto px-4 py-8">
+            <SidebarUpgradeOrAd context="article" />
           </div>
         </div>
 
