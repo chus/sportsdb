@@ -27,6 +27,7 @@ import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
+import { MatchPredictionWidget } from "@/components/games/match-prediction-widget";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
@@ -720,6 +721,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 )}
               </dl>
             </div>
+
+            {/* Prediction Widget */}
+            <MatchPredictionWidget
+              matchId={id}
+              matchStatus={match.status}
+              homeTeamName={homeTeam.shortName || homeTeam.name}
+              awayTeamName={awayTeam.shortName || awayTeam.name}
+              homeScore={match.homeScore}
+              awayScore={match.awayScore}
+            />
 
             <SidebarAd />
 

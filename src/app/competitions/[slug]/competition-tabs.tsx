@@ -7,6 +7,7 @@ const TABS = [
   { id: "standings", label: "Standings" },
   { id: "fixtures", label: "Fixtures" },
   { id: "scorers", label: "Top Scorers" },
+  { id: "predictions", label: "Predictions" },
 ];
 
 interface CompetitionTabsProps {

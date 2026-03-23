@@ -21,6 +21,7 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { StandingsTable } from "@/components/competition/standings-table";
 import { CompetitionTabs } from "./competition-tabs";
+import { MatchdayCommunityPicks } from "@/components/games/matchday-community-picks";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 
@@ -243,6 +244,21 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                   ) : (
                     <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
                       <p className="text-neutral-500">No top scorer data available</p>
+                    </div>
+                  )}
+                </TabPanel>
+
+                {/* === PREDICTIONS TAB === */}
+                <TabPanel tabId="predictions" defaultTab="standings">
+                  {competitionSeason ? (
+                    <div className="bg-white rounded-xl border border-neutral-200 p-6">
+                      <MatchdayCommunityPicks
+                        competitionSeasonId={competitionSeason.competitionSeason.id}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                      <p className="text-neutral-500">No prediction data available</p>
                     </div>
                   )}
                 </TabPanel>
