@@ -7,6 +7,8 @@ export interface TierFeatures {
   adFree: boolean;
   exportData: boolean;
   historicalData: boolean;
+  games: boolean;
+  pickemFreePerMatchday: number;
 }
 
 export interface TierConfig {
@@ -32,6 +34,8 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
       adFree: false,
       exportData: false,
       historicalData: false,
+      games: false,
+      pickemFreePerMatchday: 1,
     },
   },
   pro: {
@@ -47,6 +51,8 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
       adFree: true,
       exportData: true,
       historicalData: true,
+      games: true,
+      pickemFreePerMatchday: Infinity,
     },
   },
 } as const;

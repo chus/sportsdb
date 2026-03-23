@@ -73,6 +73,14 @@ const featureDescriptions: Record<keyof TierFeatures, { title: string; descripti
     title: "Historical Data",
     description: "Access multi-season historical statistics",
   },
+  games: {
+    title: "Pro Games",
+    description: "Unlock predictions, Pick'em, and daily challenges",
+  },
+  pickemFreePerMatchday: {
+    title: "Pick'em Limit Reached",
+    description: "Upgrade to Pro for unlimited Pick'em predictions",
+  },
 };
 
 export function UpgradePrompt({

@@ -9,6 +9,8 @@ import {
   seasons,
 } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
+import { scorePredictionsForMatch } from "@/lib/queries/predictions";
+import { scorePickemsForMatch } from "@/lib/queries/pickem";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -186,7 +188,7 @@ export async function GET() {
           const awayScore =
             match.score.fullTime.away ?? match.score.halfTime.away ?? null;
 
-          await db
+          const [upserted] = await db
             .insert(matches)
             .values({
               externalId,
@@ -210,7 +212,20 @@ export async function GET() {
                 minute: match.minute,
                 updatedAt: new Date(),
               },
-            });
+            })
+            .returning({ id: matches.id });
+
+          // Score predictions & pickems when match finishes
+          if (status === "finished" && upserted?.id) {
+            try {
+              await Promise.all([
+                scorePredictionsForMatch(upserted.id),
+                scorePickemsForMatch(upserted.id),
+              ]);
+            } catch (scoreErr) {
+              console.error(`Scoring error for match ${upserted.id}:`, scoreErr);
+            }
+          }
 
           matchesUpdated++;
         } catch (error) {

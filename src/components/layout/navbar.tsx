@@ -41,6 +41,7 @@ export function Navbar() {
     { label: t("common.competitions"), href: "/search?type=competition", path: "/search", type: "competition" },
     { label: t("common.matches"), href: "/search?type=match", path: "/search", type: "match" },
     { label: t("common.news"), href: "/news", path: "/news" },
+    { label: "Games", href: "/games", path: "/games" },
   ];
 
   const userInitial = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?";

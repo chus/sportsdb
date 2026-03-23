@@ -868,6 +868,76 @@ export const predictionLeagueMembers = pgTable(
 );
 
 // ============================================================
+// PICK'EM PREDICTIONS
+// ============================================================
+
+export const pickemPredictions = pgTable(
+  "pickem_predictions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+    outcome: text("outcome").notNull(), // 'home' | 'draw' | 'away'
+    points: integer("points"), // null until scored; 1 for correct
+    isCorrect: boolean("is_correct"), // null until scored
+    submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow(),
+    scoredAt: timestamp("scored_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("uq_pickem").on(table.userId, table.matchId),
+    index("idx_pickem_user").on(table.userId),
+    index("idx_pickem_match").on(table.matchId),
+  ]
+);
+
+// ============================================================
+// CHALLENGE (TRIVIA)
+// ============================================================
+
+export const challengeQuestions = pgTable(
+  "challenge_questions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    question: text("question").notNull(),
+    options: jsonb("options").notNull(), // JSON array of 4 strings
+    correctIndex: integer("correct_index").notNull(), // 0-3
+    category: text("category").notNull(), // 'history' | 'stats' | 'transfers' | 'rules' | 'geography'
+    difficulty: text("difficulty").notNull().default("medium"),
+    activeDate: date("active_date"), // null = pool; date = assigned to that day
+    imageUrl: text("image_url"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_challenge_q_date").on(table.activeDate),
+  ]
+);
+
+export const challengeAnswers = pgTable(
+  "challenge_answers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    questionId: uuid("question_id")
+      .notNull()
+      .references(() => challengeQuestions.id, { onDelete: "cascade" }),
+    selectedIndex: integer("selected_index").notNull(), // 0-3
+    isCorrect: boolean("is_correct").notNull(),
+    points: integer("points").notNull().default(0),
+    answeredAt: timestamp("answered_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_challenge_answer").on(table.userId, table.questionId),
+    index("idx_challenge_answer_user").on(table.userId),
+  ]
+);
+
+// ============================================================
 // BOOKMARKS
 // ============================================================
 

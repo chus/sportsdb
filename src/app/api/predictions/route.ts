@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserPredictions, submitPrediction } from "@/lib/queries/predictions";
+import { getUserSubscription } from "@/lib/queries/subscriptions";
+import { canAccessFeature } from "@/lib/subscriptions/tiers";
 
 const submitSchema = z.object({
   matchId: z.string().uuid(),
@@ -41,6 +43,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "You must be logged in" },
         { status: 401 }
+      );
+    }
+
+    const sub = await getUserSubscription(user.id);
+    if (!canAccessFeature(sub.tier, "games")) {
+      return NextResponse.json(
+        { error: "Pro feature", upgradeUrl: "/pricing" },
+        { status: 403 }
       );
     }
 

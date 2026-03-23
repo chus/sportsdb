@@ -20,6 +20,9 @@ import {
   Ban,
   Check,
   Loader2,
+  Target,
+  Vote,
+  Brain,
 } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { useAnalytics } from "@/hooks/use-analytics";
@@ -30,7 +33,10 @@ type UpgradeFeature =
   | "export_data"
   | "advanced_stats"
   | "historical_data"
-  | "ad_free";
+  | "ad_free"
+  | "games_prode"
+  | "games_pickem"
+  | "games_challenge";
 
 interface UpgradeModalContextType {
   openUpgradeModal: (feature: UpgradeFeature, context?: string) => void;
@@ -113,6 +119,39 @@ const FEATURE_CONTENT: Record<
       "No banner or sidebar ads",
       "No in-article interruptions",
       "Faster page loads",
+    ],
+  },
+  games_prode: {
+    icon: Target,
+    title: "Score Predictions",
+    description:
+      "Predict exact scores for every match and compete on the global leaderboard.",
+    bullets: [
+      "Predict scores for every matchday",
+      "Earn points — 3 for exact, 1 for result",
+      "Climb the global leaderboard",
+    ],
+  },
+  games_pickem: {
+    icon: Vote,
+    title: "Pick'em Predictions",
+    description:
+      "Pick the winner of every match and see how the community voted.",
+    bullets: [
+      "Pick Home, Draw, or Away for every match",
+      "See live community vote percentages",
+      "Compete in weekly leaderboards",
+    ],
+  },
+  games_challenge: {
+    icon: Brain,
+    title: "Daily Football Challenge",
+    description:
+      "Test your football knowledge with 5 new trivia questions every day.",
+    bullets: [
+      "5 new questions daily",
+      "Categories: history, stats, transfers & more",
+      "Track your streak and accuracy",
     ],
   },
 };
