@@ -12,6 +12,8 @@ import {
   Clock,
   Trophy,
   ChevronRight,
+  TrendingUp,
+  BarChart3,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
@@ -20,6 +22,7 @@ import {
   getVenueTeams,
   getVenueMatches,
 } from "@/lib/queries/venues";
+import { getTeamStats } from "@/lib/queries/teams";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
 import { PageHeader } from "@/components/layout/page-header";
@@ -87,6 +90,21 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const { current: currentTeams, historical: historicalTeams } = teamsData;
   const { recent: recentMatches, upcoming: upcomingMatches } = matchesData;
+
+  // Fetch standings for primary home team
+  const primaryTeam = currentTeams[0]?.team ?? null;
+  const primaryTeamStats = primaryTeam ? await getTeamStats(primaryTeam.id) : [];
+  const primaryStanding = primaryTeamStats[0]?.standing;
+  const primaryCompetitionName = primaryTeamStats[0]?.competitionName;
+  const primaryCompetitionSlug = primaryTeamStats[0]?.competitionSlug;
+
+  // Compute venue aggregate stats
+  const totalGoals = recentMatches.reduce((sum, m) => sum + (m.match.homeScore ?? 0) + (m.match.awayScore ?? 0), 0);
+  const avgGoals = recentMatches.length > 0 ? (totalGoals / recentMatches.length).toFixed(1) : null;
+  const matchesWithAttendance = recentMatches.filter(m => m.match.attendance && m.match.attendance > 0);
+  const avgAttendance = matchesWithAttendance.length > 0
+    ? Math.round(matchesWithAttendance.reduce((sum, m) => sum + (m.match.attendance ?? 0), 0) / matchesWithAttendance.length)
+    : null;
 
   const venueUrl = `${BASE_URL}/venues/${slug}`;
 
@@ -266,6 +284,74 @@ export default async function VenuePage({ params }: VenuePageProps) {
               </div>
             </div>
 
+            {/* Home Team Context + Venue Stats */}
+            {(primaryStanding || avgGoals) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Home Team Standings */}
+                {primaryStanding && primaryTeam && (
+                  <Link
+                    href={`/competitions/${primaryCompetitionSlug}`}
+                    className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                  >
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                      <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Home Team in League</h3>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {primaryTeam.logoUrl ? (
+                          <img src={primaryTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                        ) : (
+                          <Shield className="w-6 h-6 text-neutral-300" />
+                        )}
+                        <span className="text-sm font-bold text-neutral-900">{primaryTeam.shortName || primaryTeam.name}</span>
+                      </div>
+                      <span className="text-2xl font-black text-neutral-900">{primaryStanding.position}<sup className="text-xs font-medium text-neutral-500">{primaryStanding.position === 1 ? "st" : primaryStanding.position === 2 ? "nd" : primaryStanding.position === 3 ? "rd" : "th"}</sup></span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-neutral-500">
+                      <span>{primaryCompetitionName}</span>
+                      <span>{primaryStanding.points}pts · {primaryStanding.won}W {primaryStanding.drawn}D {primaryStanding.lost}L</span>
+                    </div>
+                    {primaryStanding.form && (
+                      <div className="flex gap-1 mt-2">
+                        {primaryStanding.form.split("").slice(-5).map((r, i) => (
+                          <span key={i} className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                )}
+
+                {/* Venue Stats */}
+                {(avgGoals || avgAttendance) && (
+                  <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <BarChart3 className="w-3.5 h-3.5 text-purple-500" />
+                      <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Venue Stats</h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                        <div className="text-lg font-bold text-neutral-900">{recentMatches.length}</div>
+                        <div className="text-[10px] text-neutral-500">Matches</div>
+                      </div>
+                      {avgGoals && (
+                        <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                          <div className="text-lg font-bold text-green-600">{avgGoals}</div>
+                          <div className="text-[10px] text-neutral-500">Goals/Match</div>
+                        </div>
+                      )}
+                      {avgAttendance && (
+                        <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                          <div className="text-lg font-bold text-blue-600">{(avgAttendance / 1000).toFixed(1)}k</div>
+                          <div className="text-[10px] text-neutral-500">Avg Attend.</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Recent Results Strip */}
             {recentMatches.length > 0 && (
               <div>
@@ -318,24 +404,34 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       href={`/matches/${match.id}`}
                       className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {homeTeam.logoUrl ? (
-                            <img src={homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                            <img src={homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
-                            <Shield className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                            <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}
-                          <span className="text-sm text-neutral-900 truncate">{homeTeam.shortName || homeTeam.name}</span>
-                          <span className="text-xs text-neutral-400">vs</span>
+                          <span className="text-xs font-medium text-neutral-900 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                        </div>
+                        <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
+                        <div className="flex items-center gap-1.5 min-w-0">
                           {awayTeam.logoUrl ? (
-                            <img src={awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                            <img src={awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
-                            <Shield className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                            <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}
-                          <span className="text-sm text-neutral-900 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                          <span className="text-xs font-medium text-neutral-900 truncate">{awayTeam.shortName || awayTeam.name}</span>
                         </div>
                       </div>
-                      <span className="text-xs text-neutral-500 flex-shrink-0 ml-2">{format(new Date(match.scheduledAt), "MMM d")}</span>
+                      <div className="text-right flex-shrink-0 ml-3">
+                        <div className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d, HH:mm")}</div>
+                        <div className="text-[10px] font-medium text-blue-600">
+                          {formatDistanceToNowStrict(new Date(match.scheduledAt), { addSuffix: true })}
+                        </div>
+                        {competition && (
+                          <div className="text-[10px] text-neutral-400 truncate max-w-[120px]">{competition.name}</div>
+                        )}
+                      </div>
                     </Link>
                   ))}
                 </div>
