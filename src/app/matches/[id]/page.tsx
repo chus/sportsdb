@@ -428,21 +428,122 @@ export default async function MatchPage({ params }: MatchPageProps) {
         </div>
       </div>
 
+      {/* Data Dashboard — 4 cards */}
+      {match.status === "finished" && (
+        <div className="max-w-7xl mx-auto px-4 pt-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Goal Scorers */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-sm">⚽</span>
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Goals</h3>
+              </div>
+              {homeEvents.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty").length > 0 ||
+               awayEvents.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty").length > 0 ? (
+                <div className="space-y-1.5">
+                  {[...homeEvents, ...awayEvents]
+                    .filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty")
+                    .sort((a, b) => a.minute - b.minute)
+                    .slice(0, 4)
+                    .map((e) => (
+                      <div key={e.id} className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-neutral-900 truncate">
+                          {e.player?.name ?? "Unknown"}
+                          {e.type === "own_goal" && " (OG)"}
+                          {e.type === "penalty" && " (P)"}
+                        </span>
+                        <span className="text-neutral-500 flex-shrink-0 ml-1">{e.minute}&apos;</span>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-400">No goals</p>
+              )}
+            </div>
+
+            {/* Cards */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-sm">🟨</span>
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Cards</h3>
+              </div>
+              {(() => {
+                const homeYellows = homeEvents.filter((e) => e.type === "yellow_card").length;
+                const homeReds = homeEvents.filter((e) => e.type === "red_card").length;
+                const awayYellows = awayEvents.filter((e) => e.type === "yellow_card").length;
+                const awayReds = awayEvents.filter((e) => e.type === "red_card").length;
+                const total = homeYellows + homeReds + awayYellows + awayReds;
+                return total > 0 ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-neutral-700 font-medium">{homeTeam.shortName || homeTeam.name}</span>
+                      <span className="text-neutral-500">{homeYellows > 0 ? `🟨${homeYellows}` : ""} {homeReds > 0 ? `🟥${homeReds}` : ""}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-neutral-700 font-medium">{awayTeam.shortName || awayTeam.name}</span>
+                      <span className="text-neutral-500">{awayYellows > 0 ? `🟨${awayYellows}` : ""} {awayReds > 0 ? `🟥${awayReds}` : ""}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-neutral-400">No cards</p>
+                );
+              })()}
+            </div>
+
+            {/* Competition */}
+            {competition ? (
+              <Link
+                href={`/competitions/${competition.slug}`}
+                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+              >
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                </div>
+                <div className="text-sm font-bold text-neutral-900 truncate">{competition.name}</div>
+                <p className="text-xs text-neutral-500">
+                  {season ? season.label : ""}{match.matchday ? ` · Matchday ${match.matchday}` : ""}
+                </p>
+              </Link>
+            ) : (
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Trophy className="w-3.5 h-3.5 text-neutral-400" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                </div>
+                <p className="text-sm text-neutral-400">Unknown</p>
+              </div>
+            )}
+
+            {/* Venue */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <MapPin className="w-3.5 h-3.5 text-blue-500" />
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Venue</h3>
+              </div>
+              {venue ? (
+                <>
+                  <div className="text-sm font-bold text-neutral-900 truncate">{venue.name}</div>
+                  <p className="text-xs text-neutral-500">
+                    {[venue.city, match.attendance ? `${match.attendance.toLocaleString()} att.` : null].filter(Boolean).join(" · ")}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-neutral-400">Not available</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Match Events Timeline */}
+            {/* Match Stats (moved up) */}
             {events.length > 0 ? (
               <>
-                <MatchTimeline
-                  events={events}
-                  homeTeamId={homeTeam.id}
-                  awayTeamId={awayTeam.id}
-                  homeTeamName={homeTeam.shortName || homeTeam.name}
-                  awayTeamName={awayTeam.shortName || awayTeam.name}
-                />
                 <MatchStatBars
                   homeTeamName={homeTeam.shortName || homeTeam.name}
                   awayTeamName={awayTeam.shortName || awayTeam.name}
@@ -451,6 +552,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   events={events}
                   homeTeamId={homeTeam.id}
                   awayTeamId={awayTeam.id}
+                />
+                <MatchTimeline
+                  events={events}
+                  homeTeamId={homeTeam.id}
+                  awayTeamId={awayTeam.id}
+                  homeTeamName={homeTeam.shortName || homeTeam.name}
+                  awayTeamName={awayTeam.shortName || awayTeam.name}
                 />
               </>
             ) : (
@@ -643,85 +751,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Match Info Card */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-6">
-              <h3 className="text-sm font-medium text-neutral-500 mb-4">
-                Match Info
-              </h3>
-              <dl className="space-y-3 text-sm">
-                {competition && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Competition</dt>
-                    <dd className="font-medium text-neutral-900 text-right">
-                      <Link
-                        href={`/competitions/${competition.slug}`}
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        {competition.name}
-                      </Link>
-                    </dd>
-                  </div>
-                )}
-                {season && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Season</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {season.label}
-                    </dd>
-                  </div>
-                )}
-                {match.matchday && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Matchday</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {match.matchday}
-                    </dd>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <dt className="text-neutral-600">Date</dt>
-                  <dd className="font-medium text-neutral-900">
-                    {format(new Date(match.scheduledAt), "MMM d, yyyy")}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-neutral-600">Kick-off</dt>
-                  <dd className="font-medium text-neutral-900">
-                    {format(new Date(match.scheduledAt), "HH:mm")}
-                  </dd>
-                </div>
-                {venue && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Venue</dt>
-                    <dd className="font-medium text-neutral-900 text-right">
-                      <Link
-                        href={`/venues/${venue.slug}`}
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        {venue.name}
-                      </Link>
-                    </dd>
-                  </div>
-                )}
-                {match.attendance && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Attendance</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {match.attendance.toLocaleString()}
-                    </dd>
-                  </div>
-                )}
-                {match.referee && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Referee</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {match.referee}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
             {/* Prediction Widget */}
             <MatchPredictionWidget
               matchId={id}
@@ -733,139 +762,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
             />
 
             <SidebarAd />
-
-            {/* Goal Scorers Card */}
-            {(homeEvents.filter((e) => e.type === "goal").length > 0 ||
-              awayEvents.filter((e) => e.type === "goal").length > 0) && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-sm font-medium text-neutral-500 mb-4">
-                  Goals
-                </h3>
-                <div className="space-y-4">
-                  {homeEvents.filter((e) => e.type === "goal" || e.type === "own_goal").length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        {homeTeam.logoUrl ? (
-                          <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
-                        ) : (
-                          <Shield className="w-5 h-5 text-neutral-300" />
-                        )}
-                        <span className="text-xs font-medium text-neutral-600">
-                          {homeTeam.shortName || homeTeam.name}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {homeEvents
-                          .filter((e) => e.type === "goal" || e.type === "own_goal")
-                          .map((e) => (
-                            <div
-                              key={e.id}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              {e.player ? (
-                                <PlayerLink
-                                  slug={e.player.slug}
-                                  isLinkWorthy={e.player.isIndexable ?? false}
-                                  className="hover:text-blue-600 transition-colors"
-                                >
-                                  {e.player.name}
-                                  {e.type === "own_goal" && " (OG)"}
-                                </PlayerLink>
-                              ) : (
-                                <span>Unknown</span>
-                              )}
-                              <span className="text-neutral-500">
-                                {e.minute}&apos;
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                  {awayEvents.filter((e) => e.type === "goal" || e.type === "own_goal").length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        {awayTeam.logoUrl ? (
-                          <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
-                        ) : (
-                          <Shield className="w-5 h-5 text-neutral-300" />
-                        )}
-                        <span className="text-xs font-medium text-neutral-600">
-                          {awayTeam.shortName || awayTeam.name}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        {awayEvents
-                          .filter((e) => e.type === "goal" || e.type === "own_goal")
-                          .map((e) => (
-                            <div
-                              key={e.id}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              {e.player ? (
-                                <PlayerLink
-                                  slug={e.player.slug}
-                                  isLinkWorthy={e.player.isIndexable ?? false}
-                                  className="hover:text-blue-600 transition-colors"
-                                >
-                                  {e.player.name}
-                                  {e.type === "own_goal" && " (OG)"}
-                                </PlayerLink>
-                              ) : (
-                                <span>Unknown</span>
-                              )}
-                              <span className="text-neutral-500">
-                                {e.minute}&apos;
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Cards Summary */}
-            {events.filter(
-              (e) => e.type === "yellow_card" || e.type === "red_card"
-            ).length > 0 && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-sm font-medium text-neutral-500 mb-4">
-                  Cards
-                </h3>
-                <div className="space-y-2">
-                  {events
-                    .filter(
-                      (e) => e.type === "yellow_card" || e.type === "red_card"
-                    )
-                    .map((e) => (
-                      <div
-                        key={e.id}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {e.type === "yellow_card" ? "🟨" : "🟥"}
-                          </span>
-                          {e.player ? (
-                            <PlayerLink
-                              slug={e.player.slug}
-                              isLinkWorthy={e.player.isIndexable ?? false}
-                              className="hover:text-blue-600 transition-colors"
-                            >
-                              {e.player.name}
-                            </PlayerLink>
-                          ) : (
-                            <span>Unknown</span>
-                          )}
-                        </div>
-                        <span className="text-neutral-500">{e.minute}&apos;</span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
 
             {/* Head to Head */}
             <HeadToHead
