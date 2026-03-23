@@ -8,16 +8,19 @@ import {
   Shield,
   Trophy,
   User,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 import { PlayerLink } from "@/components/player/player-link";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
-import { format } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   getMatchWithDetails,
   getMatchEventsWithPlayers,
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
+import { getTeamStats, getTeamTopScorer } from "@/lib/queries/teams";
 import { MatchJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
@@ -264,6 +267,12 @@ function LineupPlayer({
   );
 }
 
+function ordinal(n: number) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 export default async function MatchPage({ params }: MatchPageProps) {
   const { id } = await params;
 
@@ -279,6 +288,24 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
   const { homeTeam, awayTeam, venue, competition, season } = match;
   const statusDisplay = getStatusDisplay(match.status, match.minute);
+
+  // Fetch team standings for context
+  const [homeTeamStats, awayTeamStats] = await Promise.all([
+    getTeamStats(homeTeam.id),
+    getTeamStats(awayTeam.id),
+  ]);
+  const homeStanding = homeTeamStats[0]?.standing;
+  const awayStanding = awayTeamStats[0]?.standing;
+
+  // For scheduled matches, get top scorers
+  let homeTopScorer: Awaited<ReturnType<typeof getTeamTopScorer>> | null = null;
+  let awayTopScorer: Awaited<ReturnType<typeof getTeamTopScorer>> | null = null;
+  if (match.status === "scheduled" && match.competitionSeasonId) {
+    [homeTopScorer, awayTopScorer] = await Promise.all([
+      getTeamTopScorer(homeTeam.id, match.competitionSeasonId),
+      getTeamTopScorer(awayTeam.id, match.competitionSeasonId),
+    ]);
+  }
 
   // Separate events by team
   const homeEvents = events.filter((e) => e.teamId === homeTeam.id);
@@ -428,7 +455,108 @@ export default async function MatchPage({ params }: MatchPageProps) {
         </div>
       </div>
 
-      {/* Data Dashboard — 4 cards */}
+      {/* Scheduled Match Dashboard */}
+      {match.status === "scheduled" && (
+        <div className="max-w-7xl mx-auto px-4 pt-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Countdown */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Kickoff</h3>
+              </div>
+              <div className="text-lg font-black text-neutral-900">
+                {formatDistanceToNowStrict(new Date(match.scheduledAt), { addSuffix: true })}
+              </div>
+              <p className="text-xs text-neutral-500 mt-0.5">{format(new Date(match.scheduledAt), "EEE, MMM d · h:mm a")}</p>
+            </div>
+
+            {/* League Positions */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Standings</h3>
+              </div>
+              {homeStanding && awayStanding ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-neutral-700 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                    <span className="font-bold text-neutral-900 flex-shrink-0 ml-1">{ordinal(homeStanding.position)} · {homeStanding.points}pts</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-neutral-700 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                    <span className="font-bold text-neutral-900 flex-shrink-0 ml-1">{ordinal(awayStanding.position)} · {awayStanding.points}pts</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-400">No data</p>
+              )}
+            </div>
+
+            {/* Form */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
+              </div>
+              {homeStanding?.form || awayStanding?.form ? (
+                <div className="space-y-2">
+                  {homeStanding?.form && (
+                    <div>
+                      <p className="text-[10px] text-neutral-500 mb-1">{homeTeam.shortName || homeTeam.name}</p>
+                      <div className="flex gap-1">
+                        {homeStanding.form.split("").slice(-5).map((r, i) => (
+                          <span key={i} className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {awayStanding?.form && (
+                    <div>
+                      <p className="text-[10px] text-neutral-500 mb-1">{awayTeam.shortName || awayTeam.name}</p>
+                      <div className="flex gap-1">
+                        {awayStanding.form.split("").slice(-5).map((r, i) => (
+                          <span key={i} className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-400">No data</p>
+              )}
+            </div>
+
+            {/* Top Scorers */}
+            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Target className="w-3.5 h-3.5 text-red-500" />
+                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Dangermen</h3>
+              </div>
+              {homeTopScorer || awayTopScorer ? (
+                <div className="space-y-1.5">
+                  {homeTopScorer && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-neutral-900 truncate">{homeTopScorer.player.name}</span>
+                      <span className="text-neutral-500 flex-shrink-0 ml-1">{homeTopScorer.goals}G {homeTopScorer.assists}A</span>
+                    </div>
+                  )}
+                  {awayTopScorer && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-neutral-900 truncate">{awayTopScorer.player.name}</span>
+                      <span className="text-neutral-500 flex-shrink-0 ml-1">{awayTopScorer.goals}G {awayTopScorer.assists}A</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-neutral-400">No data</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Finished Match Dashboard — 4 cards */}
       {match.status === "finished" && (
         <div className="max-w-7xl mx-auto px-4 pt-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -532,6 +660,85 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 <p className="text-sm text-neutral-400">Not available</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Form & Standings Context Strip */}
+      {(homeStanding || awayStanding) && (
+        <div className="max-w-7xl mx-auto px-4 pt-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Standings */}
+            {homeStanding && awayStanding && (
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Position</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {homeTeam.logoUrl ? (
+                        <ImageWithFallback src={homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      ) : (
+                        <Shield className="w-5 h-5 text-neutral-300" />
+                      )}
+                      <span className="text-xs font-medium text-neutral-900">{homeTeam.shortName || homeTeam.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-neutral-900">{ordinal(homeStanding.position)}</span>
+                      <span className="text-xs text-neutral-500 ml-1.5">{homeStanding.points}pts · {homeStanding.won}W {homeStanding.drawn}D {homeStanding.lost}L</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {awayTeam.logoUrl ? (
+                        <ImageWithFallback src={awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      ) : (
+                        <Shield className="w-5 h-5 text-neutral-300" />
+                      )}
+                      <span className="text-xs font-medium text-neutral-900">{awayTeam.shortName || awayTeam.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-neutral-900">{ordinal(awayStanding.position)}</span>
+                      <span className="text-xs text-neutral-500 ml-1.5">{awayStanding.points}pts · {awayStanding.won}W {awayStanding.drawn}D {awayStanding.lost}L</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Form */}
+            {(homeStanding?.form || awayStanding?.form) && (
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-3">
+                  <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Recent Form</h3>
+                </div>
+                <div className="space-y-2.5">
+                  {homeStanding?.form && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-neutral-700 w-20 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                      <div className="flex gap-1">
+                        {homeStanding.form.split("").slice(-5).map((r, i) => (
+                          <span key={i} className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {awayStanding?.form && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-neutral-700 w-20 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                      <div className="flex gap-1">
+                        {awayStanding.form.split("").slice(-5).map((r, i) => (
+                          <span key={i} className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
