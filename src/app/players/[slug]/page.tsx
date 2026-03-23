@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  User, Calendar, Ruler, Flag,
-  Footprints, Shield, BarChart3
+  User, Calendar, Shield, BarChart3,
+  Trophy, Target, TrendingUp, ChevronRight
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality } from "@/lib/queries/players";
@@ -103,18 +103,6 @@ function renderBioWithLinks(text: string) {
   });
 }
 
-function StatCard({ label, value, icon: Icon }: { label: string; value: string | number | null; icon?: React.ElementType }) {
-  if (!value) return null;
-  return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-center gap-2 text-neutral-500 text-sm mb-1">
-        {Icon && <Icon className="w-4 h-4" />}
-        {label}
-      </div>
-      <div className="text-xl font-semibold text-neutral-900">{value}</div>
-    </div>
-  );
-}
 
 export default async function PlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params;
@@ -299,89 +287,215 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 {/* === OVERVIEW TAB === */}
                 <TabPanel tabId="overview" defaultTab="overview">
                   <>
-                    {/* About */}
-                    <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                      <h2 className="text-lg font-bold text-neutral-900 mb-3">About {player.name}</h2>
-                      <div className="space-y-3 text-sm leading-7 text-neutral-700">
-                        {aboutParagraphs.map((paragraph, i) => (
-                          <p key={i}>{renderBioWithLinks(paragraph)}</p>
-                        ))}
-                      </div>
-                    </section>
-
-                    {/* Career Overview */}
-                    {statsHistory.length > 0 && (
-                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Career Overview</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
-                            <div className="text-2xl font-bold text-blue-600">{totalApps}</div>
-                            <div className="text-xs text-neutral-500 mt-1">Appearances</div>
+                    {/* Data Dashboard — 4 cards */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                      {/* Current Season */}
+                      {currentSeasonStats ? (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Target className="w-3.5 h-3.5 text-green-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">This Season</h3>
                           </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
-                            <div className="text-2xl font-bold text-green-600">{totalGoals}</div>
-                            <div className="text-xs text-neutral-500 mt-1">Goals</div>
-                          </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
-                            <div className="text-2xl font-bold text-purple-600">{totalAssists}</div>
-                            <div className="text-xs text-neutral-500 mt-1">Assists</div>
-                          </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
-                            <div className="text-2xl font-bold text-orange-500">{totalMins.toLocaleString()}</div>
-                            <div className="text-xs text-neutral-500 mt-1">Minutes</div>
-                          </div>
+                          <div className="text-2xl font-black text-neutral-900">{currentSeasonStats.goals}</div>
+                          <p className="text-xs text-neutral-500">goals · {currentSeasonStats.assists} assists</p>
+                          <p className="text-xs text-neutral-500 mt-0.5">{currentSeasonStats.appearances} apps</p>
                         </div>
-                      </section>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Target className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">This Season</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">No data</p>
+                        </div>
+                      )}
+
+                      {/* Rankings */}
+                      {rankings.length > 0 ? (
+                        <Link
+                          href={`/top-scorers/${rankings[0].competitionSlug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Ranking</h3>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            {rankings[0].goals > 0 && (
+                              <div>
+                                <span className="text-2xl font-black text-neutral-900">#{rankings[0].goalsRank}</span>
+                                <p className="text-xs text-neutral-500">goals</p>
+                              </div>
+                            )}
+                            {rankings[0].assists > 0 && (
+                              <div>
+                                <span className="text-2xl font-black text-neutral-900">#{rankings[0].assistsRank}</span>
+                                <p className="text-xs text-neutral-500">assists</p>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-neutral-500 truncate mt-0.5">{rankings[0].competitionName}</p>
+                        </Link>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Ranking</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">No data</p>
+                        </div>
+                      )}
+
+                      {/* Current Team */}
+                      {currentTeam ? (
+                        <Link
+                          href={`/teams/${currentTeam.slug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Shield className="w-3.5 h-3.5 text-blue-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Club</h3>
+                          </div>
+                          <div className="flex items-center gap-2 mb-1">
+                            {currentTeam.logoUrl ? (
+                              <ImageWithFallback src={currentTeam.logoUrl} alt={currentTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
+                            ) : (
+                              <Shield className="w-6 h-6 text-neutral-300" />
+                            )}
+                            <span className="text-sm font-bold text-neutral-900 truncate">{currentTeam.shortName || currentTeam.name}</span>
+                          </div>
+                          <p className="text-xs text-neutral-500">{currentTeam.country}</p>
+                        </Link>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Shield className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Club</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">Free agent</p>
+                        </div>
+                      )}
+
+                      {/* Recent Form */}
+                      <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                          <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
+                        </div>
+                        {recentMatches.length > 0 && currentTeamData ? (
+                          <div className="flex gap-1.5 mt-1">
+                            {recentMatches.slice(0, 5).map((m, i) => {
+                              const playerTeamId = currentTeamData.team.id;
+                              const isHome = m.match.status === "finished" && m.homeTeam.name; // always has data
+                              // Determine if player's team won
+                              const homeScore = m.match.homeScore ?? 0;
+                              const awayScore = m.match.awayScore ?? 0;
+                              // Figure out which side the player's team is on
+                              const isPlayerHome = m.homeTeam.slug === currentTeam?.slug;
+                              const teamScore = isPlayerHome ? homeScore : awayScore;
+                              const oppScore = isPlayerHome ? awayScore : homeScore;
+                              const result = m.match.status === "finished"
+                                ? teamScore > oppScore ? "W" : teamScore < oppScore ? "L" : "D"
+                                : null;
+                              return result ? (
+                                <span
+                                  key={i}
+                                  title={`${m.homeTeam.name} ${homeScore}-${awayScore} ${m.awayTeam.name}`}
+                                  className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white cursor-default ${
+                                    result === "W" ? "bg-green-500" : result === "D" ? "bg-neutral-400" : "bg-red-500"
+                                  }`}
+                                >
+                                  {result}
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-neutral-400">No data</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Recent Appearances Strip */}
+                    {recentMatches.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Recent Appearances</h3>
+                          <Link href={`/players/${slug}?tab=news`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            View all <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                          {recentMatches.map((m) => (
+                            <Link
+                              key={m.match.id}
+                              href={`/matches/${m.match.id}`}
+                              className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                            >
+                              <div className="flex items-center gap-1.5 text-xs text-neutral-700 mb-1.5">
+                                <span className="font-medium truncate">{m.homeTeam.name}</span>
+                                {m.match.status === "finished" ? (
+                                  <span className="font-bold text-neutral-900 flex-shrink-0">{m.match.homeScore}-{m.match.awayScore}</span>
+                                ) : (
+                                  <span className="text-neutral-400 flex-shrink-0">vs</span>
+                                )}
+                                <span className="font-medium truncate">{m.awayTeam.name}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className={`text-[10px] font-medium ${m.lineup.isStarter ? "text-green-600" : "text-neutral-500"}`}>
+                                  {m.lineup.isStarter ? "Starter" : "Sub"}
+                                  {m.lineup.minutesPlayed != null && ` · ${m.lineup.minutesPlayed}'`}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-neutral-400 mt-1">
+                                {m.match.scheduledAt && format(new Date(m.match.scheduledAt), "MMM d")}
+                              </p>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
                     )}
 
-                    {/* Rankings */}
-                    {rankings.length > 0 && (
+                    {/* Career Overview (compact) */}
+                    {statsHistory.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Career Overview</h3>
+                          <Link href={`/players/${slug}?tab=stats`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            Full stats <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="grid grid-cols-4 gap-3">
+                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                            <div className="text-xl font-bold text-blue-600">{totalApps}</div>
+                            <div className="text-[10px] text-neutral-500">Apps</div>
+                          </div>
+                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                            <div className="text-xl font-bold text-green-600">{totalGoals}</div>
+                            <div className="text-[10px] text-neutral-500">Goals</div>
+                          </div>
+                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                            <div className="text-xl font-bold text-purple-600">{totalAssists}</div>
+                            <div className="text-[10px] text-neutral-500">Assists</div>
+                          </div>
+                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
+                            <div className="text-xl font-bold text-orange-500">{totalMins.toLocaleString()}</div>
+                            <div className="text-[10px] text-neutral-500">Mins</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* About (moved below fold) */}
+                    {aboutParagraphs.length > 0 && (
                       <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Current Season Rankings</h2>
-                        <div className="space-y-3">
-                          {rankings.map((r) => (
-                            <div key={r.competitionSlug} className="border border-neutral-100 rounded-lg p-3">
-                              <Link href={`/competitions/${r.competitionSlug}`} className="text-sm font-medium text-blue-600 hover:underline">
-                                {r.competitionName}
-                              </Link>
-                              <div className="grid grid-cols-2 gap-3 mt-2">
-                                {r.goals > 0 && (
-                                  <Link href={`/top-scorers/${r.competitionSlug}`} className="flex items-center gap-2 group">
-                                    <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center text-green-600 font-bold text-xs">#{r.goalsRank}</div>
-                                    <div><div className="text-sm font-medium group-hover:text-blue-600">{r.goals} goals</div><div className="text-xs text-neutral-500">Top Scorers</div></div>
-                                  </Link>
-                                )}
-                                {r.assists > 0 && (
-                                  <Link href={`/top-assists/${r.competitionSlug}`} className="flex items-center gap-2 group">
-                                    <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 font-bold text-xs">#{r.assistsRank}</div>
-                                    <div><div className="text-sm font-medium group-hover:text-blue-600">{r.assists} assists</div><div className="text-xs text-neutral-500">Top Assists</div></div>
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
+                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {player.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                          {aboutParagraphs.map((paragraph, i) => (
+                            <p key={i}>{renderBioWithLinks(paragraph)}</p>
                           ))}
                         </div>
                       </section>
-                    )}
-
-                    {/* Current Team */}
-                    {currentTeam && (
-                      <Link
-                        href={`/teams/${currentTeam.slug}`}
-                        className="flex items-center gap-4 bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow group"
-                      >
-                        <div className="w-14 h-14 bg-neutral-100 rounded-lg flex items-center justify-center">
-                          {currentTeam.logoUrl ? (
-                            <ImageWithFallback src={currentTeam.logoUrl} alt={currentTeam.name} width={40} height={40} className="w-10 h-10 object-contain" />
-                          ) : (
-                            <Shield className="w-7 h-7 text-neutral-400" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">{currentTeam.name}</div>
-                          <div className="text-sm text-neutral-500">{currentTeam.country}</div>
-                        </div>
-                      </Link>
                     )}
                   </>
                 </TabPanel>
@@ -542,45 +656,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
               {/* Sidebar */}
               <div className="space-y-6">
-                {/* Quick Facts */}
-                <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                  <h3 className="text-sm font-bold text-neutral-900 mb-3">Quick Facts</h3>
-                  <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <dt className="text-neutral-500">Full Name</dt>
-                      <dd className="font-medium text-neutral-900">{player.name}</dd>
-                    </div>
-                    {player.nationality && (
-                      <div className="flex justify-between">
-                        <dt className="text-neutral-500">Nationality</dt>
-                        <dd className="font-medium text-neutral-900">{player.nationality}</dd>
-                      </div>
-                    )}
-                    {player.secondNationality && (
-                      <div className="flex justify-between">
-                        <dt className="text-neutral-500">2nd Nationality</dt>
-                        <dd className="font-medium text-neutral-900">{player.secondNationality}</dd>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <dt className="text-neutral-500">Position</dt>
-                      <dd className="font-medium text-neutral-900">{player.position}</dd>
-                    </div>
-                    {player.dateOfBirth && (
-                      <div className="flex justify-between">
-                        <dt className="text-neutral-500">Date of Birth</dt>
-                        <dd className="font-medium text-neutral-900">{format(new Date(player.dateOfBirth), "MMM d, yyyy")}</dd>
-                      </div>
-                    )}
-                    {career.length > 0 && (
-                      <div className="flex justify-between">
-                        <dt className="text-neutral-500">Clubs</dt>
-                        <dd className="font-medium text-neutral-900">{career.length}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </div>
-
                 <SidebarUpgradeOrAd context="player" />
 
                 <PlayerProfileSummary playerId={player.id} />

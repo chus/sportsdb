@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Trophy, Shield, Target, Calendar, TrendingUp } from "lucide-react";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
@@ -160,6 +160,11 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
               )}
             </div>
           }
+          stats={standingsData.length > 0 ? [
+            { label: "Teams", value: standingsData.length },
+            ...(leader ? [{ label: "Leader", value: `${leader.name}` }] : []),
+            ...(topScorer ? [{ label: "Top Scorer", value: `${topScorer.name} (${topScorer.goals})` }] : []),
+          ] : undefined}
           actions={
             <FollowButton entityType="competition" entityId={competition.id} entityName={competition.name} variant="hero" />
           }
@@ -172,7 +177,103 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
               <div className="lg:col-span-2">
                 {/* === STANDINGS TAB === */}
                 <TabPanel tabId="standings" defaultTab="standings">
-                  <div className="space-y-8">
+                  <div className="space-y-6">
+                    {/* Data Dashboard — 4 cards */}
+                    {standingsData.length > 0 && (
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {/* Leader */}
+                        <Link
+                          href={`/teams/${standingsData[0].team.slug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Leader</h3>
+                          </div>
+                          <div className="flex items-center gap-2 mb-1">
+                            {standingsData[0].team.logoUrl ? (
+                              <ImageWithFallback src={standingsData[0].team.logoUrl} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                            ) : (
+                              <Shield className="w-6 h-6 text-neutral-300" />
+                            )}
+                            <span className="text-sm font-bold text-neutral-900 truncate">{standingsData[0].team.shortName || standingsData[0].team.name}</span>
+                          </div>
+                          <p className="text-xs text-neutral-500">{standingsData[0].standing.points} pts · {standingsData[0].standing.won}W {standingsData[0].standing.drawn}D {standingsData[0].standing.lost}L</p>
+                        </Link>
+
+                        {/* Top Scorer */}
+                        {topScorers.length > 0 ? (
+                          <PlayerLink
+                            slug={topScorers[0].player.slug}
+                            isLinkWorthy={topScorers[0].player.isIndexable ?? false}
+                            className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          >
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Target className="w-3.5 h-3.5 text-red-500" />
+                              <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                            </div>
+                            <div className="text-2xl font-black text-neutral-900">{topScorers[0].stat.goals}</div>
+                            <p className="text-xs text-neutral-500">goals</p>
+                            <p className="text-sm font-medium text-neutral-900 truncate mt-0.5">{topScorers[0].player.name}</p>
+                          </PlayerLink>
+                        ) : (
+                          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Target className="w-3.5 h-3.5 text-neutral-400" />
+                              <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                            </div>
+                            <p className="text-sm text-neutral-400">No data</p>
+                          </div>
+                        )}
+
+                        {/* Matchday */}
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Progress</h3>
+                          </div>
+                          <div className="text-2xl font-black text-neutral-900">MD {standingsData[0].standing.played}</div>
+                          <p className="text-xs text-neutral-500">{standingsData.length} teams</p>
+                          <p className="text-xs text-neutral-500 mt-0.5">{competitionSeason?.season.label}</p>
+                        </div>
+
+                        {/* Top Form */}
+                        {(() => {
+                          const bestForm = standingsData.find(s => s.standing.form && s.standing.form.length >= 3);
+                          return bestForm?.standing.form ? (
+                            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Best Form</h3>
+                              </div>
+                              <div className="flex gap-1.5 mt-1 mb-1.5">
+                                {bestForm.standing.form.split("").slice(-5).map((result, i) => (
+                                  <span
+                                    key={i}
+                                    className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${
+                                      result === "W" ? "bg-green-500" : result === "D" ? "bg-neutral-400" : "bg-red-500"
+                                    }`}
+                                  >
+                                    {result}
+                                  </span>
+                                ))}
+                              </div>
+                              <p className="text-xs text-neutral-500 truncate">{bestForm.team.shortName || bestForm.team.name}</p>
+                            </div>
+                          ) : (
+                            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <TrendingUp className="w-3.5 h-3.5 text-neutral-400" />
+                                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Best Form</h3>
+                              </div>
+                              <p className="text-sm text-neutral-400">No data</p>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {/* Standings Table */}
                     {standingsData.length === 0 ? (
                       <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
                         <Trophy className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
@@ -184,6 +285,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                       </div>
                     )}
 
+                    {/* About (below standings) */}
                     {aboutParagraphs.length > 0 && (
                       <section className="bg-white rounded-xl border border-neutral-200 p-6">
                         <h2 className="text-lg font-bold text-neutral-900 mb-3">About {competition.name}</h2>
