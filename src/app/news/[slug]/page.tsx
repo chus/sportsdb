@@ -21,6 +21,8 @@ import {
   Shield,
   MapPin,
   Users,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 import { InArticleAd } from "@/components/ads/in-article-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
@@ -30,6 +32,8 @@ import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { ShareButtons } from "@/components/news/share-buttons";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { getTeamStats } from "@/lib/queries/teams";
+import { getPlayerStats } from "@/lib/queries/players";
 import { marked } from "marked";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
@@ -181,6 +185,12 @@ function linkifyEntities(
   return result;
 }
 
+function ordinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 function getRatingColor(rating: number): string {
   if (rating >= 7.0) return "text-green-600 bg-green-50";
   if (rating >= 6.0) return "text-yellow-600 bg-yellow-50";
@@ -217,6 +227,29 @@ export default async function ArticlePage({ params }: Props) {
         ? getArticleMatchContext(article.matchId, article.competitionSeasonId)
         : Promise.resolve(null),
     ]);
+
+  // Fetch team standings/form context
+  let homeStanding: Awaited<ReturnType<typeof getTeamStats>>[number] | null = null;
+  let awayStanding: Awaited<ReturnType<typeof getTeamStats>>[number] | null = null;
+  let primaryStanding: Awaited<ReturnType<typeof getTeamStats>>[number] | null = null;
+  let primaryPlayerStats: Awaited<ReturnType<typeof getPlayerStats>> | null = null;
+
+  if (matchData) {
+    const [hStats, aStats] = await Promise.all([
+      getTeamStats(matchData.match.homeTeamId),
+      getTeamStats(matchData.match.awayTeamId),
+    ]);
+    homeStanding = hStats[0] ?? null;
+    awayStanding = aStats[0] ?? null;
+  } else if (article.primaryTeamId || (article.primaryPlayerId && article.type === "player_spotlight")) {
+    const [tStats, pStats] = await Promise.all([
+      article.primaryTeamId ? getTeamStats(article.primaryTeamId) : Promise.resolve(null),
+      article.primaryPlayerId && article.type === "player_spotlight"
+        ? getPlayerStats(article.primaryPlayerId) : Promise.resolve(null),
+    ]);
+    primaryStanding = tStats?.[0] ?? null;
+    primaryPlayerStats = pStats;
+  }
 
   // Parse markdown content
   let htmlContent = marked.parse(article.content, { async: false }) as string;
@@ -667,6 +700,186 @@ export default async function ArticlePage({ params }: Props) {
               homeTeamName={matchData.homeTeam.name}
               awayTeamName={matchData.awayTeam.name}
             />
+          </div>
+        )}
+
+        {/* Form & Standings Context — for match reports */}
+        {matchData && (homeStanding || awayStanding) && (
+          <div className="max-w-3xl mx-auto px-4 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* League Position */}
+              {(homeStanding || awayStanding) && (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Position</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {homeStanding && (
+                      <Link href={`/competitions/${homeStanding.competitionSlug}`} className="flex items-center gap-3 group">
+                        {matchData.homeTeam.logoUrl && (
+                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        )}
+                        <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                          {ordinal(homeStanding.standing.position)}
+                        </span>
+                        <span className="text-xs text-neutral-500">
+                          {homeStanding.standing.points} pts · {homeStanding.standing.won}W {homeStanding.standing.drawn}D {homeStanding.standing.lost}L
+                        </span>
+                      </Link>
+                    )}
+                    {awayStanding && (
+                      <Link href={`/competitions/${awayStanding.competitionSlug}`} className="flex items-center gap-3 group">
+                        {matchData.awayTeam.logoUrl && (
+                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        )}
+                        <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                          {ordinal(awayStanding.standing.position)}
+                        </span>
+                        <span className="text-xs text-neutral-500">
+                          {awayStanding.standing.points} pts · {awayStanding.standing.won}W {awayStanding.standing.drawn}D {awayStanding.standing.lost}L
+                        </span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Form */}
+              {(homeStanding?.standing.form || awayStanding?.standing.form) && (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <Target className="w-3.5 h-3.5 text-green-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Recent Form</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {homeStanding?.standing.form && (
+                      <div className="flex items-center gap-3">
+                        {matchData.homeTeam.logoUrl && (
+                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        )}
+                        <div className="flex gap-1">
+                          {homeStanding.standing.form.split(",").slice(-5).map((r, i) => (
+                            <span
+                              key={i}
+                              className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${
+                                r === "W" ? "bg-green-100 text-green-700" :
+                                r === "D" ? "bg-neutral-100 text-neutral-600" :
+                                "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {awayStanding?.standing.form && (
+                      <div className="flex items-center gap-3">
+                        {matchData.awayTeam.logoUrl && (
+                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        )}
+                        <div className="flex gap-1">
+                          {awayStanding.standing.form.split(",").slice(-5).map((r, i) => (
+                            <span
+                              key={i}
+                              className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${
+                                r === "W" ? "bg-green-100 text-green-700" :
+                                r === "D" ? "bg-neutral-100 text-neutral-600" :
+                                "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Team & Player Context — for non-match articles */}
+        {!matchData && (primaryStanding || primaryPlayerStats) && (
+          <div className="max-w-3xl mx-auto px-4 pt-6">
+            <div className={`grid gap-3 ${primaryStanding && primaryPlayerStats ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
+              {/* Primary team standings */}
+              {primaryStanding && primaryTeam && (
+                <Link
+                  href={`/competitions/${primaryStanding.competitionSlug}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Standing</h3>
+                  </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    {primaryTeam.logoUrl && (
+                      <ImageWithFallback src={primaryTeam.logoUrl} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                    )}
+                    <div>
+                      <span className="text-lg font-bold text-neutral-900">{ordinal(primaryStanding.standing.position)}</span>
+                      <span className="text-xs text-neutral-500 ml-2">{primaryStanding.competitionName}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-neutral-500">
+                    <span>{primaryStanding.standing.points} pts</span>
+                    <span>{primaryStanding.standing.won}W {primaryStanding.standing.drawn}D {primaryStanding.standing.lost}L</span>
+                    {primaryStanding.standing.form && (
+                      <div className="flex gap-0.5 ml-auto">
+                        {primaryStanding.standing.form.split(",").slice(-5).map((r, i) => (
+                          <span
+                            key={i}
+                            className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center ${
+                              r === "W" ? "bg-green-100 text-green-700" :
+                              r === "D" ? "bg-neutral-100 text-neutral-600" :
+                              "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )}
+
+              {/* Player current season stats */}
+              {primaryPlayerStats && primaryPlayerStats.length > 0 && primaryPlayer && (
+                <Link
+                  href={`/players/${primaryPlayer.slug}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <User className="w-3.5 h-3.5 text-amber-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Season Stats</h3>
+                  </div>
+                  <div className="text-sm font-bold text-neutral-900 mb-2">{primaryPlayer.name}</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {primaryPlayerStats.slice(0, 1).map((s) => (
+                      <div key={s.seasonLabel} className="contents">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-neutral-900">{s.stat.appearances ?? 0}</div>
+                          <div className="text-[10px] text-neutral-500 uppercase">Apps</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-neutral-900">{s.stat.goals ?? 0}</div>
+                          <div className="text-[10px] text-neutral-500 uppercase">Goals</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-neutral-900">{s.stat.assists ?? 0}</div>
+                          <div className="text-[10px] text-neutral-500 uppercase">Assists</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Link>
+              )}
+            </div>
           </div>
         )}
 
