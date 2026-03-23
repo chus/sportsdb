@@ -86,13 +86,22 @@ export function TabNavigation({ tabs, defaultTab, children }: TabNavigationProps
   );
 }
 
-interface TabPanelProps {
+/**
+ * A single tab panel that reads ?tab from the URL to show/hide itself.
+ * Can receive server-rendered ReactNode children safely.
+ */
+export function TabPanel({
+  tabId,
+  defaultTab,
+  children,
+}: {
   tabId: string;
-  activeTab: string;
+  defaultTab: string;
   children: ReactNode;
-}
+}) {
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || defaultTab;
 
-export function TabPanel({ tabId, activeTab, children }: TabPanelProps) {
   return (
     <div
       id={`tabpanel-${tabId}`}
@@ -103,22 +112,4 @@ export function TabPanel({ tabId, activeTab, children }: TabPanelProps) {
       {children}
     </div>
   );
-}
-
-/**
- * Client wrapper that reads ?tab from URL and passes to children.
- * Use this to wrap TabPanel components so they can react to URL changes.
- */
-export function TabPanels({
-  defaultTab,
-  tabs,
-  children,
-}: {
-  defaultTab?: string;
-  tabs: string[];
-  children: (activeTab: string) => ReactNode;
-}) {
-  const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || defaultTab || tabs[0];
-  return <>{children(activeTab)}</>;
 }

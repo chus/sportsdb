@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { TabNavigation, TabPanels } from "@/components/ui/tab-navigation";
+import { TabNavigation } from "@/components/ui/tab-navigation";
 
 const TABS = [
   { id: "standings", label: "Standings" },
@@ -11,7 +11,7 @@ const TABS = [
 
 interface CompetitionTabsProps {
   teamCount: number;
-  children: (activeTab: string) => ReactNode;
+  children: ReactNode;
 }
 
 export function CompetitionTabs({ teamCount, children }: CompetitionTabsProps) {
@@ -22,9 +22,7 @@ export function CompetitionTabs({ teamCount, children }: CompetitionTabsProps) {
 
   return (
     <TabNavigation tabs={tabs} defaultTab="standings">
-      <TabPanels defaultTab="standings" tabs={tabs.map((t) => t.id)}>
-        {children}
-      </TabPanels>
+      {children}
     </TabNavigation>
   );
 }

@@ -19,6 +19,7 @@ import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
+import { TabPanel } from "@/components/ui/tab-navigation";
 import { TeamTabs } from "./team-tabs";
 import { db } from "@/lib/db";
 import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons } from "@/lib/db/schema";
@@ -272,14 +273,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
       {/* Tabs */}
       <TeamTabs squadCount={squad.length}>
-        {(activeTab) => (
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
 
                 {/* === OVERVIEW TAB === */}
-                {activeTab === "overview" && (
+                <TabPanel tabId="overview" defaultTab="overview">
                   <>
                     <section className="bg-white rounded-xl border border-neutral-200 p-6">
                       <h2 className="text-lg font-bold text-neutral-900 mb-3">About {team.name}</h2>
@@ -307,10 +307,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     {/* Upcoming fixtures */}
                     <TeamFixtures teamId={team.id} limit={5} />
                   </>
-                )}
+                </TabPanel>
 
                 {/* === SQUAD TAB === */}
-                {activeTab === "squad" && (
+                <TabPanel tabId="squad" defaultTab="overview">
                   <>
                     {squad.length === 0 ? (
                       <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
@@ -327,15 +327,15 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       </div>
                     )}
                   </>
-                )}
+                </TabPanel>
 
                 {/* === FIXTURES TAB === */}
-                {activeTab === "fixtures" && (
+                <TabPanel tabId="fixtures" defaultTab="overview">
                   <TeamFixtures teamId={team.id} limit={50} />
-                )}
+                </TabPanel>
 
                 {/* === STATS TAB === */}
-                {activeTab === "stats" && (
+                <TabPanel tabId="stats" defaultTab="overview">
                   <>
                     {standing && (
                       <div className="bg-white rounded-xl border border-neutral-200 p-6">
@@ -414,7 +414,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       );
                     })()}
                   </>
-                )}
+                </TabPanel>
 
                 <BetweenContentAd />
               </div>
@@ -456,7 +456,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
               </div>
             </div>
           </div>
-        )}
       </TeamTabs>
     </div>
     </>

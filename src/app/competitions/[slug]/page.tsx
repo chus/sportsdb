@@ -15,6 +15,7 @@ import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-co
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
+import { TabPanel } from "@/components/ui/tab-navigation";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
@@ -164,48 +165,53 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
         {/* Tabs */}
         <CompetitionTabs teamCount={standingsData.length}>
-          {(activeTab) => (
-            <div className="max-w-7xl mx-auto px-4 py-8">
-              <div className="grid lg:grid-cols-3 gap-8">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-8">
-                  {/* === STANDINGS TAB === */}
-                  {activeTab === "standings" && (
-                    <>
-                      {standingsData.length === 0 ? (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                          <Trophy className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                          <p className="text-neutral-500">No standings data available</p>
-                        </div>
-                      ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                          <StandingsTable standings={standingsData} />
-                        </div>
-                      )}
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                {/* === STANDINGS TAB === */}
+                <TabPanel tabId="standings" defaultTab="standings">
+                  <div className="space-y-8">
+                    {standingsData.length === 0 ? (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                        <Trophy className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                        <p className="text-neutral-500">No standings data available</p>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <StandingsTable standings={standingsData} />
+                      </div>
+                    )}
 
-                      {aboutParagraphs.length > 0 && (
-                        <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                          <h2 className="text-lg font-bold text-neutral-900 mb-3">About {competition.name}</h2>
-                          <div className="space-y-3 text-sm leading-7 text-neutral-700">
-                            {aboutParagraphs.map((p, i) => (
-                              <p key={i}>{p}</p>
-                            ))}
-                          </div>
-                        </section>
-                      )}
-                    </>
-                  )}
+                    {aboutParagraphs.length > 0 && (
+                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {competition.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                          {aboutParagraphs.map((p, i) => (
+                            <p key={i}>{p}</p>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                </TabPanel>
 
-                  {/* === FIXTURES TAB === */}
-                  {activeTab === "fixtures" && competitionSeason && (
+                {/* === FIXTURES TAB === */}
+                <TabPanel tabId="fixtures" defaultTab="standings">
+                  {competitionSeason ? (
                     <CompetitionFixtures
                       competitionSeasonId={competitionSeason.competitionSeason.id}
                       limit={50}
                     />
+                  ) : (
+                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                      <p className="text-neutral-500">No fixture data available</p>
+                    </div>
                   )}
+                </TabPanel>
 
-                  {/* === TOP SCORERS TAB === */}
-                  {activeTab === "scorers" && topScorers.length > 0 && (
+                {/* === TOP SCORERS TAB === */}
+                <TabPanel tabId="scorers" defaultTab="standings">
+                  {topScorers.length > 0 ? (
                     <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                       <div className="divide-y divide-neutral-100">
                         {topScorers.map(({ stat, player, team }, index) => (
@@ -232,57 +238,38 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                         </Link>
                       </div>
                     </div>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                      <p className="text-neutral-500">No top scorer data available</p>
+                    </div>
                   )}
-                </div>
+                </TabPanel>
+              </div>
 
-                {/* Sidebar */}
-                <div className="space-y-6">
-                  {competitionSeason && (
-                    <TournamentRecap competitionSeasonId={competitionSeason.competitionSeason.id} />
-                  )}
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {competitionSeason && (
+                  <TournamentRecap competitionSeasonId={competitionSeason.competitionSeason.id} />
+                )}
 
-                  <div className="bg-white rounded-xl border border-neutral-200 p-5 space-y-2">
-                    <h3 className="text-sm font-bold text-neutral-900 mb-2">Leaderboards</h3>
-                    <Link href={`/top-scorers/${slug}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 group">
-                      <span className="text-sm font-medium text-neutral-700 group-hover:text-blue-600">Top Scorers</span>
-                      <span className="text-xs text-neutral-400">→</span>
-                    </Link>
-                    <Link href={`/top-assists/${slug}`} className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 group">
-                      <span className="text-sm font-medium text-neutral-700 group-hover:text-blue-600">Top Assists</span>
-                      <span className="text-xs text-neutral-400">→</span>
-                    </Link>
-                  </div>
+                {faqItems.length > 0 && (
+                  <section className="bg-white rounded-xl border border-neutral-200 p-5">
+                    <h3 className="text-sm font-bold text-neutral-900 mb-3">FAQ</h3>
+                    <div className="space-y-2">
+                      {faqItems.map((item) => (
+                        <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
+                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
+                        </details>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
-                  <SidebarAd />
-
-                  <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                    <h3 className="text-sm font-bold text-neutral-900 mb-3">Competition Info</h3>
-                    <dl className="space-y-2 text-sm">
-                      <div className="flex justify-between"><dt className="text-neutral-500">Name</dt><dd className="font-medium text-neutral-900">{competition.name}</dd></div>
-                      {competition.country && <div className="flex justify-between"><dt className="text-neutral-500">Country</dt><dd className="font-medium text-neutral-900">{competition.country}</dd></div>}
-                      {competition.type && <div className="flex justify-between"><dt className="text-neutral-500">Type</dt><dd className="font-medium text-neutral-900 capitalize">{competition.type}</dd></div>}
-                      {competitionSeason && <div className="flex justify-between"><dt className="text-neutral-500">Season</dt><dd className="font-medium text-neutral-900">{competitionSeason.season.label}</dd></div>}
-                      <div className="flex justify-between"><dt className="text-neutral-500">Teams</dt><dd className="font-medium text-neutral-900">{standingsData.length}</dd></div>
-                    </dl>
-                  </div>
-
-                  {faqItems.length > 0 && (
-                    <section className="bg-white rounded-xl border border-neutral-200 p-5">
-                      <h3 className="text-sm font-bold text-neutral-900 mb-3">FAQ</h3>
-                      <div className="space-y-2">
-                        {faqItems.map((item) => (
-                          <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
-                            <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
-                            <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
-                          </details>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </div>
+                <SidebarAd />
               </div>
             </div>
-          )}
+          </div>
         </CompetitionTabs>
       </div>
     </>

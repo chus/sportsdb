@@ -21,6 +21,7 @@ import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
 import { scorePlayerPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
+import { TabPanel } from "@/components/ui/tab-navigation";
 import { PlayerTabs } from "./player-tabs";
 import { db } from "@/lib/db";
 import { matchLineups, articlePlayers } from "@/lib/db/schema";
@@ -301,14 +302,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         careerCount={career.length}
         matchCount={recentMatches.length}
       >
-        {(activeTab) => (
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
 
                 {/* === OVERVIEW TAB === */}
-                {activeTab === "overview" && (
+                <TabPanel tabId="overview" defaultTab="overview">
                   <>
                     {/* About */}
                     <section className="bg-white rounded-xl border border-neutral-200 p-6">
@@ -395,10 +395,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </Link>
                     )}
                   </>
-                )}
+                </TabPanel>
 
                 {/* === STATS TAB === */}
-                {activeTab === "stats" && (
+                <TabPanel tabId="stats" defaultTab="overview">
                   <>
                     {statsHistory.length > 0 ? (
                       <section>
@@ -458,10 +458,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </div>
                     )}
                   </>
-                )}
+                </TabPanel>
 
                 {/* === CAREER TAB === */}
-                {activeTab === "career" && (
+                <TabPanel tabId="career" defaultTab="overview">
                   <>
                     {career.length > 0 ? (
                       <section>
@@ -502,10 +502,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </div>
                     )}
                   </>
-                )}
+                </TabPanel>
 
                 {/* === NEWS TAB === */}
-                {activeTab === "news" && (
+                <TabPanel tabId="news" defaultTab="overview">
                   <>
                     <RelatedArticles playerId={player.id} limit={10} />
 
@@ -546,7 +546,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </section>
                     )}
                   </>
-                )}
+                </TabPanel>
 
                 <BetweenContentAd />
               </div>
@@ -636,7 +636,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
               </div>
             </div>
           </div>
-        )}
       </PlayerTabs>
     </div>
     </>

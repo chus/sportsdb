@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { TabNavigation, TabPanels } from "@/components/ui/tab-navigation";
+import { TabNavigation } from "@/components/ui/tab-navigation";
 
 const TABS = [
   { id: "overview", label: "Overview" },
@@ -12,7 +12,7 @@ const TABS = [
 
 interface TeamTabsProps {
   squadCount: number;
-  children: (activeTab: string) => ReactNode;
+  children: ReactNode;
 }
 
 export function TeamTabs({ squadCount, children }: TeamTabsProps) {
@@ -23,9 +23,7 @@ export function TeamTabs({ squadCount, children }: TeamTabsProps) {
 
   return (
     <TabNavigation tabs={tabs} defaultTab="overview">
-      <TabPanels defaultTab="overview" tabs={tabs.map((t) => t.id)}>
-        {children}
-      </TabPanels>
+      {children}
     </TabNavigation>
   );
 }
