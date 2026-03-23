@@ -4,24 +4,25 @@ import Link from "next/link";
 export const revalidate = 3600; // ISR: revalidate every hour
 
 import {
-  ArrowLeft,
   MapPin,
   Calendar,
   Users,
   Building,
   Shield,
   Clock,
+  Trophy,
+  ChevronRight,
 } from "lucide-react";
 import type { Metadata } from "next";
-import { format } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   getVenueBySlug,
   getVenueTeams,
   getVenueMatches,
 } from "@/lib/queries/venues";
-import { getVenueImage } from "@/lib/utils/avatar";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -70,108 +71,6 @@ export async function generateMetadata({
   };
 }
 
-function StatBox({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="text-center">
-      <div className="text-2xl md:text-3xl font-bold text-white">{value}</div>
-      <div className="text-sm text-white/70">{label}</div>
-    </div>
-  );
-}
-
-function MatchRow({
-  match,
-  homeTeam,
-  awayTeam,
-  competition,
-}: {
-  match: {
-    id: string;
-    scheduledAt: Date;
-    status: string;
-    homeScore: number | null;
-    awayScore: number | null;
-  };
-  homeTeam: {
-    name: string;
-    shortName: string | null;
-    slug: string;
-    logoUrl: string | null;
-  };
-  awayTeam: {
-    name: string;
-    shortName: string | null;
-    slug: string;
-    logoUrl: string | null;
-  };
-  competition: {
-    name: string;
-    slug: string;
-  };
-}) {
-  const isFinished = match.status === "finished";
-
-  return (
-    <Link
-      href={`/matches/${match.id}`}
-      className="flex items-center gap-4 p-4 hover:bg-neutral-50 rounded-lg transition-colors group"
-    >
-      {/* Date */}
-      <div className="w-20 text-center flex-shrink-0">
-        <div className="text-sm font-medium text-neutral-900">
-          {format(new Date(match.scheduledAt), "MMM d")}
-        </div>
-        <div className="text-xs text-neutral-500">
-          {format(new Date(match.scheduledAt), "HH:mm")}
-        </div>
-      </div>
-
-      {/* Teams */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          {homeTeam.logoUrl ? (
-            <img
-              src={homeTeam.logoUrl}
-              alt={homeTeam.name}
-              className="w-5 h-5 object-contain"
-            />
-          ) : (
-            <Shield className="w-5 h-5 text-neutral-300" />
-          )}
-          <span className="font-medium truncate group-hover:text-blue-600 transition-colors">
-            {homeTeam.shortName || homeTeam.name}
-          </span>
-          {isFinished && (
-            <span className="ml-auto font-bold">{match.homeScore}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {awayTeam.logoUrl ? (
-            <img
-              src={awayTeam.logoUrl}
-              alt={awayTeam.name}
-              className="w-5 h-5 object-contain"
-            />
-          ) : (
-            <Shield className="w-5 h-5 text-neutral-300" />
-          )}
-          <span className="font-medium truncate group-hover:text-blue-600 transition-colors">
-            {awayTeam.shortName || awayTeam.name}
-          </span>
-          {isFinished && (
-            <span className="ml-auto font-bold">{match.awayScore}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Competition */}
-      <div className="hidden sm:block text-right flex-shrink-0">
-        <span className="text-xs text-neutral-500">{competition.name}</span>
-      </div>
-    </Link>
-  );
-}
-
 export default async function VenuePage({ params }: VenuePageProps) {
   const { slug } = await params;
 
@@ -188,8 +87,6 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const { current: currentTeams, historical: historicalTeams } = teamsData;
   const { recent: recentMatches, upcoming: upcomingMatches } = matchesData;
-
-  const heroImage = getVenueImage(venue, 1200);
 
   const venueUrl = `${BASE_URL}/venues/${slug}`;
 
@@ -214,6 +111,15 @@ export default async function VenuePage({ params }: VenuePageProps) {
     homeTeamNames: currentTeams.map((t) => t.team.name),
   });
 
+  const subtitle = [
+    venue.city,
+    venue.country,
+    venue.openedYear ? `Est. ${venue.openedYear}` : null,
+  ].filter(Boolean).join(" · ");
+
+  const nextMatch = upcomingMatches[0] ?? null;
+  const lastMatch = recentMatches[0] ?? null;
+
   return (
     <>
     <BreadcrumbJsonLd
@@ -232,87 +138,219 @@ export default async function VenuePage({ params }: VenuePageProps) {
     />
     {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
     <div className="min-h-screen bg-neutral-50">
-      {/* Hero Section */}
-      <div
-        className="relative text-white"
-        style={{
-          background: venue.imageUrl
-            ? `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${venue.imageUrl}) center/cover`
-            : "linear-gradient(135deg, #6b7280 0%, #374151 100%)",
-          minHeight: "400px",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Back button */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
-
-          <div className="flex flex-col gap-8 items-start pt-8">
-            {/* Venue Icon */}
-            <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Building className="w-12 h-12 text-white" />
-            </div>
-
-            {/* Venue Info */}
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                {venue.name}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-6 mb-6 text-sm">
-                {(venue.city || venue.country) && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-white/60" />
-                    <span>
-                      {venue.city
-                        ? `${venue.city}${venue.country ? `, ${venue.country}` : ""}`
-                        : venue.country}
-                    </span>
-                  </div>
-                )}
-                {venue.openedYear && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-white/60" />
-                    <span>Opened {venue.openedYear}</span>
-                  </div>
-                )}
-                {venue.capacity && (
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-white/60" />
-                    <span>{venue.capacity.toLocaleString()} capacity</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Stats */}
-              <div className="flex flex-wrap gap-8 pt-4 border-t border-white/20">
-                {venue.capacity && (
-                  <StatBox
-                    label="Capacity"
-                    value={venue.capacity.toLocaleString()}
-                  />
-                )}
-                {venue.openedYear && (
-                  <StatBox label="Opened" value={venue.openedYear} />
-                )}
-                <StatBox label="Home Teams" value={currentTeams.length} />
-              </div>
-            </div>
+      {/* Compact Header */}
+      <PageHeader
+        title={venue.name}
+        subtitle={subtitle}
+        accentColor="bg-neutral-800"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Venues", href: "/search?type=venue" },
+          { label: venue.name },
+        ]}
+        icon={
+          <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Building className="w-7 h-7 text-white/80" />
           </div>
-        </div>
-      </div>
+        }
+        stats={[
+          ...(venue.capacity ? [{ label: "Capacity", value: venue.capacity.toLocaleString() }] : []),
+          { label: "Home Teams", value: currentTeams.length },
+          { label: "Matches", value: recentMatches.length + upcomingMatches.length },
+        ]}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* About */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Data Dashboard — 4 cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Home Teams */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Shield className="w-3.5 h-3.5 text-blue-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Home Teams</h3>
+                </div>
+                {currentTeams.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {currentTeams.slice(0, 3).map(({ team }) => (
+                      <Link key={team.id} href={`/teams/${team.slug}`} className="flex items-center gap-2 group">
+                        {team.logoUrl ? (
+                          <img src={team.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                        ) : (
+                          <Shield className="w-5 h-5 text-neutral-300" />
+                        )}
+                        <span className="text-xs font-medium text-neutral-900 truncate group-hover:text-blue-600">{team.shortName || team.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-neutral-400">No data</p>
+                )}
+              </div>
+
+              {/* Next Match */}
+              {nextMatch ? (
+                <Link
+                  href={`/matches/${nextMatch.match.id}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                  </div>
+                  <div className="text-xs font-medium text-neutral-900 truncate">
+                    {nextMatch.homeTeam.shortName || nextMatch.homeTeam.name} vs {nextMatch.awayTeam.shortName || nextMatch.awayTeam.name}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    {format(new Date(nextMatch.match.scheduledAt), "EEE, MMM d")}
+                  </p>
+                  <p className="text-xs font-medium text-blue-600 mt-0.5">
+                    {formatDistanceToNowStrict(new Date(nextMatch.match.scheduledAt), { addSuffix: true })}
+                  </p>
+                </Link>
+              ) : (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                  </div>
+                  <p className="text-sm text-neutral-400">No upcoming</p>
+                </div>
+              )}
+
+              {/* Last Result */}
+              {lastMatch ? (
+                <Link
+                  href={`/matches/${lastMatch.match.id}`}
+                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Last Result</h3>
+                  </div>
+                  <div className="text-lg font-black text-neutral-900">
+                    {lastMatch.match.homeScore}-{lastMatch.match.awayScore}
+                  </div>
+                  <p className="text-xs text-neutral-500 truncate">
+                    {lastMatch.homeTeam.shortName || lastMatch.homeTeam.name} vs {lastMatch.awayTeam.shortName || lastMatch.awayTeam.name}
+                  </p>
+                </Link>
+              ) : (
+                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Trophy className="w-3.5 h-3.5 text-neutral-400" />
+                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Last Result</h3>
+                  </div>
+                  <p className="text-sm text-neutral-400">No data</p>
+                </div>
+              )}
+
+              {/* Capacity */}
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Users className="w-3.5 h-3.5 text-green-500" />
+                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Stadium</h3>
+                </div>
+                {venue.capacity ? (
+                  <>
+                    <div className="text-2xl font-black text-neutral-900">{venue.capacity.toLocaleString()}</div>
+                    <p className="text-xs text-neutral-500">capacity</p>
+                    {venue.openedYear && <p className="text-xs text-neutral-500 mt-0.5">Opened {venue.openedYear}</p>}
+                  </>
+                ) : (
+                  <p className="text-sm text-neutral-400">Not available</p>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Results Strip */}
+            {recentMatches.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900 mb-3">Recent Results</h3>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                  {recentMatches.slice(0, 6).map(({ match, homeTeam, awayTeam }) => (
+                    <Link
+                      key={match.id}
+                      href={`/matches/${match.id}`}
+                      className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                    >
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        {homeTeam.logoUrl ? (
+                          <img src={homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                        ) : (
+                          <Shield className="w-4 h-4 text-neutral-300" />
+                        )}
+                        <span className="text-xs text-neutral-700 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        {awayTeam.logoUrl ? (
+                          <img src={awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                        ) : (
+                          <Shield className="w-4 h-4 text-neutral-300" />
+                        )}
+                        <span className="text-xs text-neutral-700 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-neutral-900">
+                          {match.homeScore}-{match.awayScore}
+                        </span>
+                        <span className="text-[10px] text-neutral-400">
+                          {format(new Date(match.scheduledAt), "MMM d")}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upcoming Matches */}
+            {upcomingMatches.length > 0 && (
+              <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                <h3 className="text-sm font-bold text-neutral-900 mb-3">Upcoming Matches</h3>
+                <div className="space-y-2">
+                  {upcomingMatches.slice(0, 5).map(({ match, homeTeam, awayTeam, competition }) => (
+                    <Link
+                      key={match.id}
+                      href={`/matches/${match.id}`}
+                      className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {homeTeam.logoUrl ? (
+                            <img src={homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                          ) : (
+                            <Shield className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                          )}
+                          <span className="text-sm text-neutral-900 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                          <span className="text-xs text-neutral-400">vs</span>
+                          {awayTeam.logoUrl ? (
+                            <img src={awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
+                          ) : (
+                            <Shield className="w-4 h-4 text-neutral-300 flex-shrink-0" />
+                          )}
+                          <span className="text-sm text-neutral-900 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-neutral-500 flex-shrink-0 ml-2">{format(new Date(match.scheduledAt), "MMM d")}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* No matches message */}
+            {recentMatches.length === 0 && upcomingMatches.length === 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                <Clock className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                <p className="text-neutral-500">No matches scheduled at this venue</p>
+              </section>
+            )}
+
+            {/* About (below fold) */}
             {aboutParagraphs.length > 0 && (
               <section className="bg-white rounded-xl border border-neutral-200 p-6">
                 <h2 className="text-lg font-bold text-neutral-900 mb-4">About {venue.name}</h2>
@@ -324,7 +362,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
               </section>
             )}
 
-            {/* Current Teams */}
+            {/* Current Teams (detailed) */}
             {currentTeams.length > 0 && (
               <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-neutral-200">
@@ -365,107 +403,10 @@ export default async function VenuePage({ params }: VenuePageProps) {
                 </div>
               </section>
             )}
-
-            {/* Recent Matches */}
-            {recentMatches.length > 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-bold text-neutral-900">
-                    Recent Matches
-                  </h2>
-                </div>
-                <div className="divide-y divide-neutral-100">
-                  {recentMatches.map(({ match, homeTeam, awayTeam, competition }) => (
-                    <MatchRow
-                      key={match.id}
-                      match={match}
-                      homeTeam={homeTeam}
-                      awayTeam={awayTeam}
-                      competition={competition}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Upcoming Matches */}
-            {upcomingMatches.length > 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-bold text-neutral-900">
-                    Upcoming Matches
-                  </h2>
-                </div>
-                <div className="divide-y divide-neutral-100">
-                  {upcomingMatches.map(({ match, homeTeam, awayTeam, competition }) => (
-                    <MatchRow
-                      key={match.id}
-                      match={match}
-                      homeTeam={homeTeam}
-                      awayTeam={awayTeam}
-                      competition={competition}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* No matches message */}
-            {recentMatches.length === 0 && upcomingMatches.length === 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                <Clock className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <p className="text-neutral-500">No matches scheduled at this venue</p>
-              </section>
-            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Venue Info Card */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-6">
-              <h3 className="text-sm font-medium text-neutral-500 mb-4">
-                Venue Info
-              </h3>
-              <dl className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-neutral-600">Full Name</dt>
-                  <dd className="font-medium text-neutral-900 text-right">
-                    {venue.name}
-                  </dd>
-                </div>
-                {venue.city && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">City</dt>
-                    <dd className="font-medium text-neutral-900">{venue.city}</dd>
-                  </div>
-                )}
-                {venue.country && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Country</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {venue.country}
-                    </dd>
-                  </div>
-                )}
-                {venue.capacity && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Capacity</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {venue.capacity.toLocaleString()}
-                    </dd>
-                  </div>
-                )}
-                {venue.openedYear && (
-                  <div className="flex justify-between">
-                    <dt className="text-neutral-600">Opened</dt>
-                    <dd className="font-medium text-neutral-900">
-                      {venue.openedYear}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
             {/* Historical Teams */}
             {historicalTeams.length > 0 && (
               <div className="bg-white rounded-xl border border-neutral-200 p-6">
@@ -521,18 +462,18 @@ export default async function VenuePage({ params }: VenuePageProps) {
             )}
 
             {faqItems.length > 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Venue FAQ</h3>
-                <div className="space-y-3">
+              <section className="bg-white rounded-xl border border-neutral-200 p-5">
+                <h3 className="text-sm font-bold text-neutral-900 mb-3">Venue FAQ</h3>
+                <div className="space-y-2">
                   {faqItems.map((item) => (
                     <details
                       key={item.question}
-                      className="group rounded-lg border border-neutral-200 px-4 py-3"
+                      className="group rounded-lg border border-neutral-200 px-3 py-2"
                     >
-                      <summary className="cursor-pointer list-none font-medium text-neutral-900">
+                      <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">
                         {item.question}
                       </summary>
-                      <p className="mt-3 text-sm leading-6 text-neutral-600">{item.answer}</p>
+                      <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
                     </details>
                   ))}
                 </div>
