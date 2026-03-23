@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import {
   predictions,
-  badges,
   matches,
   teams,
   users,
@@ -281,28 +280,9 @@ export async function getGlobalLeaderboard(limit = 50) {
   }));
 }
 
-// Badge helpers
-export async function getUserBadges(userId: string) {
-  return db.select().from(badges).where(eq(badges.userId, userId));
-}
-
-async function checkAndAwardBadge(
-  userId: string,
-  badgeType: string
-): Promise<boolean> {
-  // Check if already has badge
-  const [existing] = await db
-    .select()
-    .from(badges)
-    .where(and(eq(badges.userId, userId), eq(badges.badgeType, badgeType)))
-    .limit(1);
-
-  if (existing) return false;
-
-  // Award badge
-  await db.insert(badges).values({ userId, badgeType }).onConflictDoNothing();
-  return true;
-}
+// Badge helpers (re-exported from shared module)
+import { getUserBadges as _getUserBadges, checkAndAwardBadge } from "./badges";
+export const getUserBadges = _getUserBadges;
 
 // Score predictions after a match ends
 export async function scorePredictionsForMatch(matchId: string) {

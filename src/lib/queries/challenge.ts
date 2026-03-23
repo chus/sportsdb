@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { challengeQuestions, challengeAnswers, users } from "@/lib/db/schema";
 import { eq, and, desc, count, sum, sql } from "drizzle-orm";
+import { checkAndAwardBadge, checkTripleThreat } from "./badges";
 
 export interface ChallengeQuestion {
   id: string;
@@ -81,7 +82,7 @@ export async function submitChallengeAnswer(
     })
     .returning();
 
-  return {
+  const answer: ChallengeAnswer = {
     id: result.id,
     userId: result.userId,
     questionId: result.questionId,
@@ -90,6 +91,64 @@ export async function submitChallengeAnswer(
     points: result.points,
     answeredAt: result.answeredAt,
   };
+
+  // Check badges after answering
+  await checkChallengeBadges(userId);
+  await checkTripleThreat(userId);
+
+  return answer;
+}
+
+// Check and award challenge-related badges
+async function checkChallengeBadges(userId: string) {
+  const today = new Date().toISOString().split("T")[0];
+
+  // challenge_perfect: all questions correct today
+  const todayQuestions = await db
+    .select({ id: challengeQuestions.id })
+    .from(challengeQuestions)
+    .where(eq(challengeQuestions.activeDate, today));
+
+  if (todayQuestions.length > 0) {
+    const todayAnswers = await db
+      .select({
+        isCorrect: challengeAnswers.isCorrect,
+      })
+      .from(challengeAnswers)
+      .innerJoin(
+        challengeQuestions,
+        eq(challengeAnswers.questionId, challengeQuestions.id)
+      )
+      .where(
+        and(
+          eq(challengeAnswers.userId, userId),
+          eq(challengeQuestions.activeDate, today)
+        )
+      );
+
+    if (
+      todayAnswers.length === todayQuestions.length &&
+      todayAnswers.every((a) => a.isCorrect)
+    ) {
+      await checkAndAwardBadge(userId, "challenge_perfect");
+    }
+  }
+
+  // challenge_streak_7: answered on 7 consecutive days
+  const recentDays = await db.execute(sql`
+    SELECT DISTINCT cq.active_date
+    FROM ${challengeAnswers} ca
+    JOIN ${challengeQuestions} cq ON cq.id = ca.question_id
+    WHERE ca.user_id = ${userId}
+      AND cq.active_date IS NOT NULL
+      AND cq.active_date >= CURRENT_DATE - INTERVAL '6 days'
+      AND cq.active_date <= CURRENT_DATE
+    ORDER BY cq.active_date
+  `);
+
+  if (recentDays.rows.length >= 7) {
+    await checkAndAwardBadge(userId, "challenge_streak_7");
+  }
 }
 
 // Get user's progress for today's challenge
