@@ -9,6 +9,7 @@ import {
   players,
 } from "@/lib/db/schema";
 import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { matches } from "@/lib/db/schema";
 
 /**
@@ -183,4 +184,85 @@ export async function getHistoricalStandings(
     standings: standingsData,
     topScorers,
   };
+}
+
+/**
+ * Get recent results and upcoming fixtures for a competition season.
+ */
+export async function getCompetitionRecentAndUpcoming(
+  competitionSeasonId: string,
+  recentLimit = 6,
+  upcomingLimit = 3
+) {
+  const homeTeams = alias(teams, "homeTeam");
+  const awayTeams = alias(teams, "awayTeam");
+
+  const [recentResults, upcomingMatches] = await Promise.all([
+    db
+      .select({
+        id: matches.id,
+        scheduledAt: matches.scheduledAt,
+        homeScore: matches.homeScore,
+        awayScore: matches.awayScore,
+        status: matches.status,
+        matchday: matches.matchday,
+        homeTeam: {
+          name: homeTeams.name,
+          shortName: homeTeams.shortName,
+          slug: homeTeams.slug,
+          logoUrl: homeTeams.logoUrl,
+        },
+        awayTeam: {
+          name: awayTeams.name,
+          shortName: awayTeams.shortName,
+          slug: awayTeams.slug,
+          logoUrl: awayTeams.logoUrl,
+        },
+      })
+      .from(matches)
+      .innerJoin(homeTeams, eq(homeTeams.id, matches.homeTeamId))
+      .innerJoin(awayTeams, eq(awayTeams.id, matches.awayTeamId))
+      .where(
+        and(
+          eq(matches.competitionSeasonId, competitionSeasonId),
+          eq(matches.status, "finished")
+        )
+      )
+      .orderBy(desc(matches.scheduledAt))
+      .limit(recentLimit),
+    db
+      .select({
+        id: matches.id,
+        scheduledAt: matches.scheduledAt,
+        homeScore: matches.homeScore,
+        awayScore: matches.awayScore,
+        status: matches.status,
+        matchday: matches.matchday,
+        homeTeam: {
+          name: homeTeams.name,
+          shortName: homeTeams.shortName,
+          slug: homeTeams.slug,
+          logoUrl: homeTeams.logoUrl,
+        },
+        awayTeam: {
+          name: awayTeams.name,
+          shortName: awayTeams.shortName,
+          slug: awayTeams.slug,
+          logoUrl: awayTeams.logoUrl,
+        },
+      })
+      .from(matches)
+      .innerJoin(homeTeams, eq(homeTeams.id, matches.homeTeamId))
+      .innerJoin(awayTeams, eq(awayTeams.id, matches.awayTeamId))
+      .where(
+        and(
+          eq(matches.competitionSeasonId, competitionSeasonId),
+          eq(matches.status, "scheduled")
+        )
+      )
+      .orderBy(asc(matches.scheduledAt))
+      .limit(upcomingLimit),
+  ]);
+
+  return { recent: recentResults, upcoming: upcomingMatches };
 }

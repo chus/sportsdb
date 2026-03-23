@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Trophy, Shield, Target, Calendar, TrendingUp } from "lucide-react";
+import { Trophy, Shield, Target, Calendar, TrendingUp, ChevronRight } from "lucide-react";
+import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
@@ -9,6 +10,7 @@ import {
   getCompetitionSeason,
   getStandings,
   getTopScorers,
+  getCompetitionRecentAndUpcoming,
 } from "@/lib/queries/competitions";
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
@@ -82,13 +84,15 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   let competitionSeason: Awaited<ReturnType<typeof getCompetitionSeason>> = null;
   let standingsData: Awaited<ReturnType<typeof getStandings>> = [];
   let topScorers: Awaited<ReturnType<typeof getTopScorers>> = [];
+  let matchesData: Awaited<ReturnType<typeof getCompetitionRecentAndUpcoming>> = { recent: [], upcoming: [] };
 
   try {
     competitionSeason = await getCompetitionSeason(slug);
     if (competitionSeason) {
-      [standingsData, topScorers] = await Promise.all([
+      [standingsData, topScorers, matchesData] = await Promise.all([
         getStandings(competitionSeason.competitionSeason.id),
         getTopScorers(competitionSeason.competitionSeason.id, 10),
+        getCompetitionRecentAndUpcoming(competitionSeason.competitionSeason.id, 6, 3),
       ]);
     }
   } catch (e) {
@@ -270,6 +274,129 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                             </div>
                           );
                         })()}
+                      </div>
+                    )}
+
+                    {/* Recent Results Strip */}
+                    {matchesData.recent.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Recent Results</h3>
+                          <Link href={`/competitions/${slug}?tab=fixtures`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            All fixtures <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                          {matchesData.recent.map((match) => (
+                            <Link
+                              key={match.id}
+                              href={`/matches/${match.id}`}
+                              className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                            >
+                              <div className="flex items-center gap-1.5 mb-1.5">
+                                {match.homeTeam.logoUrl ? (
+                                  <img src={match.homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                                ) : (
+                                  <Shield className="w-4 h-4 text-neutral-300" />
+                                )}
+                                <span className="text-[11px] font-medium text-neutral-700 truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 mb-2">
+                                {match.awayTeam.logoUrl ? (
+                                  <img src={match.awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                                ) : (
+                                  <Shield className="w-4 h-4 text-neutral-300" />
+                                )}
+                                <span className="text-[11px] font-medium text-neutral-700 truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-lg font-bold text-neutral-900">
+                                  {match.homeScore}-{match.awayScore}
+                                </span>
+                                {match.matchday && (
+                                  <span className="text-[10px] text-neutral-400">MD {match.matchday}</span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-neutral-400 mt-1">{format(new Date(match.scheduledAt), "MMM d")}</p>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Upcoming Fixtures */}
+                    {matchesData.upcoming.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Fixtures</h3>
+                        </div>
+                        <div className="space-y-2">
+                          {matchesData.upcoming.map((match) => (
+                            <Link
+                              key={match.id}
+                              href={`/matches/${match.id}`}
+                              className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  {match.homeTeam.logoUrl ? (
+                                    <img src={match.homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                                  ) : (
+                                    <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
+                                  )}
+                                  <span className="text-xs font-medium text-neutral-900 truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
+                                </div>
+                                <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  {match.awayTeam.logoUrl ? (
+                                    <img src={match.awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                                  ) : (
+                                    <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
+                                  )}
+                                  <span className="text-xs font-medium text-neutral-900 truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0 ml-3">
+                                <div className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d, HH:mm")}</div>
+                                <div className="text-[10px] font-medium text-blue-600">
+                                  {formatDistanceToNowStrict(new Date(match.scheduledAt), { addSuffix: true })}
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top 3 Scorers Mini-list */}
+                    {topScorers.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Top Scorers</h3>
+                          <Link href={`/top-scorers/${slug}`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            Full list <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="space-y-2">
+                          {topScorers.slice(0, 3).map(({ stat, player, team }, index) => (
+                            <PlayerLink
+                              key={player.id}
+                              slug={player.slug}
+                              isLinkWorthy={player.isIndexable ?? false}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                            >
+                              <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-500">{index + 1}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-neutral-900 truncate">{player.name}</div>
+                                <div className="text-[11px] text-neutral-500">{team.shortName || team.name}</div>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-lg font-black text-neutral-900">{stat.goals}</span>
+                                <span className="text-[10px] text-neutral-500 ml-1">goals</span>
+                              </div>
+                            </PlayerLink>
+                          ))}
+                        </div>
                       </div>
                     )}
 
