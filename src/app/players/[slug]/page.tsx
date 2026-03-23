@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality } from "@/lib/queries/players";
-import { format, differenceInYears } from "date-fns";
+import { getTeamMatches } from "@/lib/queries/matches";
+import { format, differenceInYears, formatDistanceToNowStrict } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
@@ -128,6 +129,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const currentTeam = currentTeamData?.team;
   const shirtNumber = currentTeamData?.shirtNumber;
+
+  // Fetch upcoming match for player's team
+  const teamMatchesData = currentTeam
+    ? await getTeamMatches(currentTeam.id, 1)
+    : { recent: [], upcoming: [] };
+  const nextMatch = teamMatchesData.upcoming[0] ?? null;
 
   // Calculate age
   const age = player.dateOfBirth
@@ -456,32 +463,131 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       </div>
                     )}
 
-                    {/* Career Overview (compact) */}
-                    {statsHistory.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                    {/* Upcoming Match */}
+                    {nextMatch && currentTeam && (
+                      <Link
+                        href={`/matches/${nextMatch.id}`}
+                        className="block bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
+                      >
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Career Overview</h3>
+                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Match</h3>
+                          <span className="text-xs font-medium text-blue-600">
+                            {formatDistanceToNowStrict(new Date(nextMatch.scheduledAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {nextMatch.homeTeam?.logoUrl ? (
+                              <img src={nextMatch.homeTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                            ) : (
+                              <Shield className="w-6 h-6 text-neutral-300" />
+                            )}
+                            <span className="text-sm font-medium text-neutral-900">{nextMatch.homeTeam?.shortName || nextMatch.homeTeam?.name}</span>
+                          </div>
+                          <span className="text-xs text-neutral-400 px-3">vs</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-neutral-900">{nextMatch.awayTeam?.shortName || nextMatch.awayTeam?.name}</span>
+                            {nextMatch.awayTeam?.logoUrl ? (
+                              <img src={nextMatch.awayTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                            ) : (
+                              <Shield className="w-6 h-6 text-neutral-300" />
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-2 text-center">
+                          {format(new Date(nextMatch.scheduledAt), "EEE, MMM d · h:mm a")}
+                          {nextMatch.competition && <span> · {nextMatch.competition.name}</span>}
+                        </p>
+                      </Link>
+                    )}
+
+                    {/* Recent Seasons mini-table */}
+                    {statsHistory.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
+                          <h3 className="text-sm font-bold text-neutral-900">Season Stats</h3>
                           <Link href={`/players/${slug}?tab=stats`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             Full stats <ChevronRight className="w-3 h-3" />
                           </Link>
                         </div>
-                        <div className="grid grid-cols-4 gap-3">
-                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
-                            <div className="text-xl font-bold text-blue-600">{totalApps}</div>
-                            <div className="text-[10px] text-neutral-500">Apps</div>
-                          </div>
-                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
-                            <div className="text-xl font-bold text-green-600">{totalGoals}</div>
-                            <div className="text-[10px] text-neutral-500">Goals</div>
-                          </div>
-                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
-                            <div className="text-xl font-bold text-purple-600">{totalAssists}</div>
-                            <div className="text-[10px] text-neutral-500">Assists</div>
-                          </div>
-                          <div className="text-center p-2 bg-neutral-50 rounded-lg">
-                            <div className="text-xl font-bold text-orange-500">{totalMins.toLocaleString()}</div>
-                            <div className="text-[10px] text-neutral-500">Mins</div>
-                          </div>
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="bg-neutral-50 text-left text-[10px] text-neutral-500 uppercase">
+                              <th className="px-3 py-2 font-medium">Season</th>
+                              <th className="px-3 py-2 font-medium">Team</th>
+                              <th className="px-3 py-2 font-medium text-center">Apps</th>
+                              <th className="px-3 py-2 font-medium text-center">G</th>
+                              <th className="px-3 py-2 font-medium text-center">A</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-50">
+                            {statsHistory.slice(0, 3).map(({ stat, team, season }) => (
+                              <tr key={stat.id} className="hover:bg-neutral-50">
+                                <td className="px-3 py-2 font-medium text-neutral-700">{season.label}</td>
+                                <td className="px-3 py-2">
+                                  <div className="flex items-center gap-1.5">
+                                    {team.logoUrl ? (
+                                      <ImageWithFallback src={team.logoUrl} alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+                                    ) : (
+                                      <Shield className="w-4 h-4 text-neutral-300" />
+                                    )}
+                                    <span className="text-neutral-700 truncate">{team.shortName || team.name}</span>
+                                  </div>
+                                </td>
+                                <td className="px-3 py-2 text-center text-neutral-600">{stat.appearances}</td>
+                                <td className="px-3 py-2 text-center font-bold text-neutral-900">{stat.goals}</td>
+                                <td className="px-3 py-2 text-center text-neutral-600">{stat.assists}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot className="border-t border-neutral-200 bg-neutral-50">
+                            <tr className="font-medium text-neutral-900">
+                              <td className="px-3 py-2" colSpan={2}>Career Total</td>
+                              <td className="px-3 py-2 text-center">{totalApps}</td>
+                              <td className="px-3 py-2 text-center font-bold">{totalGoals}</td>
+                              <td className="px-3 py-2 text-center">{totalAssists}</td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* Career Path mini-list */}
+                    {career.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Career Path</h3>
+                          {career.length > 3 && (
+                            <Link href={`/players/${slug}?tab=career`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                              Full history <ChevronRight className="w-3 h-3" />
+                            </Link>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          {career.slice(0, 3).map((entry) => (
+                            <Link
+                              key={entry.id}
+                              href={`/teams/${entry.team.slug}`}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                            >
+                              <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                {entry.team.logoUrl ? (
+                                  <ImageWithFallback src={entry.team.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                ) : (
+                                  <Shield className="w-4 h-4 text-neutral-400" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-neutral-900 truncate">{entry.team.name}</div>
+                                <div className="text-[11px] text-neutral-500">
+                                  {entry.validFrom && format(new Date(entry.validFrom), "MMM yyyy")} → {entry.validTo ? format(new Date(entry.validTo), "MMM yyyy") : "Present"}
+                                </div>
+                              </div>
+                              {entry.shirtNumber && (
+                                <span className="text-xs text-neutral-400 flex-shrink-0">#{entry.shirtNumber}</span>
+                              )}
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     )}
