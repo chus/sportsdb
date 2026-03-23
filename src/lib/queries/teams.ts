@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players } from "@/lib/db/schema";
+import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players, playerSeasonStats } from "@/lib/db/schema";
 import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne } from "drizzle-orm";
 
 /**
@@ -28,6 +28,7 @@ export async function getTeamStats(teamId: string, seasonId?: string) {
       standing: standings,
       seasonLabel: seasons.label,
       competitionName: competitions.name,
+      competitionSlug: competitions.slug,
     })
     .from(standings)
     .innerJoin(
@@ -114,6 +115,30 @@ export async function getFormerPlayers(teamId: string, limit = 20) {
     )
     .orderBy(desc(playerTeamHistory.validTo))
     .limit(limit);
+}
+
+/**
+ * Get the top scorer for a team in a given competition season.
+ */
+export async function getTeamTopScorer(teamId: string, competitionSeasonId: string) {
+  const [result] = await db
+    .select({
+      player: players,
+      goals: playerSeasonStats.goals,
+      assists: playerSeasonStats.assists,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(players, eq(players.id, playerSeasonStats.playerId))
+    .where(
+      and(
+        eq(playerSeasonStats.teamId, teamId),
+        eq(playerSeasonStats.competitionSeasonId, competitionSeasonId)
+      )
+    )
+    .orderBy(desc(playerSeasonStats.goals))
+    .limit(1);
+
+  return result ?? null;
 }
 
 /**

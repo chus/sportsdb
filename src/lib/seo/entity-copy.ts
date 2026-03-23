@@ -262,9 +262,11 @@ export function buildTeamAbout(args: {
   } | null;
 }): string[] {
   // --- Sentence 1: Identity + history ---
-  const location = args.city && args.country
-    ? `${args.city}, ${args.country}`
-    : args.city || args.country || null;
+  // Guard: skip city if it looks like a number (data quality bug)
+  const safeCity = args.city && !/^\d+$/.test(args.city) ? args.city : null;
+  const location = safeCity && args.country
+    ? `${safeCity}, ${args.country}`
+    : safeCity || args.country || null;
 
   let sentence1: string;
   if (args.foundedYear && location) {

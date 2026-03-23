@@ -76,6 +76,22 @@ const COMPETITIONS = [
   { code: "WC", name: "World Cup", country: "World" },
 ];
 
+function extractCity(address: string | undefined | null): string | null {
+  if (!address) return null;
+  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
+  for (let i = parts.length - 2; i >= 0; i--) {
+    const part = parts[i];
+    if (part && !/^\d+$/.test(part) && !/^\d{4,}/.test(part) && part.length > 2) {
+      const cleaned = part.replace(/^\d+\s+/, "");
+      if (cleaned.length > 2) return cleaned;
+    }
+  }
+  if (parts.length === 1 && !/^\d+$/.test(parts[0]) && parts[0].length > 2) {
+    return parts[0];
+  }
+  return null;
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -228,7 +244,7 @@ async function ingestTeamsAndPlayers(
           const [venue] = await db.insert(schema.venues).values({
             name: apiTeam.venue,
             slug: venueSlug,
-            city: apiTeam.address?.split(",")[0] || null,
+            city: extractCity(apiTeam.address),
             country: apiTeam.area?.name || null,
             capacity: null,
           }).onConflictDoNothing().returning();
@@ -249,7 +265,7 @@ async function ingestTeamsAndPlayers(
         shortName: apiTeam.shortName || null,
         slug: teamSlug,
         country: apiTeam.area?.name || "Unknown",
-        city: apiTeam.address?.split(",")[0] || null,
+        city: extractCity(apiTeam.address),
         foundedYear: apiTeam.founded,
         logoUrl: apiTeam.crest,
         primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,

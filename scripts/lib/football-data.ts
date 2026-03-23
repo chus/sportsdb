@@ -52,6 +52,35 @@ export const COMPETITIONS = [
 export type CompMeta = (typeof COMPETITIONS)[number];
 
 // ============================================================
+// HELPERS
+// ============================================================
+
+/**
+ * Extract city name from Football-Data.org address field.
+ * Address formats vary: "Straße 15, 89518 Heidenheim, Germany" or "London" or "15".
+ * Returns the last non-numeric, non-postal-code part before the country.
+ */
+export function extractCity(address: string | undefined | null): string | null {
+  if (!address) return null;
+  const parts = address.split(",").map((s) => s.trim()).filter(Boolean);
+  // Walk backward from second-to-last (last is often country)
+  for (let i = parts.length - 2; i >= 0; i--) {
+    const part = parts[i];
+    // Skip pure numbers, postal codes (5+ digits), or very short strings
+    if (part && !/^\d+$/.test(part) && !/^\d{4,}/.test(part) && part.length > 2) {
+      // Strip leading postal code if present (e.g., "89518 Heidenheim" → "Heidenheim")
+      const cleaned = part.replace(/^\d+\s+/, "");
+      if (cleaned.length > 2) return cleaned;
+    }
+  }
+  // Fallback: single-part address that's not a number
+  if (parts.length === 1 && !/^\d+$/.test(parts[0]) && parts[0].length > 2) {
+    return parts[0];
+  }
+  return null;
+}
+
+// ============================================================
 // RATE LIMITING
 // ============================================================
 
@@ -343,7 +372,7 @@ export async function upsertTeam(db: DrizzleDb, apiTeam: any) {
         name: apiTeam.name,
         shortName: apiTeam.shortName || null,
         country: apiTeam.area?.name || "Unknown",
-        city: apiTeam.address?.split(",")[0] || null,
+        city: extractCity(apiTeam.address),
         foundedYear: apiTeam.founded,
         logoUrl: apiTeam.crest,
         primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,
@@ -369,7 +398,7 @@ export async function upsertTeam(db: DrizzleDb, apiTeam: any) {
         name: apiTeam.name,
         shortName: apiTeam.shortName || null,
         country: apiTeam.area?.name || "Unknown",
-        city: apiTeam.address?.split(",")[0] || null,
+        city: extractCity(apiTeam.address),
         foundedYear: apiTeam.founded,
         logoUrl: apiTeam.crest,
         primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,
@@ -389,7 +418,7 @@ export async function upsertTeam(db: DrizzleDb, apiTeam: any) {
       shortName: apiTeam.shortName || null,
       slug: teamSlug,
       country: apiTeam.area?.name || "Unknown",
-      city: apiTeam.address?.split(",")[0] || null,
+      city: extractCity(apiTeam.address),
       foundedYear: apiTeam.founded,
       logoUrl: apiTeam.crest,
       primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,
@@ -401,7 +430,7 @@ export async function upsertTeam(db: DrizzleDb, apiTeam: any) {
         name: apiTeam.name,
         shortName: apiTeam.shortName || null,
         country: apiTeam.area?.name || "Unknown",
-        city: apiTeam.address?.split(",")[0] || null,
+        city: extractCity(apiTeam.address),
         foundedYear: apiTeam.founded,
         logoUrl: apiTeam.crest,
         primaryColor: apiTeam.clubColors?.split("/")[0]?.trim() || null,
@@ -428,14 +457,14 @@ export async function upsertVenue(db: DrizzleDb, apiTeam: any): Promise<string |
     .values({
       name: apiTeam.venue,
       slug: venueSlug,
-      city: apiTeam.address?.split(",")[0] || null,
+      city: extractCity(apiTeam.address),
       country: apiTeam.area?.name || null,
     })
     .onConflictDoUpdate({
       target: schema.venues.slug,
       set: {
         name: apiTeam.venue,
-        city: apiTeam.address?.split(",")[0] || null,
+        city: extractCity(apiTeam.address),
         country: apiTeam.area?.name || null,
         updatedAt: new Date(),
       },

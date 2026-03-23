@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Shield, Users } from "lucide-react";
+import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight } from "lucide-react";
+import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
-import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers } from "@/lib/queries/teams";
+import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer } from "@/lib/queries/teams";
+import { getTeamMatches } from "@/lib/queries/matches";
 import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
@@ -64,7 +66,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
     logoUrl: team.logoUrl,
     squadSize: Number(squadCountResult[0]?.count ?? 0),
     hasStandings: Number(standingsCountResult[0]?.count ?? 0) > 0,
-    hasMatches: true, // all teams we show have matches (sitemap-filtered)
+    hasMatches: true,
   });
   const isThin = quality.isThin;
 
@@ -102,15 +104,6 @@ function renderBioWithLinks(text: string) {
     if (match) return <Link key={i} href={match[2]} className="text-blue-600 font-medium hover:underline">{match[1]}</Link>;
     return <span key={i}>{part}</span>;
   });
-}
-
-function StatBox({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="text-center">
-      <div className="text-2xl md:text-3xl font-bold text-white">{value}</div>
-      <div className="text-sm text-white/70">{label}</div>
-    </div>
-  );
 }
 
 function PositionGroup({
@@ -163,6 +156,12 @@ function PositionGroup({
   );
 }
 
+function ordinal(n: number) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 export default async function TeamPage({ params }: TeamPageProps) {
   const { slug } = await params;
 
@@ -172,15 +171,30 @@ export default async function TeamPage({ params }: TeamPageProps) {
     notFound();
   }
 
-  const [squad, statsData, formerPlayers] = await Promise.all([
+  const [squad, statsData, formerPlayers, matchesData] = await Promise.all([
     getSquad(team.id),
     getTeamStats(team.id),
     getFormerPlayers(team.id, 10),
+    getTeamMatches(team.id, 5),
   ]);
 
   const standing = statsData[0]?.standing;
   const seasonLabel = statsData[0]?.seasonLabel;
   const competitionName = statsData[0]?.competitionName;
+  const competitionSlug = statsData[0]?.competitionSlug;
+
+  // Fetch top scorer (needs competitionSeasonId from standing)
+  const topScorer = standing
+    ? await getTeamTopScorer(team.id, standing.competitionSeasonId)
+    : null;
+
+  const nextMatch = matchesData.upcoming[0] ?? null;
+  const recentMatches = matchesData.recent.slice(0, 5);
+
+  // Guard: skip city if it's a number (data quality bug)
+  const safeCity = team.city && !/^\d+$/.test(team.city) ? team.city : null;
+  // Guard: skip shortName if truncated mid-word (15 char API limit)
+  const safeShortName = team.shortName && team.shortName.length < 15 ? team.shortName : null;
 
   // Group players by position
   const goalkeepers = squad.filter((p) => p.player.position === "Goalkeeper");
@@ -197,8 +211,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const teamUrl = `${BASE_URL}/teams/${slug}`;
   const aboutParagraphs = buildTeamAbout({
     name: team.name,
-    shortName: team.shortName,
-    city: team.city,
+    shortName: safeShortName,
+    city: safeCity,
     country: team.country,
     foundedYear: team.foundedYear,
     squadSize: squad.length,
@@ -209,7 +223,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
   });
   const faqItems = buildTeamFaqs({
     name: team.name,
-    city: team.city,
+    city: safeCity,
     country: team.country,
     foundedYear: team.foundedYear,
     squadSize: squad.length,
@@ -227,6 +241,16 @@ export default async function TeamPage({ params }: TeamPageProps) {
     { name: team.name, url: teamUrl },
   ];
 
+  // Subtitle with safe values
+  const subtitle = [safeCity, team.country, team.foundedYear ? `Est. ${team.foundedYear}` : null]
+    .filter(Boolean)
+    .join(" · ");
+
+  // League position badge for header
+  const positionBadge = standing && competitionName
+    ? `${ordinal(standing.position)} in ${competitionName}`
+    : null;
+
   return (
     <>
       <BreadcrumbJsonLd items={breadcrumbItems} />
@@ -234,7 +258,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         name={team.name}
         url={teamUrl}
         logo={team.logoUrl}
-        location={{ city: team.city, country: team.country }}
+        location={{ city: safeCity, country: team.country }}
         foundingDate={team.foundedYear}
         memberCount={squad.length}
       />
@@ -246,7 +270,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       <div className="text-white" style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #1e1b4b 100%)` }}>
         <PageHeader
           title={team.name}
-          subtitle={[team.city, team.country, team.foundedYear ? `Est. ${team.foundedYear}` : null].filter(Boolean).join(" · ")}
+          subtitle={subtitle}
           accentColor=""
           breadcrumbs={[
             { label: "Home", href: "/" },
@@ -262,6 +286,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
               )}
             </div>
           }
+          badges={positionBadge ? (
+            <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-full">
+              {positionBadge}
+            </span>
+          ) : undefined}
           stats={standing ? [
             { label: "Pos", value: `#${standing.position}` },
             { label: "Pts", value: standing.points },
@@ -279,36 +308,238 @@ export default async function TeamPage({ params }: TeamPageProps) {
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-6">
 
                 {/* === OVERVIEW TAB === */}
                 <TabPanel tabId="overview" defaultTab="overview">
                   <>
-                    <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                      <h2 className="text-lg font-bold text-neutral-900 mb-3">About {team.name}</h2>
-                      <div className="space-y-3 text-sm leading-7 text-neutral-700">
-                        {aboutParagraphs.map((paragraph, i) => (
-                          <p key={i}>{renderBioWithLinks(paragraph)}</p>
-                        ))}
-                      </div>
-                    </section>
+                    {/* Data Dashboard — 4 cards */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                      {/* Next Match */}
+                      {nextMatch ? (
+                        <Link
+                          href={`/matches/${nextMatch.id}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                          </div>
+                          {(() => {
+                            const isHome = nextMatch.homeTeamId === team.id;
+                            const opponent = isHome ? nextMatch.awayTeam : nextMatch.homeTeam;
+                            const matchDate = new Date(nextMatch.scheduledAt);
+                            return (
+                              <>
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  {opponent?.logoUrl ? (
+                                    <img src={opponent.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                                  ) : (
+                                    <Shield className="w-6 h-6 text-neutral-300" />
+                                  )}
+                                  <span className="text-sm font-bold text-neutral-900 truncate">
+                                    {isHome ? "vs" : "@"} {opponent?.shortName || opponent?.name}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-neutral-500">
+                                  {format(matchDate, "EEE, MMM d · h:mm a")}
+                                </p>
+                                <p className="text-xs font-medium text-blue-600 mt-1">
+                                  {formatDistanceToNowStrict(matchDate, { addSuffix: true })}
+                                </p>
+                              </>
+                            );
+                          })()}
+                        </Link>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">No upcoming fixtures</p>
+                        </div>
+                      )}
 
-                    {/* Recent Form */}
-                    {standing?.form && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                        <h3 className="text-sm font-bold text-neutral-900 mb-3">Recent Form</h3>
-                        <div className="flex gap-1.5">
-                          {standing.form.split("").map((result, i) => (
-                            <span key={i} className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white ${result === "W" ? "bg-green-500" : result === "D" ? "bg-neutral-400" : "bg-red-500"}`}>
-                              {result}
-                            </span>
-                          ))}
+                      {/* League Position */}
+                      {standing && competitionSlug ? (
+                        <Link
+                          href={`/competitions/${competitionSlug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Pos.</h3>
+                          </div>
+                          <div className="text-3xl font-black text-neutral-900">{ordinal(standing.position)}</div>
+                          <p className="text-xs text-neutral-500 truncate">{competitionName}</p>
+                          <p className="text-xs font-medium text-neutral-700 mt-0.5">{standing.points} pts</p>
+                        </Link>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Pos.</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">No standings data</p>
+                        </div>
+                      )}
+
+                      {/* Form */}
+                      <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                          <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
+                        </div>
+                        {standing?.form ? (
+                          <div className="flex gap-1.5 mt-1">
+                            {standing.form.split("").slice(-5).map((result, i) => {
+                              const recentMatch = recentMatches[i];
+                              const scoreTitle = recentMatch
+                                ? `${recentMatch.homeTeam?.shortName || recentMatch.homeTeam?.name} ${recentMatch.homeScore}-${recentMatch.awayScore} ${recentMatch.awayTeam?.shortName || recentMatch.awayTeam?.name}`
+                                : undefined;
+                              return (
+                                <span
+                                  key={i}
+                                  title={scoreTitle}
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white cursor-default ${
+                                    result === "W" ? "bg-green-500" : result === "D" ? "bg-neutral-400" : "bg-red-500"
+                                  }`}
+                                >
+                                  {result}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-neutral-400">No data</p>
+                        )}
+                      </div>
+
+                      {/* Top Scorer */}
+                      {topScorer ? (
+                        <Link
+                          href={`/players/${topScorer.player.slug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Target className="w-3.5 h-3.5 text-red-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                          </div>
+                          <div className="text-2xl font-black text-neutral-900">{topScorer.goals}</div>
+                          <p className="text-xs text-neutral-500">goals</p>
+                          <p className="text-sm font-medium text-neutral-900 truncate mt-0.5">{topScorer.player.name}</p>
+                        </Link>
+                      ) : (
+                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Target className="w-3.5 h-3.5 text-neutral-400" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                          </div>
+                          <p className="text-sm text-neutral-400">No data</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recent Results Strip */}
+                    {recentMatches.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-bold text-neutral-900 mb-3">Recent Results</h3>
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                          {recentMatches.map((match) => {
+                            const isHome = match.homeTeamId === team.id;
+                            const opponent = isHome ? match.awayTeam : match.homeTeam;
+                            const teamScore = isHome ? match.homeScore : match.awayScore;
+                            const oppScore = isHome ? match.awayScore : match.homeScore;
+                            const result =
+                              teamScore !== null && oppScore !== null
+                                ? teamScore > oppScore ? "W" : teamScore < oppScore ? "L" : "D"
+                                : null;
+
+                            return (
+                              <Link
+                                key={match.id}
+                                href={`/matches/${match.id}`}
+                                className="flex-shrink-0 w-[140px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  {opponent?.logoUrl ? (
+                                    <img src={opponent.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                                  ) : (
+                                    <Shield className="w-5 h-5 text-neutral-300" />
+                                  )}
+                                  <span className="text-xs font-medium text-neutral-700 truncate">
+                                    {opponent?.shortName || opponent?.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-lg font-bold text-neutral-900">
+                                    {match.homeScore}-{match.awayScore}
+                                  </span>
+                                  {result && (
+                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                      result === "W" ? "bg-green-100 text-green-700"
+                                        : result === "D" ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-red-100 text-red-700"
+                                    }`}>
+                                      {result}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-neutral-400 mt-1">
+                                  {format(new Date(match.scheduledAt), "MMM d")}
+                                </p>
+                              </Link>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
 
                     {/* Upcoming fixtures */}
-                    <TeamFixtures teamId={team.id} limit={5} />
+                    {matchesData.upcoming.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Fixtures</h3>
+                          <Link href={`/teams/${slug}?tab=fixtures`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            View all <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="space-y-2">
+                          {matchesData.upcoming.slice(0, 3).map((match) => {
+                            const isHome = match.homeTeamId === team.id;
+                            const opponent = isHome ? match.awayTeam : match.homeTeam;
+                            return (
+                              <Link key={match.id} href={`/matches/${match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
+                                <div className="flex items-center gap-2">
+                                  {opponent?.logoUrl ? (
+                                    <img src={opponent.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                                  ) : (
+                                    <Shield className="w-5 h-5 text-neutral-300" />
+                                  )}
+                                  <span className="text-sm text-neutral-900">
+                                    {isHome ? "vs" : "@"} {opponent?.shortName || opponent?.name}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d")}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* About (moved below fold) */}
+                    {aboutParagraphs.length > 0 && (
+                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
+                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {team.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                          {aboutParagraphs.map((paragraph, i) => (
+                            <p key={i}>{renderBioWithLinks(paragraph)}</p>
+                          ))}
+                        </div>
+                      </section>
+                    )}
                   </>
                 </TabPanel>
 
@@ -422,23 +653,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 <BetweenContentAd />
               </div>
 
-              {/* Sidebar */}
+              {/* Sidebar — reordered: Articles → FAQ → Upgrade → Related → Links */}
               <div className="space-y-6">
-                {/* Club Info */}
-                <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                  <h3 className="text-sm font-bold text-neutral-900 mb-3">Club Info</h3>
-                  <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between"><dt className="text-neutral-500">Full Name</dt><dd className="font-medium text-neutral-900 text-right">{team.name}</dd></div>
-                    {team.shortName && <div className="flex justify-between"><dt className="text-neutral-500">Short Name</dt><dd className="font-medium text-neutral-900">{team.shortName}</dd></div>}
-                    <div className="flex justify-between"><dt className="text-neutral-500">Country</dt><dd className="font-medium text-neutral-900">{team.country}</dd></div>
-                    {team.city && <div className="flex justify-between"><dt className="text-neutral-500">City</dt><dd className="font-medium text-neutral-900">{team.city}</dd></div>}
-                    {team.foundedYear && <div className="flex justify-between"><dt className="text-neutral-500">Founded</dt><dd className="font-medium text-neutral-900">{team.foundedYear}</dd></div>}
-                  </dl>
-                </div>
-
                 <RelatedArticles teamId={team.id} limit={5} />
-
-                <SidebarUpgradeOrAd context="team" />
 
                 {faqItems.length > 0 && (
                   <section className="bg-white rounded-xl border border-neutral-200 p-5">
@@ -453,6 +670,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     </div>
                   </section>
                 )}
+
+                <SidebarUpgradeOrAd context="team" />
 
                 <RelatedTeams teamId={team.id} />
                 <TeamInternalLinks teamId={team.id} country={team.country} />
