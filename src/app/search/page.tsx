@@ -8,6 +8,7 @@ import { PopularSearches } from "@/components/search/popular-searches";
 import { FeaturedEntities } from "@/components/search/featured-entities";
 import type { SearchResult } from "@/types/entities";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string; type?: string }>;
@@ -61,34 +62,50 @@ function SearchResultCard({ result }: { result: SearchResult }) {
   const Icon =
     ENTITY_TYPES.find((t) => t.value === result.entityType)?.icon || Users;
 
+  const content = (
+    <div className="flex items-start gap-4">
+      <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
+        <Icon className="w-6 h-6 text-neutral-500 group-hover:text-blue-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+            {result.name}
+          </h3>
+          <span
+            className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${TYPE_COLORS[result.entityType]}`}
+          >
+            {TYPE_LABELS[result.entityType]}
+          </span>
+        </div>
+        {result.subtitle && (
+          <p className="text-sm text-neutral-600 truncate">{result.subtitle}</p>
+        )}
+        {result.meta && (
+          <p className="text-xs text-neutral-500 mt-1">{result.meta}</p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (result.entityType === "player") {
+    return (
+      <PlayerLink
+        slug={result.slug}
+        isLinkWorthy={true}
+        className="block p-4 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
+      >
+        {content}
+      </PlayerLink>
+    );
+  }
+
   return (
     <Link
       href={href}
       className="block p-4 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
     >
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
-          <Icon className="w-6 h-6 text-neutral-500 group-hover:text-blue-600" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
-              {result.name}
-            </h3>
-            <span
-              className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${TYPE_COLORS[result.entityType]}`}
-            >
-              {TYPE_LABELS[result.entityType]}
-            </span>
-          </div>
-          {result.subtitle && (
-            <p className="text-sm text-neutral-600 truncate">{result.subtitle}</p>
-          )}
-          {result.meta && (
-            <p className="text-xs text-neutral-500 mt-1">{result.meta}</p>
-          )}
-        </div>
-      </div>
+      {content}
     </Link>
   );
 }

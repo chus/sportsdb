@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { SearchBar } from "@/components/search/search-bar";
 import { getPublishedArticles } from "@/lib/queries/articles";
@@ -223,9 +224,10 @@ export default async function HomePage() {
                   </div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {trendingPlayers.map((player) => (
-                      <Link
+                      <PlayerLink
                         key={player.id}
-                        href={`/players/${player.slug}`}
+                        slug={player.slug}
+                        isLinkWorthy={player.isIndexable ?? false}
                         className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 hover:shadow-md transition-shadow group"
                       >
                         <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -251,7 +253,7 @@ export default async function HomePage() {
                             {player.position}{player.nationality && ` · ${player.nationality}`}
                           </div>
                         </div>
-                      </Link>
+                      </PlayerLink>
                     ))}
                   </div>
                 </div>

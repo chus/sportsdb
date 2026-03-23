@@ -7,6 +7,7 @@ import { players, playerSeasonStats, competitionSeasons, seasons, teams } from "
 import { eq, desc, sql } from "drizzle-orm";
 import { PlayerSearchSelector } from "@/components/search/player-search-selector";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface ComparePageProps {
   searchParams: Promise<{ p1?: string; p2?: string }>;
@@ -26,6 +27,7 @@ interface PlayerWithStats {
   imageUrl: string | null;
   dateOfBirth: string | null;
   heightCm: number | null;
+  isIndexable: boolean;
   team: { name: string; slug: string; logoUrl: string | null } | null;
   totalStats: {
     appearances: number;
@@ -81,6 +83,7 @@ async function getPlayerWithStats(slug: string): Promise<PlayerWithStats | null>
     imageUrl: p.imageUrl,
     dateOfBirth: p.dateOfBirth,
     heightCm: p.heightCm,
+    isIndexable: p.isIndexable ?? false,
     team: team ? { name: team.name, slug: team.slug, logoUrl: team.logo_url } : null,
     totalStats: {
       appearances: stats[0]?.appearances || 0,
@@ -134,7 +137,7 @@ function StatComparison({
 
 function PlayerCard({ player }: { player: PlayerWithStats }) {
   return (
-    <Link href={`/players/${player.slug}`} className="block">
+    <PlayerLink slug={player.slug} isLinkWorthy={player.isIndexable} className="block">
       <div className="text-center p-6 hover:bg-neutral-50 transition-colors rounded-xl">
         <div className="w-24 h-24 bg-neutral-100 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
           {player.imageUrl ? (
@@ -156,7 +159,7 @@ function PlayerCard({ player }: { player: PlayerWithStats }) {
           </div>
         )}
       </div>
-    </Link>
+    </PlayerLink>
   );
 }
 

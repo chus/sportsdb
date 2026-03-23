@@ -11,6 +11,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { PageHeader } from "@/components/layout/page-header";
+import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -138,9 +139,10 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {playersList.map((player) => (
-              <Link
+              <PlayerLink
                 key={player.id}
-                href={`/players/${player.slug}`}
+                slug={player.slug}
+                isLinkWorthy={player.isIndexable}
                 className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-xl transition-shadow group"
               >
                 <div className="flex items-center gap-3">
@@ -168,7 +170,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                     )}
                   </div>
                 </div>
-              </Link>
+              </PlayerLink>
             ))}
           </div>
 

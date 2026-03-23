@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups } from "@/lib/db/schema";
+import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers } from "@/lib/db/schema";
 import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
 
 /**
@@ -201,4 +201,42 @@ export async function getPlayerRecentMatches(playerId: string, limit = 5) {
     .where(eq(matchLineups.playerId, playerId))
     .orderBy(desc(matches.scheduledAt))
     .limit(limit);
+}
+
+/**
+ * Compute the quality score for a player page.
+ * Used to decide 404 vs noindex vs indexed.
+ */
+export async function getPlayerQuality(player: {
+  id: string;
+  position: string | null;
+  nationality: string | null;
+  dateOfBirth: string | null;
+  heightCm: number | null;
+  preferredFoot: string | null;
+  imageUrl: string | null;
+}) {
+  const { scorePlayerPage } = await import("@/lib/seo/page-quality");
+
+  const [career, currentTeam, statsHistory, lineupCount, articleCount] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(playerTeamHistory).where(eq(playerTeamHistory.playerId, player.id)),
+    db.select({ count: sql<number>`count(*)` }).from(playerTeamHistory).where(and(eq(playerTeamHistory.playerId, player.id), isNull(playerTeamHistory.validTo))),
+    db.select({ count: sql<number>`count(*)` }).from(playerSeasonStats).where(eq(playerSeasonStats.playerId, player.id)),
+    db.select({ count: sql<number>`count(*)` }).from(matchLineups).where(eq(matchLineups.playerId, player.id)),
+    db.select({ count: sql<number>`count(*)` }).from(articlePlayers).where(eq(articlePlayers.playerId, player.id)),
+  ]);
+
+  return scorePlayerPage({
+    position: player.position,
+    nationality: player.nationality,
+    dateOfBirth: player.dateOfBirth,
+    heightCm: player.heightCm,
+    preferredFoot: player.preferredFoot,
+    imageUrl: player.imageUrl,
+    careerCount: Number(career[0]?.count ?? 0),
+    hasCurrentTeam: Number(currentTeam[0]?.count ?? 0) > 0,
+    statsCount: Number(statsHistory[0]?.count ?? 0),
+    lineupCount: Number(lineupCount[0]?.count ?? 0),
+    articleCount: Number(articleCount[0]?.count ?? 0),
+  });
 }

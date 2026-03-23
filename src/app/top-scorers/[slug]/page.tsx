@@ -11,6 +11,7 @@ import {
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageHeader } from "@/components/layout/page-header";
+import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -123,8 +124,9 @@ export default async function CompetitionTopScorersPage({ params }: PageProps) {
                       <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
                         <td className="px-2 sm:px-4 py-3 font-medium text-neutral-400">{index + 1}</td>
                         <td className="px-2 sm:px-4 py-3">
-                          <Link
-                            href={`/players/${player.slug}`}
+                          <PlayerLink
+                            slug={player.slug}
+                            isLinkWorthy={player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
                             <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
@@ -138,7 +140,7 @@ export default async function CompetitionTopScorersPage({ params }: PageProps) {
                               <div className="font-medium">{player.name}</div>
                               <div className="text-xs text-neutral-500">{player.nationality}</div>
                             </div>
-                          </Link>
+                          </PlayerLink>
                         </td>
                         <td className="px-2 sm:px-4 py-3">
                           <Link

@@ -6,6 +6,7 @@ import {
   getRelatedTeams,
   getRelatedMatches,
 } from "@/lib/queries/related";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface RelatedPlayersProps {
   playerId: string;
@@ -26,9 +27,10 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
       </h3>
       <div className="space-y-3">
         {relatedPlayers.map((player) => (
-          <Link
+          <PlayerLink
             key={player.id}
-            href={`/players/${player.slug}`}
+            slug={player.slug}
+            isLinkWorthy={player.isIndexable ?? false}
             className="flex items-center gap-3 group"
           >
             {player.imageUrl ? (
@@ -53,7 +55,7 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
                 {player.nationality && ` · ${player.nationality}`}
               </div>
             </div>
-          </Link>
+          </PlayerLink>
         ))}
       </div>
     </div>

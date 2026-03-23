@@ -35,6 +35,7 @@ export async function getTrendingPlayers(limit = 10) {
           imageUrl: players.imageUrl,
           position: players.position,
           nationality: players.nationality,
+          isIndexable: players.isIndexable,
         })
         .from(players)
         .where(and(eq(players.id, item.entityId), ne(players.position, "Unknown")))
@@ -50,6 +51,7 @@ export async function getTrendingPlayers(limit = 10) {
     imageUrl: string | null;
     position: string;
     nationality: string | null;
+    isIndexable: boolean;
     views: number;
   }>;
 }

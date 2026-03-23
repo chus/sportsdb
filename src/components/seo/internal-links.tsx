@@ -26,7 +26,7 @@ async function getPlayersByNationality(nationality: string, excludeId: string, l
       imageUrl: players.imageUrl,
     })
     .from(players)
-    .where(and(eq(players.nationality, nationality), ne(players.id, excludeId)))
+    .where(and(eq(players.nationality, nationality), ne(players.id, excludeId), eq(players.isIndexable, true)))
     .orderBy(desc(players.popularityScore))
     .limit(limit);
 }
@@ -44,7 +44,7 @@ async function getPlayersByPosition(position: string, excludeId: string, limit =
       imageUrl: players.imageUrl,
     })
     .from(players)
-    .where(and(eq(players.position, position), ne(players.id, excludeId)))
+    .where(and(eq(players.position, position), ne(players.id, excludeId), eq(players.isIndexable, true)))
     .orderBy(desc(players.popularityScore))
     .limit(limit);
 }
@@ -62,6 +62,7 @@ async function getTopPlayers(limit = 8) {
       imageUrl: players.imageUrl,
     })
     .from(players)
+    .where(eq(players.isIndexable, true))
     .orderBy(desc(players.popularityScore))
     .limit(limit);
 }

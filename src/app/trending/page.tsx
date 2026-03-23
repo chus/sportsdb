@@ -5,6 +5,7 @@ import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -70,9 +71,10 @@ export default async function TrendingPage() {
               ) : (
                 <div className="grid sm:grid-cols-2 gap-4">
                   {trendingPlayers.map((player, index) => (
-                    <Link
+                    <PlayerLink
                       key={player.id}
-                      href={`/players/${player.slug}`}
+                      slug={player.slug}
+                      isLinkWorthy={player.isIndexable ?? false}
                       className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-lg transition-shadow group"
                     >
                       <span className="text-2xl font-bold text-neutral-200 w-8">
@@ -105,7 +107,7 @@ export default async function TrendingPage() {
                       <div className="text-sm text-neutral-400 flex-shrink-0">
                         {player.views} views
                       </div>
-                    </Link>
+                    </PlayerLink>
                   ))}
                 </div>
               )}

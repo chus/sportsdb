@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { getPlayersByPosition } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -92,9 +93,10 @@ export default async function PositionPlayersPage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {playersList.map((player) => (
-              <Link
+              <PlayerLink
                 key={player.id}
-                href={`/players/${player.slug}`}
+                slug={player.slug}
+                isLinkWorthy={player.isIndexable ?? false}
                 className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-xl transition-shadow group"
               >
                 <div className="flex items-center gap-3">
@@ -122,7 +124,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
                     )}
                   </div>
                 </div>
-              </Link>
+              </PlayerLink>
             ))}
           </div>
 

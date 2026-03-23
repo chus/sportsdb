@@ -78,6 +78,8 @@ export const players = pgTable(
     status: text("status").notNull().default("active"), // 'active' | 'retired'
     imageUrl: text("image_url"),
     popularityScore: integer("popularity_score").default(0),
+    isIndexable: boolean("is_indexable").default(false), // Cached: score >= 40
+    enrichedAt: timestamp("enriched_at", { withTimezone: true }), // Last API-Football enrichment
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },

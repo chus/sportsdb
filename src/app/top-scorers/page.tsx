@@ -5,6 +5,7 @@ import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug } fro
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -89,8 +90,9 @@ export default async function TopScorersPage() {
                           {index + 1}
                         </td>
                         <td className="px-2 sm:px-4 py-3">
-                          <Link
-                            href={`/players/${player.slug}`}
+                          <PlayerLink
+                            slug={player.slug}
+                            isLinkWorthy={player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
                             {player.imageUrl ? (
@@ -112,7 +114,7 @@ export default async function TopScorersPage() {
                               <div className="font-medium">{player.name}</div>
                               <div className="text-xs text-neutral-500">{player.nationality}</div>
                             </div>
-                          </Link>
+                          </PlayerLink>
                         </td>
                         <td className="px-2 sm:px-4 py-3">
                           <Link

@@ -5,7 +5,7 @@ import {
   Footprints, Shield, BarChart3
 } from "lucide-react";
 import type { Metadata } from "next";
-import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches } from "@/lib/queries/players";
+import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality } from "@/lib/queries/players";
 import { format, differenceInYears } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
@@ -18,14 +18,10 @@ import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or
 import { ProTeaserWithModal } from "@/components/subscription/pro-teaser-with-modal";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
-import { scorePlayerPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { TabPanel } from "@/components/ui/tab-navigation";
 import { PlayerTabs } from "./player-tabs";
-import { db } from "@/lib/db";
-import { matchLineups, articlePlayers } from "@/lib/db/schema";
-import { eq, sql } from "drizzle-orm";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
@@ -39,32 +35,20 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const { slug } = await params;
   const player = await getPlayerBySlug(slug);
 
-  if (!player) {
+  if (!player || player.position === "Unknown") {
     return { title: "Player Not Found" };
   }
 
-  const [currentTeamData, statsHistory, career, lineupCountResult, articleCountResult] = await Promise.all([
+  const quality = await getPlayerQuality(player);
+
+  if (quality.shouldReturn404) {
+    return { title: "Player Not Found" };
+  }
+
+  const [currentTeamData, statsHistory] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerStatsHistory(player.id),
-    getPlayerCareer(player.id),
-    db.select({ count: sql<number>`count(*)` }).from(matchLineups).where(eq(matchLineups.playerId, player.id)),
-    db.select({ count: sql<number>`count(*)` }).from(articlePlayers).where(eq(articlePlayers.playerId, player.id)),
   ]);
-
-  // Multi-signal thin page scoring
-  const quality = scorePlayerPage({
-    position: player.position,
-    nationality: player.nationality,
-    dateOfBirth: player.dateOfBirth,
-    heightCm: player.heightCm,
-    preferredFoot: player.preferredFoot,
-    imageUrl: player.imageUrl,
-    careerCount: career.length,
-    hasCurrentTeam: !!currentTeamData,
-    statsCount: statsHistory.length,
-    lineupCount: Number(lineupCountResult[0]?.count ?? 0),
-    articleCount: Number(articleCountResult[0]?.count ?? 0),
-  });
   const isThin = quality.isThin;
 
   const currentTeam = currentTeamData?.team;
@@ -138,6 +122,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const player = await getPlayerBySlug(slug);
 
   if (!player || player.position === "Unknown") {
+    notFound();
+  }
+
+  const quality = await getPlayerQuality(player);
+  if (quality.shouldReturn404) {
     notFound();
   }
 

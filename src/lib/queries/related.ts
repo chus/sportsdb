@@ -18,6 +18,7 @@ interface RelatedPlayer {
   position: string;
   imageUrl: string | null;
   nationality: string | null;
+  isIndexable: boolean | null;
 }
 
 interface RelatedTeam {
@@ -82,6 +83,7 @@ export async function getRelatedPlayers(
         position: players.position,
         imageUrl: players.imageUrl,
         nationality: players.nationality,
+        isIndexable: players.isIndexable,
       })
       .from(players)
       .innerJoin(playerTeamHistory, eq(players.id, playerTeamHistory.playerId))
@@ -89,7 +91,8 @@ export async function getRelatedPlayers(
         and(
           eq(playerTeamHistory.teamId, currentTeamId),
           isNull(playerTeamHistory.validTo),
-          ne(players.id, playerId)
+          ne(players.id, playerId),
+          eq(players.isIndexable, true)
         )
       )
       .limit(limit);
@@ -110,12 +113,14 @@ export async function getRelatedPlayers(
         position: players.position,
         imageUrl: players.imageUrl,
         nationality: players.nationality,
+        isIndexable: players.isIndexable,
       })
       .from(players)
       .where(
         and(
           eq(players.position, currentPlayer.position),
           ne(players.id, playerId),
+          eq(players.isIndexable, true),
           ...(teammateIds.length > 0
             ? [sql`${players.id} NOT IN (${sql.raw(teammateIds.map((id) => `'${id}'`).join(","))})`]
             : [])

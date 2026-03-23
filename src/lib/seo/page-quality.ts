@@ -2,7 +2,12 @@
  * Page quality scoring for SEO thin page detection.
  *
  * Used by generateMetadata in entity pages to determine
- * whether a page should be noindexed.
+ * whether a page should be noindexed or 404'd.
+ *
+ * Thresholds:
+ *   Score < 15  → 404 (truly empty)
+ *   Score 15-39 → 200 + noindex
+ *   Score >= 40 → 200 + indexed
  */
 
 export type Tier = "A" | "B" | "C" | "D";
@@ -10,7 +15,8 @@ export type Tier = "A" | "B" | "C" | "D";
 export interface QualityResult {
   score: number;
   tier: Tier;
-  isThin: boolean; // true for tier C or D
+  isThin: boolean; // true for tier C or D (score < 40)
+  shouldReturn404: boolean; // true for score < 15
 }
 
 export interface PlayerQualityInput {
@@ -44,7 +50,12 @@ export function scorePlayerPage(input: PlayerQualityInput): QualityResult {
   if (input.articleCount > 0) score += 10;
 
   const tier: Tier = score >= 60 ? "A" : score >= 40 ? "B" : score >= 20 ? "C" : "D";
-  return { score, tier, isThin: tier === "C" || tier === "D" };
+  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 15 };
+}
+
+/** Whether a player has enough data to warrant an indexable link */
+export function isPlayerLinkWorthy(input: PlayerQualityInput): boolean {
+  return scorePlayerPage(input).score >= 40;
 }
 
 export interface TeamQualityInput {
@@ -69,5 +80,5 @@ export function scoreTeamPage(input: TeamQualityInput): QualityResult {
   if (input.hasMatches) score += 10;
 
   const tier: Tier = score >= 40 ? "A" : score >= 25 ? "B" : score >= 15 ? "C" : "D";
-  return { score, tier, isThin: tier === "C" || tier === "D" };
+  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 15 };
 }

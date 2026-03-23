@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Star, Clock, Sparkles } from "lucide-react";
 import { getMatchSummary } from "@/lib/queries/summaries";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface MatchSummaryProps {
   matchId: string;
@@ -75,12 +75,13 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
                 Man of the Match
               </span>
               <div className="mt-1">
-                <Link
-                  href={`/players/${summary.manOfTheMatch.slug}`}
+                <PlayerLink
+                  slug={summary.manOfTheMatch.slug}
+                  isLinkWorthy={summary.manOfTheMatch.isIndexable ?? false}
                   className="font-semibold text-neutral-900 hover:text-blue-600 transition-colors"
                 >
                   {summary.manOfTheMatch.name}
-                </Link>
+                </PlayerLink>
                 <span className="text-sm text-neutral-500 ml-2">
                   {summary.manOfTheMatch.position}
                 </span>

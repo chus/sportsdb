@@ -22,6 +22,7 @@ export type LeaderboardEntry = {
     imageUrl: string | null;
     position: string;
     nationality: string | null;
+    isIndexable: boolean | null;
   };
   team: {
     id: string;
@@ -54,6 +55,7 @@ function baseLeaderboardQuery() {
         imageUrl: players.imageUrl,
         position: players.position,
         nationality: players.nationality,
+        isIndexable: players.isIndexable,
       },
       team: {
         id: teams.id,
@@ -234,12 +236,14 @@ export async function getPlayersByPosition(position: string, limit = 100) {
     nationality: string | null;
     image_url: string | null;
     popularity_score: number | null;
+    is_indexable: boolean;
     team_name: string | null;
     team_slug: string | null;
     team_logo_url: string | null;
   }>(sql`
     SELECT
       p.id, p.name, p.slug, p.position, p.nationality, p.image_url, p.popularity_score,
+      p.is_indexable,
       t.name as team_name, t.slug as team_slug, t.logo_url as team_logo_url
     FROM players p
     LEFT JOIN player_team_history pth ON pth.player_id = p.id AND pth.valid_to IS NULL
@@ -257,6 +261,7 @@ export async function getPlayersByPosition(position: string, limit = 100) {
     nationality: r.nationality,
     imageUrl: r.image_url,
     popularityScore: r.popularity_score,
+    isIndexable: r.is_indexable,
     team: r.team_name
       ? { name: r.team_name, slug: r.team_slug!, logoUrl: r.team_logo_url }
       : null,
@@ -291,12 +296,14 @@ export async function getPlayersByNationality(nationality: string, limit = 100) 
     nationality: string;
     image_url: string | null;
     popularity_score: number | null;
+    is_indexable: boolean | null;
     team_name: string | null;
     team_slug: string | null;
     team_logo_url: string | null;
   }>(sql`
     SELECT
       p.id, p.name, p.slug, p.position, p.nationality, p.image_url, p.popularity_score,
+      p.is_indexable,
       t.name as team_name, t.slug as team_slug, t.logo_url as team_logo_url
     FROM players p
     LEFT JOIN player_team_history pth ON pth.player_id = p.id AND pth.valid_to IS NULL
@@ -315,6 +322,7 @@ export async function getPlayersByNationality(nationality: string, limit = 100) 
     nationality: r.nationality,
     imageUrl: r.image_url,
     popularityScore: r.popularity_score,
+    isIndexable: r.is_indexable ?? false,
     team: r.team_name
       ? { name: r.team_name, slug: r.team_slug!, logoUrl: r.team_logo_url }
       : null,
@@ -438,6 +446,7 @@ export async function getRecentTransfers(limit = 50) {
     player_slug: string;
     player_image_url: string | null;
     player_position: string;
+    player_is_indexable: boolean;
     to_team_id: string;
     to_team_name: string;
     to_team_slug: string;
@@ -455,6 +464,7 @@ export async function getRecentTransfers(limit = 50) {
       p.slug as player_slug,
       p.image_url as player_image_url,
       p.position as player_position,
+      p.is_indexable as player_is_indexable,
       t_to.id as to_team_id,
       t_to.name as to_team_name,
       t_to.slug as to_team_slug,
@@ -490,6 +500,7 @@ export async function getRecentTransfers(limit = 50) {
       slug: r.player_slug,
       imageUrl: r.player_image_url,
       position: r.player_position,
+      isIndexable: r.player_is_indexable,
     },
     toTeam: {
       id: r.to_team_id,

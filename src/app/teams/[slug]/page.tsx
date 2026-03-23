@@ -10,6 +10,7 @@ import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
 import { TeamInternalLinks } from "@/components/seo/internal-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
+import { PlayerLink } from "@/components/player/player-link";
 import { TeamFixtures } from "@/components/team/team-fixtures";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
@@ -124,6 +125,7 @@ function PositionGroup({
       name: string;
       nationality: string | null;
       position: string;
+      isIndexable: boolean | null;
     };
     shirtNumber: number | null;
   }[];
@@ -137,9 +139,10 @@ function PositionGroup({
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {players.map(({ player, shirtNumber }) => (
-          <Link
+          <PlayerLink
             key={player.id}
-            href={`/players/${player.slug}`}
+            slug={player.slug}
+            isLinkWorthy={player.isIndexable ?? false}
             className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-100 hover:shadow-md hover:border-blue-200 transition-all group"
           >
             <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-700 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
@@ -153,7 +156,7 @@ function PositionGroup({
                 {player.nationality || player.position}
               </div>
             </div>
-          </Link>
+          </PlayerLink>
         ))}
       </div>
     </div>
@@ -389,7 +392,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       const visiblePlayers = formerPlayers.slice(0, 3);
                       const hiddenPlayers = formerPlayers.slice(3);
                       const renderPlayerRow = ({ player, shirtNumber, validFrom, validTo }: typeof formerPlayers[number]) => (
-                        <Link key={player.id} href={`/players/${player.slug}`} className="flex items-center justify-between p-3 hover:bg-neutral-50 transition-colors group">
+                        <PlayerLink key={player.id} slug={player.slug} isLinkWorthy={player.isIndexable ?? false} className="flex items-center justify-between p-3 hover:bg-neutral-50 transition-colors group">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 text-xs font-medium">{shirtNumber || "—"}</div>
                             <div>
@@ -397,7 +400,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                               <div className="text-xs text-neutral-500">{player.position} · {new Date(validFrom).getFullYear()}-{validTo ? new Date(validTo).getFullYear() : "Present"}</div>
                             </div>
                           </div>
-                        </Link>
+                        </PlayerLink>
                       );
                       return (
                         <section>

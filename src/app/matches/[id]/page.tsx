@@ -9,6 +9,7 @@ import {
   Trophy,
   User,
 } from "lucide-react";
+import { PlayerLink } from "@/components/player/player-link";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
 import { format } from "date-fns";
@@ -150,8 +151,8 @@ function MatchEventItem({
     type: string;
     minute: number;
     addedTime: number | null;
-    player: { name: string; slug: string } | null;
-    secondaryPlayer: { name: string; slug: string } | null;
+    player: { name: string; slug: string; isIndexable: boolean } | null;
+    secondaryPlayer: { name: string; slug: string; isIndexable: boolean } | null;
     description: string | null;
   };
   isHomeTeam: boolean;
@@ -168,35 +169,38 @@ function MatchEventItem({
     >
       <div className={`flex-1 ${isHomeTeam ? "text-right" : "text-left"}`}>
         {event.player && (
-          <Link
-            href={`/players/${event.player.slug}`}
+          <PlayerLink
+            slug={event.player.slug}
+            isLinkWorthy={event.player.isIndexable ?? false}
             className="font-medium hover:text-blue-600 transition-colors"
           >
             {event.player.name}
-          </Link>
+          </PlayerLink>
         )}
         {event.type === "substitution" && event.secondaryPlayer && (
           <span className="text-neutral-500 text-sm">
             {" "}
             for{" "}
-            <Link
-              href={`/players/${event.secondaryPlayer.slug}`}
+            <PlayerLink
+              slug={event.secondaryPlayer.slug}
+              isLinkWorthy={event.secondaryPlayer.isIndexable ?? false}
               className="hover:text-blue-600 transition-colors"
             >
               {event.secondaryPlayer.name}
-            </Link>
+            </PlayerLink>
           </span>
         )}
         {event.type === "goal" && event.secondaryPlayer && (
           <span className="text-neutral-500 text-sm">
             {" "}
             (assist:{" "}
-            <Link
-              href={`/players/${event.secondaryPlayer.slug}`}
+            <PlayerLink
+              slug={event.secondaryPlayer.slug}
+              isLinkWorthy={event.secondaryPlayer.isIndexable ?? false}
               className="hover:text-blue-600 transition-colors"
             >
               {event.secondaryPlayer.name}
-            </Link>
+            </PlayerLink>
             )
           </span>
         )}
@@ -219,15 +223,16 @@ function LineupPlayer({
   position,
   rating,
 }: {
-  player: { name: string; slug: string; position: string };
+  player: { name: string; slug: string; position: string; isIndexable: boolean | null };
   shirtNumber: number | null;
   isStarter: boolean;
   position: string | null;
   rating: string | null;
 }) {
   return (
-    <Link
-      href={`/players/${player.slug}`}
+    <PlayerLink
+      slug={player.slug}
+      isLinkWorthy={player.isIndexable ?? false}
       className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-lg transition-colors group"
     >
       <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-sm font-medium text-neutral-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
@@ -254,7 +259,7 @@ function LineupPlayer({
           {parseFloat(rating).toFixed(1)}
         </div>
       )}
-    </Link>
+    </PlayerLink>
   );
 }
 
@@ -485,6 +490,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                     slug: player.slug,
                     position: lineup.position || player.position,
                     shirtNumber: lineup.shirtNumber,
+                    isIndexable: player.isIndexable,
                   })),
                 }}
                 awayTeam={{
@@ -497,6 +503,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                     slug: player.slug,
                     position: lineup.position || player.position,
                     shirtNumber: lineup.shirtNumber,
+                    isIndexable: player.isIndexable,
                   })),
                 }}
               />
@@ -745,13 +752,14 @@ export default async function MatchPage({ params }: MatchPageProps) {
                               className="flex items-center justify-between text-sm"
                             >
                               {e.player ? (
-                                <Link
-                                  href={`/players/${e.player.slug}`}
+                                <PlayerLink
+                                  slug={e.player.slug}
+                                  isLinkWorthy={e.player.isIndexable ?? false}
                                   className="hover:text-blue-600 transition-colors"
                                 >
                                   {e.player.name}
                                   {e.type === "own_goal" && " (OG)"}
-                                </Link>
+                                </PlayerLink>
                               ) : (
                                 <span>Unknown</span>
                               )}
@@ -784,13 +792,14 @@ export default async function MatchPage({ params }: MatchPageProps) {
                               className="flex items-center justify-between text-sm"
                             >
                               {e.player ? (
-                                <Link
-                                  href={`/players/${e.player.slug}`}
+                                <PlayerLink
+                                  slug={e.player.slug}
+                                  isLinkWorthy={e.player.isIndexable ?? false}
                                   className="hover:text-blue-600 transition-colors"
                                 >
                                   {e.player.name}
                                   {e.type === "own_goal" && " (OG)"}
-                                </Link>
+                                </PlayerLink>
                               ) : (
                                 <span>Unknown</span>
                               )}
@@ -829,12 +838,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
                             {e.type === "yellow_card" ? "🟨" : "🟥"}
                           </span>
                           {e.player ? (
-                            <Link
-                              href={`/players/${e.player.slug}`}
+                            <PlayerLink
+                              slug={e.player.slug}
+                              isLinkWorthy={e.player.isIndexable ?? false}
                               className="hover:text-blue-600 transition-colors"
                             >
                               {e.player.name}
-                            </Link>
+                            </PlayerLink>
                           ) : (
                             <span>Unknown</span>
                           )}

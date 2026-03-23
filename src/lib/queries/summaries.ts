@@ -50,6 +50,7 @@ export async function getMatchSummary(matchId: string) {
           slug: motmPlayer.slug,
           position: motmPlayer.position,
           imageUrl: motmPlayer.imageUrl,
+          isIndexable: motmPlayer.isIndexable,
         }
       : null,
     generatedAt: summary.generatedAt,

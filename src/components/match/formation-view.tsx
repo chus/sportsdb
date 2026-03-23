@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface Player {
   id: string;
@@ -6,6 +6,7 @@ interface Player {
   slug: string;
   position: string | null;
   shirtNumber: number | null;
+  isIndexable: boolean | null;
 }
 
 interface FormationViewProps {
@@ -93,10 +94,10 @@ function PlayerMarker({
   isHome: boolean;
 }) {
   return (
-    <Link
-      href={`/players/${player.slug}`}
+    <PlayerLink
+      slug={player.slug}
+      isLinkWorthy={player.isIndexable ?? false}
       className="group flex flex-col items-center"
-      title={player.name}
     >
       <div
         className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-bold shadow-lg group-hover:scale-110 transition-transform"
@@ -107,7 +108,7 @@ function PlayerMarker({
       <span className="text-[10px] md:text-xs text-white font-medium mt-1 text-center max-w-[60px] truncate opacity-90 group-hover:opacity-100">
         {player.name.split(" ").pop()}
       </span>
-    </Link>
+    </PlayerLink>
   );
 }
 

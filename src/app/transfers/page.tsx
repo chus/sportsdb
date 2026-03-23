@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getRecentTransfers } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 import { PageHeader } from "@/components/layout/page-header";
 import { format } from "date-fns";
 
@@ -75,8 +76,9 @@ export default async function TransfersPage() {
                     {transfers.map((transfer) => (
                       <tr key={transfer.id} className="hover:bg-neutral-50 transition-colors">
                         <td className="px-4 py-3">
-                          <Link
-                            href={`/players/${transfer.player.slug}`}
+                          <PlayerLink
+                            slug={transfer.player.slug}
+                            isLinkWorthy={transfer.player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
                             <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
@@ -96,7 +98,7 @@ export default async function TransfersPage() {
                               <div className="font-medium">{transfer.player.name}</div>
                               <div className="text-xs text-neutral-500">{transfer.player.position}</div>
                             </div>
-                          </Link>
+                          </PlayerLink>
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell">
                           {transfer.fromTeam ? (

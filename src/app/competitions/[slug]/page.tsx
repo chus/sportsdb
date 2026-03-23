@@ -22,6 +22,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StandingsTable } from "@/components/competition/standings-table";
 import { CompetitionTabs } from "./competition-tabs";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface CompetitionPageProps {
   params: Promise<{ slug: string }>;
@@ -215,9 +216,10 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                     <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
                       <div className="divide-y divide-neutral-100">
                         {topScorers.map(({ stat, player, team }, index) => (
-                          <Link
+                          <PlayerLink
                             key={player.id}
-                            href={`/players/${player.slug}`}
+                            slug={player.slug}
+                            isLinkWorthy={player.isIndexable ?? false}
                             className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition-colors group"
                           >
                             <span className="w-8 text-center text-sm font-bold text-neutral-400">{index + 1}</span>
@@ -229,7 +231,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                               <div className="font-bold text-neutral-900">{stat.goals}</div>
                               <div className="text-xs text-neutral-500">goals</div>
                             </div>
-                          </Link>
+                          </PlayerLink>
                         ))}
                       </div>
                       <div className="border-t border-neutral-200 p-4">

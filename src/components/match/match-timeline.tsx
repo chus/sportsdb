@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PlayerLink } from "@/components/player/player-link";
 
 interface TimelineEvent {
   id: string;
@@ -6,8 +6,8 @@ interface TimelineEvent {
   minute: number;
   addedTime: number | null;
   teamId: string;
-  player: { name: string; slug: string } | null;
-  secondaryPlayer: { name: string; slug: string } | null;
+  player: { name: string; slug: string; isIndexable: boolean | null } | null;
+  secondaryPlayer: { name: string; slug: string; isIndexable: boolean | null } | null;
 }
 
 interface MatchTimelineProps {
@@ -68,12 +68,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
       <span className="text-sm">
         <span className="font-semibold text-neutral-900">
           {event.player ? (
-            <Link
-              href={`/players/${event.player.slug}`}
+            <PlayerLink
+              slug={event.player.slug}
+              isLinkWorthy={event.player.isIndexable ?? false}
               className="hover:text-blue-600 transition-colors"
             >
               {event.player.name}
-            </Link>
+            </PlayerLink>
           ) : (
             "Unknown"
           )}
@@ -88,12 +89,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
           <span className="text-neutral-500">
             {" "}
             (assist:{" "}
-            <Link
-              href={`/players/${event.secondaryPlayer.slug}`}
+            <PlayerLink
+              slug={event.secondaryPlayer.slug}
+              isLinkWorthy={event.secondaryPlayer.isIndexable ?? false}
               className="text-neutral-600 hover:text-blue-600 transition-colors"
             >
               {event.secondaryPlayer.name}
-            </Link>
+            </PlayerLink>
             )
           </span>
         )}
@@ -106,12 +108,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
       <span className="text-sm">
         <span className="font-semibold text-neutral-900">
           {event.player ? (
-            <Link
-              href={`/players/${event.player.slug}`}
+            <PlayerLink
+              slug={event.player.slug}
+              isLinkWorthy={event.player.isIndexable ?? false}
               className="hover:text-blue-600 transition-colors"
             >
               {event.player.name}
-            </Link>
+            </PlayerLink>
           ) : (
             "Unknown"
           )}
@@ -125,12 +128,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
     return (
       <span className="text-sm font-semibold text-neutral-900">
         {event.player ? (
-          <Link
-            href={`/players/${event.player.slug}`}
+          <PlayerLink
+            slug={event.player.slug}
+            isLinkWorthy={event.player.isIndexable ?? false}
             className="hover:text-blue-600 transition-colors"
           >
             {event.player.name}
-          </Link>
+          </PlayerLink>
         ) : (
           "Unknown"
         )}
@@ -143,12 +147,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
       <span className="text-sm">
         <span className="text-green-600 font-medium">
           {event.player ? (
-            <Link
-              href={`/players/${event.player.slug}`}
+            <PlayerLink
+              slug={event.player.slug}
+              isLinkWorthy={event.player.isIndexable ?? false}
               className="hover:text-green-700 transition-colors"
             >
               {event.player.name}
-            </Link>
+            </PlayerLink>
           ) : (
             "Unknown"
           )}{" "}
@@ -156,12 +161,13 @@ function EventDetail({ event }: { event: TimelineEvent }) {
         <span className="text-neutral-400">{"\u2194"}</span>{" "}
         <span className="text-red-500 font-medium">
           {event.secondaryPlayer ? (
-            <Link
-              href={`/players/${event.secondaryPlayer.slug}`}
+            <PlayerLink
+              slug={event.secondaryPlayer.slug}
+              isLinkWorthy={event.secondaryPlayer.isIndexable ?? false}
               className="hover:text-red-600 transition-colors"
             >
               {event.secondaryPlayer.name}
-            </Link>
+            </PlayerLink>
           ) : (
             "Unknown"
           )}
