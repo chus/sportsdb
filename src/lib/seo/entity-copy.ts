@@ -259,50 +259,107 @@ export function buildTeamAbout(args: {
     drawn: number;
     lost: number;
     goalDifference: number;
+    played?: number;
+    goalsFor?: number;
+    goalsAgainst?: number;
+    form?: string | null;
   } | null;
+  leaderName?: string | null;
+  leaderPoints?: number | null;
+  topScorer?: { name: string; goals: number } | null;
+  venueName?: string | null;
+  venueCapacity?: number | null;
 }): string[] {
-  // --- Sentence 1: Identity + history ---
   // Guard: skip city if it looks like a number (data quality bug)
   const safeCity = args.city && !/^\d+$/.test(args.city) ? args.city : null;
   const location = safeCity && args.country
     ? `${safeCity}, ${args.country}`
     : safeCity || args.country || null;
 
-  let sentence1: string;
+  // --- Paragraph 1: Identity + history ---
+  let identity: string;
   if (args.foundedYear && location) {
-    sentence1 = `Founded in ${args.foundedYear}, ${args.name} are a football club based in ${location}.`;
+    identity = `Founded in ${args.foundedYear}, ${args.name} are a football club based in ${location}.`;
   } else if (location) {
-    sentence1 = `${args.name} are a football club based in ${location}.`;
+    identity = `${args.name} are a football club based in ${location}.`;
   } else if (args.foundedYear) {
-    sentence1 = `Founded in ${args.foundedYear}, ${args.name} are a professional football club.`;
+    identity = `Founded in ${args.foundedYear}, ${args.name} are a professional football club.`;
   } else {
-    sentence1 = `${args.name} are a professional football club.`;
+    identity = `${args.name} are a professional football club.`;
   }
 
-  // --- Sentence 2: Current standing ---
-  let sentence2: string;
-  const compLabel = args.competitionName || args.seasonLabel || "the league";
+  const compLabel = args.competitionName || "the league";
+  let competition = "";
+  if (args.competitionName && args.seasonLabel) {
+    competition = ` They compete in the ${args.competitionName} for the ${args.seasonLabel} season.`;
+  } else if (args.competitionName) {
+    competition = ` They compete in the ${args.competitionName}.`;
+  }
+
+  const para1 = identity + competition;
+
+  // --- Paragraph 2: Current standing + context ---
+  let standingText = "";
   if (args.standing && args.seasonLabel) {
-    sentence2 = `They currently sit ${ordinal(args.standing.position)} in the ${compLabel} with ${args.standing.points} points from a ${args.standing.won}W-${args.standing.drawn}D-${args.standing.lost}L record this season.`;
-  } else {
-    sentence2 = `The club carries a ${args.squadSize}-player squad for the current campaign.`;
+    const s = args.standing;
+    const posText = `${ordinal(s.position)} in the ${compLabel}`;
+    const gdText = s.goalDifference > 0 ? `+${s.goalDifference}` : String(s.goalDifference);
+
+    standingText = `${args.name} currently sit ${posText} with ${s.points} points from a ${s.won}W-${s.drawn}D-${s.lost}L record (GD: ${gdText}).`;
+
+    // Add gap-to-leader context if not 1st
+    if (s.position > 1 && args.leaderName && args.leaderPoints != null) {
+      const gap = args.leaderPoints - s.points;
+      if (gap > 0) {
+        standingText += ` They trail leaders ${args.leaderName} by ${gap} point${gap !== 1 ? "s" : ""}.`;
+      }
+    } else if (s.position === 1) {
+      standingText += ` They lead the table.`;
+    }
+
+    // Form context
+    if (s.form && s.form.length >= 3) {
+      const formArr = s.form.split("");
+      const recent5 = formArr.slice(-5);
+      const wins = recent5.filter((f) => f === "W").length;
+      const unbeaten = recent5.filter((f) => f === "W" || f === "D").length;
+      if (wins >= 4) {
+        standingText += ` Their recent form has been excellent, winning ${wins} of their last ${recent5.length} matches.`;
+      } else if (unbeaten === recent5.length) {
+        standingText += ` They are unbeaten in their last ${recent5.length} matches.`;
+      } else if (wins <= 1) {
+        standingText += ` Form has been a concern, with just ${wins} win in their last ${recent5.length} outings.`;
+      }
+    }
   }
 
-  // --- Sentence 3: Squad context ---
-  let sentence3: string;
-  if (args.standing) {
-    // Already mentioned standing, add squad context
-    sentence3 = `The squad features ${args.squadSize} players${args.formerPlayersCount > 0 ? `, with ${args.formerPlayersCount} former players having represented the club in recent seasons` : ""}.`;
-  } else if (args.formerPlayersCount > 0) {
-    sentence3 = `${args.formerPlayersCount} former players have represented the club in recent seasons.`;
-  } else {
-    sentence3 = "";
+  const para2 = standingText;
+
+  // --- Paragraph 3: Top scorer + squad ---
+  const parts3: string[] = [];
+  if (args.topScorer && args.topScorer.goals > 0) {
+    parts3.push(
+      `${args.topScorer.name} leads the scoring charts for the club with ${args.topScorer.goals} goal${args.topScorer.goals !== 1 ? "s" : ""} this season.`
+    );
+  }
+  if (args.squadSize > 0) {
+    parts3.push(
+      `The first-team squad comprises ${args.squadSize} players${args.formerPlayersCount > 0 ? `, with ${args.formerPlayersCount} former players having represented the club in recent seasons` : ""}.`
+    );
+  }
+  const para3 = parts3.join(" ");
+
+  // --- Paragraph 4: Venue ---
+  let para4 = "";
+  if (args.venueName) {
+    if (args.venueCapacity) {
+      para4 = `${args.name} play their home matches at ${args.venueName}, which has a capacity of ${args.venueCapacity.toLocaleString()} spectators.`;
+    } else {
+      para4 = `${args.name} play their home matches at ${args.venueName}.`;
+    }
   }
 
-  const para1 = [sentence1, sentence2].join(" ");
-  const para2 = sentence3;
-
-  return [para1, para2].filter(Boolean);
+  return [para1, para2, para3, para4].filter(Boolean);
 }
 
 export function buildCompetitionAbout(args: {

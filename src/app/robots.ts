@@ -8,9 +8,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/search"],
+        disallow: [
+          "/api/",
+          "/admin/",
+          "/search",
+          "/dashboard",
+          "/players/",
+          "/venues/",
+          "/matches/",
+          "/compare",
+          "/games/",
+        ],
       },
     ],
-    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/news-sitemap.xml`],
+    sitemap: [`${BASE_URL}/sitemap.xml`],
   };
 }

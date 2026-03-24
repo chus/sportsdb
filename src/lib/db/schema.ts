@@ -618,6 +618,7 @@ export const articles = pgTable(
     // AI metadata
     generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow(),
     modelVersion: text("model_version"),
+    wordCount: integer("word_count"),
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

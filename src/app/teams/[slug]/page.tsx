@@ -25,8 +25,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { TabPanel } from "@/components/ui/tab-navigation";
 import { TeamTabs } from "./team-tabs";
 import { db } from "@/lib/db";
-import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons } from "@/lib/db/schema";
-import { eq, and, isNull, ne, sql } from "drizzle-orm";
+import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons, teamVenueHistory, venues, teams as teamsTable } from "@/lib/db/schema";
+import { eq, and, isNull, ne, sql, asc } from "drizzle-orm";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
@@ -183,10 +183,30 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const competitionName = statsData[0]?.competitionName;
   const competitionSlug = statsData[0]?.competitionSlug;
 
-  // Fetch top scorer (needs competitionSeasonId from standing)
-  const topScorer = standing
-    ? await getTeamTopScorer(team.id, standing.competitionSeasonId)
-    : null;
+  // Fetch top scorer, venue, and league leader (needs competitionSeasonId from standing)
+  const [topScorer, venueResult, leaderResult] = await Promise.all([
+    standing
+      ? getTeamTopScorer(team.id, standing.competitionSeasonId)
+      : Promise.resolve(null),
+    db
+      .select({ name: venues.name, capacity: venues.capacity })
+      .from(teamVenueHistory)
+      .innerJoin(venues, eq(venues.id, teamVenueHistory.venueId))
+      .where(and(eq(teamVenueHistory.teamId, team.id), isNull(teamVenueHistory.validTo)))
+      .limit(1),
+    standing
+      ? db
+          .select({ teamName: teamsTable.name, points: standingsTable.points })
+          .from(standingsTable)
+          .innerJoin(teamsTable, eq(teamsTable.id, standingsTable.teamId))
+          .where(eq(standingsTable.competitionSeasonId, standing.competitionSeasonId))
+          .orderBy(asc(standingsTable.position))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  const venue = venueResult[0] ?? null;
+  const leader = leaderResult[0] ?? null;
 
   const nextMatch = matchesData.upcoming[0] ?? null;
   const recentMatches = matchesData.recent.slice(0, 5);
@@ -219,7 +239,18 @@ export default async function TeamPage({ params }: TeamPageProps) {
     formerPlayersCount: formerPlayers.length,
     seasonLabel,
     competitionName,
-    standing,
+    standing: standing ? {
+      ...standing,
+      played: standing.played,
+      goalsFor: standing.goalsFor,
+      goalsAgainst: standing.goalsAgainst,
+      form: standing.form,
+    } : null,
+    leaderName: leader?.teamName ?? null,
+    leaderPoints: leader?.points ?? null,
+    topScorer: topScorer ? { name: topScorer.player.name, goals: topScorer.goals } : null,
+    venueName: venue?.name ?? null,
+    venueCapacity: venue?.capacity ?? null,
   });
   const faqItems = buildTeamFaqs({
     name: team.name,

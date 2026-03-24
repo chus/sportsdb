@@ -5,6 +5,7 @@
  *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --limit=10
  *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --type=match_report --limit=5
  *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --type=all --limit=20
+ *   OPENAI_API_KEY=xxx npx tsx scripts/regenerate-articles.ts --min-words=600 --limit=20
  */
 
 import { neon } from "@neondatabase/serverless";
@@ -41,6 +42,7 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const args = process.argv.slice(2);
 const limitArg = parseInt(args.find(a => a.startsWith("--limit="))?.split("=")[1] || "10");
 const typeArg = args.find(a => a.startsWith("--type="))?.split("=")[1] || "all";
+const minWordsArg = parseInt(args.find(a => a.startsWith("--min-words="))?.split("=")[1] || "0");
 
 const VALID_TYPES = ["match_report", "round_recap", "player_spotlight", "match_preview", "season_review", "all"] as const;
 
@@ -50,12 +52,20 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\nRegenerating ${limitArg} articles (type: ${typeArg}) with improved prompts\n`);
+  console.log(`\nRegenerating ${limitArg} articles (type: ${typeArg}${minWordsArg > 0 ? `, under ${minWordsArg} words` : ""}) with improved prompts\n`);
 
-  // Get oldest articles to regenerate, filtered by type
-  const oldArticles = typeArg !== "all"
-    ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND (model_version != 'gpt-4o-mini-improved' OR model_version IS NULL) ORDER BY created_at LIMIT ${limitArg}`
-    : await sql`SELECT * FROM articles WHERE model_version != 'gpt-4o-mini-improved' OR model_version IS NULL ORDER BY created_at LIMIT ${limitArg}`;
+  // Get articles to regenerate, filtered by type and optional min-words
+  let oldArticles;
+  if (minWordsArg > 0) {
+    // Target short articles based on word_count column
+    oldArticles = typeArg !== "all"
+      ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND status = 'published' AND (word_count IS NULL OR word_count < ${minWordsArg}) ORDER BY word_count ASC NULLS FIRST LIMIT ${limitArg}`
+      : await sql`SELECT * FROM articles WHERE status = 'published' AND (word_count IS NULL OR word_count < ${minWordsArg}) ORDER BY word_count ASC NULLS FIRST LIMIT ${limitArg}`;
+  } else {
+    oldArticles = typeArg !== "all"
+      ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND (model_version != 'gpt-4o-mini-improved' OR model_version IS NULL) ORDER BY created_at LIMIT ${limitArg}`
+      : await sql`SELECT * FROM articles WHERE model_version != 'gpt-4o-mini-improved' OR model_version IS NULL ORDER BY created_at LIMIT ${limitArg}`;
+  }
 
   console.log(`Found ${oldArticles.length} articles to regenerate\n`);
 
@@ -103,6 +113,27 @@ async function main() {
         continue;
       }
 
+      let wordCount = estimateWordCount(newArticle.content);
+
+      // Retry once if under minimum word count
+      const MIN_WORDS: Record<string, number> = {
+        match_report: 600,
+        round_recap: 600,
+        match_preview: 500,
+        season_review: 600,
+        player_spotlight: 500,
+      };
+      const minRequired = MIN_WORDS[article.type] || 500;
+
+      if (wordCount < minRequired && prompt) {
+        console.log(`   Under minimum (${wordCount}/${minRequired} words), retrying...`);
+        const retry = await generateArticle(prompt);
+        if (retry && estimateWordCount(retry.content) > wordCount) {
+          Object.assign(newArticle, retry);
+          wordCount = estimateWordCount(retry.content);
+        }
+      }
+
       // Update the article (preserve slug for SEO continuity)
       await sql`
         UPDATE articles SET
@@ -112,11 +143,12 @@ async function main() {
           meta_title = ${newArticle.metaTitle},
           meta_description = ${newArticle.metaDescription},
           model_version = ${"gpt-4o-mini-improved"},
+          word_count = ${wordCount},
           updated_at = NOW()
         WHERE id = ${article.id}
       `;
 
-      console.log(`   Regenerated (${estimateWordCount(newArticle.content)} words)`);
+      console.log(`   Regenerated (${wordCount} words)`);
       regenerated++;
 
       // Rate limit
