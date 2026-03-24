@@ -81,8 +81,8 @@ async function main() {
     if (t.standings_count > 0) score += 10;
     if (t.match_count > 0) score += 10;
 
-    if (score >= 40) {
-      // This team would be in the sitemap
+    if (score >= 40 && t.standings_count > 0) {
+      // This team would be in the sitemap (score >= 40 + must have standings)
       if (issues.length > 0) {
         teamFail++;
         allIssues.push({ type: "team", slug: t.slug, issues });

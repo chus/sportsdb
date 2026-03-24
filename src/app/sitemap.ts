@@ -159,15 +159,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
+  // Also require current-season standings — national teams without league play are thin
   const teamPages: MetadataRoute.Sitemap = allTeams
     .filter((team) => {
+      if ((team.standingsCount ?? 0) === 0) return false; // hard gate: must have current standings
       const result = scoreTeamPage({
         country: team.country,
         city: team.city,
         foundedYear: team.foundedYear,
         logoUrl: team.logoUrl,
         squadSize: team.squadCount ?? 0,
-        hasStandings: (team.standingsCount ?? 0) > 0,
+        hasStandings: true,
         hasMatches: true,
       });
       return result.score >= 40; // Tier A only
