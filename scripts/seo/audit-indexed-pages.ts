@@ -57,10 +57,13 @@ async function main() {
     )
   `;
 
+  const NATIONAL_TEAM_SLUGS = new Set(["mexico", "south-korea", "south-africa", "brazil", "argentina", "germany", "france", "england", "spain", "italy", "portugal", "netherlands", "belgium", "croatia", "denmark", "serbia", "switzerland", "austria", "poland", "czech-republic", "scotland", "wales", "turkey", "ukraine", "romania", "hungary", "slovakia", "slovenia", "albania", "georgia", "japan", "australia", "usa", "canada", "colombia", "uruguay", "chile", "ecuador", "paraguay", "peru", "venezuela", "bolivia"]);
+
   let teamPass = 0;
   let teamFail = 0;
 
   for (const t of teams) {
+    if (NATIONAL_TEAM_SLUGS.has(t.slug)) continue; // excluded from sitemap
     const issues: string[] = [];
     if (t.city && /^\d+$/.test(t.city)) issues.push("numeric city");
     if (!t.city) issues.push("no city");
