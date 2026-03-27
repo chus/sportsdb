@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players, playerSeasonStats } from "@/lib/db/schema";
-import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne } from "drizzle-orm";
+import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players, playerSeasonStats, transfers } from "@/lib/db/schema";
+import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne, sql } from "drizzle-orm";
 
 /**
  * Get a team by their URL slug.
@@ -162,4 +162,41 @@ export async function getTeamSeasons(teamId: string) {
     .where(eq(playerTeamHistory.teamId, teamId))
     .groupBy(seasons.id)
     .orderBy(desc(seasons.startDate));
+}
+
+/**
+ * Get recent transfers for a team (incoming and outgoing).
+ */
+export async function getTeamTransfers(teamId: string, limit = 10) {
+  return db
+    .select({
+      id: transfers.id,
+      transferDate: transfers.transferDate,
+      transferFeeEur: transfers.transferFeeEur,
+      season: transfers.season,
+      fromTeamId: transfers.fromTeamId,
+      toTeamId: transfers.toTeamId,
+      player: {
+        name: players.name,
+        slug: players.slug,
+        position: players.position,
+      },
+      fromTeam: {
+        name: sql<string | null>`ft.name`,
+        slug: sql<string | null>`ft.slug`,
+        logoUrl: sql<string | null>`ft.logo_url`,
+      },
+      toTeam: {
+        name: sql<string>`tt.name`,
+        slug: sql<string>`tt.slug`,
+        logoUrl: sql<string | null>`tt.logo_url`,
+      },
+    })
+    .from(transfers)
+    .innerJoin(players, eq(players.id, transfers.playerId))
+    .leftJoin(sql`teams ft`, sql`ft.id = ${transfers.fromTeamId}`)
+    .innerJoin(sql`teams tt`, sql`tt.id = ${transfers.toTeamId}`)
+    .where(or(eq(transfers.toTeamId, teamId), eq(transfers.fromTeamId, teamId)))
+    .orderBy(desc(transfers.transferDate))
+    .limit(limit);
 }

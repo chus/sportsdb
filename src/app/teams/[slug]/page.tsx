@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight } from "lucide-react";
+import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight, ArrowRightLeft, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
-import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer } from "@/lib/queries/teams";
+import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer, getTeamTransfers } from "@/lib/queries/teams";
 import { getTeamMatches } from "@/lib/queries/matches";
 import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
@@ -33,6 +33,15 @@ interface TeamPageProps {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
+function formatMarketValue(valueEur: number): string {
+  if (valueEur >= 1_000_000) {
+    const millions = valueEur / 1_000_000;
+    return `€${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1)}M`;
+  }
+  if (valueEur >= 1_000) return `€${(valueEur / 1_000).toFixed(0)}K`;
+  return `€${valueEur.toLocaleString()}`;
+}
 
 export async function generateMetadata({ params }: TeamPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -71,7 +80,8 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   const isThin = quality.isThin;
 
   const title = `${team.name} – Squad, Results & Standings 2025/26 | DataSports`;
-  const description = `${team.name} squad, fixtures, results, and standings for the 2025/26 season. View full roster, recent matches, and league position.`;
+  const mvStr = team.squadMarketValue ? ` Squad value: ${formatMarketValue(team.squadMarketValue)}.` : "";
+  const description = `${team.name} squad, fixtures, results, and standings for the 2025/26 season.${mvStr} View full roster, recent matches, and league position.`;
 
   return {
     title,
@@ -171,11 +181,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
     notFound();
   }
 
-  const [squad, statsData, formerPlayers, matchesData] = await Promise.all([
+  const [squad, statsData, formerPlayers, matchesData, teamTransfers] = await Promise.all([
     getSquad(team.id),
     getTeamStats(team.id),
     getFormerPlayers(team.id, 10),
     getTeamMatches(team.id, 5),
+    getTeamTransfers(team.id, 10),
   ]);
 
   const standing = statsData[0]?.standing;
@@ -251,6 +262,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
     topScorer: topScorer ? { name: topScorer.player.name, goals: topScorer.goals } : null,
     venueName: venue?.name ?? null,
     venueCapacity: venue?.capacity ?? null,
+    coachName: team.coachName,
+    squadMarketValue: team.squadMarketValue,
   });
   const faqItems = buildTeamFaqs({
     name: team.name,
@@ -263,6 +276,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
     goalsFor: standing?.goalsFor,
     goalsAgainst: standing?.goalsAgainst,
     standing,
+    coachName: team.coachName,
+    squadMarketValue: team.squadMarketValue,
   });
 
   // Breadcrumb items
@@ -317,11 +332,25 @@ export default async function TeamPage({ params }: TeamPageProps) {
               )}
             </div>
           }
-          badges={positionBadge ? (
-            <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-full">
-              {positionBadge}
-            </span>
-          ) : undefined}
+          badges={
+            <div className="flex items-center gap-2 flex-wrap">
+              {positionBadge && (
+                <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-full">
+                  {positionBadge}
+                </span>
+              )}
+              {team.coachName && (
+                <span className="text-xs font-medium bg-white/20 px-2.5 py-1 rounded-full">
+                  Coach: {team.coachName}
+                </span>
+              )}
+              {team.squadMarketValue && (
+                <span className="text-xs font-bold bg-emerald-500/30 px-2.5 py-1 rounded-full">
+                  Squad: {formatMarketValue(team.squadMarketValue)}
+                </span>
+              )}
+            </div>
+          }
           stats={standing ? [
             { label: "Pos", value: `#${standing.position}` },
             { label: "Pts", value: standing.points },
@@ -554,6 +583,58 @@ export default async function TeamPage({ params }: TeamPageProps) {
                                 </div>
                                 <span className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d")}</span>
                               </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent Transfers */}
+                    {teamTransfers.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
+                          <h3 className="text-sm font-bold text-neutral-900">Recent Transfers</h3>
+                        </div>
+                        <div className="divide-y divide-neutral-100">
+                          {teamTransfers.slice(0, 5).map((t) => {
+                            const isIncoming = t.toTeamId === team.id;
+                            const otherTeam = isIncoming ? t.fromTeam : t.toTeam;
+                            return (
+                              <div key={t.id} className="flex items-center justify-between px-4 py-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isIncoming ? "bg-green-100" : "bg-red-100"}`}>
+                                    {isIncoming ? (
+                                      <ArrowDownLeft className="w-3.5 h-3.5 text-green-600" />
+                                    ) : (
+                                      <ArrowUpRight className="w-3.5 h-3.5 text-red-600" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <Link href={`/players/${t.player.slug}`} className="text-sm font-medium text-neutral-900 hover:text-blue-600 truncate block">
+                                      {t.player.name}
+                                    </Link>
+                                    <div className="flex items-center gap-1 text-xs text-neutral-500">
+                                      <span>{isIncoming ? "from" : "to"}</span>
+                                      {otherTeam.name ? (
+                                        <Link href={`/teams/${otherTeam.slug}`} className="hover:text-blue-600 truncate">{otherTeam.name}</Link>
+                                      ) : (
+                                        <span>Unknown</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right flex-shrink-0 ml-3">
+                                  {t.transferFeeEur != null && t.transferFeeEur > 0 && (
+                                    <div className="text-sm font-bold text-neutral-900">{formatMarketValue(t.transferFeeEur)}</div>
+                                  )}
+                                  {t.transferFeeEur === 0 && (
+                                    <div className="text-xs font-medium text-green-600">Free</div>
+                                  )}
+                                  <div className="text-[10px] text-neutral-400">
+                                    {t.transferDate && format(new Date(t.transferDate), "MMM yyyy")}
+                                  </div>
+                                </div>
+                              </div>
                             );
                           })}
                         </div>

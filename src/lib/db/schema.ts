@@ -55,10 +55,16 @@ export const teams = pgTable(
     primaryColor: text("primary_color"), // hex
     secondaryColor: text("secondary_color"),
     tier: integer("tier").default(3), // 1 = top club, 2 = mid tier, 3 = other
+    transfermarktId: integer("transfermarkt_id"), // Transfermarkt club ID
+    coachName: text("coach_name"), // Current manager/coach
+    squadMarketValue: integer("squad_market_value"), // Total squad value in EUR
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
-  (table) => [index("idx_teams_slug").on(table.slug)]
+  (table) => [
+    index("idx_teams_slug").on(table.slug),
+    uniqueIndex("idx_teams_transfermarkt").on(table.transfermarktId),
+  ]
 );
 
 export const players = pgTable(
@@ -80,10 +86,17 @@ export const players = pgTable(
     popularityScore: integer("popularity_score").default(0),
     isIndexable: boolean("is_indexable").default(false), // Cached: score >= 40
     enrichedAt: timestamp("enriched_at", { withTimezone: true }), // Last API-Football enrichment
+    transfermarktId: integer("transfermarkt_id"), // Transfermarkt player ID
+    marketValueEur: integer("market_value_eur"), // Current market value in EUR
+    highestMarketValueEur: integer("highest_market_value_eur"), // All-time peak
+    contractExpirationDate: date("contract_expiration_date"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
-  (table) => [index("idx_players_slug").on(table.slug)]
+  (table) => [
+    index("idx_players_slug").on(table.slug),
+    uniqueIndex("idx_players_transfermarkt").on(table.transfermarktId),
+  ]
 );
 
 export const venues = pgTable("venues", {
@@ -125,6 +138,32 @@ export const playerTeamHistory = pgTable(
     index("idx_pth_player").on(table.playerId),
     index("idx_pth_team").on(table.teamId),
     index("idx_pth_current").on(table.playerId),
+  ]
+);
+
+export const transfers = pgTable(
+  "transfers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+    fromTeamId: uuid("from_team_id").references(() => teams.id), // NULL = youth/unknown
+    toTeamId: uuid("to_team_id")
+      .notNull()
+      .references(() => teams.id),
+    transferDate: date("transfer_date").notNull(),
+    transferFeeEur: integer("transfer_fee_eur"), // NULL = undisclosed, 0 = free
+    marketValueAtTransfer: integer("market_value_at_transfer"),
+    season: text("season"), // e.g. "2024/25"
+    transfermarktId: text("transfermarkt_id").unique(), // composite key for dedup
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_transfers_player").on(table.playerId),
+    index("idx_transfers_from").on(table.fromTeamId),
+    index("idx_transfers_to").on(table.toTeamId),
+    index("idx_transfers_date").on(table.transferDate),
   ]
 );
 

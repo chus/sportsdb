@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers } from "@/lib/db/schema";
+import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers, transfers } from "@/lib/db/schema";
 import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
 
 /**
@@ -239,4 +239,33 @@ export async function getPlayerQuality(player: {
     lineupCount: Number(lineupCount[0]?.count ?? 0),
     articleCount: Number(articleCount[0]?.count ?? 0),
   });
+}
+
+/**
+ * Get transfer history for a player, ordered by date descending.
+ */
+export async function getPlayerTransfers(playerId: string) {
+  return db
+    .select({
+      id: transfers.id,
+      transferDate: transfers.transferDate,
+      transferFeeEur: transfers.transferFeeEur,
+      marketValueAtTransfer: transfers.marketValueAtTransfer,
+      season: transfers.season,
+      fromTeam: {
+        name: sql<string | null>`ft.name`,
+        slug: sql<string | null>`ft.slug`,
+        logoUrl: sql<string | null>`ft.logo_url`,
+      },
+      toTeam: {
+        name: sql<string>`tt.name`,
+        slug: sql<string>`tt.slug`,
+        logoUrl: sql<string | null>`tt.logo_url`,
+      },
+    })
+    .from(transfers)
+    .leftJoin(sql`teams ft`, sql`ft.id = ${transfers.fromTeamId}`)
+    .innerJoin(sql`teams tt`, sql`tt.id = ${transfers.toTeamId}`)
+    .where(eq(transfers.playerId, playerId))
+    .orderBy(desc(transfers.transferDate));
 }

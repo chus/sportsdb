@@ -27,6 +27,15 @@ function pronoun(position: string): { he: string; his: string; him: string } {
   return { he: "he", his: "his", him: "him" };
 }
 
+function formatMarketValue(valueEur: number): string {
+  if (valueEur >= 1_000_000) {
+    const millions = valueEur / 1_000_000;
+    return `€${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1)}M`;
+  }
+  if (valueEur >= 1_000) return `€${(valueEur / 1_000).toFixed(0)}K`;
+  return `€${valueEur.toLocaleString()}`;
+}
+
 function positionDescriptor(position: string): string {
   const lower = position.toLowerCase();
   if (lower === "forward") return "striker";
@@ -69,6 +78,7 @@ export function buildPlayerAbout(args: {
   totalAppearances: number;
   totalGoals: number;
   totalAssists: number;
+  marketValueEur?: number | null;
 }): string[] {
   const { he, his } = pronoun(args.position);
   const pos = positionDescriptor(args.position);
@@ -159,9 +169,15 @@ export function buildPlayerAbout(args: {
     sentence3 = "";
   }
 
+  // --- Sentence 4: Market value ---
+  let sentence4 = "";
+  if (args.marketValueEur) {
+    sentence4 = `${sn}'s current market value is estimated at ${formatMarketValue(args.marketValueEur)}.`;
+  }
+
   // Build paragraphs
   const para1 = [sentence1, sentence2].filter(Boolean).join(" ");
-  const para2 = sentence3;
+  const para2 = [sentence3, sentence4].filter(Boolean).join(" ");
 
   return [para1, para2].filter(Boolean);
 }
@@ -179,6 +195,7 @@ export function buildPlayerFaqs(args: {
   totalApps?: number;
   heightCm?: number | null;
   careerTeams?: string[];
+  marketValueEur?: number | null;
 }) {
   const faqs: FaqItem[] = [
     {
@@ -239,6 +256,13 @@ export function buildPlayerFaqs(args: {
     });
   }
 
+  if (args.marketValueEur) {
+    faqs.push({
+      question: `What is ${args.name}'s market value?`,
+      answer: `${args.name}'s current estimated market value is ${formatMarketValue(args.marketValueEur)}.`,
+    });
+  }
+
   return faqs;
 }
 
@@ -269,6 +293,8 @@ export function buildTeamAbout(args: {
   topScorer?: { name: string; goals: number } | null;
   venueName?: string | null;
   venueCapacity?: number | null;
+  coachName?: string | null;
+  squadMarketValue?: number | null;
 }): string[] {
   // Guard: skip city if it looks like a number (data quality bug)
   const safeCity = args.city && !/^\d+$/.test(args.city) ? args.city : null;
@@ -335,16 +361,22 @@ export function buildTeamAbout(args: {
 
   const para2 = standingText;
 
-  // --- Paragraph 3: Top scorer + squad ---
+  // --- Paragraph 3: Top scorer + squad + coach + value ---
   const parts3: string[] = [];
+  if (args.coachName) {
+    parts3.push(`The team is managed by ${args.coachName}.`);
+  }
   if (args.topScorer && args.topScorer.goals > 0) {
     parts3.push(
       `${args.topScorer.name} leads the scoring charts for the club with ${args.topScorer.goals} goal${args.topScorer.goals !== 1 ? "s" : ""} this season.`
     );
   }
   if (args.squadSize > 0) {
+    const valueSuffix = args.squadMarketValue
+      ? `, valued at a combined ${formatMarketValue(args.squadMarketValue)}`
+      : "";
     parts3.push(
-      `The first-team squad comprises ${args.squadSize} players${args.formerPlayersCount > 0 ? `, with ${args.formerPlayersCount} former players having represented the club in recent seasons` : ""}.`
+      `The first-team squad comprises ${args.squadSize} players${valueSuffix}${args.formerPlayersCount > 0 ? `, with ${args.formerPlayersCount} former players having represented the club in recent seasons` : ""}.`
     );
   }
   const para3 = parts3.join(" ");
@@ -481,6 +513,8 @@ export function buildTeamFaqs(args: {
     position: number;
     points: number;
   } | null;
+  coachName?: string | null;
+  squadMarketValue?: number | null;
 }) {
   const faqs: FaqItem[] = [];
 
@@ -525,6 +559,20 @@ export function buildTeamFaqs(args: {
     faqs.push({
       question: `How many goals have ${args.name} scored this season?`,
       answer: `${args.name} have scored ${args.goalsFor} goals and conceded ${args.goalsAgainst} in the ${label} this season.`,
+    });
+  }
+
+  if (args.coachName) {
+    faqs.push({
+      question: `Who is the manager of ${args.name}?`,
+      answer: `${args.name} are managed by ${args.coachName}.`,
+    });
+  }
+
+  if (args.squadMarketValue) {
+    faqs.push({
+      question: `What is ${args.name}'s squad market value?`,
+      answer: `${args.name}'s current squad is valued at approximately ${formatMarketValue(args.squadMarketValue)}.`,
     });
   }
 

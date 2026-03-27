@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   User, Calendar, Shield, BarChart3,
-  Trophy, Target, TrendingUp, ChevronRight
+  Trophy, Target, TrendingUp, ChevronRight, ArrowRightLeft
 } from "lucide-react";
 import type { Metadata } from "next";
-import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality } from "@/lib/queries/players";
+import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
 import { getTeamMatches } from "@/lib/queries/matches";
 import { format, differenceInYears, formatDistanceToNowStrict } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
@@ -31,6 +31,15 @@ interface PlayerPageProps {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
+function formatMarketValue(valueEur: number): string {
+  if (valueEur >= 1_000_000) {
+    const millions = valueEur / 1_000_000;
+    return `€${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1)}M`;
+  }
+  if (valueEur >= 1_000) return `€${(valueEur / 1_000).toFixed(0)}K`;
+  return `€${valueEur.toLocaleString()}`;
+}
 
 export async function generateMetadata({ params }: PlayerPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -67,9 +76,10 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
 
   const statsStr = statsParts.length > 0 ? statsParts.join(" and ") : "";
   const teamStr = currentTeam ? ` for ${currentTeam.name}` : "";
+  const mvStr = player.marketValueEur ? ` Valued at ${formatMarketValue(player.marketValueEur)}.` : "";
   const description = statsStr
-    ? `${player.name} has ${statsStr}${teamStr}. Full career history, season stats, and player profile.`
-    : `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}. View career history, teams, and stats on DataSports.`;
+    ? `${player.name} has ${statsStr}${teamStr}.${mvStr} Full career history, season stats, and player profile.`
+    : `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}.${mvStr} View career history, teams, and stats on DataSports.`;
 
   return {
     title,
@@ -119,12 +129,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
 
-  const [currentTeamData, career, statsHistory, rankings, recentMatches] = await Promise.all([
+  const [currentTeamData, career, statsHistory, rankings, recentMatches, transferHistory] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerCareer(player.id),
     getPlayerStatsHistory(player.id),
     getPlayerRankings(player.id),
     getPlayerRecentMatches(player.id, 5),
+    getPlayerTransfers(player.id),
   ]);
 
   const currentTeam = currentTeamData?.team;
@@ -175,6 +186,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     totalAppearances: totalApps,
     totalGoals,
     totalAssists,
+    marketValueEur: player.marketValueEur,
   });
   const faqItems = buildPlayerFaqs({
     name: player.name,
@@ -189,6 +201,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     totalApps: totalApps,
     heightCm: player.heightCm,
     careerTeams: career.length > 1 ? career.map((c) => c.team.name) : undefined,
+    marketValueEur: player.marketValueEur,
   });
 
   // Build breadcrumb items
@@ -266,6 +279,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             {shirtNumber && (
               <span className="px-2.5 py-1 bg-white/20 rounded-full text-xs font-bold">
                 #{shirtNumber}
+              </span>
+            )}
+            {player.marketValueEur && (
+              <span className="px-3 py-1 bg-emerald-500/30 rounded-full text-xs font-bold">
+                {formatMarketValue(player.marketValueEur)}
               </span>
             )}
           </div>
@@ -709,6 +727,49 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
                         <p className="text-neutral-500">No career history available.</p>
                       </div>
+                    )}
+
+                    {/* Transfer History */}
+                    {transferHistory.length > 0 && (
+                      <section className="mt-8">
+                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Transfer History</h2>
+                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                          {transferHistory.map((t) => (
+                            <div key={t.id} className="flex items-center justify-between p-4">
+                              <div className="flex items-center gap-2 min-w-0">
+                                {t.fromTeam.name ? (
+                                  <Link href={`/teams/${t.fromTeam.slug}`} className="flex items-center gap-1.5 hover:text-blue-600 min-w-0">
+                                    {t.fromTeam.logoUrl && (
+                                      <ImageWithFallback src={t.fromTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
+                                    )}
+                                    <span className="text-sm text-neutral-700 truncate">{t.fromTeam.name}</span>
+                                  </Link>
+                                ) : (
+                                  <span className="text-sm text-neutral-400">Unknown</span>
+                                )}
+                                <ArrowRightLeft className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0 mx-1" />
+                                <Link href={`/teams/${t.toTeam.slug}`} className="flex items-center gap-1.5 hover:text-blue-600 min-w-0">
+                                  {t.toTeam.logoUrl && (
+                                    <ImageWithFallback src={t.toTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
+                                  )}
+                                  <span className="text-sm font-medium text-neutral-900 truncate">{t.toTeam.name}</span>
+                                </Link>
+                              </div>
+                              <div className="text-right flex-shrink-0 ml-3">
+                                {t.transferFeeEur != null && t.transferFeeEur > 0 && (
+                                  <div className="text-sm font-bold text-neutral-900">{formatMarketValue(t.transferFeeEur)}</div>
+                                )}
+                                {t.transferFeeEur === 0 && (
+                                  <div className="text-xs font-medium text-green-600">Free transfer</div>
+                                )}
+                                <div className="text-xs text-neutral-500">
+                                  {t.transferDate && format(new Date(t.transferDate), "MMM d, yyyy")}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
                     )}
                   </>
                 </TabPanel>

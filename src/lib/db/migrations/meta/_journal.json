@@ -36,6 +36,13 @@
       "when": 1773643813687,
       "tag": "0004_faithful_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774206101525,
+      "tag": "0005_bizarre_marvel_boy",
+      "breakpoints": true
     }
   ]
 }
