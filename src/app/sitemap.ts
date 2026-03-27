@@ -159,9 +159,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
-  // Also require current-season standings — national teams without league play are thin
+  // Exclude national teams (no squad data) and require current-season standings
+  const NATIONAL_TEAM_SLUGS = new Set(["mexico", "south-korea", "south-africa", "brazil", "argentina", "germany", "france", "england", "spain", "italy", "portugal", "netherlands", "belgium", "croatia", "denmark", "serbia", "switzerland", "austria", "poland", "czech-republic", "scotland", "wales", "turkey", "ukraine", "romania", "hungary", "slovakia", "slovenia", "albania", "georgia", "japan", "australia", "usa", "canada", "colombia", "uruguay", "chile", "ecuador", "paraguay", "peru", "venezuela", "bolivia"]);
   const teamPages: MetadataRoute.Sitemap = allTeams
     .filter((team) => {
+      if (NATIONAL_TEAM_SLUGS.has(team.slug)) return false; // exclude national teams
       if ((team.standingsCount ?? 0) === 0) return false; // hard gate: must have current standings
       const result = scoreTeamPage({
         country: team.country,

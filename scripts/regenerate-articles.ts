@@ -43,6 +43,7 @@ const args = process.argv.slice(2);
 const limitArg = parseInt(args.find(a => a.startsWith("--limit="))?.split("=")[1] || "10");
 const typeArg = args.find(a => a.startsWith("--type="))?.split("=")[1] || "all";
 const minWordsArg = parseInt(args.find(a => a.startsWith("--min-words="))?.split("=")[1] || "0");
+const noMetaArg = args.includes("--no-meta");
 
 const VALID_TYPES = ["match_report", "round_recap", "player_spotlight", "match_preview", "season_review", "all"] as const;
 
@@ -52,11 +53,16 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`\nRegenerating ${limitArg} articles (type: ${typeArg}${minWordsArg > 0 ? `, under ${minWordsArg} words` : ""}) with improved prompts\n`);
+  console.log(`\nRegenerating ${limitArg} articles (type: ${typeArg}${minWordsArg > 0 ? `, under ${minWordsArg} words` : ""}${noMetaArg ? ", missing meta description" : ""}) with improved prompts\n`);
 
-  // Get articles to regenerate, filtered by type and optional min-words
+  // Get articles to regenerate, filtered by type and optional min-words or missing meta
   let oldArticles;
-  if (minWordsArg > 0) {
+  if (noMetaArg) {
+    // Target articles missing meta_description
+    oldArticles = typeArg !== "all"
+      ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND status = 'published' AND (meta_description IS NULL OR meta_description = '') ORDER BY created_at LIMIT ${limitArg}`
+      : await sql`SELECT * FROM articles WHERE status = 'published' AND (meta_description IS NULL OR meta_description = '') ORDER BY created_at LIMIT ${limitArg}`;
+  } else if (minWordsArg > 0) {
     // Target short articles based on word_count column
     oldArticles = typeArg !== "all"
       ? await sql`SELECT * FROM articles WHERE type = ${typeArg} AND status = 'published' AND (word_count IS NULL OR word_count < ${minWordsArg}) ORDER BY word_count ASC NULLS FIRST LIMIT ${limitArg}`
