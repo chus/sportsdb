@@ -58,6 +58,7 @@ export const teams = pgTable(
     transfermarktId: integer("transfermarkt_id"), // Transfermarkt club ID
     coachName: text("coach_name"), // Current manager/coach
     squadMarketValue: integer("squad_market_value"), // Total squad value in EUR
+    wikidataId: text("wikidata_id"), // Wikidata Q-number (e.g. "Q18656")
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -90,6 +91,8 @@ export const players = pgTable(
     marketValueEur: integer("market_value_eur"), // Current market value in EUR
     highestMarketValueEur: integer("highest_market_value_eur"), // All-time peak
     contractExpirationDate: date("contract_expiration_date"),
+    wikidataId: text("wikidata_id"), // Wikidata Q-number (e.g. "Q615")
+    placeOfBirth: text("place_of_birth"), // City/town name for SEO
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
