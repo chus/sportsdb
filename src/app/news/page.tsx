@@ -6,10 +6,15 @@ import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export const metadata: Metadata = {
   title: "Football News & Match Reports | DataSports",
   description:
     "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.",
+  alternates: {
+    canonical: `${BASE_URL}/news`,
+  },
 };
 
 const ARTICLE_TYPES = [

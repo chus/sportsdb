@@ -88,6 +88,11 @@ export default async function VenuePage({ params }: VenuePageProps) {
     getVenueMatches(venue.id),
   ]);
 
+  // Hard 404 for truly empty venue pages (no city, no teams, no matches)
+  if (!venue.city && teamsData.current.length === 0 && matchesData.recent.length === 0 && matchesData.upcoming.length === 0) {
+    notFound();
+  }
+
   const { current: currentTeams, historical: historicalTeams } = teamsData;
   const { recent: recentMatches, upcoming: upcomingMatches } = matchesData;
 

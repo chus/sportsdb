@@ -14,6 +14,8 @@ interface SearchPageProps {
   searchParams: Promise<{ q?: string; type?: string }>;
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export async function generateMetadata({
   searchParams,
 }: SearchPageProps): Promise<Metadata> {
@@ -25,6 +27,10 @@ export async function generateMetadata({
     description: query
       ? `Search results for "${query}" - Find players, teams, competitions, and venues`
       : "Search players, teams, competitions, and venues in DataSports",
+    robots: { index: false, follow: true },
+    alternates: {
+      canonical: `${BASE_URL}/search`,
+    },
   };
 }
 

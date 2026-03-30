@@ -181,6 +181,31 @@ export default async function TeamPage({ params }: TeamPageProps) {
     notFound();
   }
 
+  // Quick quality check for hard 404 on truly empty team pages
+  const [squadCountCheck, standingsCountCheck] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` })
+      .from(playerTeamHistory)
+      .innerJoin(players, eq(players.id, playerTeamHistory.playerId))
+      .where(and(eq(playerTeamHistory.teamId, team.id), isNull(playerTeamHistory.validTo), ne(players.position, "Unknown"))),
+    db.select({ count: sql<number>`count(*)` })
+      .from(standingsTable)
+      .innerJoin(competitionSeasons, eq(competitionSeasons.id, standingsTable.competitionSeasonId))
+      .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+      .where(and(eq(standingsTable.teamId, team.id), eq(seasons.isCurrent, true))),
+  ]);
+  const teamQuality = scoreTeamPage({
+    country: team.country,
+    city: team.city,
+    foundedYear: team.foundedYear,
+    logoUrl: team.logoUrl,
+    squadSize: Number(squadCountCheck[0]?.count ?? 0),
+    hasStandings: Number(standingsCountCheck[0]?.count ?? 0) > 0,
+    hasMatches: true,
+  });
+  if (teamQuality.shouldReturn404) {
+    notFound();
+  }
+
   const [squad, statsData, formerPlayers, matchesData, teamTransfers] = await Promise.all([
     getSquad(team.id),
     getTeamStats(team.id),

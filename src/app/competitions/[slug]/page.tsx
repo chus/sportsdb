@@ -99,6 +99,11 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     console.error(`[CompetitionPage] Error loading data for ${slug}:`, e);
   }
 
+  // Hard 404 for competitions with no season data at all
+  if (!competitionSeason && standingsData.length === 0) {
+    notFound();
+  }
+
   const competitionUrl = `${BASE_URL}/competitions/${slug}`;
 
   const leader = standingsData.length > 0
