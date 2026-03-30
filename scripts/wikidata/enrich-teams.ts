@@ -4,7 +4,7 @@
  * Strategy: Pre-fetch all football clubs per country from Wikidata,
  * then match locally by normalized name.
  *
- * Enriches: foundedYear, city (never overwrites existing values)
+ * Enriches: foundedYear, city, logoUrl (never overwrites existing values)
  *
  * Usage:
  *   npx tsx scripts/wikidata/enrich-teams.ts
@@ -71,13 +71,14 @@ interface DbTeam {
   city: string | null;
   founded_year: number | null;
   wikidata_id: string | null;
+  logo_url: string | null;
 }
 
 async function main() {
   console.log(`\n🏟️  Wikidata Team Enrichment${dryRun ? " (DRY RUN)" : ""}\n`);
 
   const teams: DbTeam[] = await sql`
-    SELECT id, name, short_name, country, city, founded_year, wikidata_id
+    SELECT id, name, short_name, country, city, founded_year, wikidata_id, logo_url
     FROM teams
     WHERE wikidata_id IS NULL
     ORDER BY country, name
@@ -108,12 +109,13 @@ async function main() {
     // Query all football clubs in this country (handle multiple QIDs with VALUES)
     const countryValues = countryQids.map((q) => `wd:${q}`).join(" ");
     const query = `
-      SELECT ?item ?itemLabel ?inception ?locationLabel WHERE {
+      SELECT ?item ?itemLabel ?inception ?locationLabel ?logo WHERE {
         VALUES ?country { ${countryValues} }
         ?item wdt:P31/wdt:P279* wd:Q476028 .
         ?item wdt:P17 ?country .
         OPTIONAL { ?item wdt:P571 ?inception . }
         OPTIONAL { ?item wdt:P131 ?location . }
+        OPTIONAL { ?item wdt:P154 ?logo . }
         SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
       }
     `;
@@ -159,12 +161,14 @@ async function main() {
         const inceptionStr = val(r, "inception");
         const foundedYear = inceptionStr ? parseInt(inceptionStr.substring(0, 4), 10) : null;
         const city = val(r, "locationLabel");
+        const logo = val(r, "logo");
 
         matched++;
 
         const updates: string[] = [];
         if (!team.founded_year && foundedYear && foundedYear > 1800 && foundedYear < 2030) updates.push("foundedYear");
         if (!team.city && city) updates.push("city");
+        if (!team.logo_url && logo) updates.push("logo");
 
         if (!dryRun) {
           await sql`
@@ -172,6 +176,7 @@ async function main() {
               wikidata_id = ${wikidataId},
               founded_year = COALESCE(founded_year, ${foundedYear && foundedYear > 1800 && foundedYear < 2030 ? foundedYear : null}),
               city = COALESCE(city, ${city}),
+              logo_url = COALESCE(logo_url, ${logo}),
               updated_at = NOW()
             WHERE id = ${team.id}
           `;
