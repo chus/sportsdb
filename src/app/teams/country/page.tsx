@@ -31,7 +31,7 @@ export default async function TeamCountryIndexPage() {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Teams", url: `${BASE_URL}/search?type=team` },
+          { name: "Teams", url: `${BASE_URL}/teams` },
           { name: "By Country", url: `${BASE_URL}/teams/country` },
         ]}
       />
@@ -43,7 +43,7 @@ export default async function TeamCountryIndexPage() {
           accentColor="bg-indigo-800"
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Teams", href: "/search?type=team" },
+            { label: "Teams", href: "/teams" },
             { label: "By Country" },
           ]}
           icon={<MapPin className="w-7 h-7 text-indigo-300" />}

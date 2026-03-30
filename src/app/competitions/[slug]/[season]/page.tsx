@@ -108,7 +108,7 @@ export default async function CompetitionSeasonPage({
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Competitions", url: `${BASE_URL}/search?type=competition` },
+          { name: "Competitions", url: `${BASE_URL}/competitions` },
           { name: competition.name, url: `${BASE_URL}/competitions/${slug}` },
           { name: seasonData.label, url: competitionUrl },
         ]}

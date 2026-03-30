@@ -231,13 +231,13 @@ export default async function AboutPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/search?type=player"
+              href="/players"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Browse Players
             </Link>
             <Link
-              href="/search?type=team"
+              href="/teams"
               className="px-6 py-3 bg-neutral-200 text-neutral-900 rounded-lg font-medium hover:bg-neutral-300 transition-colors"
             >
               Browse Teams

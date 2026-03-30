@@ -142,7 +142,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Competitions", url: `${BASE_URL}/search?type=competition` },
+          { name: "Competitions", url: `${BASE_URL}/competitions` },
           { name: competition.name, url: competitionUrl },
         ]}
       />
@@ -157,7 +157,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           accentColor="bg-indigo-800"
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Competitions", href: "/search?type=competition" },
+            { label: "Competitions", href: "/competitions" },
             { label: competition.name },
           ]}
           icon={

@@ -207,7 +207,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   // Build breadcrumb items
   const breadcrumbItems = [
     { name: "Home", url: BASE_URL },
-    { name: "Players", url: `${BASE_URL}/search?type=player` },
+    { name: "Players", url: `${BASE_URL}/players` },
     ...(currentTeam
       ? [{ name: currentTeam.name, url: `${BASE_URL}/teams/${currentTeam.slug}` }]
       : []),
@@ -243,7 +243,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         accentColor="bg-blue-700"
         breadcrumbs={[
           { label: "Home", href: "/" },
-          { label: "Players", href: "/search?type=player" },
+          { label: "Players", href: "/players" },
           ...(currentTeam ? [{ label: currentTeam.name, href: `/teams/${currentTeam.slug}` }] : []),
           { label: player.name },
         ]}

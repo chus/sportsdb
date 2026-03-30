@@ -192,7 +192,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/search?type=player"
+            href="/players"
             className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />

@@ -293,7 +293,7 @@ export async function TeamInternalLinks({
           ))}
         </div>
         <Link
-          href="/search?type=player"
+          href="/players"
           className="block mt-3 text-sm text-blue-600 hover:text-blue-700"
         >
           Browse all players →

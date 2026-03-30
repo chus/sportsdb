@@ -31,7 +31,7 @@ export default async function NationalityIndexPage() {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Players", url: `${BASE_URL}/search?type=player` },
+          { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Nationality", url: `${BASE_URL}/players/nationality` },
         ]}
       />
@@ -43,7 +43,7 @@ export default async function NationalityIndexPage() {
           accentColor="bg-teal-800"
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Players", href: "/search?type=player" },
+            { label: "Players", href: "/players" },
             { label: "By Nationality" },
           ]}
           icon={<Globe className="w-7 h-7 text-teal-300" />}

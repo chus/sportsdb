@@ -308,7 +308,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
   // Breadcrumb items
   const breadcrumbItems = [
     { name: "Home", url: BASE_URL },
-    { name: "Teams", url: `${BASE_URL}/search?type=team` },
+    { name: "Teams", url: `${BASE_URL}/teams` },
     { name: team.name, url: teamUrl },
   ];
 
@@ -345,7 +345,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
           accentColor=""
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Teams", href: "/search?type=team" },
+            { label: "Teams", href: "/teams" },
             { label: team.name },
           ]}
           icon={

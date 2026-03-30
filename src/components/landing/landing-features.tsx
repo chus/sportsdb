@@ -7,7 +7,7 @@ const explorationCards = [
     description: "Explore the Premier League, La Liga, Bundesliga, Serie A, and more",
     icon: Trophy,
     gradient: "from-red-500 to-orange-600",
-    href: "/search?type=competition",
+    href: "/competitions",
     linkText: "Browse competitions",
   },
   {
@@ -15,7 +15,7 @@ const explorationCards = [
     description: "Find any footballer — from rising stars to all-time legends",
     icon: TrendingUp,
     gradient: "from-green-500 to-emerald-600",
-    href: "/search?type=player",
+    href: "/players",
     linkText: "Explore players",
   },
   {

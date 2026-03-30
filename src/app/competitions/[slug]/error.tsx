@@ -32,7 +32,7 @@ export default function CompetitionError({
             Try Again
           </button>
           <Link
-            href="/search?type=competition"
+            href="/competitions"
             className="rounded-full border border-neutral-300 px-5 py-2.5 text-sm font-semibold text-neutral-800 hover:border-blue-300 hover:text-blue-600 transition-colors"
           >
             All Competitions

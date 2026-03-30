@@ -25,7 +25,7 @@ export async function FeaturedEntities() {
             Compare Players
           </Link>
           <Link
-            href="/search?type=competition"
+            href="/competitions"
             className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-purple-700 hover:bg-purple-50 border border-purple-200 transition-colors"
           >
             <Trophy className="w-4 h-4" />
@@ -42,7 +42,7 @@ export async function FeaturedEntities() {
             Popular Competitions
           </h3>
           <Link
-            href="/search?type=competition"
+            href="/competitions"
             className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             View all <ArrowRight className="w-4 h-4" />
@@ -77,7 +77,7 @@ export async function FeaturedEntities() {
             Featured Teams
           </h3>
           <Link
-            href="/search?type=team"
+            href="/teams"
             className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             View all <ArrowRight className="w-4 h-4" />
@@ -112,7 +112,7 @@ export async function FeaturedEntities() {
             Featured Players
           </h3>
           <Link
-            href="/search?type=player"
+            href="/players"
             className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             View all <ArrowRight className="w-4 h-4" />

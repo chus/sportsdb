@@ -36,9 +36,9 @@ export function Navbar() {
   }, [userMenuOpen]);
 
   const navLinks = [
-    { label: t("common.players"), href: "/search?type=player", path: "/search", type: "player" },
-    { label: t("common.teams"), href: "/search?type=team", path: "/search", type: "team" },
-    { label: t("common.competitions"), href: "/search?type=competition", path: "/search", type: "competition" },
+    { label: t("common.players"), href: "/players", path: "/players" },
+    { label: t("common.teams"), href: "/teams", path: "/teams" },
+    { label: t("common.competitions"), href: "/competitions", path: "/competitions" },
     { label: t("common.matches"), href: "/search?type=match", path: "/search", type: "match" },
     { label: t("common.news"), href: "/news", path: "/news" },
     { label: "Games", href: "/games", path: "/games" },
@@ -56,9 +56,9 @@ export function Navbar() {
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map((link) => {
-              const isActive =
-                pathname === link.path &&
-                (!link.type || searchParams.get("type") === link.type);
+              const isActive = link.type
+                ? pathname === link.path && searchParams.get("type") === link.type
+                : pathname === link.path || pathname.startsWith(link.path + "/");
               return (
                 <Link
                   key={link.href}
@@ -170,9 +170,9 @@ export function Navbar() {
           <div id="mobile-navigation" className="lg:hidden mt-3 pt-3 border-t border-neutral-800">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
-                const isActive =
-                  pathname === link.path &&
-                  (!link.type || searchParams.get("type") === link.type);
+                const isActive = link.type
+                  ? pathname === link.path && searchParams.get("type") === link.type
+                  : pathname === link.path || pathname.startsWith(link.path + "/");
                 return (
                   <Link
                     key={link.href}

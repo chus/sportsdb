@@ -37,7 +37,7 @@ export default async function PositionIndexPage() {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Players", url: `${BASE_URL}/search?type=player` },
+          { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Position", url: `${BASE_URL}/players/position` },
         ]}
       />

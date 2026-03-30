@@ -65,7 +65,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Players", url: `${BASE_URL}/search?type=player` },
+          { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Position", url: `${BASE_URL}/players/position` },
           { name: `${posName}s`, url: `${BASE_URL}/players/position/${position}` },
         ]}

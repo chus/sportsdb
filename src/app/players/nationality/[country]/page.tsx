@@ -109,7 +109,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },
-          { name: "Players", url: `${BASE_URL}/search?type=player` },
+          { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Nationality", url: `${BASE_URL}/players/nationality` },
           { name: nationality, url: `${BASE_URL}/players/nationality/${encodeURIComponent(nationality)}` },
         ]}
@@ -122,7 +122,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
           accentColor="bg-teal-800"
           breadcrumbs={[
             { label: "Home", href: "/" },
-            { label: "Players", href: "/search?type=player" },
+            { label: "Players", href: "/players" },
             { label: "By Nationality", href: "/players/nationality" },
             { label: nationality },
           ]}

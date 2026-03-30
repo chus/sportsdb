@@ -34,14 +34,6 @@ export async function generateMetadata({
   };
 }
 
-const ENTITY_TYPES = [
-  { value: "", label: "All", icon: null },
-  { value: "player", label: "Players", icon: Users },
-  { value: "team", label: "Teams", icon: Shield },
-  { value: "competition", label: "Competitions", icon: Trophy },
-  { value: "venue", label: "Venues", icon: MapPin },
-];
-
 const ENTITY_ROUTES: Record<string, string> = {
   player: "/players",
   team: "/teams",
@@ -65,8 +57,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 function SearchResultCard({ result }: { result: SearchResult }) {
   const href = `${ENTITY_ROUTES[result.entityType]}/${result.slug}`;
-  const Icon =
-    ENTITY_TYPES.find((t) => t.value === result.entityType)?.icon || Users;
+  const ICON_MAP: Record<string, typeof Users> = { player: Users, team: Shield, competition: Trophy, venue: MapPin };
+  const Icon = ICON_MAP[result.entityType] || Users;
 
   const content = (
     <div className="flex items-start gap-4">
@@ -217,32 +209,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           size="large"
           placeholder="Search for players, teams, competitions..."
         />
-      </div>
-
-      {/* Type filter tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {ENTITY_TYPES.map((entityType) => {
-          const isActive = type === entityType.value;
-          const Icon = entityType.icon;
-          const href = query
-            ? `/search?q=${encodeURIComponent(query)}${entityType.value ? `&type=${entityType.value}` : ""}`
-            : `/search${entityType.value ? `?type=${entityType.value}` : ""}`;
-
-          return (
-            <Link
-              key={entityType.value}
-              href={href}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-600 text-white"
-                  : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              {Icon && <Icon className="w-4 h-4" />}
-              {entityType.label}
-            </Link>
-          );
-        })}
       </div>
 
       {/* Results */}

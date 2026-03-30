@@ -324,13 +324,13 @@ export default async function WorldCup2026Page() {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
-                  href="/search?type=team"
+                  href="/teams"
                   className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
                   Explore Teams
                 </Link>
                 <Link
-                  href="/search?type=player"
+                  href="/players"
                   className="px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
                 >
                   Explore Players

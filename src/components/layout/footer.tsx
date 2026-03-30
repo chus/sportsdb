@@ -11,9 +11,9 @@ export function Footer() {
 
   const footerLinks = {
     [t("footer.explore")]: [
-      { label: t("common.players"), href: "/search?type=player" },
-      { label: t("common.teams"), href: "/search?type=team" },
-      { label: t("common.competitions"), href: "/search?type=competition" },
+      { label: t("common.players"), href: "/players" },
+      { label: t("common.teams"), href: "/teams" },
+      { label: t("common.competitions"), href: "/competitions" },
       { label: t("common.matches"), href: "/search?type=match" },
       { label: t("common.news"), href: "/news" },
       { label: "Dashboard", href: "/dashboard" },
