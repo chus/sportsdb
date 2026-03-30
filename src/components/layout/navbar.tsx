@@ -4,7 +4,7 @@ import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown, LayoutDashboard
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Logo } from "@/components/layout/logo";
 import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -14,7 +14,6 @@ import { useSubscription } from "@/components/subscription/subscription-provider
 export function Navbar() {
   const t = useTranslations();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { openModal } = useAuthModal();
   const { tier, isLoading: subLoading } = useSubscription();
@@ -39,7 +38,7 @@ export function Navbar() {
     { label: t("common.players"), href: "/players", path: "/players" },
     { label: t("common.teams"), href: "/teams", path: "/teams" },
     { label: t("common.competitions"), href: "/competitions", path: "/competitions" },
-    { label: t("common.matches"), href: "/search?type=match", path: "/search", type: "match" },
+    { label: t("common.matches"), href: "/matches", path: "/matches" },
     { label: t("common.news"), href: "/news", path: "/news" },
     { label: "Games", href: "/games", path: "/games" },
   ];
@@ -56,9 +55,7 @@ export function Navbar() {
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map((link) => {
-              const isActive = link.type
-                ? pathname === link.path && searchParams.get("type") === link.type
-                : pathname === link.path || pathname.startsWith(link.path + "/");
+              const isActive = pathname === link.path || pathname.startsWith(link.path + "/");
               return (
                 <Link
                   key={link.href}
@@ -170,9 +167,7 @@ export function Navbar() {
           <div id="mobile-navigation" className="lg:hidden mt-3 pt-3 border-t border-neutral-800">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => {
-                const isActive = link.type
-                  ? pathname === link.path && searchParams.get("type") === link.type
-                  : pathname === link.path || pathname.startsWith(link.path + "/");
+                const isActive = pathname === link.path || pathname.startsWith(link.path + "/");
                 return (
                   <Link
                     key={link.href}

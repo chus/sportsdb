@@ -14,7 +14,7 @@ export function Footer() {
       { label: t("common.players"), href: "/players" },
       { label: t("common.teams"), href: "/teams" },
       { label: t("common.competitions"), href: "/competitions" },
-      { label: t("common.matches"), href: "/search?type=match" },
+      { label: t("common.matches"), href: "/matches" },
       { label: t("common.news"), href: "/news" },
       { label: "Dashboard", href: "/dashboard" },
       { label: "Pricing", href: "/pricing" },

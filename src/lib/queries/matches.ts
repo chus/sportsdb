@@ -10,7 +10,7 @@ import {
   competitionSeasons,
   seasons,
 } from "@/lib/db/schema";
-import { eq, inArray, desc, and, or, asc, gt } from "drizzle-orm";
+import { eq, inArray, desc, and, or, asc, gt, sql } from "drizzle-orm";
 
 /**
  * Get a match by ID with teams.
@@ -400,4 +400,317 @@ export async function getTeamMatches(teamId: string, limit = 10) {
     recent: recentResult.map(mapMatch),
     upcoming: upcomingResult.map(mapMatch),
   };
+}
+
+// ============================================================
+// MATCHES HUB QUERIES
+// ============================================================
+
+export interface HubMatch {
+  id: string;
+  scheduledAt: string;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  minute: number | null;
+  matchday: number | null;
+  homeTeamName: string;
+  homeTeamSlug: string;
+  homeTeamLogoUrl: string | null;
+  awayTeamName: string;
+  awayTeamSlug: string;
+  awayTeamLogoUrl: string | null;
+  competitionId: string;
+  competitionName: string;
+  competitionSlug: string;
+  competitionLogoUrl: string | null;
+}
+
+/**
+ * Get all matches in a date range with team and competition info.
+ * Uses raw SQL for efficient single-query join.
+ */
+export async function getMatchesForDateRange(
+  startDate: Date,
+  endDate: Date
+): Promise<HubMatch[]> {
+  const result = await db.execute<{
+    id: string;
+    scheduled_at: string;
+    status: string;
+    home_score: number | null;
+    away_score: number | null;
+    minute: number | null;
+    matchday: number | null;
+    home_team_name: string;
+    home_team_slug: string;
+    home_team_logo_url: string | null;
+    away_team_name: string;
+    away_team_slug: string;
+    away_team_logo_url: string | null;
+    competition_id: string;
+    competition_name: string;
+    competition_slug: string;
+    competition_logo_url: string | null;
+  }>(sql`
+    SELECT
+      m.id,
+      m.scheduled_at,
+      m.status,
+      m.home_score,
+      m.away_score,
+      m.minute,
+      m.matchday,
+      ht.name as home_team_name,
+      ht.slug as home_team_slug,
+      ht.logo_url as home_team_logo_url,
+      at.name as away_team_name,
+      at.slug as away_team_slug,
+      at.logo_url as away_team_logo_url,
+      c.id as competition_id,
+      c.name as competition_name,
+      c.slug as competition_slug,
+      c.logo_url as competition_logo_url
+    FROM matches m
+    JOIN teams ht ON ht.id = m.home_team_id
+    JOIN teams at ON at.id = m.away_team_id
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    WHERE m.scheduled_at >= ${startDate.toISOString()}
+      AND m.scheduled_at < ${endDate.toISOString()}
+    ORDER BY m.scheduled_at ASC
+  `);
+
+  return result.rows.map((r) => ({
+    id: r.id,
+    scheduledAt: r.scheduled_at,
+    status: r.status,
+    homeScore: r.home_score,
+    awayScore: r.away_score,
+    minute: r.minute,
+    matchday: r.matchday,
+    homeTeamName: r.home_team_name,
+    homeTeamSlug: r.home_team_slug,
+    homeTeamLogoUrl: r.home_team_logo_url,
+    awayTeamName: r.away_team_name,
+    awayTeamSlug: r.away_team_slug,
+    awayTeamLogoUrl: r.away_team_logo_url,
+    competitionId: r.competition_id,
+    competitionName: r.competition_name,
+    competitionSlug: r.competition_slug,
+    competitionLogoUrl: r.competition_logo_url,
+  }));
+}
+
+/**
+ * Get matchday summary stats for a date (total matches, goals, red cards, biggest win).
+ */
+export async function getMatchDaySummary(startOfDay: Date, endOfDay: Date) {
+  const result = await db.execute<{
+    total_matches: number;
+    finished_matches: number;
+    total_goals: number;
+    red_cards: number;
+    biggest_diff: number | null;
+    biggest_home: string | null;
+    biggest_away: string | null;
+    biggest_home_score: number | null;
+    biggest_away_score: number | null;
+    biggest_match_id: string | null;
+  }>(sql`
+    SELECT
+      count(*)::int as total_matches,
+      count(*) FILTER (WHERE m.status = 'finished')::int as finished_matches,
+      coalesce(sum(m.home_score + m.away_score) FILTER (WHERE m.status = 'finished'), 0)::int as total_goals,
+      coalesce((
+        SELECT count(*)::int FROM match_events me
+        JOIN matches mx ON mx.id = me.match_id
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND me.type = 'red_card'
+      ), 0)::int as red_cards,
+      (
+        SELECT abs(mx.home_score - mx.away_score)
+        FROM matches mx
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_diff,
+      (
+        SELECT ht.name FROM matches mx
+        JOIN teams ht ON ht.id = mx.home_team_id
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_home,
+      (
+        SELECT at.name FROM matches mx
+        JOIN teams at ON at.id = mx.away_team_id
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_away,
+      (
+        SELECT mx.home_score FROM matches mx
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_home_score,
+      (
+        SELECT mx.away_score FROM matches mx
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_away_score,
+      (
+        SELECT mx.id FROM matches mx
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_match_id
+    FROM matches m
+    WHERE m.scheduled_at >= ${startOfDay.toISOString()}
+      AND m.scheduled_at < ${endOfDay.toISOString()}
+  `);
+
+  const r = result.rows[0];
+  return {
+    totalMatches: r?.total_matches ?? 0,
+    finishedMatches: r?.finished_matches ?? 0,
+    totalGoals: r?.total_goals ?? 0,
+    redCards: r?.red_cards ?? 0,
+    biggestWin: r?.biggest_diff
+      ? {
+          matchId: r.biggest_match_id!,
+          homeTeam: r.biggest_home!,
+          awayTeam: r.biggest_away!,
+          homeScore: r.biggest_home_score!,
+          awayScore: r.biggest_away_score!,
+        }
+      : null,
+  };
+}
+
+/**
+ * Get competitions that have matches in a date range (for filter pills).
+ */
+export async function getCompetitionsWithMatches(
+  startDate: Date,
+  endDate: Date
+) {
+  const result = await db.execute<{
+    id: string;
+    name: string;
+    slug: string;
+    logo_url: string | null;
+    match_count: number;
+  }>(sql`
+    SELECT
+      c.id,
+      c.name,
+      c.slug,
+      c.logo_url,
+      count(*)::int as match_count
+    FROM matches m
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    WHERE m.scheduled_at >= ${startDate.toISOString()}
+      AND m.scheduled_at < ${endDate.toISOString()}
+    GROUP BY c.id, c.name, c.slug, c.logo_url
+    ORDER BY match_count DESC
+  `);
+
+  return result.rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    logoUrl: r.logo_url,
+    matchCount: r.match_count,
+  }));
+}
+
+/**
+ * Get recent finished matches with team and competition info.
+ */
+export async function getRecentFinishedMatches(
+  limit = 20
+): Promise<HubMatch[]> {
+  const result = await db.execute<{
+    id: string;
+    scheduled_at: string;
+    status: string;
+    home_score: number | null;
+    away_score: number | null;
+    minute: number | null;
+    matchday: number | null;
+    home_team_name: string;
+    home_team_slug: string;
+    home_team_logo_url: string | null;
+    away_team_name: string;
+    away_team_slug: string;
+    away_team_logo_url: string | null;
+    competition_id: string;
+    competition_name: string;
+    competition_slug: string;
+    competition_logo_url: string | null;
+  }>(sql`
+    SELECT
+      m.id,
+      m.scheduled_at,
+      m.status,
+      m.home_score,
+      m.away_score,
+      m.minute,
+      m.matchday,
+      ht.name as home_team_name,
+      ht.slug as home_team_slug,
+      ht.logo_url as home_team_logo_url,
+      at.name as away_team_name,
+      at.slug as away_team_slug,
+      at.logo_url as away_team_logo_url,
+      c.id as competition_id,
+      c.name as competition_name,
+      c.slug as competition_slug,
+      c.logo_url as competition_logo_url
+    FROM matches m
+    JOIN teams ht ON ht.id = m.home_team_id
+    JOIN teams at ON at.id = m.away_team_id
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    WHERE m.status = 'finished'
+    ORDER BY m.scheduled_at DESC
+    LIMIT ${limit}
+  `);
+
+  return result.rows.map((r) => ({
+    id: r.id,
+    scheduledAt: r.scheduled_at,
+    status: r.status,
+    homeScore: r.home_score,
+    awayScore: r.away_score,
+    minute: r.minute,
+    matchday: r.matchday,
+    homeTeamName: r.home_team_name,
+    homeTeamSlug: r.home_team_slug,
+    homeTeamLogoUrl: r.home_team_logo_url,
+    awayTeamName: r.away_team_name,
+    awayTeamSlug: r.away_team_slug,
+    awayTeamLogoUrl: r.away_team_logo_url,
+    competitionId: r.competition_id,
+    competitionName: r.competition_name,
+    competitionSlug: r.competition_slug,
+    competitionLogoUrl: r.competition_logo_url,
+  }));
 }

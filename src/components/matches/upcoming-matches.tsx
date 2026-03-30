@@ -41,7 +41,7 @@ export async function UpcomingMatches({
           </div>
           {showViewAll && (
             <Link
-              href="/search?type=match"
+              href="/matches"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
             >
               View All <ArrowRight className="w-4 h-4" />
