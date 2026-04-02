@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { SearchBar } from "@/components/search/search-bar";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -66,6 +66,7 @@ export default async function CompetitionsPage() {
           { name: "Competitions", url: `${BASE_URL}/competitions` },
         ]}
       />
+      <CollectionPageJsonLd name="Football Competitions" description="Explore football leagues and tournaments worldwide. Browse standings, results, and stats." url={`${BASE_URL}/competitions`} />
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

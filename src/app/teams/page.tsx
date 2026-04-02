@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Shield, Trophy, ChevronRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { getTeamBrowseData } from "@/lib/queries/browse";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { SearchBar } from "@/components/search/search-bar";
@@ -53,6 +53,7 @@ export default async function TeamsPage() {
           { name: "Teams", url: `${BASE_URL}/teams` },
         ]}
       />
+      <CollectionPageJsonLd name="Football Teams" description="Browse football clubs and teams worldwide. View squads, results, and standings." url={`${BASE_URL}/teams`} />
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Building, MapPin, Users, Calendar } from "lucide-react";
 import type { Metadata } from "next";
 import { getAllVenues } from "@/lib/queries/venues";
-import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -54,6 +54,7 @@ export default async function VenuesPage() {
           { name: "Venues", url: `${BASE_URL}/venues` },
         ]}
       />
+      <CollectionPageJsonLd name="Football Stadiums & Venues" description="Explore football stadiums and venues worldwide. Find capacity, location, and home teams." url={`${BASE_URL}/venues`} />
       <ItemListJsonLd
         name="Top Football Stadiums by Capacity"
         items={top50ByCapacity.map((v, i) => ({

@@ -3,7 +3,7 @@ import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
-import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -57,6 +57,7 @@ export default async function NewsPage({ searchParams }: Props) {
         { name: "News", url: `${BASE_URL}/news` },
       ]}
     />
+    <CollectionPageJsonLd name="Football News" description="Latest football news, match reports, player spotlights, and competition recaps." url={`${BASE_URL}/news`} />
     {page === 1 && (
       <ItemListJsonLd
         name="Football News"

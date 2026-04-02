@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Handshake, Shield, User, ChevronRight, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import { getTopAssistsGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageHeader } from "@/components/layout/page-header";
 import { PlayerLink } from "@/components/player/player-link";
@@ -45,6 +45,7 @@ export default async function TopAssistsPage() {
           { name: "Top Assists", url: `${BASE_URL}/top-assists` },
         ]}
       />
+      <CollectionPageJsonLd name="Top Assists 2025/26" description="Top assist providers across all major football competitions for the 2025/26 season." url={`${BASE_URL}/top-assists`} />
       <ItemListJsonLd
         name="Top Assists 2025/26"
         items={leaders.map((s, i) => ({

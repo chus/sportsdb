@@ -64,7 +64,6 @@ export function TeamJsonLd({
   name,
   url,
   logo,
-  sport = "Football",
   location,
   foundingDate,
   coach,
@@ -74,7 +73,6 @@ export function TeamJsonLd({
   name: string;
   url: string;
   logo?: string | null;
-  sport?: string;
   location?: { city?: string | null; country?: string | null } | null;
   foundingDate?: number | null;
   coach?: string | null;
@@ -86,7 +84,7 @@ export function TeamJsonLd({
     "@type": "SportsTeam",
     name,
     url,
-    sport,
+    sport: "https://www.wikidata.org/entity/Q2736",
     ...(logo && { logo }),
     ...(foundingDate && { foundingDate: String(foundingDate) }),
     ...(coach && { coach: { "@type": "Person", name: coach } }),
@@ -109,17 +107,35 @@ export function TeamJsonLd({
   return <JsonLd data={data} />;
 }
 
+export function CollectionPageJsonLd({
+  name,
+  description,
+  url,
+}: {
+  name: string;
+  description: string;
+  url: string;
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+  };
+
+  return <JsonLd data={data} />;
+}
+
 export function CompetitionJsonLd({
   name,
   url,
   logo,
-  sport = "Football",
   location,
 }: {
   name: string;
   url: string;
   logo?: string | null;
-  sport?: string;
   location?: string | null;
 }) {
   const data: Record<string, unknown> = {
@@ -127,7 +143,7 @@ export function CompetitionJsonLd({
     "@type": "SportsOrganization",
     name,
     url,
-    sport,
+    sport: "https://www.wikidata.org/entity/Q2736",
     ...(logo && { logo }),
     ...(location && {
       location: {
@@ -239,7 +255,7 @@ export function MatchJsonLd({
     endDate,
     eventStatus: getEventStatus(status),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    sport: "Football",
+    sport: "https://www.wikidata.org/entity/Q2736",
     image: `${matchUrl}/opengraph-image`,
     performer: [
       {

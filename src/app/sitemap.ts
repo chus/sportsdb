@@ -257,7 +257,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${BASE_URL}/news/${article.slug}`,
     lastModified: article.updatedAt || article.publishedAt || new Date(),
     changeFrequency: "weekly" as const,
-    priority: 0.6,
+    priority: 0.7,
   }));
 
   // Top scorers/assists by competition — current season only
@@ -296,8 +296,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const matchPages: MetadataRoute.Sitemap = finishedMatches.rows.map((match) => ({
     url: `${BASE_URL}/matches/${match.id}`,
     lastModified: new Date(match.scheduled_at),
-    changeFrequency: "monthly" as const,
-    priority: 0.4,
+    changeFrequency: "yearly" as const,
+    priority: 0.5,
   }));
 
   // Player pages — only quality-gated indexable players

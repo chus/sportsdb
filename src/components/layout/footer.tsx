@@ -42,6 +42,7 @@ export function Footer() {
       { label: t("footer.privacy"), href: "/privacy" },
       { label: t("footer.terms"), href: "/terms" },
       { label: "Cookie Settings", href: "#", onClick: openSettings },
+      { label: "RSS Feed", href: "/feed.xml" },
     ],
   };
 
