@@ -86,6 +86,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description: desc,
             type: "article",
             publishedTime: article.publishedAt?.toISOString(),
+            modifiedTime: (article.updatedAt || article.publishedAt)?.toISOString(),
+            section: competition?.name || "Football",
+            authors: ["DataSports Editorial"],
             images: [
               {
                 url: `${BASE_URL}/news/${slug}/opengraph-image`,
@@ -120,6 +123,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: article.excerpt,
       type: "article",
       publishedTime: article.publishedAt?.toISOString(),
+      modifiedTime: (article.updatedAt || article.publishedAt)?.toISOString(),
+      section: competition?.name || "Football",
+      authors: ["DataSports Editorial"],
       images: [
         {
           url: `${BASE_URL}/news/${slug}/opengraph-image`,

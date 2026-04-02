@@ -332,7 +332,17 @@ export default async function TeamPage({ params }: TeamPageProps) {
         logo={team.logoUrl}
         location={{ city: safeCity, country: team.country }}
         foundingDate={team.foundedYear}
-        memberCount={squad.length}
+        coach={team.coachName}
+        athletes={squad.slice(0, 25).map((s) => ({
+          name: s.player.name,
+          url: `${BASE_URL}/players/${s.player.slug}`,
+        }))}
+        sameAs={[
+          team.wikipediaUrl,
+          team.websiteUrl,
+          team.instagramHandle && `https://instagram.com/${team.instagramHandle}`,
+          team.twitterHandle && `https://x.com/${team.twitterHandle}`,
+        ].filter(Boolean) as string[]}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="team" entityId={team.id} />

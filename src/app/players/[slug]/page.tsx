@@ -224,9 +224,16 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         image={player.imageUrl}
         nationality={player.nationality}
         birthDate={player.dateOfBirth}
+        birthPlace={player.placeOfBirth}
         height={player.heightCm}
         position={player.position}
         team={currentTeam && teamUrl ? { name: currentTeam.name, url: teamUrl } : null}
+        sameAs={[
+          player.wikipediaUrl,
+          player.websiteUrl,
+          player.instagramHandle && `https://instagram.com/${player.instagramHandle}`,
+          player.twitterHandle && `https://x.com/${player.twitterHandle}`,
+        ].filter(Boolean) as string[]}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="player" entityId={player.id} />

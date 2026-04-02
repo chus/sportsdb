@@ -24,6 +24,17 @@ export function Footer() {
       { label: "La Liga", href: "/competitions/la-liga" },
       { label: "Champions League", href: "/competitions/uefa-champions-league" },
       { label: "Bundesliga", href: "/competitions/bundesliga" },
+      { label: "Serie A", href: "/competitions/serie-a" },
+      { label: "Ligue 1", href: "/competitions/ligue-1" },
+      { label: "Liga Argentina", href: "/competitions/liga-profesional-argentina" },
+      { label: "MLS", href: "/competitions/mls" },
+    ],
+    Discover: [
+      { label: "Top Scorers", href: "/top-scorers" },
+      { label: "Top Assists", href: "/top-assists" },
+      { label: "Venues", href: "/venues" },
+      { label: "Compare Players", href: "/compare" },
+      { label: "Methodology", href: "/methodology" },
     ],
     [t("footer.legal")]: [
       { label: t("footer.about"), href: "/about" },
@@ -37,7 +48,7 @@ export function Footer() {
   return (
     <footer className="bg-neutral-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">

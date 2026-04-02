@@ -19,18 +19,22 @@ export function PlayerJsonLd({
   image,
   nationality,
   birthDate,
+  birthPlace,
   height,
   team,
   position,
+  sameAs,
 }: {
   name: string;
   url: string;
   image?: string | null;
   nationality?: string | null;
   birthDate?: string | null;
+  birthPlace?: string | null;
   height?: number | null;
   team?: { name: string; url: string } | null;
   position?: string | null;
+  sameAs?: string[];
 }) {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -40,6 +44,7 @@ export function PlayerJsonLd({
     ...(image && { image }),
     ...(nationality && { nationality }),
     ...(birthDate && { birthDate }),
+    ...(birthPlace && { birthPlace: { "@type": "Place", name: birthPlace } }),
     ...(height && { height: { "@type": "QuantitativeValue", value: height, unitCode: "CMT" } }),
     ...(position && { jobTitle: position }),
     ...(team && {
@@ -49,6 +54,7 @@ export function PlayerJsonLd({
         url: team.url,
       },
     }),
+    ...(sameAs && sameAs.length > 0 && { sameAs }),
   };
 
   return <JsonLd data={data} />;
@@ -61,7 +67,9 @@ export function TeamJsonLd({
   sport = "Football",
   location,
   foundingDate,
-  memberCount,
+  coach,
+  athletes,
+  sameAs,
 }: {
   name: string;
   url: string;
@@ -69,7 +77,9 @@ export function TeamJsonLd({
   sport?: string;
   location?: { city?: string | null; country?: string | null } | null;
   foundingDate?: number | null;
-  memberCount?: number;
+  coach?: string | null;
+  athletes?: { name: string; url: string }[];
+  sameAs?: string[];
 }) {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -79,7 +89,10 @@ export function TeamJsonLd({
     sport,
     ...(logo && { logo }),
     ...(foundingDate && { foundingDate: String(foundingDate) }),
-    ...(memberCount && { member: { "@type": "QuantitativeValue", value: memberCount } }),
+    ...(coach && { coach: { "@type": "Person", name: coach } }),
+    ...(athletes && athletes.length > 0 && {
+      athlete: athletes.map((a) => ({ "@type": "Person", name: a.name, url: a.url })),
+    }),
     ...(location && (location.city || location.country) && {
       location: {
         "@type": "Place",
@@ -90,6 +103,7 @@ export function TeamJsonLd({
         },
       },
     }),
+    ...(sameAs && sameAs.length > 0 && { sameAs }),
   };
 
   return <JsonLd data={data} />;
