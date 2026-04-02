@@ -149,7 +149,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
     <BreadcrumbJsonLd
       items={[
         { name: "Home", url: BASE_URL },
-        { name: "Venues", url: `${BASE_URL}/search?type=venue` },
+        { name: "Venues", url: `${BASE_URL}/venues` },
         { name: venue.name, url: venueUrl },
       ]}
     />
@@ -169,7 +169,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
         accentColor="bg-neutral-800"
         breadcrumbs={[
           { label: "Home", href: "/" },
-          { label: "Venues", href: "/search?type=venue" },
+          { label: "Venues", href: "/venues" },
           { label: venue.name },
         ]}
         icon={
@@ -202,7 +202,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     {currentTeams.slice(0, 3).map(({ team }) => (
                       <Link key={team.id} href={`/teams/${team.slug}`} className="flex items-center gap-2 group">
                         {team.logoUrl ? (
-                          <img src={team.logoUrl} alt="" className="w-5 h-5 object-contain" />
+                          <img src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" />
                         ) : (
                           <Shield className="w-5 h-5 text-neutral-300" />
                         )}
@@ -306,7 +306,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {primaryTeam.logoUrl ? (
-                          <img src={primaryTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                          <img src={primaryTeam.logoUrl} alt={primaryTeam.name} className="w-6 h-6 object-contain" />
                         ) : (
                           <Shield className="w-6 h-6 text-neutral-300" />
                         )}
@@ -371,7 +371,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     >
                       <div className="flex items-center gap-1.5 mb-1.5">
                         {homeTeam.logoUrl ? (
-                          <img src={homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                          <img src={homeTeam.logoUrl} alt={homeTeam.name} className="w-4 h-4 object-contain" />
                         ) : (
                           <Shield className="w-4 h-4 text-neutral-300" />
                         )}
@@ -379,7 +379,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       </div>
                       <div className="flex items-center gap-1.5 mb-1.5">
                         {awayTeam.logoUrl ? (
-                          <img src={awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                          <img src={awayTeam.logoUrl} alt={awayTeam.name} className="w-4 h-4 object-contain" />
                         ) : (
                           <Shield className="w-4 h-4 text-neutral-300" />
                         )}
@@ -413,7 +413,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {homeTeam.logoUrl ? (
-                            <img src={homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                            <img src={homeTeam.logoUrl} alt={homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
                             <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}
@@ -422,7 +422,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                         <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
                         <div className="flex items-center gap-1.5 min-w-0">
                           {awayTeam.logoUrl ? (
-                            <img src={awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                            <img src={awayTeam.logoUrl} alt={awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
                             <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}

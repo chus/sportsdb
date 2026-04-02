@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Trophy, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
@@ -45,6 +45,15 @@ export default async function TopScorersPage() {
           { name: "Home", url: BASE_URL },
           { name: "Top Scorers", url: `${BASE_URL}/top-scorers` },
         ]}
+      />
+      <ItemListJsonLd
+        name="Top Scorers 2025/26"
+        items={scorers.map((s, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/players/${s.player.slug}`,
+          name: s.player.name,
+          image: s.player.imageUrl,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">
@@ -117,7 +126,7 @@ export default async function TopScorersPage() {
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">{s.player.name}</div>
                         <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-                          {s.team.logoUrl && <ImageWithFallback src={s.team.logoUrl} alt="" width={14} height={14} className="w-3.5 h-3.5 object-contain" />}
+                          {s.team.logoUrl && <ImageWithFallback src={s.team.logoUrl} alt={s.team.name} width={14} height={14} className="w-3.5 h-3.5 object-contain" />}
                           {s.team.name}
                         </div>
                       </div>

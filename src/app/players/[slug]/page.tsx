@@ -497,7 +497,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             {nextMatch.homeTeam?.logoUrl ? (
-                              <img src={nextMatch.homeTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                              <img src={nextMatch.homeTeam.logoUrl} alt={nextMatch.homeTeam.name} className="w-6 h-6 object-contain" />
                             ) : (
                               <Shield className="w-6 h-6 text-neutral-300" />
                             )}
@@ -507,7 +507,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-neutral-900">{nextMatch.awayTeam?.shortName || nextMatch.awayTeam?.name}</span>
                             {nextMatch.awayTeam?.logoUrl ? (
-                              <img src={nextMatch.awayTeam.logoUrl} alt="" className="w-6 h-6 object-contain" />
+                              <img src={nextMatch.awayTeam.logoUrl} alt={nextMatch.awayTeam.name} className="w-6 h-6 object-contain" />
                             ) : (
                               <Shield className="w-6 h-6 text-neutral-300" />
                             )}
@@ -546,7 +546,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 <td className="px-3 py-2">
                                   <div className="flex items-center gap-1.5">
                                     {team.logoUrl ? (
-                                      <ImageWithFallback src={team.logoUrl} alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+                                      <ImageWithFallback src={team.logoUrl} alt={team.name} width={16} height={16} className="w-4 h-4 object-contain" />
                                     ) : (
                                       <Shield className="w-4 h-4 text-neutral-300" />
                                     )}
@@ -591,7 +591,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             >
                               <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                 {entry.team.logoUrl ? (
-                                  <ImageWithFallback src={entry.team.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                  <ImageWithFallback src={entry.team.logoUrl} alt={entry.team.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                 ) : (
                                   <Shield className="w-4 h-4 text-neutral-400" />
                                 )}
@@ -741,7 +741,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 {t.fromTeam.name ? (
                                   <Link href={`/teams/${t.fromTeam.slug}`} className="flex items-center gap-1.5 hover:text-blue-600 min-w-0">
                                     {t.fromTeam.logoUrl && (
-                                      <ImageWithFallback src={t.fromTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
+                                      <ImageWithFallback src={t.fromTeam.logoUrl} alt={t.fromTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                     )}
                                     <span className="text-sm text-neutral-700 truncate">{t.fromTeam.name}</span>
                                   </Link>
@@ -751,7 +751,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 <ArrowRightLeft className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0 mx-1" />
                                 <Link href={`/teams/${t.toTeam.slug}`} className="flex items-center gap-1.5 hover:text-blue-600 min-w-0">
                                   {t.toTeam.logoUrl && (
-                                    <ImageWithFallback src={t.toTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
+                                    <ImageWithFallback src={t.toTeam.logoUrl} alt={t.toTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                   )}
                                   <span className="text-sm font-medium text-neutral-900 truncate">{t.toTeam.name}</span>
                                 </Link>

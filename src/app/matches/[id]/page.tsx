@@ -683,7 +683,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {homeTeam.logoUrl ? (
-                        <ImageWithFallback src={homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                       ) : (
                         <Shield className="w-5 h-5 text-neutral-300" />
                       )}
@@ -697,7 +697,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {awayTeam.logoUrl ? (
-                        <ImageWithFallback src={awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                        <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                       ) : (
                         <Shield className="w-5 h-5 text-neutral-300" />
                       )}

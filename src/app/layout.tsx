@@ -4,6 +4,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AdSenseScript } from "@/components/ads/adsense-script";
 import { GoogleAnalytics } from "@/components/analytics/ga-script";
+import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -105,6 +106,18 @@ export default async function RootLayout({
                 <AuthModalProvider>
                   <UpgradeModalProvider>
                   <OnboardingProvider>
+                    <WebsiteJsonLd
+                      url={BASE_URL}
+                      name="DataSports"
+                      description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
+                      searchUrl={`${BASE_URL}/search?q={search_term_string}`}
+                    />
+                    <OrganizationJsonLd
+                      name="DataSports"
+                      url={BASE_URL}
+                      logo={`${BASE_URL}/favicon.svg`}
+                      description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
+                    />
                     <GoogleAnalytics />
                     <AdSenseScript />
                     <Navbar />

@@ -327,6 +327,30 @@ export function FAQJsonLd({ items }: { items: { question: string; answer: string
   return <JsonLd data={data} />;
 }
 
+export function ItemListJsonLd({
+  name,
+  items,
+}: {
+  name: string;
+  items: { position: number; url: string; name: string; image?: string | null }[];
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    numberOfItems: items.length,
+    itemListElement: items.map((item) => ({
+      "@type": "ListItem",
+      position: item.position,
+      url: item.url,
+      name: item.name,
+      ...(item.image && { image: item.image }),
+    })),
+  };
+
+  return <JsonLd data={data} />;
+}
+
 export function WebsiteJsonLd({
   url,
   name,

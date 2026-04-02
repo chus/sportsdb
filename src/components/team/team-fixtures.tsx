@@ -46,7 +46,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                     {match.homeTeam?.logoUrl ? (
                       <img
                         src={match.homeTeam.logoUrl}
-                        alt=""
+                        alt={match.homeTeam.name}
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
@@ -72,7 +72,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                     {match.awayTeam?.logoUrl ? (
                       <img
                         src={match.awayTeam.logoUrl}
-                        alt=""
+                        alt={match.awayTeam.name}
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
@@ -131,7 +131,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                       {match.homeTeam?.logoUrl ? (
                         <img
                           src={match.homeTeam.logoUrl}
-                          alt=""
+                          alt={match.homeTeam.name}
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
@@ -161,7 +161,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                       {match.awayTeam?.logoUrl ? (
                         <img
                           src={match.awayTeam.logoUrl}
-                          alt=""
+                          alt={match.awayTeam.name}
                           className="w-5 h-5 object-contain"
                         />
                       ) : (

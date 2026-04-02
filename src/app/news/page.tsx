@@ -3,7 +3,7 @@ import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -57,6 +57,17 @@ export default async function NewsPage({ searchParams }: Props) {
         { name: "News", url: `${BASE_URL}/news` },
       ]}
     />
+    {page === 1 && (
+      <ItemListJsonLd
+        name="Football News"
+        items={articles.map((a, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/news/${a.article.slug}`,
+          name: a.article.title,
+          image: a.article.imageUrl,
+        }))}
+      />
+    )}
     <div className="min-h-screen bg-neutral-50">
       <PageHeader
         title="News"

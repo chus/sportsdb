@@ -113,7 +113,7 @@ export function MatchStatBars({
             {homeTeamLogo && (
               <img
                 src={homeTeamLogo}
-                alt=""
+                alt={homeTeamName}
                 className="w-5 h-5 object-contain"
               />
             )}
@@ -128,7 +128,7 @@ export function MatchStatBars({
             {awayTeamLogo && (
               <img
                 src={awayTeamLogo}
-                alt=""
+                alt={awayTeamName}
                 className="w-5 h-5 object-contain"
               />
             )}

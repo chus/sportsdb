@@ -201,7 +201,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                           </div>
                           <div className="flex items-center gap-2 mb-1">
                             {standingsData[0].team.logoUrl ? (
-                              <ImageWithFallback src={standingsData[0].team.logoUrl} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                              <ImageWithFallback src={standingsData[0].team.logoUrl} alt={standingsData[0].team.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
                               <Shield className="w-6 h-6 text-neutral-300" />
                             )}
@@ -300,7 +300,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                             >
                               <div className="flex items-center gap-1.5 mb-1.5">
                                 {match.homeTeam.logoUrl ? (
-                                  <img src={match.homeTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                                  <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-4 h-4 object-contain" />
                                 ) : (
                                   <Shield className="w-4 h-4 text-neutral-300" />
                                 )}
@@ -308,7 +308,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                               </div>
                               <div className="flex items-center gap-1.5 mb-2">
                                 {match.awayTeam.logoUrl ? (
-                                  <img src={match.awayTeam.logoUrl} alt="" className="w-4 h-4 object-contain" />
+                                  <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-4 h-4 object-contain" />
                                 ) : (
                                   <Shield className="w-4 h-4 text-neutral-300" />
                                 )}
@@ -345,7 +345,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                               <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   {match.homeTeam.logoUrl ? (
-                                    <img src={match.homeTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                                    <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
                                   ) : (
                                     <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                                   )}
@@ -354,7 +354,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                                 <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   {match.awayTeam.logoUrl ? (
-                                    <img src={match.awayTeam.logoUrl} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                                    <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
                                   ) : (
                                     <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                                   )}
