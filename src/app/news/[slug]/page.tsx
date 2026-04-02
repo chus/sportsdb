@@ -27,7 +27,7 @@ import {
 import { InArticleAd } from "@/components/ads/in-article-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
 import { UpgradeBanner } from "@/components/subscription/upgrade-banner";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
 import { ShareButtons } from "@/components/news/share-buttons";
@@ -307,8 +307,8 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: article.publishedAt?.toISOString(),
     dateModified: (article.updatedAt || article.publishedAt)?.toISOString(),
     author: {
-      "@type": "Organization",
-      name: "DataSports",
+      "@type": "Person",
+      name: "DataSports Editorial",
       url: BASE_URL,
     },
     publisher: {
@@ -395,6 +395,66 @@ export default async function ArticlePage({ params }: Props) {
         })()
       : null;
 
+  // Auto-generate FAQ items from article data
+  const faqItems: { question: string; answer: string }[] = [];
+
+  if (article.type === "match_report" && matchData) {
+    const home = matchData.homeTeam.name;
+    const away = matchData.awayTeam.name;
+
+    if (matchData.match.homeScore !== null && matchData.match.awayScore !== null) {
+      faqItems.push({
+        question: `What was the final score of ${home} vs ${away}?`,
+        answer: `The final score was ${home} ${matchData.match.homeScore}-${matchData.match.awayScore} ${away}.`,
+      });
+    }
+
+    if (matchContext) {
+      const goals = matchContext.events.filter(
+        (e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty"
+      );
+      if (goals.length > 0) {
+        const scorerList = goals
+          .sort((a, b) => a.minute - b.minute)
+          .map((g) => `${g.player?.name ?? "Unknown"} (${g.minute}')`)
+          .join(", ");
+        faqItems.push({
+          question: `Who scored in ${home} vs ${away}?`,
+          answer: `The goal scorers were: ${scorerList}.`,
+        });
+      }
+    }
+
+    if (matchData.venue?.name) {
+      const location = [matchData.venue.name, matchData.venue.city].filter(Boolean).join(", ");
+      faqItems.push({
+        question: `Where was ${home} vs ${away} played?`,
+        answer: `The match was played at ${location}.`,
+      });
+    }
+
+    if (competition && season) {
+      faqItems.push({
+        question: `What competition was ${home} vs ${away} in?`,
+        answer: `This match was part of the ${competition.name} ${season.label}.`,
+      });
+    }
+  } else if (article.type === "player_spotlight" && primaryPlayer) {
+    if (primaryTeam) {
+      faqItems.push({
+        question: `What team does ${primaryPlayer.name} play for?`,
+        answer: `${primaryPlayer.name} currently plays for ${primaryTeam.name}.`,
+      });
+    }
+    if (primaryPlayerStats && primaryPlayerStats.length > 0) {
+      const s = primaryPlayerStats[0];
+      faqItems.push({
+        question: `How many goals has ${primaryPlayer.name} scored this season?`,
+        answer: `${primaryPlayer.name} has scored ${s.stat.goals ?? 0} goals in ${s.stat.appearances ?? 0} appearances this ${s.seasonLabel} season.`,
+      });
+    }
+  }
+
   // Breadcrumb items
   const breadcrumbItems = [
     { name: "Home", url: BASE_URL },
@@ -418,6 +478,7 @@ export default async function ArticlePage({ params }: Props) {
         />
       )}
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker />
 
       <div className="min-h-screen bg-white">
@@ -459,6 +520,10 @@ export default async function ArticlePage({ params }: Props) {
                   {format(new Date(article.publishedAt), "MMM d, yyyy")}
                 </span>
               )}
+              <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+                <User className="w-3.5 h-3.5" />
+                DataSports Editorial
+              </span>
               <span className="flex items-center gap-1.5 text-xs text-neutral-400">
                 <Clock className="w-3.5 h-3.5" />
                 {readingTime} min read
