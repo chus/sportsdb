@@ -9,8 +9,9 @@ import {
   seasons,
   playerSeasonStats,
   standings,
+  venues,
 } from "@/lib/db/schema";
-import { eq, sql, or, and } from "drizzle-orm";
+import { eq, sql, or, and, isNotNull } from "drizzle-orm";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -98,8 +99,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const competitionSlugsWithStats = new Set(competitionsWithStats.map((c) => c.slug));
 
-  // Fetch only what we need — teams, competitions, articles
-  const [allTeams, allCompetitions, allArticles] = await Promise.all([
+  // Fetch only what we need — teams, competitions, articles, venues, matches
+  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches] = await Promise.all([
     // Teams with quality-relevant data for filtering
     db
       .selectDistinct({
@@ -156,6 +157,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(articles)
       .where(eq(articles.status, "published")),
+    // Venues with Wikidata enrichment (quality gate: must have wikipedia or capacity)
+    db
+      .select({
+        slug: venues.slug,
+        updatedAt: venues.updatedAt,
+        wikipediaUrl: venues.wikipediaUrl,
+        capacity: venues.capacity,
+        latitude: venues.latitude,
+      })
+      .from(venues)
+      .where(
+        or(
+          isNotNull(venues.wikipediaUrl),
+          isNotNull(venues.capacity),
+        )
+      ),
+    // Finished matches with scores (quality gate: must have both teams scored)
+    db.execute<{
+      id: string;
+      scheduled_at: string;
+    }>(sql`
+      SELECT m.id, m.scheduled_at
+      FROM matches m
+      JOIN teams ht ON ht.id = m.home_team_id
+      JOIN teams at2 ON at2.id = m.away_team_id
+      JOIN competition_seasons cs ON cs.id = m.competition_season_id
+      JOIN seasons s ON s.id = cs.season_id
+      WHERE m.status = 'finished'
+        AND m.home_score IS NOT NULL
+        AND m.away_score IS NOT NULL
+        AND s.is_current = true
+      ORDER BY m.scheduled_at DESC
+      LIMIT 500
+    `),
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
@@ -225,10 +260,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
+  // Venue pages — enriched venues with Wikipedia or capacity data
+  const venuePages: MetadataRoute.Sitemap = allVenues.map((venue) => ({
+    url: `${BASE_URL}/venues/${venue.slug}`,
+    lastModified: venue.updatedAt || new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
+
+  // Match pages — finished current-season matches with scores
+  const matchPages: MetadataRoute.Sitemap = finishedMatches.rows.map((match) => ({
+    url: `${BASE_URL}/matches/${match.id}`,
+    lastModified: new Date(match.scheduled_at),
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
+  }));
+
+  // Matches hub page
+  const matchesHubPage: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/matches`,
+      lastModified: new Date(),
+      changeFrequency: "hourly" as const,
+      priority: 0.8,
+    },
+  ];
+
   return [
     ...staticPages,
+    ...matchesHubPage,
     ...competitionPages,
     ...teamPages,
+    ...venuePages,
+    ...matchPages,
     ...articlePages,
     ...topScorerCompPages,
     ...topAssistCompPages,

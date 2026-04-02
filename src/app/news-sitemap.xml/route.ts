@@ -57,7 +57,7 @@ export async function GET() {
     <loc>${BASE_URL}/news/${escapeXml(article.slug)}</loc>
     <news:news>
       <news:publication>
-        <news:name>SportsDB</news:name>
+        <news:name>DataSports</news:name>
         <news:language>en</news:language>
       </news:publication>
       <news:publication_date>${pubDate}</news:publication_date>

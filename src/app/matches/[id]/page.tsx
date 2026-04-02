@@ -62,9 +62,13 @@ export async function generateMetadata({
     match.competition ? ` - ${match.competition.name}` : ""
   }${match.venue ? ` at ${match.venue.name}` : ""}. Match events, lineups, and statistics.`;
 
+  // Only index finished matches with scores — scheduled/cancelled matches are thin
+  const isIndexable = match.status === "finished" && match.homeScore != null && match.awayScore != null;
+
   return {
     title,
     description,
+    ...(!isIndexable && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,

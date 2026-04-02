@@ -7,20 +7,21 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/entity-image"],
+        allow: ["/", "/api/entity-image", "/matches"],
         disallow: [
           "/api/",
           "/admin/",
           "/search",
           "/dashboard",
           "/players/",
-          "/venues/",
-          "/matches/",
           "/compare",
           "/games/",
         ],
       },
     ],
-    sitemap: [`${BASE_URL}/sitemap.xml`],
+    sitemap: [
+      `${BASE_URL}/sitemap.xml`,
+      `${BASE_URL}/news-sitemap.xml`,
+    ],
   };
 }
