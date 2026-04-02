@@ -7,14 +7,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/entity-image", "/matches"],
+        allow: ["/", "/api/entity-image", "/matches", "/players/", "/compare/"],
         disallow: [
           "/api/",
           "/admin/",
           "/search",
           "/dashboard",
-          "/players/",
-          "/compare",
           "/games/",
         ],
       },

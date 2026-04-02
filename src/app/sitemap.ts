@@ -10,8 +10,9 @@ import {
   playerSeasonStats,
   standings,
   venues,
+  players,
 } from "@/lib/db/schema";
-import { eq, sql, or, and, isNotNull } from "drizzle-orm";
+import { eq, sql, or, and, isNotNull, ne, desc } from "drizzle-orm";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -99,8 +100,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const competitionSlugsWithStats = new Set(competitionsWithStats.map((c) => c.slug));
 
-  // Fetch only what we need — teams, competitions, articles, venues, matches
-  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches] = await Promise.all([
+  // Fetch only what we need — teams, competitions, articles, venues, matches, players
+  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs] = await Promise.all([
     // Teams with quality-relevant data for filtering
     db
       .selectDistinct({
@@ -191,6 +192,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ORDER BY m.scheduled_at DESC
       LIMIT 500
     `),
+    // Indexable players (quality score >= 40)
+    db
+      .select({
+        slug: players.slug,
+        updatedAt: players.updatedAt,
+      })
+      .from(players)
+      .where(eq(players.isIndexable, true)),
+    // Top players for compare matchup pages
+    db
+      .select({
+        slug: players.slug,
+      })
+      .from(players)
+      .where(ne(players.position, "Unknown"))
+      .orderBy(desc(players.popularityScore))
+      .limit(15),
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
@@ -276,6 +294,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
+  // Player pages — only quality-gated indexable players
+  const playerPages: MetadataRoute.Sitemap = indexablePlayers.map((player) => ({
+    url: `${BASE_URL}/players/${player.slug}`,
+    lastModified: player.updatedAt || new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
+  // Compare matchup pages — top player pairs (C(15,2) = 105 pages)
+  const comparePages: MetadataRoute.Sitemap = [];
+  for (let i = 0; i < topPlayerPairs.length; i++) {
+    for (let j = i + 1; j < topPlayerPairs.length; j++) {
+      comparePages.push({
+        url: `${BASE_URL}/compare/${topPlayerPairs[i].slug}-vs-${topPlayerPairs[j].slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      });
+    }
+  }
+
   // Matches hub page
   const matchesHubPage: MetadataRoute.Sitemap = [
     {
@@ -291,10 +330,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...matchesHubPage,
     ...competitionPages,
     ...teamPages,
+    ...playerPages,
     ...venuePages,
     ...matchPages,
     ...articlePages,
     ...topScorerCompPages,
     ...topAssistCompPages,
+    ...comparePages,
   ];
 }
