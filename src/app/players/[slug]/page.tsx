@@ -13,6 +13,7 @@ import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerProfileSummary } from "@/components/player/player-profile-summary";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
+import { ExternalLinks } from "@/components/entity/external-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
@@ -840,6 +841,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     </div>
                   </section>
                 )}
+
+                <ExternalLinks
+                  wikipediaUrl={player.wikipediaUrl}
+                  websiteUrl={player.websiteUrl}
+                  instagramHandle={player.instagramHandle}
+                  twitterHandle={player.twitterHandle}
+                  entityName={player.name}
+                />
 
                 <RelatedPlayers playerId={player.id} />
 

@@ -26,6 +26,7 @@ import { getTeamStats } from "@/lib/queries/teams";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
 import { PageHeader } from "@/components/layout/page-header";
+import { ExternalLinks } from "@/components/entity/external-links";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -508,6 +509,11 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            <ExternalLinks
+              wikipediaUrl={venue.wikipediaUrl}
+              entityName={venue.name}
+            />
+
             {/* Historical Teams */}
             {historicalTeams.length > 0 && (
               <div className="bg-white rounded-xl border border-neutral-200 p-6">

@@ -11,6 +11,7 @@ import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-l
 import { FollowButton } from "@/components/follow-button";
 import { RelatedTeams } from "@/components/entity/related-entities";
 import { TeamInternalLinks } from "@/components/seo/internal-links";
+import { ExternalLinks } from "@/components/entity/external-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { PlayerLink } from "@/components/player/player-link";
 import { TeamFixtures } from "@/components/team/team-fixtures";
@@ -807,6 +808,14 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     </div>
                   </section>
                 )}
+
+                <ExternalLinks
+                  wikipediaUrl={team.wikipediaUrl}
+                  websiteUrl={team.websiteUrl}
+                  instagramHandle={team.instagramHandle}
+                  twitterHandle={team.twitterHandle}
+                  entityName={team.name}
+                />
 
                 <SidebarUpgradeOrAd context="team" />
 
