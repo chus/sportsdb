@@ -59,6 +59,10 @@ export const teams = pgTable(
     coachName: text("coach_name"), // Current manager/coach
     squadMarketValue: integer("squad_market_value"), // Total squad value in EUR
     wikidataId: text("wikidata_id"), // Wikidata Q-number (e.g. "Q18656")
+    websiteUrl: text("website_url"), // Official club website
+    wikipediaUrl: text("wikipedia_url"), // English Wikipedia page
+    instagramHandle: text("instagram_handle"), // e.g. "mancity"
+    twitterHandle: text("twitter_handle"), // e.g. "ManCity"
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -93,6 +97,10 @@ export const players = pgTable(
     contractExpirationDate: date("contract_expiration_date"),
     wikidataId: text("wikidata_id"), // Wikidata Q-number (e.g. "Q615")
     placeOfBirth: text("place_of_birth"), // City/town name for SEO
+    websiteUrl: text("website_url"), // Official personal website
+    wikipediaUrl: text("wikipedia_url"), // English Wikipedia page
+    instagramHandle: text("instagram_handle"), // e.g. "eraborehaaland"
+    twitterHandle: text("twitter_handle"), // e.g. "ErlingHaaland"
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
@@ -113,6 +121,8 @@ export const venues = pgTable("venues", {
   imageUrl: text("image_url"),
   latitude: decimal("latitude", { precision: 9, scale: 6 }),
   longitude: decimal("longitude", { precision: 9, scale: 6 }),
+  wikidataId: text("wikidata_id"), // Wikidata Q-number
+  wikipediaUrl: text("wikipedia_url"), // English Wikipedia page
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
