@@ -422,6 +422,10 @@ export async function getPlayerWithAggregatedStats(slug: string) {
     imageUrl: player.imageUrl,
     dateOfBirth: player.dateOfBirth,
     heightCm: player.heightCm,
+    wikipediaUrl: player.wikipediaUrl,
+    websiteUrl: player.websiteUrl,
+    instagramHandle: player.instagramHandle,
+    twitterHandle: player.twitterHandle,
     team: team ? { name: team.name, slug: team.slug, logoUrl: team.logo_url } : null,
     totalStats: {
       appearances: stats[0]?.appearances || 0,

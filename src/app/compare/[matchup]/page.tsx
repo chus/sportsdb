@@ -8,6 +8,7 @@ import {
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { ExternalLinks } from "@/components/entity/external-links";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -257,6 +258,26 @@ export default async function CompareMatchupPage({ params }: PageProps) {
               )}
             </div>
           </div>
+
+          {/* External Links */}
+          {(player1.wikipediaUrl || player1.websiteUrl || player1.instagramHandle || player1.twitterHandle || player2.wikipediaUrl || player2.websiteUrl || player2.instagramHandle || player2.twitterHandle) && (
+            <div className="grid grid-cols-2 gap-6 mt-8">
+              <ExternalLinks
+                wikipediaUrl={player1.wikipediaUrl}
+                websiteUrl={player1.websiteUrl}
+                instagramHandle={player1.instagramHandle}
+                twitterHandle={player1.twitterHandle}
+                entityName={player1.name}
+              />
+              <ExternalLinks
+                wikipediaUrl={player2.wikipediaUrl}
+                websiteUrl={player2.websiteUrl}
+                instagramHandle={player2.instagramHandle}
+                twitterHandle={player2.twitterHandle}
+                entityName={player2.name}
+              />
+            </div>
+          )}
 
           <div className="mt-8 text-center">
             <Link

@@ -8,6 +8,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import { PlayerSearchSelector } from "@/components/search/player-search-selector";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
+import { ExternalLinks } from "@/components/entity/external-links";
 
 interface ComparePageProps {
   searchParams: Promise<{ p1?: string; p2?: string }>;
@@ -28,6 +29,10 @@ interface PlayerWithStats {
   dateOfBirth: string | null;
   heightCm: number | null;
   isIndexable: boolean;
+  wikipediaUrl: string | null;
+  websiteUrl: string | null;
+  instagramHandle: string | null;
+  twitterHandle: string | null;
   team: { name: string; slug: string; logoUrl: string | null } | null;
   totalStats: {
     appearances: number;
@@ -84,6 +89,10 @@ async function getPlayerWithStats(slug: string): Promise<PlayerWithStats | null>
     dateOfBirth: p.dateOfBirth,
     heightCm: p.heightCm,
     isIndexable: p.isIndexable ?? false,
+    wikipediaUrl: p.wikipediaUrl,
+    websiteUrl: p.websiteUrl,
+    instagramHandle: p.instagramHandle,
+    twitterHandle: p.twitterHandle,
     team: team ? { name: team.name, slug: team.slug, logoUrl: team.logo_url } : null,
     totalStats: {
       appearances: stats[0]?.appearances || 0,
@@ -320,6 +329,26 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
               <p className="text-sm text-neutral-400 mt-2">
                 Try: erling-haaland vs mohamed-salah
               </p>
+            </div>
+          )}
+
+          {/* External Links */}
+          {player1 && player2 && (player1.wikipediaUrl || player1.websiteUrl || player1.instagramHandle || player1.twitterHandle || player2.wikipediaUrl || player2.websiteUrl || player2.instagramHandle || player2.twitterHandle) && (
+            <div className="grid grid-cols-2 gap-6 p-6 border-t border-neutral-200">
+              <ExternalLinks
+                wikipediaUrl={player1.wikipediaUrl}
+                websiteUrl={player1.websiteUrl}
+                instagramHandle={player1.instagramHandle}
+                twitterHandle={player1.twitterHandle}
+                entityName={player1.name}
+              />
+              <ExternalLinks
+                wikipediaUrl={player2.wikipediaUrl}
+                websiteUrl={player2.websiteUrl}
+                instagramHandle={player2.instagramHandle}
+                twitterHandle={player2.twitterHandle}
+                entityName={player2.name}
+              />
             </div>
           )}
         </div>
