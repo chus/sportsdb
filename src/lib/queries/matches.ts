@@ -38,20 +38,9 @@ export async function getMatch(matchId: string) {
 }
 
 /**
- * Get a match with full details: teams, venue, competition, and season.
+ * Internal helper: hydrate a match row with related teams, venue, competition, season.
  */
-export async function getMatchWithDetails(matchId: string) {
-  const result = await db
-    .select()
-    .from(matches)
-    .where(eq(matches.id, matchId))
-    .limit(1);
-
-  if (!result[0]) return null;
-
-  const match = result[0];
-
-  // Fetch related data in parallel
+async function hydrateMatch(match: typeof matches.$inferSelect) {
   const [homeTeamResult, awayTeamResult, venueResult, compSeasonResult] =
     await Promise.all([
       db.select().from(teams).where(eq(teams.id, match.homeTeamId)),
@@ -81,6 +70,36 @@ export async function getMatchWithDetails(matchId: string) {
     competition: compSeasonResult[0]?.competition || null,
     season: compSeasonResult[0]?.season || null,
   };
+}
+
+/**
+ * Get a match with full details: teams, venue, competition, and season.
+ *
+ * Used by the redirect path (middleware-triggered API and legacy callers).
+ */
+export async function getMatchWithDetails(matchId: string) {
+  const result = await db
+    .select()
+    .from(matches)
+    .where(eq(matches.id, matchId))
+    .limit(1);
+
+  if (!result[0]) return null;
+  return hydrateMatch(result[0]);
+}
+
+/**
+ * Get a match with full details by slug. Used by the public match page.
+ */
+export async function getMatchWithDetailsBySlug(slug: string) {
+  const result = await db
+    .select()
+    .from(matches)
+    .where(eq(matches.slug, slug))
+    .limit(1);
+
+  if (!result[0]) return null;
+  return hydrateMatch(result[0]);
 }
 
 /**
@@ -408,6 +427,7 @@ export async function getTeamMatches(teamId: string, limit = 10) {
 
 export interface HubMatch {
   id: string;
+  slug: string | null;
   scheduledAt: string;
   status: string;
   homeScore: number | null;
@@ -436,6 +456,7 @@ export async function getMatchesForDateRange(
 ): Promise<HubMatch[]> {
   const result = await db.execute<{
     id: string;
+    slug: string | null;
     scheduled_at: string;
     status: string;
     home_score: number | null;
@@ -455,6 +476,7 @@ export async function getMatchesForDateRange(
   }>(sql`
     SELECT
       m.id,
+      m.slug,
       m.scheduled_at,
       m.status,
       m.home_score,
@@ -483,6 +505,7 @@ export async function getMatchesForDateRange(
 
   return result.rows.map((r) => ({
     id: r.id,
+    slug: r.slug,
     scheduledAt: r.scheduled_at,
     status: r.status,
     homeScore: r.home_score,
@@ -517,6 +540,7 @@ export async function getMatchDaySummary(startOfDay: Date, endOfDay: Date) {
     biggest_home_score: number | null;
     biggest_away_score: number | null;
     biggest_match_id: string | null;
+    biggest_match_slug: string | null;
   }>(sql`
     SELECT
       count(*)::int as total_matches,
@@ -579,7 +603,15 @@ export async function getMatchDaySummary(startOfDay: Date, endOfDay: Date) {
           AND mx.status = 'finished'
         ORDER BY abs(mx.home_score - mx.away_score) DESC
         LIMIT 1
-      ) as biggest_match_id
+      ) as biggest_match_id,
+      (
+        SELECT mx.slug FROM matches mx
+        WHERE mx.scheduled_at >= ${startOfDay.toISOString()}
+          AND mx.scheduled_at < ${endOfDay.toISOString()}
+          AND mx.status = 'finished'
+        ORDER BY abs(mx.home_score - mx.away_score) DESC
+        LIMIT 1
+      ) as biggest_match_slug
     FROM matches m
     WHERE m.scheduled_at >= ${startOfDay.toISOString()}
       AND m.scheduled_at < ${endOfDay.toISOString()}
@@ -594,6 +626,7 @@ export async function getMatchDaySummary(startOfDay: Date, endOfDay: Date) {
     biggestWin: r?.biggest_diff
       ? {
           matchId: r.biggest_match_id!,
+          matchSlug: r.biggest_match_slug ?? null,
           homeTeam: r.biggest_home!,
           awayTeam: r.biggest_away!,
           homeScore: r.biggest_home_score!,
@@ -649,6 +682,7 @@ export async function getRecentFinishedMatches(
 ): Promise<HubMatch[]> {
   const result = await db.execute<{
     id: string;
+    slug: string | null;
     scheduled_at: string;
     status: string;
     home_score: number | null;
@@ -668,6 +702,7 @@ export async function getRecentFinishedMatches(
   }>(sql`
     SELECT
       m.id,
+      m.slug,
       m.scheduled_at,
       m.status,
       m.home_score,
@@ -696,6 +731,7 @@ export async function getRecentFinishedMatches(
 
   return result.rows.map((r) => ({
     id: r.id,
+    slug: r.slug,
     scheduledAt: r.scheduled_at,
     status: r.status,
     homeScore: r.home_score,

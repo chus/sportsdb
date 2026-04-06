@@ -40,7 +40,7 @@ export function LiveMatchesSection({ competitionFilter }: LiveMatchesSectionProp
         {filtered.map((match) => (
           <Link
             key={match.id}
-            href={`/matches/${match.id}`}
+            href={`/matches/${match.slug ?? match.id}`}
             className="min-w-[280px] snap-start flex-shrink-0 bg-white border border-red-200 rounded-xl p-4 hover:shadow-lg hover:border-red-300 transition-all"
           >
             {/* Competition badge */}

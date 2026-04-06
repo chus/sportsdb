@@ -154,7 +154,7 @@ export async function CompetitionFixtures({
               {mdFixtures.map((fixture) => (
                 <Link
                   key={fixture.id}
-                  href={`/matches/${fixture.id}`}
+                  href={`/matches/${fixture.slug ?? fixture.id}`}
                   className="flex items-center p-4 hover:bg-neutral-50 transition-colors group"
                 >
                   {/* Date/Time */}

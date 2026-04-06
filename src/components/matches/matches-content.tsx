@@ -25,7 +25,8 @@ interface MatchesContentProps {
     totalMatches: number; finishedMatches: number;
     totalGoals: number; redCards: number;
     biggestWin: {
-      matchId: string; homeTeam: string; awayTeam: string;
+      matchId: string; matchSlug: string | null;
+      homeTeam: string; awayTeam: string;
       homeScore: number; awayScore: number;
     } | null;
   };
@@ -99,7 +100,7 @@ function MatchStatusBadge({ match }: { match: HubMatch }) {
 function MatchRow({ match }: { match: HubMatch }) {
   const showScore = match.status === "finished" || match.status === "live" || match.status === "half_time";
   return (
-    <Link href={`/matches/${match.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 rounded-lg transition-colors group">
+    <Link href={`/matches/${match.slug ?? match.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 rounded-lg transition-colors group">
       <div className="w-16 flex-shrink-0 text-center"><MatchStatusBadge match={match} /></div>
       <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
         <span className="truncate text-sm text-neutral-900 text-right">{match.homeTeamName}</span>
@@ -337,7 +338,7 @@ export function MatchesContent({
               </div>
               <div className="divide-y divide-neutral-100">
                 {filteredRecentResults.map((m) => (
-                  <Link key={m.id} href={`/matches/${m.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 transition-colors">
+                  <Link key={m.id} href={`/matches/${m.slug ?? m.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 transition-colors">
                     <span className="w-14 flex-shrink-0 text-xs text-neutral-500 text-center">{format(parseISO(m.scheduledAt), "MMM d")}</span>
                     <ImageWithFallback src={m.competitionLogoUrl} alt={m.competitionName} width={16} height={16} className="w-4 h-4 flex-shrink-0 rounded-sm object-contain" />
                     <span className="flex-1 text-sm text-neutral-900 text-right truncate">{m.homeTeamName}</span>
@@ -363,7 +364,7 @@ export function MatchesContent({
             {summary.biggestWin && (
               <div className="mt-4 pt-4 border-t border-neutral-100">
                 <p className="text-xs text-neutral-500 mb-1">Biggest Win</p>
-                <Link href={`/matches/${summary.biggestWin.matchId}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                <Link href={`/matches/${summary.biggestWin.matchSlug ?? summary.biggestWin.matchId}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                   {summary.biggestWin.homeTeam} {summary.biggestWin.homeScore} - {summary.biggestWin.awayScore} {summary.biggestWin.awayTeam}
                 </Link>
               </div>

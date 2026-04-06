@@ -462,7 +462,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                           {recentMatches.map((m) => (
                             <Link
                               key={m.match.id}
-                              href={`/matches/${m.match.id}`}
+                              href={`/matches/${m.match.slug ?? m.match.id}`}
                               className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
                             >
                               <div className="flex items-center gap-1.5 text-xs text-neutral-700 mb-1.5">
@@ -492,7 +492,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {/* Upcoming Match */}
                     {nextMatch && currentTeam && (
                       <Link
-                        href={`/matches/${nextMatch.id}`}
+                        href={`/matches/${nextMatch.slug ?? nextMatch.id}`}
                         className="block bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
                       >
                         <div className="flex items-center justify-between mb-3">
@@ -794,7 +794,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                           {recentMatches.map((m) => (
                             <Link
                               key={m.match.id}
-                              href={`/matches/${m.match.id}`}
+                              href={`/matches/${m.match.slug ?? m.match.id}`}
                               className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
                             >
                               <div className="flex-1">

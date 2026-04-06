@@ -59,7 +59,7 @@ export async function UpcomingMatches({
                 {dateMatches.map((match) => (
                   <Link
                     key={match.id}
-                    href={`/matches/${match.id}`}
+                    href={`/matches/${match.slug ?? match.id}`}
                     className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-lg hover:border-blue-200 transition-all group"
                   >
                     {/* Competition badge */}

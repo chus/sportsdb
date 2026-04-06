@@ -201,6 +201,7 @@ export async function getCompetitionRecentAndUpcoming(
     db
       .select({
         id: matches.id,
+        slug: matches.slug,
         scheduledAt: matches.scheduledAt,
         homeScore: matches.homeScore,
         awayScore: matches.awayScore,
@@ -233,6 +234,7 @@ export async function getCompetitionRecentAndUpcoming(
     db
       .select({
         id: matches.id,
+        slug: matches.slug,
         scheduledAt: matches.scheduledAt,
         homeScore: matches.homeScore,
         awayScore: matches.awayScore,

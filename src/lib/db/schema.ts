@@ -273,6 +273,7 @@ export const matches = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     externalId: text("external_id").unique(), // External API ID for deduplication (e.g., "fd-12345")
+    slug: text("slug"), // Descriptive slug like "manchester-united-vs-liverpool-2024-09-15"
     competitionSeasonId: uuid("competition_season_id")
       .notNull()
       .references(() => competitionSeasons.id),
@@ -299,6 +300,7 @@ export const matches = pgTable(
     index("idx_matches_scheduled").on(table.scheduledAt),
     index("idx_matches_status").on(table.status),
     index("idx_matches_cs").on(table.competitionSeasonId),
+    uniqueIndex("idx_matches_slug").on(table.slug),
   ]
 );
 

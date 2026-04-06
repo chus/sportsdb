@@ -110,7 +110,7 @@ export async function HeadToHead({
                 return (
                   <Link
                     key={match.id}
-                    href={`/matches/${match.id}`}
+                    href={`/matches/${match.slug ?? match.id}`}
                     className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors text-sm"
                   >
                     <div className="flex items-center gap-2 flex-1">

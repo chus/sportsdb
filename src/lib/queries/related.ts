@@ -31,6 +31,7 @@ interface RelatedTeam {
 
 interface RelatedMatch {
   id: string;
+  slug: string | null;
   homeTeam: { name: string; slug: string; logoUrl: string | null };
   awayTeam: { name: string; slug: string; logoUrl: string | null };
   homeScore: number | null;
@@ -246,6 +247,7 @@ export async function getRelatedMatches(
   const relatedMatches = await db
     .select({
       id: matches.id,
+      slug: matches.slug,
       homeScore: matches.homeScore,
       awayScore: matches.awayScore,
       status: matches.status,
@@ -290,6 +292,7 @@ export async function getRelatedMatches(
     if (home && away) {
       result.push({
         id: m.id,
+        slug: m.slug,
         homeTeam: home,
         awayTeam: away,
         homeScore: m.homeScore,
@@ -315,6 +318,7 @@ export interface HeadToHeadStats {
   team2Goals: number;
   recentMatches: {
     id: string;
+    slug: string | null;
     homeTeamId: string;
     awayTeamId: string;
     homeScore: number;
@@ -333,6 +337,7 @@ export async function getHeadToHead(
   const h2hMatches = await db
     .select({
       id: matches.id,
+      slug: matches.slug,
       homeTeamId: matches.homeTeamId,
       awayTeamId: matches.awayTeamId,
       homeScore: matches.homeScore,
@@ -405,6 +410,7 @@ export async function getHeadToHead(
     team2Goals,
     recentMatches: h2hMatches.map((m) => ({
       id: m.id,
+      slug: m.slug,
       homeTeamId: m.homeTeamId,
       awayTeamId: m.awayTeamId,
       homeScore: m.homeScore ?? 0,

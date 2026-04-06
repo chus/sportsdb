@@ -16,6 +16,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
 import { eq } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
+import { buildMatchSlug } from "../src/lib/utils/match-slug";
 
 config({ path: ".env.local" });
 
@@ -373,7 +374,14 @@ async function ingestTeamsAndPlayers(
         const awayTeam = teamMap.get(apiMatch.awayTeam.id);
         if (!homeTeam || !awayTeam) continue;
 
+        const matchSlug = buildMatchSlug(
+          homeTeam.slug,
+          awayTeam.slug,
+          new Date(apiMatch.utcDate)
+        );
+
         await db.insert(schema.matches).values({
+          slug: matchSlug,
           competitionSeasonId: compSeason.id,
           homeTeamId: homeTeam.id,
           awayTeamId: awayTeam.id,

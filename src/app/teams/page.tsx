@@ -218,7 +218,7 @@ export default async function TeamsPage() {
                 {recentMatches.map((match) => (
                   <Link
                     key={match.id}
-                    href={`/matches/${match.id}`}
+                    href={`/matches/${match.slug ?? match.id}`}
                     className="flex items-center px-5 py-3.5 hover:bg-neutral-50 transition-colors group"
                   >
                     {/* Home Team */}

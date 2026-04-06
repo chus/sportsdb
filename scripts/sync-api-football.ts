@@ -16,8 +16,9 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
-import { eq, sql as drizzleSql, and, isNull } from "drizzle-orm";
+import { eq, sql as drizzleSql, and, isNull, inArray } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
+import { buildMatchSlug } from "../src/lib/utils/match-slug";
 
 config({ path: ".env.local" });
 
@@ -869,6 +870,16 @@ async function syncMatches(
 ) {
   const data = await apiFetch(`/fixtures?league=${league.apiId}&season=${league.season}`);
 
+  // Look up slugs for all teams in this league once.
+  const teamDbIds = Array.from(teamIdMap.values());
+  const teamSlugRows = teamDbIds.length
+    ? await db
+        .select({ id: schema.teams.id, slug: schema.teams.slug })
+        .from(schema.teams)
+        .where(inArray(schema.teams.id, teamDbIds))
+    : [];
+  const slugById = new Map(teamSlugRows.map((r) => [r.id, r.slug]));
+
   let count = 0;
   for (const entry of data.response || []) {
     const fixture = entry.fixture;
@@ -881,11 +892,16 @@ async function syncMatches(
 
     const extId = afId(fixture.id);
     const scheduledAt = new Date(fixture.date);
+    const homeSlug = slugById.get(homeTeamId);
+    const awaySlug = slugById.get(awayTeamId);
+    const matchSlug =
+      homeSlug && awaySlug ? buildMatchSlug(homeSlug, awaySlug, scheduledAt) : null;
 
     await db
       .insert(schema.matches)
       .values({
         externalId: extId,
+        slug: matchSlug,
         competitionSeasonId: compSeasonId,
         homeTeamId,
         awayTeamId,

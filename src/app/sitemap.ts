@@ -180,12 +180,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           isNotNull(venues.capacity),
         )
       ),
-    // Finished matches with scores (quality gate: must have both teams scored)
+    // Finished matches with scores (quality gate: must have both teams scored).
+    // Slug must be set — we no longer expose UUID URLs in the sitemap.
     db.execute<{
       id: string;
+      slug: string;
       scheduled_at: string;
     }>(sql`
-      SELECT m.id, m.scheduled_at
+      SELECT m.id, m.slug, m.scheduled_at
       FROM matches m
       JOIN teams ht ON ht.id = m.home_team_id
       JOIN teams at2 ON at2.id = m.away_team_id
@@ -194,6 +196,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       WHERE m.status = 'finished'
         AND m.home_score IS NOT NULL
         AND m.away_score IS NOT NULL
+        AND m.slug IS NOT NULL
         AND s.is_current = true
       ORDER BY m.scheduled_at DESC
       LIMIT 500
@@ -292,9 +295,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  // Match pages — finished current-season matches with scores
+  // Match pages — finished current-season matches with scores (slug-based URLs only)
   const matchPages: MetadataRoute.Sitemap = finishedMatches.rows.map((match) => ({
-    url: `${BASE_URL}/matches/${match.id}`,
+    url: `${BASE_URL}/matches/${match.slug}`,
     lastModified: new Date(match.scheduled_at),
     changeFrequency: "yearly" as const,
     priority: 0.5,

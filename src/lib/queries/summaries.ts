@@ -76,6 +76,7 @@ export async function getPlayerMatchSummaries(playerId: string, limit = 5) {
   return result.map(({ summary, match }) => ({
     id: summary.id,
     matchId: match.id,
+    matchSlug: match.slug,
     rating: summary.rating ? parseFloat(summary.rating) : null,
     summary: summary.summary,
     highlights: safeJsonParse(summary.highlights, []),

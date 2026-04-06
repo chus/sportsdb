@@ -177,6 +177,7 @@ export async function getTeamBrowseData() {
     // Recent match results
     db.execute<{
       match_id: string;
+      match_slug: string | null;
       scheduled_at: string;
       home_score: number | null;
       away_score: number | null;
@@ -190,6 +191,7 @@ export async function getTeamBrowseData() {
     }>(sql`
       SELECT
         m.id as match_id,
+        m.slug as match_slug,
         m.scheduled_at,
         m.home_score,
         m.away_score,
@@ -247,6 +249,7 @@ export async function getTeamBrowseData() {
     })),
     recentMatches: recentMatches.rows.map((r) => ({
       id: r.match_id,
+      slug: r.match_slug,
       scheduledAt: r.scheduled_at,
       homeScore: r.home_score,
       awayScore: r.away_score,

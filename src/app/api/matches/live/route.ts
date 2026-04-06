@@ -38,6 +38,7 @@ export async function GET() {
 
         return {
           id: match.id,
+          slug: match.slug,
           status: match.status,
           minute: match.minute,
           homeScore: match.homeScore,

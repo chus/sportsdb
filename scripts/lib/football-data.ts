@@ -7,8 +7,9 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import * as schema from "../../src/lib/db/schema";
+import { buildMatchSlug } from "../../src/lib/utils/match-slug";
 
 config({ path: ".env.local" });
 
@@ -734,6 +735,16 @@ export async function syncMatches(
     `${BASE_URL}/competitions/${compCode}/matches${seasonParam}`
   );
 
+  // Look up slugs for all teams in this league once.
+  const teamDbIds = Array.from(teamIdMap.values());
+  const teamSlugRows = teamDbIds.length
+    ? await db
+        .select({ id: schema.teams.id, slug: schema.teams.slug })
+        .from(schema.teams)
+        .where(inArray(schema.teams.id, teamDbIds))
+    : [];
+  const slugById = new Map(teamSlugRows.map((r) => [r.id, r.slug]));
+
   let count = 0;
   for (const apiMatch of matchesData.matches || []) {
     const homeTeamId = teamIdMap.get(apiMatch.homeTeam.id);
@@ -741,16 +752,22 @@ export async function syncMatches(
     if (!homeTeamId || !awayTeamId) continue;
 
     const extId = fdId(apiMatch.id);
+    const scheduledAt = new Date(apiMatch.utcDate);
+    const homeSlug = slugById.get(homeTeamId);
+    const awaySlug = slugById.get(awayTeamId);
+    const matchSlug =
+      homeSlug && awaySlug ? buildMatchSlug(homeSlug, awaySlug, scheduledAt) : null;
 
     await db
       .insert(schema.matches)
       .values({
         externalId: extId,
+        slug: matchSlug,
         competitionSeasonId: compSeasonId,
         homeTeamId,
         awayTeamId,
         matchday: apiMatch.matchday,
-        scheduledAt: new Date(apiMatch.utcDate),
+        scheduledAt,
         status: mapMatchStatus(apiMatch.status),
         homeScore: apiMatch.score?.fullTime?.home ?? null,
         awayScore: apiMatch.score?.fullTime?.away ?? null,
@@ -760,7 +777,7 @@ export async function syncMatches(
         target: schema.matches.externalId,
         set: {
           matchday: apiMatch.matchday,
-          scheduledAt: new Date(apiMatch.utcDate),
+          scheduledAt,
           status: mapMatchStatus(apiMatch.status),
           homeScore: apiMatch.score?.fullTime?.home ?? null,
           awayScore: apiMatch.score?.fullTime?.away ?? null,

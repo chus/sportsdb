@@ -8,9 +8,10 @@ import {
   competitionSeasons,
   seasons,
 } from "@/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { scorePredictionsForMatch } from "@/lib/queries/predictions";
 import { scorePickemsForMatch } from "@/lib/queries/pickem";
+import { buildMatchSlugWithFallback } from "@/lib/utils/match-slug";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -77,17 +78,17 @@ function slugify(name: string): string {
 async function getOrCreateTeam(
   team: ApiMatch["homeTeam"],
   country: string
-): Promise<string | null> {
+): Promise<{ id: string; slug: string } | null> {
   const slug = slugify(team.name);
 
   const existing = await db
-    .select({ id: teams.id })
+    .select({ id: teams.id, slug: teams.slug })
     .from(teams)
     .where(eq(teams.slug, slug))
     .limit(1);
 
   if (existing.length > 0) {
-    return existing[0].id;
+    return { id: existing[0].id, slug: existing[0].slug };
   }
 
   const result = await db
@@ -99,9 +100,34 @@ async function getOrCreateTeam(
       country,
       logoUrl: team.crest,
     })
-    .returning({ id: teams.id });
+    .returning({ id: teams.id, slug: teams.slug });
 
-  return result[0]?.id ?? null;
+  if (!result[0]) return null;
+  return { id: result[0].id, slug: result[0].slug };
+}
+
+/**
+ * Pick a slug variant that doesn't collide with another match's slug
+ * (other than the row being upserted via externalId).
+ */
+async function resolveMatchSlug(
+  variants: { primary: string; withMatchday: string | null; withUuid: string },
+  externalId: string
+): Promise<string> {
+  const candidates = [variants.primary];
+  if (variants.withMatchday) candidates.push(variants.withMatchday);
+  candidates.push(variants.withUuid);
+
+  for (const candidate of candidates) {
+    const conflict = await db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(and(eq(matches.slug, candidate), ne(matches.externalId, externalId)))
+      .limit(1);
+
+    if (conflict.length === 0) return candidate;
+  }
+  return `${variants.primary}-${Date.now().toString(36)}`;
 }
 
 async function getCompetitionSeasonId(
@@ -171,9 +197,9 @@ export async function GET() {
 
       for (const match of apiMatches) {
         try {
-          const homeTeamId = await getOrCreateTeam(match.homeTeam, league.country);
-          const awayTeamId = await getOrCreateTeam(match.awayTeam, league.country);
-          if (!homeTeamId || !awayTeamId) continue;
+          const homeTeam = await getOrCreateTeam(match.homeTeam, league.country);
+          const awayTeam = await getOrCreateTeam(match.awayTeam, league.country);
+          if (!homeTeam || !awayTeam) continue;
 
           const seasonLabel = getSeasonLabel(match.utcDate);
           const competitionSeasonId = await getCompetitionSeasonId(league.slug, seasonLabel);
@@ -188,13 +214,23 @@ export async function GET() {
           const awayScore =
             match.score.fullTime.away ?? match.score.halfTime.away ?? null;
 
+          const slugVariants = buildMatchSlugWithFallback(
+            homeTeam.slug,
+            awayTeam.slug,
+            new Date(match.utcDate),
+            match.matchday,
+            externalId
+          );
+          const matchSlug = await resolveMatchSlug(slugVariants, externalId);
+
           const [upserted] = await db
             .insert(matches)
             .values({
               externalId,
+              slug: matchSlug,
               competitionSeasonId,
-              homeTeamId,
-              awayTeamId,
+              homeTeamId: homeTeam.id,
+              awayTeamId: awayTeam.id,
               scheduledAt: new Date(match.utcDate),
               status,
               homeScore,

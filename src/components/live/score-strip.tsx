@@ -68,7 +68,7 @@ export function ScoreStrip() {
           {matches.map((match) => (
             <Link
               key={match.id}
-              href={`/matches/${match.id}`}
+              href={`/matches/${match.slug ?? match.id}`}
               className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800/60 hover:bg-neutral-700/60 rounded transition-colors flex-shrink-0"
             >
               {/* Home */}

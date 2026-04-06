@@ -144,7 +144,7 @@ export default async function DashboardPage() {
                   {upcomingFixtures.map((fixture) => (
                     <Link
                       key={fixture.id}
-                      href={`/matches/${fixture.id}`}
+                      href={`/matches/${fixture.slug ?? fixture.id}`}
                       className="block rounded-xl border border-neutral-200 bg-white p-4 hover:shadow-xl transition-shadow"
                     >
                       <div className="flex items-center justify-between mb-2">

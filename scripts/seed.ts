@@ -7,6 +7,7 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
 import * as schema from "../src/lib/db/schema";
+import { buildMatchSlug } from "../src/lib/utils/match-slug";
 
 config({ path: ".env.local" });
 const sql = neon(process.env.DATABASE_URL!);
@@ -182,13 +183,27 @@ async function seed() {
   console.log("✅ Standings");
 
   // Sample Matches (3 recent finished, 1 live, 1 upcoming)
-  const matchRows = [
-    { competitionSeasonId:cs2526.id, homeTeamId:teamMap["manchester-city"].id, awayTeamId:teamMap["liverpool"].id, venueId:venues[0].id, matchday:28, scheduledAt:"2026-02-08T16:30:00Z", status:"finished", homeScore:2, awayScore:1, attendance:53284, referee:"Michael Oliver" },
-    { competitionSeasonId:cs2526.id, homeTeamId:teamMap["arsenal"].id, awayTeamId:teamMap["chelsea"].id, venueId:venues[1].id, matchday:28, scheduledAt:"2026-02-08T14:00:00Z", status:"finished", homeScore:3, awayScore:1, attendance:60542, referee:"Anthony Taylor" },
-    { competitionSeasonId:cs2526.id, homeTeamId:teamMap["manchester-united"].id, awayTeamId:teamMap["tottenham-hotspur"].id, venueId:venues[4].id, matchday:28, scheduledAt:"2026-02-07T20:00:00Z", status:"finished", homeScore:1, awayScore:1, attendance:73864, referee:"Craig Pawson" },
-    { competitionSeasonId:cs2526.id, homeTeamId:teamMap["liverpool"].id, awayTeamId:teamMap["arsenal"].id, venueId:venues[2].id, matchday:29, scheduledAt:"2026-02-15T16:30:00Z", status:"scheduled", homeScore:null, awayScore:null, attendance:null, referee:null },
-    { competitionSeasonId:cs2526.id, homeTeamId:teamMap["chelsea"].id, awayTeamId:teamMap["manchester-city"].id, venueId:venues[3].id, matchday:29, scheduledAt:"2026-02-15T14:00:00Z", status:"scheduled", homeScore:null, awayScore:null, attendance:null, referee:null },
+  const matchSeed = [
+    { homeSlug:"manchester-city", awaySlug:"liverpool", venueId:venues[0].id, matchday:28, scheduledAt:"2026-02-08T16:30:00Z", status:"finished", homeScore:2, awayScore:1, attendance:53284, referee:"Michael Oliver" },
+    { homeSlug:"arsenal", awaySlug:"chelsea", venueId:venues[1].id, matchday:28, scheduledAt:"2026-02-08T14:00:00Z", status:"finished", homeScore:3, awayScore:1, attendance:60542, referee:"Anthony Taylor" },
+    { homeSlug:"manchester-united", awaySlug:"tottenham-hotspur", venueId:venues[4].id, matchday:28, scheduledAt:"2026-02-07T20:00:00Z", status:"finished", homeScore:1, awayScore:1, attendance:73864, referee:"Craig Pawson" },
+    { homeSlug:"liverpool", awaySlug:"arsenal", venueId:venues[2].id, matchday:29, scheduledAt:"2026-02-15T16:30:00Z", status:"scheduled", homeScore:null, awayScore:null, attendance:null, referee:null },
+    { homeSlug:"chelsea", awaySlug:"manchester-city", venueId:venues[3].id, matchday:29, scheduledAt:"2026-02-15T14:00:00Z", status:"scheduled", homeScore:null, awayScore:null, attendance:null, referee:null },
   ];
+  const matchRows = matchSeed.map((m) => ({
+    competitionSeasonId: cs2526.id,
+    slug: buildMatchSlug(m.homeSlug, m.awaySlug, new Date(m.scheduledAt)),
+    homeTeamId: teamMap[m.homeSlug].id,
+    awayTeamId: teamMap[m.awaySlug].id,
+    venueId: m.venueId,
+    matchday: m.matchday,
+    scheduledAt: m.scheduledAt,
+    status: m.status,
+    homeScore: m.homeScore,
+    awayScore: m.awayScore,
+    attendance: m.attendance,
+    referee: m.referee,
+  }));
   const matchesInserted = await db.insert(schema.matches).values(matchRows).returning();
   console.log("✅ Matches");
 

@@ -30,7 +30,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
             {upcoming.map((match) => (
               <Link
                 key={match.id}
-                href={`/matches/${match.id}`}
+                href={`/matches/${match.slug ?? match.id}`}
                 className="block p-3 bg-neutral-50 rounded-lg hover:bg-blue-50 transition-colors group"
               >
                 <div className="flex items-center justify-between mb-2">
@@ -115,7 +115,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
               return (
                 <Link
                   key={match.id}
-                  href={`/matches/${match.id}`}
+                  href={`/matches/${match.slug ?? match.id}`}
                   className="block p-3 bg-neutral-50 rounded-lg hover:bg-blue-50 transition-colors group"
                 >
                   <div className="flex items-center justify-between mb-2">

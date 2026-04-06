@@ -218,7 +218,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
               {/* Next Match */}
               {nextMatch ? (
                 <Link
-                  href={`/matches/${nextMatch.match.id}`}
+                  href={`/matches/${nextMatch.match.slug ?? nextMatch.match.id}`}
                   className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
                 >
                   <div className="flex items-center gap-1.5 mb-2">
@@ -248,7 +248,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
               {/* Last Result */}
               {lastMatch ? (
                 <Link
-                  href={`/matches/${lastMatch.match.id}`}
+                  href={`/matches/${lastMatch.match.slug ?? lastMatch.match.id}`}
                   className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
                 >
                   <div className="flex items-center gap-1.5 mb-2">
@@ -366,7 +366,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                   {recentMatches.slice(0, 6).map(({ match, homeTeam, awayTeam }) => (
                     <Link
                       key={match.id}
-                      href={`/matches/${match.id}`}
+                      href={`/matches/${match.slug ?? match.id}`}
                       className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
                     >
                       <div className="flex items-center gap-1.5 mb-1.5">
@@ -407,7 +407,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                   {upcomingMatches.slice(0, 5).map(({ match, homeTeam, awayTeam, competition }) => (
                     <Link
                       key={match.id}
-                      href={`/matches/${match.id}`}
+                      href={`/matches/${match.slug ?? match.id}`}
                       className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">

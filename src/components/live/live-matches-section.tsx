@@ -78,7 +78,7 @@ export function LiveMatchesSection() {
             {matches.map((match) => (
               <Link
                 key={match.id}
-                href={`/matches/${match.id}`}
+                href={`/matches/${match.slug ?? match.id}`}
                 className="flex-shrink-0 w-72 bg-white rounded-xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
               >
                 {/* Competition & Status */}

@@ -50,7 +50,7 @@ export async function PlayerMatchPerformance({
         {performances.map((perf) => (
           <Link
             key={perf.id}
-            href={`/matches/${perf.matchId}`}
+            href={`/matches/${perf.matchSlug ?? perf.matchId}`}
             className="block p-4 hover:bg-neutral-50 transition-colors"
           >
             <div className="flex items-start gap-4">

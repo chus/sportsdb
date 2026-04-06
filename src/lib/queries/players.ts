@@ -168,6 +168,7 @@ export async function getPlayerRecentMatches(playerId: string, limit = 5) {
     .select({
       match: {
         id: matches.id,
+        slug: matches.slug,
         scheduledAt: matches.scheduledAt,
         status: matches.status,
         homeScore: matches.homeScore,

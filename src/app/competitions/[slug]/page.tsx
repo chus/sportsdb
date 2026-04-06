@@ -295,7 +295,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                           {matchesData.recent.map((match) => (
                             <Link
                               key={match.id}
-                              href={`/matches/${match.id}`}
+                              href={`/matches/${match.slug ?? match.id}`}
                               className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
                             >
                               <div className="flex items-center gap-1.5 mb-1.5">
@@ -339,7 +339,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                           {matchesData.upcoming.map((match) => (
                             <Link
                               key={match.id}
-                              href={`/matches/${match.id}`}
+                              href={`/matches/${match.slug ?? match.id}`}
                               className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">

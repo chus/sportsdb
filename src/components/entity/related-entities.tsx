@@ -135,7 +135,7 @@ export async function RelatedMatches({ matchId, limit = 4 }: RelatedMatchesProps
         {relatedMatches.map((match) => (
           <Link
             key={match.id}
-            href={`/matches/${match.id}`}
+            href={`/matches/${match.slug ?? match.id}`}
             className="block p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
           >
             <div className="flex items-center justify-between text-sm">

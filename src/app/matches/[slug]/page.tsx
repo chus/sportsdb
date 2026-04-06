@@ -16,7 +16,7 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import {
-  getMatchWithDetails,
+  getMatchWithDetailsBySlug,
   getMatchEventsWithPlayers,
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
@@ -35,7 +35,7 @@ import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface MatchPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 const BASE_URL =
@@ -44,8 +44,8 @@ const BASE_URL =
 export async function generateMetadata({
   params,
 }: MatchPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const match = await getMatchWithDetails(id);
+  const { slug } = await params;
+  const match = await getMatchWithDetailsBySlug(slug);
 
   if (!match || !match.homeTeam || !match.awayTeam) {
     return { title: "Match Not Found" };
@@ -65,6 +65,8 @@ export async function generateMetadata({
   // Only index finished matches with scores — scheduled/cancelled matches are thin
   const isIndexable = match.status === "finished" && match.homeScore != null && match.awayScore != null;
 
+  const url = `${BASE_URL}/matches/${slug}`;
+
   return {
     title,
     description,
@@ -72,7 +74,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `${BASE_URL}/matches/${id}`,
+      url,
       siteName: "DataSports",
       type: "website",
     },
@@ -82,7 +84,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
-      canonical: `${BASE_URL}/matches/${id}`,
+      canonical: url,
     },
   };
 }
@@ -278,17 +280,20 @@ function ordinal(n: number) {
 }
 
 export default async function MatchPage({ params }: MatchPageProps) {
-  const { id } = await params;
+  const { slug } = await params;
 
-  const [match, events, lineups] = await Promise.all([
-    getMatchWithDetails(id),
-    getMatchEventsWithPlayers(id),
-    getMatchLineupsGrouped(id),
-  ]);
-
+  const match = await getMatchWithDetailsBySlug(slug);
   if (!match || !match.homeTeam || !match.awayTeam) {
     notFound();
   }
+
+  const matchId = match.id;
+  const matchUrl = `${BASE_URL}/matches/${slug}`;
+
+  const [events, lineups] = await Promise.all([
+    getMatchEventsWithPlayers(matchId),
+    getMatchLineupsGrouped(matchId),
+  ]);
 
   const { homeTeam, awayTeam, venue, competition, season } = match;
   const statusDisplay = getStatusDisplay(match.status, match.minute);
@@ -335,7 +340,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
     ...(competition
       ? [{ name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` }]
       : []),
-    { name: `${homeTeam.shortName || homeTeam.name} vs ${awayTeam.shortName || awayTeam.name}`, url: `${BASE_URL}/matches/${id}` },
+    { name: `${homeTeam.shortName || homeTeam.name} vs ${awayTeam.shortName || awayTeam.name}`, url: matchUrl },
   ];
 
   return (
@@ -349,10 +354,10 @@ export default async function MatchPage({ params }: MatchPageProps) {
         status={match.status}
         venue={venue ? { name: venue.name, url: `${BASE_URL}/venues/${venue.slug}`, city: venue.city, country: venue.country } : null}
         competition={competition ? { name: competition.name, url: `${BASE_URL}/competitions/${competition.slug}` } : null}
-        matchUrl={`${BASE_URL}/matches/${id}`}
+        matchUrl={matchUrl}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
-      <PageTracker entityType="match" entityId={id} />
+      <PageTracker entityType="match" entityId={matchId} />
     <div className="min-h-screen bg-neutral-50">
       {/* Scoreboard Header */}
       <div className="bg-neutral-900 text-white">
@@ -794,7 +799,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* AI Match Summary */}
             {match.status === "finished" && (
-              <MatchSummary matchId={id} />
+              <MatchSummary matchId={matchId} />
             )}
 
             {/* Formation View */}
@@ -964,7 +969,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
           <div className="space-y-6">
             {/* Prediction Widget */}
             <MatchPredictionWidget
-              matchId={id}
+              matchId={matchId}
               matchStatus={match.status}
               homeTeamName={homeTeam.shortName || homeTeam.name}
               awayTeamName={awayTeam.shortName || awayTeam.name}
@@ -985,7 +990,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
             />
 
             {/* Related Matches */}
-            <RelatedMatches matchId={id} />
+            <RelatedMatches matchId={matchId} />
 
             {/* Internal Links for SEO */}
             <MatchInternalLinks

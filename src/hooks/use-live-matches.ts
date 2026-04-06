@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 
 interface LiveMatch {
   id: string;
+  slug: string | null;
   status: "live" | "half_time";
   minute: number | null;
   homeScore: number | null;

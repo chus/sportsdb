@@ -414,7 +414,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       {/* Next Match */}
                       {nextMatch ? (
                         <Link
-                          href={`/matches/${nextMatch.id}`}
+                          href={`/matches/${nextMatch.slug ?? nextMatch.id}`}
                           className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
@@ -555,7 +555,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                             return (
                               <Link
                                 key={match.id}
-                                href={`/matches/${match.id}`}
+                                href={`/matches/${match.slug ?? match.id}`}
                                 className="flex-shrink-0 w-[140px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
                               >
                                 <div className="flex items-center gap-2 mb-2">
@@ -606,7 +606,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                             const isHome = match.homeTeamId === team.id;
                             const opponent = isHome ? match.awayTeam : match.homeTeam;
                             return (
-                              <Link key={match.id} href={`/matches/${match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
+                              <Link key={match.id} href={`/matches/${match.slug ?? match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
                                 <div className="flex items-center gap-2">
                                   {opponent?.logoUrl ? (
                                     <img src={opponent.logoUrl} alt={opponent.name} className="w-5 h-5 object-contain" />

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Detect legacy /matches/{uuid} URLs to 301 redirect to the slug-based URL.
+const MATCH_UUID_PATH_RE =
+  /^\/matches\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
@@ -19,6 +23,29 @@ export async function middleware(request: NextRequest) {
       httpOnly: false,
     });
     return response;
+  }
+
+  // Legacy match URL: /matches/{uuid} → 301 redirect to /matches/{slug}
+  const matchUuidMatch = pathname.match(MATCH_UUID_PATH_RE);
+  if (matchUuidMatch) {
+    const matchId = matchUuidMatch[1];
+    try {
+      const lookup = await fetch(
+        new URL(`/api/internal/match-slug?id=${matchId}`, request.url),
+      );
+      if (lookup.ok) {
+        const { slug } = (await lookup.json()) as { slug: string | null };
+        if (slug) {
+          return NextResponse.redirect(
+            new URL(`/matches/${slug}`, request.url),
+            301,
+          );
+        }
+      }
+    } catch {
+      // Fall through to normal handling on lookup failure
+    }
+    return NextResponse.next();
   }
 
   // Only protect /admin routes
