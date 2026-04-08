@@ -283,6 +283,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+function countWords(content: string | null | undefined): number {
+  if (!content) return 0;
+  return content.split(/\s+/).filter(Boolean).length;
+}
+
 /**
  * Concurrency-limited Promise.map. Processes items in parallel up to
  * `concurrency` at a time. Errors thrown by `fn` are swallowed (the callers
@@ -564,11 +569,11 @@ async function insertArticle(
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      match_id, status, published_at, model_version
+      match_id, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${matchId}, 'published', NOW(), 'gpt-4o-mini'
+      ${matchId}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
@@ -605,11 +610,11 @@ async function insertRoundRecap(
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      competition_season_id, matchday, status, published_at, model_version
+      competition_season_id, matchday, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, 'round_recap', ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${competitionSeasonId}, ${matchday}, 'published', NOW(), 'gpt-4o-mini'
+      ${competitionSeasonId}, ${matchday}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
@@ -646,11 +651,11 @@ async function insertPlayerSpotlight(
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      primary_player_id, status, published_at, model_version
+      primary_player_id, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, 'player_spotlight', ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${playerId}, 'published', NOW(), 'gpt-4o-mini'
+      ${playerId}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
