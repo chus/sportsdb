@@ -54,6 +54,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!p1 || !p2) return { title: "Not Found" };
 
+  // Soft-404 guard: if neither player has any recorded career appearances, the
+  // page body is all zeros — Google flags these as "Soft 404". Noindex them.
+  const emptyBoth =
+    (p1.totalStats.appearances ?? 0) === 0 &&
+    (p2.totalStats.appearances ?? 0) === 0;
+
   const title = `${p1.name} vs ${p2.name} – Stats Comparison | DataSports`;
   const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, and career statistics.`;
 
@@ -66,6 +72,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${BASE_URL}/compare/${matchup}`,
     },
     alternates: { canonical: `${BASE_URL}/compare/${matchup}` },
+    robots: emptyBoth ? { index: false, follow: false } : undefined,
   };
 }
 

@@ -47,6 +47,18 @@ function scorePlayer(p: PlayerRow): number {
   if (Number(p.stats_count) > 0) score += 20;
   if (Number(p.lineup_count) > 0) score += 10;
   if (Number(p.article_count) > 0) score += 10;
+
+  // Hard content gate — must match scorePlayerPage in src/lib/seo/page-quality.ts.
+  // Pages with only bio metadata are Google "Crawled - currently not indexed"
+  // candidates; cap score at 35 so they fall into the noindex tier.
+  const hasRealContent =
+    Number(p.stats_count) > 0 ||
+    Number(p.lineup_count) > 0 ||
+    Number(p.article_count) > 0;
+  if (!hasRealContent) {
+    score = Math.min(score, 35);
+  }
+
   return score;
 }
 

@@ -385,15 +385,34 @@ export async function getTeamsByCountry(country: string, limit = 100) {
 // ============================================================
 
 export async function getTopPlayerPairs(limit = 15): Promise<{ slug: string; name: string }[]> {
-  return db
+  // Rank by real current-season production (goals + assists) instead of the
+  // popularity_score column, which is uniformly zero. Restricts matchups to
+  // players who actually have stats, so /compare/[a]-vs-[b] pages never land
+  // on empty-body "soft 404" candidates.
+  const rows = await db
     .select({
       slug: players.slug,
       name: players.name,
+      score: sql<number>`
+        SUM(COALESCE(${playerSeasonStats.goals}, 0) + COALESCE(${playerSeasonStats.assists}, 0))::int
+      `,
     })
     .from(players)
-    .where(ne(players.position, "Unknown"))
-    .orderBy(desc(players.popularityScore))
+    .innerJoin(playerSeasonStats, eq(playerSeasonStats.playerId, players.id))
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, playerSeasonStats.competitionSeasonId))
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(
+      and(
+        ne(players.position, "Unknown"),
+        eq(seasons.isCurrent, true),
+        eq(players.isIndexable, true),
+      ),
+    )
+    .groupBy(players.id, players.slug, players.name)
+    .orderBy(desc(sql`SUM(COALESCE(${playerSeasonStats.goals}, 0) + COALESCE(${playerSeasonStats.assists}, 0))`))
     .limit(limit);
+
+  return rows.map((r) => ({ slug: r.slug, name: r.name }));
 }
 
 export async function getPlayerWithAggregatedStats(slug: string) {

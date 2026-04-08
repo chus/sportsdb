@@ -182,6 +182,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ),
     // Finished matches with scores (quality gate: must have both teams scored).
     // Slug must be set — we no longer expose UUID URLs in the sitemap.
+    // Hard gate: must have a published article. Without an article, the page
+    // is just a scoreboard row which Google treats as "Crawled - not indexed".
     db.execute<{
       id: string;
       slug: string;
@@ -198,6 +200,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         AND m.away_score IS NOT NULL
         AND m.slug IS NOT NULL
         AND s.is_current = true
+        AND EXISTS (
+          SELECT 1 FROM articles a
+          WHERE a.match_id = m.id AND a.status = 'published'
+        )
       ORDER BY m.scheduled_at DESC
       LIMIT 500
     `),
