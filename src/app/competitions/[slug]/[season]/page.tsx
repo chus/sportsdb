@@ -33,6 +33,14 @@ export async function generateMetadata({
   const title = `${competition.name} ${displaySeason} – Standings & Stats | DataSports`;
   const description = `${competition.name} ${displaySeason} season standings, teams, top scorers, and statistics on DataSports.`;
 
+  // If this is the current season, canonical points to /competitions/[slug]
+  // to avoid duplicate content between /competitions/laliga and /competitions/laliga/2025-26.
+  const data = await getHistoricalStandings(slug, season);
+  const isCurrentSeason = data?.season?.isCurrent === true;
+  const canonical = isCurrentSeason
+    ? `${BASE_URL}/competitions/${slug}`
+    : `${BASE_URL}/competitions/${slug}/${season}`;
+
   return {
     title,
     description,
@@ -53,7 +61,7 @@ export async function generateMetadata({
       ...(competition.logoUrl && { images: [competition.logoUrl] }),
     },
     alternates: {
-      canonical: `${BASE_URL}/competitions/${slug}/${season}`,
+      canonical,
     },
   };
 }

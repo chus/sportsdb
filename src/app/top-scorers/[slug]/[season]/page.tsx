@@ -7,6 +7,7 @@ import {
   getCompetitionSeasonLabels,
   getCompetitionBySlug,
   getAllCompetitionSlugs,
+  getCurrentSeasonUrlLabel,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
@@ -41,6 +42,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${competition.name} Top Scorers ${seasonLabel} | DataSports`;
   const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. Goals, assists, and appearances.`;
 
+  // If the requested season is the current season, canonical points to /top-scorers/[slug]
+  // to avoid duplicate content with the current-season hub page.
+  const currentUrlLabel = await getCurrentSeasonUrlLabel(slug);
+  const canonical = currentUrlLabel === season
+    ? `${BASE_URL}/top-scorers/${slug}`
+    : `${BASE_URL}/top-scorers/${slug}/${season}`;
+
   return {
     title,
     description,
@@ -49,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `${BASE_URL}/top-scorers/${slug}/${season}`,
     },
-    alternates: { canonical: `${BASE_URL}/top-scorers/${slug}/${season}` },
+    alternates: { canonical },
   };
 }
 

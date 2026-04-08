@@ -211,6 +211,24 @@ export async function getCompetitionSeasonLabels(
   return results.map((r) => r.label);
 }
 
+/**
+ * Returns the current season URL label (e.g. "2025-26") for a given competition.
+ * Used by leaderboard [season] pages to decide canonical URL (point to /[slug]
+ * when the param matches the current season, to avoid duplicate content).
+ */
+export async function getCurrentSeasonUrlLabel(
+  competitionSlug: string
+): Promise<string | null> {
+  const result = await db
+    .select({ label: seasons.label })
+    .from(seasons)
+    .innerJoin(competitionSeasons, eq(competitionSeasons.seasonId, seasons.id))
+    .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+    .where(and(eq(competitions.slug, competitionSlug), eq(seasons.isCurrent, true)))
+    .limit(1);
+  return result[0]?.label.replace("/", "-") ?? null;
+}
+
 // ============================================================
 // PLAYERS BY POSITION
 // ============================================================
