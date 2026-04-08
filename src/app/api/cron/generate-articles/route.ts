@@ -34,6 +34,13 @@ export async function GET(request: NextRequest) {
       errors: [] as string[],
     };
 
+    // Hoist the players list once instead of reloading it inside every
+    // linkArticleToPlayers call (was 50+ duplicate full table scans per run).
+    const playersForLinking = await sql`
+      SELECT id, name, known_as FROM players
+      WHERE position != 'Unknown' AND length(name) > 3
+    `;
+
     // === 1. MATCH REPORTS (25 per run) ===
     const matchesToProcess = await sql`
       SELECT
@@ -67,30 +74,30 @@ export async function GET(request: NextRequest) {
       LIMIT 25
     `;
 
-    for (const match of matchesToProcess) {
-      try {
-        const events = await sql`
-          SELECT me.minute, me.type, p.name as player_name, t.name as team_name
-          FROM match_events me
-          INNER JOIN players p ON me.player_id = p.id
-          INNER JOIN teams t ON me.team_id = t.id
-          WHERE me.match_id = ${match.id}
-          ORDER BY me.minute
-        `;
+    const runMatchReports = async () => {
+      await pMap(matchesToProcess, 5, async (match) => {
+        try {
+          const events = await sql`
+            SELECT me.minute, me.type, p.name as player_name, t.name as team_name
+            FROM match_events me
+            INNER JOIN players p ON me.player_id = p.id
+            INNER JOIN teams t ON me.team_id = t.id
+            WHERE me.match_id = ${match.id}
+            ORDER BY me.minute
+          `;
 
-        const prompt = buildMatchReportPrompt(match, events);
-        const article = await generateArticle(openai, prompt);
+          const prompt = buildMatchReportPrompt(match, events);
+          const article = await generateArticle(openai, prompt);
 
-        if (article) {
-          await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug);
-          results.matchReports++;
+          if (article) {
+            await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
+            results.matchReports++;
+          }
+        } catch (error) {
+          results.errors.push(`Match report ${match.id}: ${error}`);
         }
-
-        await new Promise((r) => setTimeout(r, 500));
-      } catch (error) {
-        results.errors.push(`Match report ${match.id}: ${error}`);
-      }
-    }
+      });
+    };
 
     // === 2. ROUND RECAPS (10 per run) ===
     const completedMatchdays = await sql`
@@ -123,37 +130,37 @@ export async function GET(request: NextRequest) {
       LIMIT 10
     `;
 
-    for (const md of completedMatchdays) {
-      try {
-        const mdMatches = await sql`
-          SELECT
-            ht.name as home_team,
-            ht.slug as home_team_slug,
-            at2.name as away_team,
-            at2.slug as away_team_slug,
-            m.home_score,
-            m.away_score
-          FROM matches m
-          INNER JOIN teams ht ON m.home_team_id = ht.id
-          INNER JOIN teams at2 ON m.away_team_id = at2.id
-          WHERE m.competition_season_id = ${md.competition_season_id}
-            AND m.matchday = ${md.matchday}
-          ORDER BY m.scheduled_at
-        `;
+    const runRoundRecaps = async () => {
+      await pMap(completedMatchdays, 5, async (md) => {
+        try {
+          const mdMatches = await sql`
+            SELECT
+              ht.name as home_team,
+              ht.slug as home_team_slug,
+              at2.name as away_team,
+              at2.slug as away_team_slug,
+              m.home_score,
+              m.away_score
+            FROM matches m
+            INNER JOIN teams ht ON m.home_team_id = ht.id
+            INNER JOIN teams at2 ON m.away_team_id = at2.id
+            WHERE m.competition_season_id = ${md.competition_season_id}
+              AND m.matchday = ${md.matchday}
+            ORDER BY m.scheduled_at
+          `;
 
-        const prompt = buildRoundRecapPrompt(md, mdMatches);
-        const article = await generateArticle(openai, prompt);
+          const prompt = buildRoundRecapPrompt(md, mdMatches);
+          const article = await generateArticle(openai, prompt);
 
-        if (article) {
-          await insertRoundRecap(sql, article, md.competition_season_id, md.matchday, mdMatches);
-          results.roundRecaps++;
+          if (article) {
+            await insertRoundRecap(sql, article, md.competition_season_id, md.matchday, mdMatches, playersForLinking);
+            results.roundRecaps++;
+          }
+        } catch (error) {
+          results.errors.push(`Round recap ${md.competition} MD${md.matchday}: ${error}`);
         }
-
-        await new Promise((r) => setTimeout(r, 500));
-      } catch (error) {
-        results.errors.push(`Round recap ${md.competition} MD${md.matchday}: ${error}`);
-      }
-    }
+      });
+    };
 
     // === 3. PLAYER SPOTLIGHTS (8 per run) ===
     // Picks top scorers from player_season_stats for the current season.
@@ -191,21 +198,21 @@ export async function GET(request: NextRequest) {
       LIMIT 8
     `;
 
-    for (const player of topPerformers) {
-      try {
-        const prompt = buildPlayerSpotlightPrompt(player);
-        const article = await generateArticle(openai, prompt);
+    const runPlayerSpotlights = async () => {
+      await pMap(topPerformers, 5, async (player) => {
+        try {
+          const prompt = buildPlayerSpotlightPrompt(player);
+          const article = await generateArticle(openai, prompt);
 
-        if (article) {
-          await insertPlayerSpotlight(sql, article, player.player_id, player.team_slug);
-          results.playerSpotlights++;
+          if (article) {
+            await insertPlayerSpotlight(sql, article, player.player_id, player.team_slug, playersForLinking);
+            results.playerSpotlights++;
+          }
+        } catch (error) {
+          results.errors.push(`Player spotlight ${player.player_name}: ${error}`);
         }
-
-        await new Promise((r) => setTimeout(r, 500));
-      } catch (error) {
-        results.errors.push(`Player spotlight ${player.player_name}: ${error}`);
-      }
-    }
+      });
+    };
 
     // === 4. MATCH PREVIEWS (10 per run) ===
     const upcomingMatches = await sql`
@@ -237,21 +244,30 @@ export async function GET(request: NextRequest) {
       LIMIT 10
     `;
 
-    for (const match of upcomingMatches) {
-      try {
-        const prompt = buildMatchPreviewPrompt(match);
-        const article = await generateArticle(openai, prompt);
+    const runMatchPreviews = async () => {
+      await pMap(upcomingMatches, 5, async (match) => {
+        try {
+          const prompt = buildMatchPreviewPrompt(match);
+          const article = await generateArticle(openai, prompt);
 
-        if (article) {
-          await insertArticle(sql, article, "match_preview", match.id, match.home_team_slug, match.away_team_slug);
-          results.matchPreviews++;
+          if (article) {
+            await insertArticle(sql, article, "match_preview", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
+            results.matchPreviews++;
+          }
+        } catch (error) {
+          results.errors.push(`Match preview ${match.id}: ${error}`);
         }
+      });
+    };
 
-        await new Promise((r) => setTimeout(r, 500));
-      } catch (error) {
-        results.errors.push(`Match preview ${match.id}: ${error}`);
-      }
-    }
+    // Run all four article-generation stages in parallel.
+    // Each stage limits its own concurrency via pMap so OpenAI/DB stay healthy.
+    await Promise.all([
+      runMatchReports(),
+      runRoundRecaps(),
+      runPlayerSpotlights(),
+      runMatchPreviews(),
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -265,6 +281,32 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Concurrency-limited Promise.map. Processes items in parallel up to
+ * `concurrency` at a time. Errors thrown by `fn` are swallowed (the callers
+ * already wrap with try/catch and push to results.errors), so this never
+ * rejects.
+ */
+async function pMap<T>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T) => Promise<unknown>,
+): Promise<void> {
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      try {
+        await fn(items[i]);
+      } catch {
+        // Caller is responsible for error tracking.
+      }
+    }
+  });
+  await Promise.all(workers);
 }
 
 function buildMatchReportPrompt(match: any, events: any[]): string {
@@ -510,7 +552,8 @@ async function insertArticle(
   type: string,
   matchId: string,
   homeTeamSlug: string,
-  awayTeamSlug: string
+  awayTeamSlug: string,
+  playersForLinking: readonly any[]
 ): Promise<void> {
   // Check if slug exists
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
@@ -542,7 +585,7 @@ async function insertArticle(
         `;
       }
     }
-    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "));
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking);
   }
 }
 
@@ -551,7 +594,8 @@ async function insertRoundRecap(
   article: any,
   competitionSeasonId: string,
   matchday: number,
-  mdMatches: any[]
+  mdMatches: any[],
+  playersForLinking: readonly any[]
 ): Promise<void> {
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
   if (existing.length > 0) {
@@ -583,7 +627,7 @@ async function insertRoundRecap(
         `;
       }
     }
-    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "));
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking);
   }
 }
 
@@ -591,7 +635,8 @@ async function insertPlayerSpotlight(
   sql: NeonQueryFunction<false, false>,
   article: any,
   playerId: string,
-  teamSlug: string
+  teamSlug: string,
+  playersForLinking: readonly any[]
 ): Promise<void> {
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
   if (existing.length > 0) {
@@ -620,7 +665,7 @@ async function insertPlayerSpotlight(
     `;
   }
   if (insertedArticle) {
-    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playerId);
+    await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking, playerId);
   }
 }
 
@@ -632,13 +677,9 @@ async function linkArticleToPlayers(
   sql: NeonQueryFunction<false, false>,
   articleId: string,
   text: string,
+  players: readonly any[],
   primaryPlayerId?: string | null
 ): Promise<void> {
-  const players = await sql`
-    SELECT id, name, known_as FROM players
-    WHERE position != 'Unknown' AND length(name) > 3
-  `;
-
   const matched = new Set<string>();
   if (primaryPlayerId) matched.add(primaryPlayerId);
 
