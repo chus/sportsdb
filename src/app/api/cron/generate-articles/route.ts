@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       errors: [] as string[],
     };
 
-    // === 1. MATCH REPORTS (5 per run) ===
+    // === 1. MATCH REPORTS (25 per run) ===
     const matchesToProcess = await sql`
       SELECT
         m.id,
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         AND m.home_score IS NOT NULL
         AND a.id IS NULL
       ORDER BY m.scheduled_at DESC
-      LIMIT 5
+      LIMIT 25
     `;
 
     for (const match of matchesToProcess) {
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // === 2. ROUND RECAPS (3 per run) ===
+    // === 2. ROUND RECAPS (10 per run) ===
     const completedMatchdays = await sql`
       WITH matchday_status AS (
         SELECT
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         AND ms.finished_matches >= 3
         AND a.id IS NULL
       ORDER BY ms.competition, ms.matchday DESC
-      LIMIT 3
+      LIMIT 10
     `;
 
     for (const md of completedMatchdays) {
@@ -155,9 +155,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // === 3. PLAYER SPOTLIGHTS (2 per run) ===
+    // === 3. PLAYER SPOTLIGHTS (8 per run) ===
+    // Picks top scorers from player_season_stats for the current season.
+    // match_events is not reliably populated, so we rank by season goals+assists.
     const topPerformers = await sql`
-      WITH recent_stars AS (
+      WITH season_stars AS (
         SELECT
           p.id as player_id,
           p.name as player_name,
@@ -166,25 +168,27 @@ export async function GET(request: NextRequest) {
           p.nationality,
           t.name as team_name,
           t.slug as team_slug,
-          COUNT(*)::int as recent_goals,
-          COUNT(DISTINCT m.id)::int as matches
-        FROM match_events me
-        INNER JOIN matches m ON me.match_id = m.id
-        INNER JOIN players p ON me.player_id = p.id
-        INNER JOIN teams t ON me.team_id = t.id
-        WHERE me.type IN ('goal', 'penalty')
-          AND m.scheduled_at >= CURRENT_DATE - INTERVAL '14 days'
-        GROUP BY p.id, p.name, p.slug, p.position, p.nationality, t.name, t.slug
-        HAVING COUNT(*) >= 2
+          pss.goals::int as recent_goals,
+          pss.assists::int as recent_assists,
+          pss.appearances::int as matches,
+          (pss.goals * 2 + pss.assists)::int as impact_score
+        FROM player_season_stats pss
+        INNER JOIN players p ON pss.player_id = p.id
+        INNER JOIN teams t ON pss.team_id = t.id
+        INNER JOIN competition_seasons cs ON pss.competition_season_id = cs.id
+        INNER JOIN seasons s ON cs.season_id = s.id
+        WHERE s.is_current = true
+          AND p.is_indexable = true
+          AND pss.goals >= 3
       )
-      SELECT rs.*
-      FROM recent_stars rs
-      LEFT JOIN articles a ON a.primary_player_id = rs.player_id
+      SELECT ss.*
+      FROM season_stars ss
+      LEFT JOIN articles a ON a.primary_player_id = ss.player_id
         AND a.type = 'player_spotlight'
-        AND a.published_at >= CURRENT_DATE - INTERVAL '14 days'
+        AND a.published_at >= CURRENT_DATE - INTERVAL '30 days'
       WHERE a.id IS NULL
-      ORDER BY rs.recent_goals DESC
-      LIMIT 2
+      ORDER BY ss.impact_score DESC, ss.recent_goals DESC
+      LIMIT 8
     `;
 
     for (const player of topPerformers) {
@@ -203,7 +207,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // === 4. MATCH PREVIEWS (3 per run) ===
+    // === 4. MATCH PREVIEWS (10 per run) ===
     const upcomingMatches = await sql`
       SELECT
         m.id,
@@ -230,7 +234,7 @@ export async function GET(request: NextRequest) {
         AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '3 days'
         AND a.id IS NULL
       ORDER BY m.scheduled_at ASC
-      LIMIT 3
+      LIMIT 10
     `;
 
     for (const match of upcomingMatches) {
@@ -433,7 +437,7 @@ Position: ${player.position || "Forward"}
 Nationality: ${player.nationality || "Unknown"}
 Current Club: ${player.team_name}
 
-ACHIEVEMENT: ${player.recent_goals} goals in ${player.matches} recent matches
+ACHIEVEMENT: ${player.recent_goals} goals${player.recent_assists ? ` and ${player.recent_assists} assists` : ""} in ${player.matches} appearances this season
 
 INTERNAL LINKS:
 - Player: ${playerLink}

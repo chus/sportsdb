@@ -42,7 +42,7 @@ let lastRequestTime = 0;
 // football-data.org code → DB competition slug mapping
 const COMPETITION_MAP: Record<string, string[]> = {
   PL: ["premier-league"],
-  PD: ["la-liga"],
+  PD: ["primera-division", "la-liga"],
   BL1: ["bundesliga"],
   SA: ["serie-a"],
   FL1: ["ligue-1"],
