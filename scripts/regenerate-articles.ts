@@ -121,15 +121,15 @@ async function main() {
 
       let wordCount = estimateWordCount(newArticle.content);
 
-      // Retry once if under minimum word count
+      // Retry once if under minimum word count (matches prompt floors)
       const MIN_WORDS: Record<string, number> = {
-        match_report: 600,
-        round_recap: 600,
-        match_preview: 500,
-        season_review: 600,
-        player_spotlight: 500,
+        match_report: 1300,
+        round_recap: 1000,
+        match_preview: 800,
+        season_review: 1300,
+        player_spotlight: 900,
       };
-      const minRequired = MIN_WORDS[article.type] || 500;
+      const minRequired = MIN_WORDS[article.type] || 800;
 
       if (wordCount < minRequired && prompt) {
         console.log(`   Under minimum (${wordCount}/${minRequired} words), retrying...`);
