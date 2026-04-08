@@ -327,6 +327,10 @@ function buildMatchReportPrompt(match: any, events: any[]): string {
 
   return `You are an experienced sports journalist writing an in-depth match report for SportsDB, a professional football database website. Write with authority, insight, and engaging storytelling.
 
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 1300 words. Target 1500-1800 words. Articles shorter than 1300 words will be rejected and regenerated.
+This is an in-depth analysis piece, NOT a summary. Do NOT be concise. Expand every observation into multiple sentences. Add tactical context, historical reference, player background, and forward-looking analysis throughout.
+
 MATCH INFORMATION:
 - Competition: ${match.competition} (${match.season})
 - Matchday: ${match.matchday || 'N/A'}
@@ -345,67 +349,87 @@ LINKS TO INCLUDE (use these exact markdown formats):
 - Competition: ${competitionLink}
 - For players: [Player Name](/players/player-slug-lowercase-with-dashes)
 
-WRITING GUIDELINES:
+REQUIRED STRUCTURE — Each section has a MINIMUM word count. Do not skip sections.
 
-1. OPENING PARAGRAPH (hook the reader):
-   - Start with the most dramatic or significant aspect of the match
-   - Set the scene and context (rivalry, standings implications, etc.)
-   - Make readers want to continue reading
+## Match Overview (MIN 200 words)
+Cover ALL of:
+- Tactical setup and how each side approached the match
+- Pre-match form and standings position context
+- Stakes for both teams
+- Opening tempo and which side took the initiative
+- Any narrative threads (rivalry, redemption, injuries)
 
-2. STRUCTURE (use ## for H2 headings):
-   ## Match Overview
-   - Brief tactical setup and early game flow
-   - How both teams approached the match
+## First Half Action (MIN 250 words)
+Cover ALL of:
+- Detailed account of how the half unfolded
+- Every goal: build-up, finish, and significance (with minute references)
+- Key chances created and missed (with minute references)
+- Tactical patterns and momentum shifts
+- Defensive moments, near-misses, refereeing calls
+- The mood at half-time
 
-   ## First Half Action
-   - Key moments, goals, chances
-   - Tactical battles and momentum shifts
+## Second Half Drama (MIN 250 words)
+Cover ALL of:
+- How the second half opened — same patterns or shift?
+- Tactical adjustments by either manager
+- Substitutions: who, when, and what they changed
+- All second-half goals in detail
+- Late drama, near-misses, momentum swings
+- The final whistle scene
 
-   ## Second Half Drama
-   - How the game evolved
-   - Decisive moments and turning points
+## Key Performances (MIN 200 words)
+Cover ALL of:
+- 3-4 standout players with one paragraph each
+- Specific actions that earned them praise
+- Reference season stats where relevant
+- A man-of-the-match selection with justification
 
-   ## Key Performances
-   - Highlight 2-3 standout players
-   - Specific contributions that influenced the result
+## Tactical Analysis (MIN 200 words)
+Cover ALL of:
+- Where the game was won and lost on the pitch
+- Key matchups (e.g., midfield battle, full-back duel)
+- What worked and what didn't for each side
+- Manager decisions that influenced the result
 
-   ## Looking Ahead
-   - What this result means for both teams
-   - Upcoming fixtures or implications
+## Looking Ahead (MIN 200 words)
+Cover ALL of:
+- Implications for the league table
+- What this changes for both teams' upcoming fixtures
+- Form trajectory going forward
+- Season-long narrative — what this confirms or upsets
+- A forward-looking takeaway for both sides
 
-3. WRITING STYLE:
-   - Use vivid, descriptive language ("thunderous strike" not "good shot")
-   - Include specific minute references for key moments
-   - Build narrative tension and drama
-   - Professional but engaging tone
-   - Vary sentence length for rhythm
-   - Use active voice predominantly
+WRITING STYLE:
+- Use vivid, descriptive language ("thunderous strike" not "good shot")
+- Include specific minute references for key moments
+- Build narrative tension and drama
+- Professional but engaging tone
+- Vary sentence length
+- Use active voice predominantly
 
-4. SEO & LINKING:
-   - Link team names on first mention using provided links
-   - Create player links as [Full Name](/players/firstname-lastname)
-   - Natural keyword integration: "${match.home_team} vs ${match.away_team}", "${match.competition}"
-   - Include competition context throughout
+SEO & LINKING:
+- Link team names on first mention using provided links
+- Create player links as [Full Name](/players/firstname-lastname)
+- Natural keyword integration: "${match.home_team} vs ${match.away_team}", "${match.competition}"
+- Include competition context throughout
 
-5. LENGTH: 1200-1800 words minimum. This should be a comprehensive, in-depth match report.
-
-6. READABILITY:
-   - Keep paragraphs to 3-4 sentences max for easy scanning
-   - Vary sentence length: mix short punchy sentences with longer analytical ones
-   - Use transition words between sections (Meanwhile, However, In contrast, As a result)
-   - Open each section with a hook sentence
-   - Use active voice predominantly
-   - Break up dense analysis with vivid match descriptions
+READABILITY:
+- Keep paragraphs to 3-4 sentences max
+- Use transition words between sections (Meanwhile, However, In contrast, As a result)
+- Open each section with a hook sentence
+- Break up dense analysis with vivid match descriptions
 
 OUTPUT FORMAT (return valid JSON only):
 {
   "title": "Compelling headline with teams and key narrative (max 80 chars)",
   "slug": "team-vs-team-competition-result-keyword",
   "excerpt": "Engaging 1-2 sentence summary that hooks readers (max 160 chars)",
-  "content": "Full markdown article content with ## headings and [links](/path)",
+  "content": "Full markdown article — MINIMUM 1300 WORDS",
   "metaTitle": "SEO title with teams, score, competition (max 60 chars)",
   "metaDescription": "Meta description with result and key info (150-160 chars)"
-}`;
+}
+
+FINAL REMINDER: The "content" field must be at least 1300 words. Each ## section must hit its minimum. If you finish early, expand the analysis sections — never cut sections short.`;
 }
 
 async function generateArticle(openai: OpenAI, prompt: string): Promise<any | null> {
@@ -441,6 +465,10 @@ function buildRoundRecapPrompt(md: any, mdMatches: any[]): string {
 
   return `You are an SEO-focused sports journalist writing a matchday recap for a football database website.
 
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 1000 words. Target 1100-1400 words. Articles shorter than 1000 words will be rejected and regenerated.
+This is a comprehensive matchday review, NOT a results dump. Discuss every notable match in detail. Add table context, form analysis, and individual performances throughout.
+
 COMPETITION: ${md.competition} (${md.season})
 MATCHDAY: ${md.matchday}
 
@@ -451,14 +479,53 @@ INTERNAL LINKS:
 - Competition: ${competitionLink}
 - Use format [Team Name](/teams/team-slug) for all team mentions
 
+REQUIRED STRUCTURE — Each section has a MINIMUM word count. Do not skip sections.
+
+## Top of the Table (MIN 200 words)
+Cover:
+- Title contenders and their results this round
+- How the standings shifted at the top
+- Key performances from leading clubs
+- Implications for the title race
+
+## The Headline Result (MIN 200 words)
+Pick the single biggest story of the matchday and dig in:
+- Pre-match expectations vs what happened
+- The key moments that decided it
+- Standout individuals
+- What it means going forward
+
+## Mid-Table Stories (MIN 150 words)
+Cover:
+- Battles for European qualification spots
+- Surprise results from mid-table sides
+- Form trends across the league's middle section
+
+## Relegation Battle (MIN 150 words)
+Cover:
+- Results from teams in the bottom third
+- Survival hopes and dwindling chances
+- Standout individual performances from relegation-threatened sides
+
+## Standout Performers (MIN 150 words)
+Cover:
+- 3-4 individual players who shaped the matchday
+- A goal-of-the-round nominee
+- Tactical or managerial highlights worth noting
+
+## Matchday in Numbers (MIN 100 words)
+Cover:
+- Goals scored across the round
+- Notable streaks (winning runs, clean sheets, scoring runs)
+- Records or milestones reached
+
 REQUIREMENTS:
-1. Headline with competition name and matchday number (max 80 chars)
-2. Excerpt for social/cards (1-2 sentences)
-3. 900-1400 words organized by storyline, not match-by-match
-4. Use ## H2 headings for narrative themes (Title Race, Relegation Battle, Upsets, etc.)
-5. All team names as markdown links
-6. Keep paragraphs to 3-4 sentences max
-7. Use vivid verbs and active voice
+- Headline with competition name and matchday number (max 80 chars)
+- Excerpt for social/cards (1-2 sentences, max 160 chars)
+- All team names as markdown links
+- Keep paragraphs to 3-4 sentences max
+- Use vivid verbs and active voice ("demolished", "edged past", "stunned")
+- Open with the biggest storyline as a hook
 
 Slug format: "${md.competition_slug}-matchday-${md.matchday}-recap-${md.season.replace("/", "-")}"
 
@@ -467,10 +534,12 @@ Return as JSON:
   "title": "...",
   "slug": "...",
   "excerpt": "...",
-  "content": "...",
-  "metaTitle": "...",
-  "metaDescription": "..."
-}`;
+  "content": "Full markdown — MINIMUM 1000 WORDS",
+  "metaTitle": "Max 60 chars",
+  "metaDescription": "150-160 chars"
+}
+
+FINAL REMINDER: The "content" field must be at least 1000 words. Each ## section must hit its minimum. If you finish early, expand the storylines — never cut sections short.`;
 }
 
 function buildPlayerSpotlightPrompt(player: any): string {
@@ -478,6 +547,10 @@ function buildPlayerSpotlightPrompt(player: any): string {
   const teamLink = `[${player.team_name}](/teams/${player.team_slug})`;
 
   return `You are an SEO-focused sports journalist writing a player spotlight for a football database website.
+
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 900 words. Target 1000-1200 words. Articles shorter than 900 words will be rejected and regenerated.
+This is an in-depth player feature, NOT a quick stat recap. Cover the player's story, style, performances, and outlook in real depth.
 
 PLAYER: ${player.player_name}
 Position: ${player.position || "Forward"}
@@ -490,25 +563,71 @@ INTERNAL LINKS:
 - Player: ${playerLink}
 - Team: ${teamLink}
 
+REQUIRED STRUCTURE — Each section has a MINIMUM word count.
+
+## The Achievement (MIN 150 words)
+Cover:
+- What ${player.player_name} has accomplished and why it matters
+- Context: how rare or significant this is for a ${player.position || "forward"}
+- What it tells us about the player's level
+- Open with a vivid scene-setting paragraph
+
+## Recent Form (MIN 200 words)
+Cover:
+- Detailed breakdown of their recent run of matches
+- Key goals, assists, and decisive moments
+- Trends visible across the run (scoring streaks, big-game performances)
+- How current form compares to earlier in the season
+
+## Season in Context (MIN 150 words)
+Cover:
+- How this stretch fits into the overall campaign
+- Where ${player.player_name} sits in scoring/assist charts
+- Impact on ${player.team_name}'s results and standings
+- Comparison with their previous seasons or career highs
+
+## Playing Style (MIN 150 words)
+Cover:
+- Tactical role and on-pitch responsibilities
+- Strengths that make them effective
+- Signature moves, finishing technique, link-up play
+- What sets them apart from peers in the same position
+
+## Comparison (MIN 100 words)
+Cover:
+- How they stack up against 2-3 peers in the same position
+- Stat comparisons where useful
+- What they do better and what they could improve
+
+## What's Next (MIN 150 words)
+Cover:
+- Upcoming fixtures and what to watch for
+- Personal targets (records within reach, milestones)
+- Implications for their team's season
+- A forward-looking statement
+
 REQUIREMENTS:
-1. Headline with player name and achievement (max 80 chars)
-2. 800-1200 words with clear ## H2 structure
-3. Sections: The Achievement, Recent Form, Season in Context, Playing Style, What's Next
-4. Link to player page and team page
-5. Keep paragraphs to 3-4 sentences max
-6. Use vivid descriptions and active voice
+- Headline with player name and achievement (max 80 chars)
+- Excerpt summarizing the achievement (max 160 chars)
+- Link to player page and team page
+- Keep paragraphs to 3-4 sentences max
+- Use vivid descriptions and active voice
+- Open with a vivid description of the player's standout moment
+- Use stats naturally within prose, not as dry lists
 
 Slug format: "${player.player_slug}-spotlight-${Date.now()}"
 
 Return as JSON:
 {
-  "title": "...",
+  "title": "Max 80 chars",
   "slug": "...",
-  "excerpt": "...",
-  "content": "...",
-  "metaTitle": "...",
-  "metaDescription": "..."
-}`;
+  "excerpt": "Max 160 chars",
+  "content": "Full markdown — MINIMUM 900 WORDS",
+  "metaTitle": "Max 60 chars",
+  "metaDescription": "150-160 chars"
+}
+
+FINAL REMINDER: The "content" field must be at least 900 words. Each ## section must hit its minimum.`;
 }
 
 function buildMatchPreviewPrompt(match: any): string {
@@ -516,7 +635,11 @@ function buildMatchPreviewPrompt(match: any): string {
   const awayTeamLink = `[${match.away_team}](/teams/${match.away_team_slug})`;
   const competitionLink = `[${match.competition}](/competitions/${match.competition_slug})`;
 
-  return `You are an SEO-focused sports journalist writing a match preview for a football database website.
+  return `You are an SEO-focused sports journalist writing a professional match preview for a football database website. Write in a factual, authoritative tone like BBC Sport — no tabloid hype.
+
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 800 words. Target 900-1100 words. Articles shorter than 800 words will be rejected and regenerated.
+This is a thorough preview, NOT a paragraph summary. Discuss form, players, tactics, and historical context in depth.
 
 MATCH DETAILS:
 - Competition: ${match.competition} (${match.season})
@@ -530,25 +653,66 @@ INTERNAL LINKS:
 - Away team: ${awayTeamLink}
 - Competition: ${competitionLink}
 
+REQUIRED STRUCTURE — Each section has a MINIMUM word count. Do not skip sections.
+
+## Why This Match Matters (MIN 150 words)
+Cover:
+- The stakes for both sides
+- Table implications and points at stake
+- Any rivalry, history, or narrative context
+- What pundits and fans are watching for
+
+## Form Guide (MIN 150 words)
+Cover:
+- Recent results for both teams with brief commentary
+- Patterns: scoring trends, defensive solidity, home/away splits
+- Injury or suspension news where relevant
+
+## Key Players to Watch (MIN 150 words)
+Cover:
+- 2-3 players per side likely to decide the match
+- Their season form and current state
+- Tactical role and the matchups they'll face
+
+## Head-to-Head History (MIN 100 words)
+Cover:
+- Past meetings between these teams
+- Patterns from previous fixtures
+- Memorable moments from recent encounters
+
+## Tactical Battle (MIN 150 words)
+Cover:
+- Expected formations from both managers
+- Key matchups (e.g., wing-back vs winger)
+- How each side will look to win the game
+- Where the match could be decided on the pitch
+
+## Prediction (MIN 100 words)
+Cover:
+- An informed take on the likely outcome
+- Reasoning grounded in form and tactical analysis
+- A specific scoreline prediction
+
 REQUIREMENTS:
-1. Exciting headline that builds anticipation (max 80 chars)
-2. 700-1000 words with ## H2 headings
-3. Sections: Why This Match Matters, Form Guide, Key Players to Watch, Tactical Battle, Prediction
-4. All team/player names as markdown links
-5. Keep paragraphs to 3-4 sentences max
-6. End with a bold prediction
+- Factual headline (max 80 chars) — include team names and competition. No hype words ("epic", "showdown", "clash", "battle"). No exclamation marks.
+- All team/player names as markdown links
+- Keep paragraphs to 3-4 sentences max
+- Use active voice and present tense for immediacy
+- Build anticipation: start with context, end with prediction
 
 Slug format: "${match.home_team_slug}-vs-${match.away_team_slug}-preview-${match.competition_slug}"
 
 Return as JSON:
 {
-  "title": "...",
+  "title": "Max 80 chars",
   "slug": "...",
-  "excerpt": "...",
-  "content": "...",
-  "metaTitle": "...",
-  "metaDescription": "..."
-}`;
+  "excerpt": "Max 160 chars",
+  "content": "Full markdown — MINIMUM 800 WORDS",
+  "metaTitle": "Max 60 chars",
+  "metaDescription": "150-160 chars"
+}
+
+FINAL REMINDER: The "content" field must be at least 800 words. Each ## section must hit its minimum.`;
 }
 
 async function insertArticle(
