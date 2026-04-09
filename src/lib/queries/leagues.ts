@@ -143,7 +143,10 @@ export async function getLeagueLeaderboard(leagueId: string) {
     LEFT JOIN LATERAL (
       SELECT SUM(points) as pts FROM ${challengeAnswers} WHERE user_id = u.id
     ) challenge ON true
-    WHERE u.id = ANY(${memberIds}::uuid[])
+    WHERE u.id IN (${sql.join(
+      memberIds.map((id) => sql`${id}::uuid`),
+      sql`, `,
+    )})
     ORDER BY total_points DESC
   `);
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { challengeQuestions } from "@/lib/db/schema";
-import { sql, isNull, eq } from "drizzle-orm";
+import { sql, isNull, eq, inArray } from "drizzle-orm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     await db
       .update(challengeQuestions)
       .set({ activeDate: today })
-      .where(sql`${challengeQuestions.id} = ANY(${ids}::uuid[])`);
+      .where(inArray(challengeQuestions.id, ids));
 
     return NextResponse.json({
       message: "Daily challenge questions assigned",

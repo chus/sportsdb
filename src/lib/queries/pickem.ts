@@ -7,7 +7,7 @@ import {
   competitionSeasons,
   competitions,
 } from "@/lib/db/schema";
-import { eq, and, desc, gte, lte, count, sum, sql, isNotNull } from "drizzle-orm";
+import { eq, and, desc, gte, lte, count, sum, sql, isNotNull, inArray } from "drizzle-orm";
 import { checkAndAwardBadge, checkTripleThreat } from "./badges";
 
 export interface PickemPrediction {
@@ -117,7 +117,7 @@ export async function getPickemCommunityPercentages(matchIds: string[]) {
       cnt: count(),
     })
     .from(pickemPredictions)
-    .where(sql`${pickemPredictions.matchId} = ANY(${matchIds}::uuid[])`)
+    .where(inArray(pickemPredictions.matchId, matchIds))
     .groupBy(pickemPredictions.matchId, pickemPredictions.outcome);
 
   const percentages: Record<
@@ -288,9 +288,7 @@ export async function scorePickemsForMatch(matchId: string) {
         correct: sql<number>`COUNT(*) FILTER (WHERE ${pickemPredictions.isCorrect} = true)`,
       })
       .from(pickemPredictions)
-      .where(
-        sql`${pickemPredictions.matchId} = ANY(${matchdayMatchIds}::uuid[])`
-      )
+      .where(inArray(pickemPredictions.matchId, matchdayMatchIds))
       .groupBy(pickemPredictions.userId);
 
     for (const ur of userResults) {
