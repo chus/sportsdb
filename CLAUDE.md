@@ -48,3 +48,7 @@ and Next.js Link for navigation. Keep the visual design identical.
 Phase 0: Project bootstrap — COMPLETE.
 Next: Phase 1 — Layout Shell + Search.
 See docs/architecture.md § Implementation Roadmap.
+
+## Commit Conventions
+- Never include references to Claude in commit messages (no "Co-Authored-By: Claude", no "Generated with Claude Code", no mentions of AI assistance).
+- Write commits as if authored by the user.

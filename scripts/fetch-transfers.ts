@@ -68,7 +68,7 @@ const TRANSFER_HISTORY: Record<string, Array<{
     { team: "Inter Miami CF", teamSlug: "inter-miami-cf", from: "2023-07-15", to: null, type: "free" },
   ],
   "cristiano-ronaldo": [
-    { team: "Sporting CP", teamSlug: "sporting-cp", from: "2002-07-01", to: "2003-08-12", type: "youth" },
+    { team: "Sporting CP", teamSlug: "sporting-clube-de-portugal", from: "2002-07-01", to: "2003-08-12", type: "youth" },
     { team: "Manchester United", teamSlug: "manchester-united-fc", from: "2003-08-12", to: "2009-07-01", type: "permanent" },
     { team: "Real Madrid", teamSlug: "real-madrid-cf", from: "2009-07-01", to: "2018-07-10", type: "permanent" },
     { team: "Juventus", teamSlug: "juventus-fc", from: "2018-07-10", to: "2021-08-27", type: "permanent" },
@@ -111,12 +111,12 @@ const TRANSFER_HISTORY: Record<string, Array<{
     { team: "Znicz Pruszków", teamSlug: "znicz-pruszkow", from: "2006-07-01", to: "2008-06-30", type: "youth" },
     { team: "Lech Poznań", teamSlug: "lech-poznan", from: "2008-06-30", to: "2010-06-18", type: "permanent" },
     { team: "Borussia Dortmund", teamSlug: "borussia-dortmund", from: "2010-06-18", to: "2014-07-01", type: "permanent" },
-    { team: "Bayern Munich", teamSlug: "bayern-munich", from: "2014-07-01", to: "2022-07-19", type: "free" },
+    { team: "Bayern Munich", teamSlug: "fc-bayern-munchen", from: "2014-07-01", to: "2022-07-19", type: "free" },
     { team: "FC Barcelona", teamSlug: "fc-barcelona", from: "2022-07-19", to: null, type: "permanent" },
   ],
   "harry-kane": [
     { team: "Tottenham Hotspur", teamSlug: "tottenham-hotspur-fc", from: "2009-07-01", to: "2023-08-12", type: "youth" },
-    { team: "Bayern Munich", teamSlug: "bayern-munich", from: "2023-08-12", to: null, type: "permanent" },
+    { team: "Bayern Munich", teamSlug: "fc-bayern-munchen", from: "2023-08-12", to: null, type: "permanent" },
   ],
   "jude-bellingham": [
     { team: "Birmingham City", teamSlug: "birmingham-city-fc", from: "2019-07-01", to: "2020-07-16", type: "youth" },

@@ -22,33 +22,66 @@ if (!DATABASE_URL) {
 
 const sql = neon(DATABASE_URL);
 
-// Top tier clubs (tier 1) - most popular clubs globally
+// Top tier clubs (tier 1) — canonical DB slugs. Keep in sync with teams.slug.
 const TIER_1_CLUBS = [
-  "real-madrid", "barcelona", "manchester-united", "manchester-city",
-  "liverpool", "chelsea", "arsenal", "bayern-munich", "paris-saint-germain",
-  "juventus", "ac-milan", "inter-milan", "atletico-madrid", "borussia-dortmund",
-  "tottenham-hotspur", "manchester-city-fc", "fc-barcelona", "real-madrid-cf",
-  "fc-bayern-munchen", "fc-bayern-münchen"
+  "real-madrid-cf",
+  "fc-barcelona",
+  "manchester-united-fc",
+  "manchester-city-fc",
+  "liverpool-fc",
+  "chelsea-fc",
+  "arsenal-fc",
+  "fc-bayern-munchen",
+  "paris-saint-germain-fc",
+  "juventus-fc",
+  "ac-milan",
+  "fc-internazionale-milano",
+  "club-atletico-de-madrid",
+  "borussia-dortmund",
+  "tottenham-hotspur-fc",
 ];
 
-// Mid tier clubs (tier 2)
+// Mid tier clubs (tier 2) — canonical DB slugs.
 const TIER_2_CLUBS = [
-  "napoli", "roma", "lazio", "sevilla", "villarreal", "real-betis",
-  "athletic-bilbao", "rb-leipzig", "bayer-leverkusen", "monaco",
-  "olympique-marseille", "lyon", "newcastle-united", "west-ham",
-  "aston-villa", "everton", "leicester-city", "ajax", "psv-eindhoven",
-  "benfica", "porto", "sporting-cp", "galatasaray", "fenerbahce"
+  "ssc-napoli",
+  "as-roma",
+  "ss-lazio",
+  "sevilla-fc",
+  "villarreal-cf",
+  "real-betis-balompie",
+  "athletic-club",
+  "rb-leipzig",
+  "bayer-04-leverkusen",
+  "as-monaco-fc",
+  "olympique-de-marseille",
+  "olympique-lyonnais",
+  "newcastle-united-fc",
+  "west-ham-united-fc",
+  "aston-villa-fc",
+  "everton-fc",
+  "leicester-city-fc",
+  "afc-ajax",
+  "sport-lisboa-e-benfica",
+  "fc-porto",
+  "sporting-clube-de-portugal",
+  "galatasaray-sk",
 ];
 
 async function setTeamTiers(dryRun: boolean) {
   console.log("\n=== Setting Team Tiers ===");
+
+  // Reset all teams to tier 3 (default) so removals from the lists take effect.
+  if (!dryRun) {
+    await sql`UPDATE teams SET tier = 3 WHERE tier IS DISTINCT FROM 3`;
+  }
 
   // Set tier 1
   for (const slug of TIER_1_CLUBS) {
     if (dryRun) {
       console.log(`[DRY-RUN] Would set ${slug} to tier 1`);
     } else {
-      await sql`UPDATE teams SET tier = 1 WHERE slug ILIKE ${slug} OR slug ILIKE ${slug + '-fc'} OR slug ILIKE ${'fc-' + slug}`;
+      const rows = await sql`UPDATE teams SET tier = 1 WHERE slug = ${slug} RETURNING slug`;
+      if (rows.length === 0) console.log(`  WARN: no team matched ${slug}`);
     }
   }
 
@@ -57,7 +90,8 @@ async function setTeamTiers(dryRun: boolean) {
     if (dryRun) {
       console.log(`[DRY-RUN] Would set ${slug} to tier 2`);
     } else {
-      await sql`UPDATE teams SET tier = 2 WHERE slug ILIKE ${slug} OR slug ILIKE ${slug + '-fc'} OR slug ILIKE ${'fc-' + slug}`;
+      const rows = await sql`UPDATE teams SET tier = 2 WHERE slug = ${slug} RETURNING slug`;
+      if (rows.length === 0) console.log(`  WARN: no team matched ${slug}`);
     }
   }
 
