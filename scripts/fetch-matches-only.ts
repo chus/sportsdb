@@ -27,7 +27,7 @@ const db = drizzle(sql, { schema });
 
 const COMPETITIONS = [
   { code: "PL", slug: "premier-league" },
-  { code: "PD", slug: "primera-division" },
+  { code: "PD", slug: "la-liga" },
   { code: "BL1", slug: "bundesliga" },
   { code: "SA", slug: "serie-a" },
   { code: "FL1", slug: "ligue-1" },
