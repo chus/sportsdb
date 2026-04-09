@@ -4,12 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 const MATCH_UUID_PATH_RE =
   /^\/matches\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
-// Legacy / external competition slugs → canonical slugs stored in the DB.
-// Add entries here when we discover inbound links to non-canonical slugs.
-const COMPETITION_SLUG_ALIASES: Record<string, string> = {
-  "primera-division": "la-liga",
-};
-
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
@@ -29,18 +23,6 @@ export async function middleware(request: NextRequest) {
       httpOnly: false,
     });
     return response;
-  }
-
-  // Legacy competition slug: /competitions/{alias}(/...) → 301 canonical slug
-  if (pathname.startsWith("/competitions/")) {
-    const rest = pathname.slice("/competitions/".length);
-    const [firstSegment, ...tail] = rest.split("/");
-    const canonical = COMPETITION_SLUG_ALIASES[firstSegment];
-    if (canonical) {
-      const url = request.nextUrl.clone();
-      url.pathname = ["/competitions", canonical, ...tail].join("/");
-      return NextResponse.redirect(url, 301);
-    }
   }
 
   // Legacy match URL: /matches/{uuid} → 301 redirect to /matches/{slug}
