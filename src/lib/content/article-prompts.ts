@@ -663,3 +663,341 @@ Return as JSON:
 
 FINAL REMINDER: The "content" field must be at least 900 words. Each ## section must hit its minimum.`;
 }
+
+export interface EventMatchSummary {
+  homeTeam: string;
+  homeTeamSlug: string;
+  awayTeam: string;
+  awayTeamSlug: string;
+  competition: string;
+  competitionSlug: string;
+  date: string;
+  venue?: string;
+  matchday?: number;
+}
+
+export interface EventFinishedMatchSummary extends EventMatchSummary {
+  homeScore: number;
+  awayScore: number;
+  topScorers?: string[];
+}
+
+export interface EventPreviewContext {
+  event: {
+    slug: string;
+    title: string;
+    description?: string;
+    type: string;
+    date: string;
+    importance: number;
+    competition?: { name: string; slug: string };
+  };
+  matches: EventMatchSummary[];
+  recentForm?: Record<string, string>;
+  headToHead?: Array<{
+    date: string;
+    homeTeam: string;
+    awayTeam: string;
+    homeScore: number;
+    awayScore: number;
+  }>;
+  standingsContext?: string;
+}
+
+export interface EventRecapContext {
+  event: {
+    slug: string;
+    title: string;
+    description?: string;
+    type: string;
+    date: string;
+    importance: number;
+    competition?: { name: string; slug: string };
+  };
+  finishedMatches: EventFinishedMatchSummary[];
+  standoutPerformers?: Array<{
+    name: string;
+    slug: string;
+    team: string;
+    teamSlug: string;
+    line: string;
+  }>;
+  standingsContext?: string;
+}
+
+function formatEventDateForSlug(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "";
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${y}${m}${day}`;
+  } catch {
+    return "";
+  }
+}
+
+export function buildEventPreviewPrompt(ctx: EventPreviewContext): string {
+  const competitionLink = ctx.event.competition
+    ? `[${ctx.event.competition.name}](/competitions/${ctx.event.competition.slug})`
+    : "";
+
+  const matchesBlock = ctx.matches.length
+    ? ctx.matches
+        .map((m) => {
+          const home = `[${m.homeTeam}](/teams/${m.homeTeamSlug})`;
+          const away = `[${m.awayTeam}](/teams/${m.awayTeamSlug})`;
+          const comp = `[${m.competition}](/competitions/${m.competitionSlug})`;
+          const md = m.matchday ? ` (MD ${m.matchday})` : "";
+          return `- ${home} vs ${away} — ${comp}${md} — ${m.date}${m.venue ? ` — ${m.venue}` : ""}`;
+        })
+        .join("\n")
+    : "- No fixture list available";
+
+  const formBlock = ctx.recentForm
+    ? Object.entries(ctx.recentForm)
+        .map(([team, form]) => `- ${team}: ${form}`)
+        .join("\n")
+    : "";
+
+  const h2hBlock = ctx.headToHead?.length
+    ? ctx.headToHead
+        .map(
+          (h) =>
+            `- ${h.date}: ${h.homeTeam} ${h.homeScore}-${h.awayScore} ${h.awayTeam}`
+        )
+        .join("\n")
+    : "";
+
+  const slugDate = formatEventDateForSlug(ctx.event.date);
+
+  return `You are an SEO-focused sports journalist writing an in-depth preview for a high-importance football event. Write in a factual, authoritative tone like BBC Sport — no tabloid hype or sensationalism.
+
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 1200 words. Target 1400-1800 words. Articles shorter than 1200 words will be rejected and regenerated.
+This is a definitive preview of a marquee football event, NOT a paragraph summary. Cover storylines, tactics, players, and context in real depth.
+
+EVENT DETAILS:
+- Title: ${ctx.event.title}
+- Type: ${ctx.event.type}
+- Date: ${ctx.event.date}
+- Importance: ${ctx.event.importance}/5
+${ctx.event.competition ? `- Competition: ${ctx.event.competition.name}` : ""}
+${ctx.event.description ? `- Context: ${ctx.event.description}` : ""}
+
+FIXTURES INVOLVED:
+${matchesBlock}
+
+${formBlock ? `RECENT FORM:\n${formBlock}` : ""}
+
+${h2hBlock ? `RECENT HEAD-TO-HEAD:\n${h2hBlock}` : ""}
+
+${ctx.standingsContext || ""}
+
+INTERNAL LINKS:
+- Every team mention: [Team Name](/teams/team-slug)
+- Every competition mention: [Competition](/competitions/competition-slug)
+${competitionLink ? `- Primary competition: ${competitionLink}` : ""}
+
+REQUIRED STRUCTURE — Each section has a MINIMUM word count. Do not skip sections.
+
+## Why ${ctx.event.title} Matters (MIN 200 words)
+Cover:
+- What makes this event a marquee fixture or moment
+- Historical, sporting, or narrative stakes
+- Why fans and pundits are circling the date
+- Standings, qualification, or silverware implications
+
+## Teams and Storylines (MIN 200 words)
+Cover:
+- The main protagonists and their current trajectories
+- Ongoing narratives heading into the event (recent form, controversies, key signings)
+- Manager profiles and season context
+- What each side needs from this event
+
+## Key Players to Watch (MIN 200 words)
+Cover:
+- 3-5 players likely to decide the outcome
+- Season stats and current form for each
+- Their tactical role and expected matchups
+- Internal links to player pages where possible
+
+## Tactical Battlegrounds (MIN 200 words)
+Cover:
+- Expected formations and systems
+- Key positional matchups (wing-back vs winger, midfield press, etc.)
+- How each team will try to win
+- Where the event could be decided tactically
+
+## Recent Form and Head-to-Head (MIN 150 words)
+Cover:
+- Form guides for each side (last 5 results with context)
+- Relevant historical meetings and their patterns
+- Momentum shifts heading into the event
+- What the numbers say about the matchup
+
+## Viewing Notes and Predictions (MIN 150 words)
+Cover:
+- Kick-off times, venues, and broadcast details if available
+- Informed outcome predictions grounded in the analysis above
+- Specific scorelines or key storylines to watch
+- A forward-looking close tying back to the event's importance
+
+REQUIREMENTS:
+1. Factual headline (max 80 chars) — include the event name. No hype words (no "epic", "showdown", "clash", "battle", "titans"). No exclamation marks.
+2. Concise excerpt (150 chars max)
+3. ALL team/player/competition mentions must be internal markdown links
+4. SEO keywords: "${ctx.event.title} preview"${ctx.event.competition ? `, "${ctx.event.competition.name} ${ctx.event.type}"` : ""}
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max
+- Open with a scene-setting paragraph that names the event
+- Use active voice and present tense for immediacy
+- Vary sentence length for rhythm
+- Stay factual — no speculation dressed up as fact
+
+Generate SEO slug: "${ctx.event.slug}-preview${slugDate ? `-${slugDate}` : ""}"
+
+Return as JSON:
+{
+  "title": "Max 80 chars",
+  "slug": "...",
+  "excerpt": "Max 150 chars",
+  "content": "Full markdown — MINIMUM 1200 WORDS",
+  "metaTitle": "Max 60 chars",
+  "metaDescription": "150-160 chars"
+}
+
+FINAL REMINDER: The "content" field must be at least 1200 words. Each ## section must hit its minimum. If you finish early, expand the analysis — never cut sections short.`;
+}
+
+export function buildEventRecapPrompt(ctx: EventRecapContext): string {
+  const competitionLink = ctx.event.competition
+    ? `[${ctx.event.competition.name}](/competitions/${ctx.event.competition.slug})`
+    : "";
+
+  const resultsBlock = ctx.finishedMatches.length
+    ? ctx.finishedMatches
+        .map((m) => {
+          const home = `[${m.homeTeam}](/teams/${m.homeTeamSlug})`;
+          const away = `[${m.awayTeam}](/teams/${m.awayTeamSlug})`;
+          const comp = `[${m.competition}](/competitions/${m.competitionSlug})`;
+          const md = m.matchday ? ` (MD ${m.matchday})` : "";
+          const scorers = m.topScorers?.length
+            ? ` — scorers: ${m.topScorers.join(", ")}`
+            : "";
+          return `- ${home} ${m.homeScore}-${m.awayScore} ${away} — ${comp}${md}${scorers}`;
+        })
+        .join("\n")
+    : "- No results recorded";
+
+  const performersBlock = ctx.standoutPerformers?.length
+    ? ctx.standoutPerformers
+        .map(
+          (p) =>
+            `- [${p.name}](/players/${p.slug}) ([${p.team}](/teams/${p.teamSlug})): ${p.line}`
+        )
+        .join("\n")
+    : "";
+
+  const slugDate = formatEventDateForSlug(ctx.event.date);
+
+  return `You are an SEO-focused sports journalist writing an in-depth recap of a high-importance football event. Write in a factual, authoritative tone like BBC Sport — no tabloid hype or sensationalism.
+
+LENGTH REQUIREMENT (CRITICAL — READ FIRST):
+This article MUST be a MINIMUM of 1200 words. Target 1400-1800 words. Articles shorter than 1200 words will be rejected and regenerated.
+This is a definitive recap of a marquee football event, NOT a paragraph summary. Cover results, performances, tactics, and implications in real depth.
+
+EVENT DETAILS:
+- Title: ${ctx.event.title}
+- Type: ${ctx.event.type}
+- Date: ${ctx.event.date}
+- Importance: ${ctx.event.importance}/5
+${ctx.event.competition ? `- Competition: ${ctx.event.competition.name}` : ""}
+${ctx.event.description ? `- Context: ${ctx.event.description}` : ""}
+
+RESULTS:
+${resultsBlock}
+
+${performersBlock ? `STANDOUT PERFORMERS:\n${performersBlock}` : ""}
+
+${ctx.standingsContext || ""}
+
+INTERNAL LINKS:
+- Every team mention: [Team Name](/teams/team-slug)
+- Every player mention: [Player Name](/players/player-slug)
+- Every competition mention: [Competition](/competitions/competition-slug)
+${competitionLink ? `- Primary competition: ${competitionLink}` : ""}
+
+REQUIRED STRUCTURE — Each section has a MINIMUM word count. Do not skip sections.
+
+## ${ctx.event.title}: The Story of the Day (MIN 200 words)
+Cover:
+- A scene-setting narrative of how the event unfolded
+- The headline storylines that defined the day
+- Where this event sits in the wider season context
+- The emotional arc across the fixtures involved
+
+## Headline Results (MIN 200 words)
+Cover:
+- Each major result with a short tactical and narrative summary
+- The decisive moments (goals, red cards, substitutions)
+- Context: were results expected or upsets?
+- Links to every team involved
+
+## Standout Performers (MIN 200 words)
+Cover:
+- 3-5 players who shaped the event
+- Their contributions (goals, assists, key passes, defensive actions)
+- How their performances compare to season norms
+- Internal links to player pages
+
+## Tactical Takeaways (MIN 200 words)
+Cover:
+- Formations and in-game adjustments that mattered
+- Pressing patterns, transitional play, set-piece routines
+- Managerial calls that paid off or backfired
+- What opposing coaches will note going forward
+
+## Table and Standings Impact (MIN 150 words)
+Cover:
+- How the event reshaped league tables, qualification races, or knockout brackets
+- Gap to leaders, relegation implications, seeding effects
+- Which clubs gained or lost the most ground
+- Key standings snapshot after the event
+
+## What Comes Next (MIN 150 words)
+Cover:
+- The immediate fixtures ahead for the clubs involved
+- Storylines to track in the coming weeks
+- Injuries, suspensions, or selection headaches triggered by the event
+- A forward-looking close tying back to the event's significance
+
+REQUIREMENTS:
+1. Factual headline (max 80 chars) — include the event name. No hype words (no "epic", "showdown", "clash", "battle", "titans"). No exclamation marks.
+2. Concise excerpt (150 chars max)
+3. ALL team/player/competition mentions must be internal markdown links
+4. SEO keywords: "${ctx.event.title} recap", "${ctx.event.title} results"${ctx.event.competition ? `, "${ctx.event.competition.name} ${ctx.event.type}"` : ""}
+
+READABILITY GUIDELINES:
+- Keep paragraphs to 3-4 sentences max
+- Open with a vivid sentence anchoring the day
+- Use past tense consistently for the match action
+- Vary sentence length for rhythm
+- Stay factual — describe what happened, don't embellish
+
+Generate SEO slug: "${ctx.event.slug}-recap${slugDate ? `-${slugDate}` : ""}"
+
+Return as JSON:
+{
+  "title": "Max 80 chars",
+  "slug": "...",
+  "excerpt": "Max 150 chars",
+  "content": "Full markdown — MINIMUM 1200 WORDS",
+  "metaTitle": "Max 60 chars",
+  "metaDescription": "150-160 chars"
+}
+
+FINAL REMINDER: The "content" field must be at least 1200 words. Each ## section must hit its minimum. If you finish early, expand the analysis — never cut sections short.`;
+}

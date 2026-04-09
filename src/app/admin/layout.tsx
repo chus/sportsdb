@@ -11,6 +11,7 @@ import {
   CreditCard,
   Gift,
   ArrowLeft,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Content", href: "/admin/content", icon: FileText },
+  { label: "Calendar", href: "/admin/calendar", icon: CalendarDays },
   { label: "Data", href: "/admin/data", icon: Database },
   { label: "Integrations", href: "/admin/integrations", icon: Puzzle },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },

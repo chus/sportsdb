@@ -1,28 +1,44 @@
-import { TrendingUp, ChevronRight, Shield, Ban, BarChart3, Heart, Search } from "lucide-react";
+import { Ban, BarChart3, ChevronRight, Heart, Shield } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { players, teams, competitions, matches } from "@/lib/db/schema";
-import { count, ne, desc } from "drizzle-orm";
+import { userLeaguePreferences } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
-import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { PlayerLink } from "@/components/player/player-link";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { SearchBar } from "@/components/search/search-bar";
-import { getPublishedArticles } from "@/lib/queries/articles";
-import { getCompetitionSeason, getStandings } from "@/lib/queries/competitions";
-import { StandingsTable } from "@/components/competition/standings-table";
+import {
+  getCompetitionSpotlight,
+  getHeroBanner,
+  getHomepageStats,
+  getMatchOfTheDay,
+  getStandoutPerformers,
+  getTimelyArticles,
+  getTopCompetitionsForHome,
+  getWeekPreview,
+} from "@/lib/queries/homepage";
+import { HeroBannerSection } from "@/components/homepage/hero-banner";
+import { MatchOfTheDayCard } from "@/components/homepage/match-of-the-day-card";
+import { StandoutPerformers } from "@/components/homepage/standout-performers";
+import { WeekPreview } from "@/components/homepage/week-preview";
+import { CompetitionSpotlight } from "@/components/homepage/competition-spotlight";
+import { LatestNewsStrip } from "@/components/homepage/latest-news-strip";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
+// ISR: regenerate the homepage at most every 5 minutes.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "DataSports – The International Sports Database",
-  description: "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data.",
+  description:
+    "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data.",
   openGraph: {
     title: "DataSports – The International Sports Database",
-    description: "The comprehensive, structured database for football. Search across players, teams, and competitions.",
+    description:
+      "The comprehensive, structured database for football. Search across players, teams, and competitions.",
     url: BASE_URL,
     siteName: "DataSports",
     type: "website",
@@ -31,63 +47,67 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DataSports – The International Sports Database",
-    description: "The comprehensive, structured database for football. Search players, teams, competitions, and venues.",
+    description:
+      "The comprehensive, structured database for football. Search players, teams, competitions, and venues.",
   },
   alternates: {
     canonical: BASE_URL,
   },
-  keywords: ["football", "soccer", "players", "teams", "competitions", "Premier League", "La Liga", "Bundesliga", "Serie A", "sports database", "World Cup 2026", "FIFA World Cup", "World Cup USA"],
+  keywords: [
+    "football",
+    "soccer",
+    "players",
+    "teams",
+    "competitions",
+    "Premier League",
+    "La Liga",
+    "Bundesliga",
+    "Serie A",
+    "sports database",
+    "World Cup 2026",
+    "FIFA World Cup",
+    "World Cup USA",
+  ],
 };
 
-async function getStats() {
-  const [playersCount] = await db.select({ count: count() }).from(players);
-  const [teamsCount] = await db.select({ count: count() }).from(teams);
-  const [competitionsCount] = await db.select({ count: count() }).from(competitions);
-  const [matchesCount] = await db.select({ count: count() }).from(matches);
-
-  return {
-    players: playersCount.count,
-    teams: teamsCount.count,
-    competitions: competitionsCount.count,
-    matches: matchesCount.count,
-  };
-}
-
-async function getTrendingPlayers(limit = 6) {
-  return db
-    .select()
-    .from(players)
-    .where(ne(players.position, "Unknown"))
-    .orderBy(desc(players.popularityScore))
-    .limit(limit);
-}
-
-async function getTopCompetitions() {
-  return db
-    .select()
-    .from(competitions)
-    .limit(12);
-}
-
-async function getPremierLeagueStandings() {
-  const cs = await getCompetitionSeason("premier-league");
-  if (!cs) return null;
-  const standingsData = await getStandings(cs.competitionSeason.id);
-  return { standings: standingsData, season: cs.season };
+async function resolvePersonalization(
+  user: Awaited<ReturnType<typeof getCurrentUser>>
+): Promise<string[] | undefined> {
+  if (!user || user.role !== "pro") return undefined;
+  const prefs = await db
+    .select({ competitionId: userLeaguePreferences.competitionId })
+    .from(userLeaguePreferences)
+    .where(eq(userLeaguePreferences.userId, user.id));
+  if (!prefs.length) return undefined;
+  return prefs.map((p) => p.competitionId);
 }
 
 export default async function HomePage() {
-  const [stats, trendingPlayers, recentArticles, plStandings, topCompetitions, currentUser] =
-    await Promise.all([
-      getStats(),
-      getTrendingPlayers(),
-      getPublishedArticles(5),
-      getPremierLeagueStandings(),
-      getTopCompetitions(),
-      getCurrentUser(),
-    ]);
+  const currentUser = await getCurrentUser();
+  const personalizedIds = await resolvePersonalization(currentUser);
 
-  const viewerName = currentUser?.name || currentUser?.email?.split("@")[0] || null;
+  const [
+    hero,
+    matchOfTheDay,
+    performers,
+    weekPreview,
+    spotlight,
+    articles,
+    stats,
+    topCompetitions,
+  ] = await Promise.all([
+    getHeroBanner({ personalizedCompetitionIds: personalizedIds }),
+    getMatchOfTheDay(),
+    getStandoutPerformers(30, 3),
+    getWeekPreview(7),
+    getCompetitionSpotlight(),
+    getTimelyArticles(6),
+    getHomepageStats(),
+    getTopCompetitionsForHome(12),
+  ]);
+
+  const viewerName =
+    currentUser?.name || currentUser?.email?.split("@")[0] || null;
 
   return (
     <>
@@ -113,214 +133,57 @@ export default async function HomePage() {
               {viewerName ? `Welcome back, ${viewerName}` : "The Sports Database"}
             </h1>
             <p className="text-neutral-400 mb-6 text-sm">
-              {stats.players.toLocaleString()} players · {stats.teams.toLocaleString()} teams · {stats.matches.toLocaleString()} matches
+              {stats.players.toLocaleString()} players ·{" "}
+              {stats.teams.toLocaleString()} teams ·{" "}
+              {stats.matches.toLocaleString()} matches
             </p>
             <div className="max-w-xl">
-              <SearchBar size="default" placeholder="Search players, teams, competitions..." variant="dark" />
+              <SearchBar
+                size="default"
+                placeholder="Search players, teams, competitions..."
+                variant="dark"
+              />
             </div>
           </div>
         </section>
 
-        {/* Live Matches */}
-        <LiveMatchesSection />
+        {/* Hero: Live / Today / Upcoming */}
+        <HeroBannerSection data={hero} />
 
-        {/* Main content grid */}
-        <section className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left column — Articles */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-neutral-900">Latest News</h2>
-                <Link
-                  href="/news"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                >
-                  View All <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {recentArticles.length > 0 && (
-                <div className="space-y-0">
-                  {/* Featured article */}
-                  <Link
-                    href={`/news/${recentArticles[0].article.slug}`}
-                    className="block bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow mb-4 group"
-                  >
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        {recentArticles[0].competition && (
-                          <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                            {recentArticles[0].competition.name}
-                          </span>
-                        )}
-                        <span className="text-xs text-neutral-400">
-                          {recentArticles[0].article.publishedAt
-                            ? new Date(recentArticles[0].article.publishedAt).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                              })
-                            : ""}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-neutral-900 group-hover:text-blue-600 transition-colors mb-2">
-                        {recentArticles[0].article.title}
-                      </h3>
-                      {recentArticles[0].article.excerpt && (
-                        <p className="text-sm text-neutral-600 line-clamp-2">
-                          {recentArticles[0].article.excerpt}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-
-                  {/* Article list */}
-                  <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
-                    {recentArticles.slice(1).map(({ article, competition }) => (
-                      <Link
-                        key={article.id}
-                        href={`/news/${article.slug}`}
-                        className="flex items-start gap-4 p-4 hover:bg-neutral-50 transition-colors group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            {competition && (
-                              <span className="text-xs font-medium text-blue-600">
-                                {competition.name}
-                              </span>
-                            )}
-                            <span className="text-xs text-neutral-400">
-                              {article.publishedAt
-                                ? new Date(article.publishedAt).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                  })
-                                : ""}
-                            </span>
-                          </div>
-                          <h4 className="font-semibold text-sm text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                            {article.title}
-                          </h4>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+        {/* Yesterday's highlights: Match of the Day + Standout Performers */}
+        {(matchOfTheDay || performers.length > 0) && (
+          <section className="max-w-7xl mx-auto px-4 py-12">
+            <div className="grid lg:grid-cols-3 gap-6">
+              {matchOfTheDay && (
+                <div className="lg:col-span-2">
+                  <MatchOfTheDayCard data={matchOfTheDay} />
                 </div>
               )}
-
-              {/* Trending Players */}
-              {trendingPlayers.length > 0 && (
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-orange-500" />
-                      <h2 className="text-lg font-bold text-neutral-900">Trending Players</h2>
-                    </div>
-                    <Link
-                      href="/trending"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                    >
-                      See all <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {trendingPlayers.map((player) => (
-                      <PlayerLink
-                        key={player.id}
-                        slug={player.slug}
-                        isLinkWorthy={player.isIndexable ?? false}
-                        className="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200 hover:shadow-md transition-shadow group"
-                      >
-                        <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          {player.imageUrl ? (
-                            <ImageWithFallback
-                              src={player.imageUrl}
-                              alt={player.name}
-                              width={40}
-                              height={40}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-sm font-bold text-neutral-500">
-                              {player.name.substring(0, 2).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                            {player.name}
-                          </div>
-                          <div className="text-xs text-neutral-500 truncate">
-                            {player.position}{player.nationality && ` · ${player.nationality}`}
-                          </div>
-                        </div>
-                      </PlayerLink>
-                    ))}
-                  </div>
+              {performers.length > 0 && (
+                <div className={matchOfTheDay ? "" : "lg:col-span-3"}>
+                  <StandoutPerformers data={performers} />
                 </div>
               )}
             </div>
+          </section>
+        )}
 
-            {/* Right sidebar */}
-            <div className="space-y-6">
-              {/* Standings snapshot */}
-              {plStandings && plStandings.standings.length > 0 && (
-                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-                    <h3 className="font-bold text-sm text-neutral-900">Premier League</h3>
-                    <Link
-                      href="/competitions/premier-league"
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      Full Table
-                    </Link>
-                  </div>
-                  <StandingsTable
-                    standings={plStandings.standings}
-                    compact
-                    limit={8}
-                  />
-                </div>
-              )}
+        {/* This Week in Football */}
+        {weekPreview.length > 0 && <WeekPreview data={weekPreview} />}
 
-              {/* Quick CTA */}
-              {!currentUser && (
-                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white">
-                  <h3 className="font-bold text-lg mb-2">Create a free account</h3>
-                  <p className="text-sm text-blue-100 mb-4">
-                    Get your personal dashboard, follow teams, track players, and stay updated with the latest stats.
-                  </p>
-                  <Link
-                    href="/signup"
-                    className="inline-block px-5 py-2.5 bg-white text-blue-600 font-semibold text-sm rounded-lg hover:shadow-lg transition-shadow"
-                  >
-                    Sign Up Free
-                  </Link>
-                </div>
-              )}
+        {/* Competition Spotlight (rotating) */}
+        {spotlight && <CompetitionSpotlight data={spotlight} />}
 
-              {currentUser && (
-                <Link
-                  href="/dashboard"
-                  className="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-white hover:shadow-lg transition-shadow group"
-                >
-                  <h3 className="font-bold text-lg mb-1 group-hover:underline">Your Dashboard</h3>
-                  <p className="text-sm text-blue-100 mb-3">
-                    Follow leagues, check standings, and see upcoming fixtures — all in one place.
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-sm font-semibold">
-                    Open Dashboard <ChevronRight className="w-4 h-4" />
-                  </span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </section>
+        {/* Latest News (timely-first) */}
+        {articles.length > 0 && <LatestNewsStrip articles={articles} />}
 
         {/* Competition quick links */}
         {topCompetitions.length > 0 && (
           <section className="border-y border-neutral-200 bg-white">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              <h2 className="text-lg font-bold text-neutral-900 mb-4">Competitions</h2>
+              <h2 className="text-lg font-bold text-neutral-900 mb-4">
+                Competitions
+              </h2>
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                 {topCompetitions.map((comp) => (
                   <Link
@@ -349,33 +212,58 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* Go Pro Section */}
-        <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-          <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-            <h2 className="text-2xl font-bold text-white mb-3">Unlock the Full Experience</h2>
-            <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
-              Ad-free browsing, advanced stats, unlimited follows and comparisons — all for less than a coffee per month.
-            </p>
-            <div className="flex items-center justify-center gap-6 mb-8">
-              {[
-                { icon: Ban, label: "Ad-Free" },
-                { icon: BarChart3, label: "Advanced Stats" },
-                { icon: Heart, label: "Unlimited Follows" },
-              ].map((f) => (
-                <div key={f.label} className="text-white text-center">
-                  <f.icon className="w-6 h-6 mx-auto mb-1" />
-                  <span className="text-xs font-medium">{f.label}</span>
-                </div>
-              ))}
+        {/* Pro / Dashboard CTA */}
+        {!currentUser && (
+          <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+            <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+              <h2 className="text-2xl font-bold text-white mb-3">
+                Unlock the Full Experience
+              </h2>
+              <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
+                Ad-free browsing, advanced stats, unlimited follows and
+                comparisons — all for less than a coffee per month.
+              </p>
+              <div className="flex items-center justify-center gap-6 mb-8">
+                {[
+                  { icon: Ban, label: "Ad-Free" },
+                  { icon: BarChart3, label: "Advanced Stats" },
+                  { icon: Heart, label: "Unlimited Follows" },
+                ].map((f) => (
+                  <div key={f.label} className="text-white text-center">
+                    <f.icon className="w-6 h-6 mx-auto mb-1" />
+                    <span className="text-xs font-medium">{f.label}</span>
+                  </div>
+                ))}
+              </div>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
+              >
+                Go Pro — from &euro;8/year
+              </Link>
             </div>
+          </section>
+        )}
+
+        {currentUser && (
+          <section className="max-w-7xl mx-auto px-4 py-12">
             <Link
-              href="/pricing"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
+              href="/dashboard"
+              className="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white hover:shadow-lg transition-shadow group"
             >
-              Go Pro — from &euro;8/year
+              <h3 className="font-bold text-xl mb-1 group-hover:underline">
+                Your Dashboard
+              </h3>
+              <p className="text-sm text-blue-100 mb-3">
+                Follow leagues, check standings, and see upcoming fixtures — all
+                in one place.
+              </p>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                Open Dashboard <ChevronRight className="w-4 h-4" />
+              </span>
             </Link>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
     </>
   );

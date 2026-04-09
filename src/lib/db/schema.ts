@@ -9,6 +9,7 @@ import {
   decimal,
   jsonb,
   uniqueIndex,
+  unique,
   index,
 } from "drizzle-orm/pg-core";
 
@@ -632,6 +633,37 @@ export const tournamentSummaries = pgTable(
 );
 
 // ============================================================
+// SPORTS CALENDAR EVENTS
+// ============================================================
+
+export const sportsEvents = pgTable(
+  "sports_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    date: date("date").notNull(),
+    // 'matchday' | 'derby' | 'final' | 'tournament_start' | 'international_break'
+    type: text("type").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    importance: integer("importance").notNull().default(1), // 1..5
+    competitionId: uuid("competition_id").references(() => competitions.id),
+    matchIds: jsonb("match_ids").$type<string[]>().notNull().default([]),
+    isFeatured: boolean("is_featured").notNull().default(false),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("idx_sports_events_date").on(table.date),
+    index("idx_sports_events_type").on(table.type),
+    index("idx_sports_events_importance").on(table.importance),
+    unique("idx_sports_events_unique")
+      .on(table.date, table.type, table.competitionId)
+      .nullsNotDistinct(),
+  ]
+);
+
+// ============================================================
 // NEWS ARTICLES
 // ============================================================
 
@@ -641,7 +673,7 @@ export const articles = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     slug: text("slug").notNull().unique(),
 
-    // Content type: match_report, player_spotlight, round_recap, season_review, transfer_news
+    // Content type: match_report, player_spotlight, round_recap, season_review, transfer_news, event_preview, event_recap
     type: text("type").notNull(),
 
     // Content
@@ -665,6 +697,9 @@ export const articles = pgTable(
     // For round recaps
     matchday: integer("matchday"),
 
+    // For event previews/recaps
+    sportsEventId: uuid("sports_event_id").references(() => sportsEvents.id),
+
     // Publishing
     status: text("status").notNull().default("draft"), // draft, published, archived
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -684,6 +719,7 @@ export const articles = pgTable(
     index("idx_articles_match_id").on(table.matchId),
     index("idx_articles_competition_season").on(table.competitionSeasonId),
     index("idx_articles_primary_player").on(table.primaryPlayerId),
+    index("idx_articles_sports_event").on(table.sportsEventId),
   ]
 );
 
