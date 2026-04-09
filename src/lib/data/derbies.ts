@@ -13,20 +13,18 @@ export type Derby = {
 };
 
 export const DERBIES: Derby[] = [
-  { teams: ["real-madrid", "barcelona"], name: "El Clásico", importance: 5 },
-  { teams: ["manchester-united", "liverpool"], name: "North West Derby", importance: 5 },
-  { teams: ["manchester-city", "manchester-united"], name: "Manchester Derby", importance: 5 },
-  { teams: ["arsenal", "tottenham-hotspur"], name: "North London Derby", importance: 5 },
-  { teams: ["liverpool", "everton"], name: "Merseyside Derby", importance: 4 },
-  { teams: ["ac-milan", "inter"], name: "Derby della Madonnina", importance: 5 },
-  { teams: ["juventus", "inter"], name: "Derby d'Italia", importance: 5 },
-  { teams: ["roma", "lazio"], name: "Derby della Capitale", importance: 5 },
-  { teams: ["bayern-munich", "borussia-dortmund"], name: "Der Klassiker", importance: 5 },
-  { teams: ["borussia-dortmund", "schalke-04"], name: "Revierderby", importance: 4 },
-  { teams: ["paris-saint-germain", "marseille"], name: "Le Classique", importance: 5 },
-  { teams: ["atletico-madrid", "real-madrid"], name: "Madrid Derby", importance: 5 },
-  { teams: ["atletico-madrid", "barcelona"], name: "Barcelona vs Atleti", importance: 4 },
-  { teams: ["celtic", "rangers"], name: "Old Firm", importance: 5 },
+  { teams: ["real-madrid-cf", "fc-barcelona"], name: "El Clásico", importance: 5 },
+  { teams: ["manchester-united-fc", "liverpool-fc"], name: "North West Derby", importance: 5 },
+  { teams: ["manchester-city-fc", "manchester-united-fc"], name: "Manchester Derby", importance: 5 },
+  { teams: ["arsenal-fc", "tottenham-hotspur-fc"], name: "North London Derby", importance: 5 },
+  { teams: ["liverpool-fc", "everton-fc"], name: "Merseyside Derby", importance: 4 },
+  { teams: ["ac-milan", "fc-internazionale-milano"], name: "Derby della Madonnina", importance: 5 },
+  { teams: ["juventus-fc", "fc-internazionale-milano"], name: "Derby d'Italia", importance: 5 },
+  { teams: ["as-roma", "ss-lazio"], name: "Derby della Capitale", importance: 5 },
+  { teams: ["fc-bayern-munchen", "borussia-dortmund"], name: "Der Klassiker", importance: 5 },
+  { teams: ["paris-saint-germain-fc", "olympique-de-marseille"], name: "Le Classique", importance: 5 },
+  { teams: ["club-atletico-de-madrid", "real-madrid-cf"], name: "Madrid Derby", importance: 5 },
+  { teams: ["club-atletico-de-madrid", "fc-barcelona"], name: "Barcelona vs Atleti", importance: 4 },
 ];
 
 const pairKey = (a: string, b: string): string => [a, b].sort().join("::");
