@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const result = await getArticleBySlug(slug);
 
   if (!result) {
-    return { title: "Article Not Found" };
+    notFound();
   }
 
   const { article, competition, season } = result;

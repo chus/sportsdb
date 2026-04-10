@@ -5,11 +5,34 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   trailingSlash: false,
+  async redirects() {
+    return [
+      {
+        source: "/privacy-policy",
+        destination: "/privacy",
+        permanent: true,
+      },
+      {
+        source: "/terms-of-service",
+        destination: "/terms",
+        permanent: true,
+      },
+      {
+        source: "/feed",
+        destination: "/news",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
         source: "/feed/:slug.xml",
         destination: "/feed/:slug",
+      },
+      {
+        source: "/favicon.ico",
+        destination: "/favicon.svg",
       },
     ];
   },

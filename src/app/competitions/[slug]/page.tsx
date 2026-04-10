@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
   const competition = await getCompetitionBySlug(slug);
 
   if (!competition) {
-    return { title: "Competition Not Found" };
+    notFound();
   }
 
   // Thin page check: competition needs at least one season

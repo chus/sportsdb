@@ -48,7 +48,7 @@ export async function generateMetadata({
   const match = await getMatchWithDetailsBySlug(slug);
 
   if (!match || !match.homeTeam || !match.awayTeam) {
-    return { title: "Match Not Found" };
+    notFound();
   }
 
   const homeTeam = match.homeTeam.shortName || match.homeTeam.name;
