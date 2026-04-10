@@ -344,8 +344,12 @@ export type StandoutPerformer = {
 };
 
 /**
- * Reads `match_events` from the last N hours and aggregates goals/assists
- * per player. Impact = goals*3 + assists*2 (tiebreak on goals).
+ * Top performers from recently finished matches.
+ *
+ * Primary: `match_events` goals/assists (when populated).
+ * Fallback: season-stats leaders on winning teams from recent matches.
+ * The fallback ensures the section renders even without per-match event
+ * data (which requires a paid API-Football plan to ingest).
  */
 export async function getStandoutPerformers(
   hours = 30,
@@ -354,7 +358,8 @@ export async function getStandoutPerformers(
   const since = new Date();
   since.setHours(since.getHours() - hours);
 
-  const rows = await db.execute<{
+  // Primary path: match_events (minute-level goal/assist data)
+  const eventRows = await db.execute<{
     player_id: string;
     player_name: string;
     player_slug: string;
@@ -394,10 +399,100 @@ export async function getStandoutPerformers(
     LIMIT 50
   `);
 
-  const performers: StandoutPerformer[] = rows.rows.map((r) => {
-    const goals = Number(r.goals) || 0;
-    const assists = Number(r.assists) || 0;
-    return {
+  if (eventRows.rows.length > 0) {
+    const performers: StandoutPerformer[] = eventRows.rows.map((r) => {
+      const goals = Number(r.goals) || 0;
+      const assists = Number(r.assists) || 0;
+      return {
+        playerId: r.player_id,
+        name: r.player_name,
+        slug: r.player_slug,
+        imageUrl: r.player_image_url,
+        goals,
+        assists,
+        teamName: r.team_name,
+        teamSlug: r.team_slug,
+        matchId: r.match_id,
+        matchSlug: r.match_slug,
+        impact: goals * 3 + assists * 2,
+      };
+    });
+    performers.sort(
+      (a, b) => b.impact - a.impact || b.goals - a.goals || b.assists - a.assists
+    );
+    return performers.slice(0, limit);
+  }
+
+  // Fallback: top season-stats players on teams that won recent matches.
+  // Picks the highest-scoring forward/midfielder from each winning team.
+  const fallbackRows = await db.execute<{
+    player_id: string;
+    player_name: string;
+    player_slug: string;
+    player_image_url: string | null;
+    team_name: string;
+    team_slug: string;
+    match_id: string;
+    match_slug: string | null;
+    season_goals: number;
+    season_assists: number;
+  }>(sql`
+    WITH recent_wins AS (
+      SELECT DISTINCT ON (
+        CASE WHEN m.home_score > m.away_score THEN m.home_team_id
+             WHEN m.away_score > m.home_score THEN m.away_team_id
+        END
+      )
+        m.id AS match_id,
+        m.slug AS match_slug,
+        CASE WHEN m.home_score > m.away_score THEN m.home_team_id
+             WHEN m.away_score > m.home_score THEN m.away_team_id
+        END AS winning_team_id
+      FROM matches m
+      WHERE m.status = 'finished'
+        AND m.scheduled_at >= ${since.toISOString()}
+        AND m.home_score IS NOT NULL
+        AND m.away_score IS NOT NULL
+        AND m.home_score != m.away_score
+      ORDER BY
+        CASE WHEN m.home_score > m.away_score THEN m.home_team_id
+             WHEN m.away_score > m.home_score THEN m.away_team_id
+        END,
+        ABS(m.home_score - m.away_score) DESC
+    )
+    SELECT
+      p.id AS player_id,
+      p.name AS player_name,
+      p.slug AS player_slug,
+      p.image_url AS player_image_url,
+      t.name AS team_name,
+      t.slug AS team_slug,
+      rw.match_id,
+      rw.match_slug,
+      COALESCE(pss.goals, 0) AS season_goals,
+      COALESCE(pss.assists, 0) AS season_assists
+    FROM recent_wins rw
+    INNER JOIN teams t ON t.id = rw.winning_team_id
+    INNER JOIN player_team_history pth ON pth.team_id = rw.winning_team_id AND pth.valid_to IS NULL
+    INNER JOIN players p ON p.id = pth.player_id
+    INNER JOIN player_season_stats pss ON pss.player_id = p.id
+    INNER JOIN competition_seasons cs ON cs.id = pss.competition_season_id
+    INNER JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+    WHERE pss.goals > 0
+      AND p.position IN ('Forward', 'Midfielder')
+    ORDER BY (pss.goals * 2 + pss.assists) DESC
+    LIMIT ${limit * 3}
+  `);
+
+  // Dedupe by team (1 player per winning team) then pick top N
+  const seen = new Set<string>();
+  const performers: StandoutPerformer[] = [];
+  for (const r of fallbackRows.rows) {
+    if (seen.has(r.team_slug)) continue;
+    seen.add(r.team_slug);
+    const goals = Number(r.season_goals) || 0;
+    const assists = Number(r.season_assists) || 0;
+    performers.push({
       playerId: r.player_id,
       name: r.player_name,
       slug: r.player_slug,
@@ -408,14 +503,11 @@ export async function getStandoutPerformers(
       teamSlug: r.team_slug,
       matchId: r.match_id,
       matchSlug: r.match_slug,
-      impact: goals * 3 + assists * 2,
-    };
-  });
-
-  performers.sort(
-    (a, b) => b.impact - a.impact || b.goals - a.goals || b.assists - a.assists
-  );
-  return performers.slice(0, limit);
+      impact: goals * 2 + assists,
+    });
+    if (performers.length >= limit) break;
+  }
+  return performers;
 }
 
 // ============================================================

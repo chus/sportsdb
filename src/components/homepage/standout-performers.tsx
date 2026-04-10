@@ -11,7 +11,7 @@ export function StandoutPerformers({ data }: { data: StandoutPerformer[] }) {
       <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-2">
         <Star className="w-4 h-4 text-amber-500" />
         <h3 className="font-bold text-sm text-neutral-900">Standout Performers</h3>
-        <span className="text-xs text-neutral-400 ml-auto">Last 24h</span>
+        <span className="text-xs text-neutral-400 ml-auto">Top Performers</span>
       </div>
       <ul className="divide-y divide-neutral-100">
         {data.map((p) => (
