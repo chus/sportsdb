@@ -49,7 +49,10 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   const team = await getTeamBySlug(slug);
 
   if (!team) {
-    notFound();
+    return {
+      title: "Team Not Found | DataSports",
+      robots: { index: false, follow: false },
+    };
   }
 
   // Multi-signal thin page scoring

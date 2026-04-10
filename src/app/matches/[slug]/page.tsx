@@ -48,7 +48,10 @@ export async function generateMetadata({
   const match = await getMatchWithDetailsBySlug(slug);
 
   if (!match || !match.homeTeam || !match.awayTeam) {
-    notFound();
+    return {
+      title: "Match Not Found | DataSports",
+      robots: { index: false, follow: false },
+    };
   }
 
   const homeTeam = match.homeTeam.shortName || match.homeTeam.name;

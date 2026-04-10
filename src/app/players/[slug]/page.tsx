@@ -47,13 +47,19 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const player = await getPlayerBySlug(slug);
 
   if (!player || player.position === "Unknown") {
-    notFound();
+    return {
+      title: "Player Not Found | DataSports",
+      robots: { index: false, follow: false },
+    };
   }
 
   const quality = await getPlayerQuality(player);
 
   if (quality.shouldReturn404) {
-    notFound();
+    return {
+      title: "Player Not Found | DataSports",
+      robots: { index: false, follow: false },
+    };
   }
 
   const [currentTeamData, statsHistory] = await Promise.all([
