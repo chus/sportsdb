@@ -9,7 +9,7 @@ import {
   getCompetitionSeasonLabels,
   getCurrentSeasonLabel,
 } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageHeader } from "@/components/layout/page-header";
 import { PlayerLink } from "@/components/player/player-link";
@@ -67,6 +67,17 @@ export default async function CompetitionTopScorersPage({ params }: PageProps) {
           { name: competition.name, url: `${BASE_URL}/top-scorers/${slug}` },
         ]}
       />
+      {scorers.length > 0 && (
+        <ItemListJsonLd
+          name={`${competition.name} Top Scorers`}
+          items={scorers.slice(0, 20).map((s, i) => ({
+            position: i + 1,
+            url: `${BASE_URL}/players/${s.player.slug}`,
+            name: `${s.player.name} (${s.stat.goals} goals)`,
+            image: s.player.imageUrl,
+          }))}
+        />
+      )}
 
       <div className="min-h-screen bg-neutral-50">
         <PageHeader

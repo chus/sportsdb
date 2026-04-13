@@ -13,7 +13,7 @@ import {
   getTopAssists,
   getCompetitionRecentAndUpcoming,
 } from "@/lib/queries/competitions";
-import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
 import { FollowButton } from "@/components/follow-button";
@@ -74,6 +74,9 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
     },
     alternates: {
       canonical: `${BASE_URL}/competitions/${slug}`,
+      types: {
+        "application/rss+xml": `${BASE_URL}/feed/${slug}.xml`,
+      },
     },
   };
 }
@@ -155,6 +158,17 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
         ]}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
+      {standingsData.length > 0 && (
+        <ItemListJsonLd
+          name={`${competition.name} Standings`}
+          items={standingsData.map((s, i) => ({
+            position: i + 1,
+            url: `${BASE_URL}/teams/${s.team.slug}`,
+            name: s.team.name,
+            image: s.team.logoUrl,
+          }))}
+        />
+      )}
       <PageTracker entityType="competition" entityId={competition.id} />
 
       <div className="min-h-screen bg-neutral-50">
