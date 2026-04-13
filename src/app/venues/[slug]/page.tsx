@@ -27,6 +27,7 @@ import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-
 import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
 import { PageHeader } from "@/components/layout/page-header";
 import { ExternalLinks } from "@/components/entity/external-links";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -218,7 +219,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     {currentTeams.slice(0, 3).map(({ team }) => (
                       <Link key={team.id} href={`/teams/${team.slug}`} className="flex items-center gap-2 group">
                         {team.logoUrl ? (
-                          <img src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" />
+                          <ImageWithFallback src={team.logoUrl} alt={team.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         ) : (
                           <Shield className="w-5 h-5 text-neutral-300" />
                         )}
@@ -322,7 +323,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {primaryTeam.logoUrl ? (
-                          <img src={primaryTeam.logoUrl} alt={primaryTeam.name} className="w-6 h-6 object-contain" />
+                          <ImageWithFallback src={primaryTeam.logoUrl} alt={primaryTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                         ) : (
                           <Shield className="w-6 h-6 text-neutral-300" />
                         )}
@@ -387,7 +388,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                     >
                       <div className="flex items-center gap-1.5 mb-1.5">
                         {homeTeam.logoUrl ? (
-                          <img src={homeTeam.logoUrl} alt={homeTeam.name} className="w-4 h-4 object-contain" />
+                          <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={16} height={16} className="w-4 h-4 object-contain" />
                         ) : (
                           <Shield className="w-4 h-4 text-neutral-300" />
                         )}
@@ -395,7 +396,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       </div>
                       <div className="flex items-center gap-1.5 mb-1.5">
                         {awayTeam.logoUrl ? (
-                          <img src={awayTeam.logoUrl} alt={awayTeam.name} className="w-4 h-4 object-contain" />
+                          <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={16} height={16} className="w-4 h-4 object-contain" />
                         ) : (
                           <Shield className="w-4 h-4 text-neutral-300" />
                         )}
@@ -429,7 +430,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {homeTeam.logoUrl ? (
-                            <img src={homeTeam.logoUrl} alt={homeTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
+                            <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
                             <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}
@@ -438,7 +439,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                         <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
                         <div className="flex items-center gap-1.5 min-w-0">
                           {awayTeam.logoUrl ? (
-                            <img src={awayTeam.logoUrl} alt={awayTeam.name} className="w-5 h-5 object-contain flex-shrink-0" />
+                            <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                           ) : (
                             <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
                           )}

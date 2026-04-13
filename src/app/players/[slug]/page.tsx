@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   User, Calendar, Shield, BarChart3,
   Trophy, Target, TrendingUp, ChevronRight, ArrowRightLeft
@@ -528,7 +529,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             {nextMatch.homeTeam?.logoUrl ? (
-                              <img src={nextMatch.homeTeam.logoUrl} alt={nextMatch.homeTeam.name} className="w-6 h-6 object-contain" />
+                              <ImageWithFallback src={nextMatch.homeTeam.logoUrl} alt={nextMatch.homeTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
                               <Shield className="w-6 h-6 text-neutral-300" />
                             )}
@@ -538,7 +539,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-neutral-900">{nextMatch.awayTeam?.shortName || nextMatch.awayTeam?.name}</span>
                             {nextMatch.awayTeam?.logoUrl ? (
-                              <img src={nextMatch.awayTeam.logoUrl} alt={nextMatch.awayTeam.name} className="w-6 h-6 object-contain" />
+                              <ImageWithFallback src={nextMatch.awayTeam.logoUrl} alt={nextMatch.awayTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
                               <Shield className="w-6 h-6 text-neutral-300" />
                             )}

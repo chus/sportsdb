@@ -87,6 +87,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     {
+      url: `${BASE_URL}/compare/players`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
       url: `${BASE_URL}/world-cup-2026`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -175,7 +181,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .where(eq(seasons.isCurrent, false));
 
   // Fetch only what we need — teams, competitions, articles, venues, matches, players, hub data
-  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs, teamCountries] = await Promise.all([
+  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs, teamCountries, playerNationalities] = await Promise.all([
     // Teams with quality-relevant data for filtering
     db
       .selectDistinct({
@@ -299,6 +305,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .where(isNotNull(teams.country))
       .groupBy(teams.country)
       .having(sql`count(*) >= 3`),
+    // Distinct player nationalities with 5+ players (for /players/nationality/[country])
+    db
+      .select({ nationality: players.nationality })
+      .from(players)
+      .where(and(isNotNull(players.nationality), eq(players.isIndexable, true)))
+      .groupBy(players.nationality)
+      .having(sql`count(*) >= 5`),
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
@@ -455,6 +468,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Players-by-nationality pages (e.g. /players/nationality/Brazil)
+  const playerNationalityPages: MetadataRoute.Sitemap = playerNationalities
+    .filter((row) => row.nationality)
+    .map((row) => ({
+      url: `${BASE_URL}/players/nationality/${encodeURIComponent(row.nationality!)}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    }));
+
   return [
     ...staticPages,
     ...matchesHubPage,
@@ -470,5 +493,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...comparePages,
     ...teamCountryPages,
     ...playerPositionPages,
+    ...playerNationalityPages,
   ];
 }

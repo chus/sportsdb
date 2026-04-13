@@ -434,7 +434,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                               <>
                                 <div className="flex items-center gap-2 mb-1.5">
                                   {opponent?.logoUrl ? (
-                                    <img src={opponent.logoUrl} alt={opponent.name} className="w-6 h-6 object-contain" />
+                                    <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={24} height={24} className="w-6 h-6 object-contain" />
                                   ) : (
                                     <Shield className="w-6 h-6 text-neutral-300" />
                                   )}
@@ -565,7 +565,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                               >
                                 <div className="flex items-center gap-2 mb-2">
                                   {opponent?.logoUrl ? (
-                                    <img src={opponent.logoUrl} alt={opponent.name} className="w-5 h-5 object-contain" />
+                                    <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                   ) : (
                                     <Shield className="w-5 h-5 text-neutral-300" />
                                   )}
@@ -614,7 +614,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                               <Link key={match.id} href={`/matches/${match.slug ?? match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
                                 <div className="flex items-center gap-2">
                                   {opponent?.logoUrl ? (
-                                    <img src={opponent.logoUrl} alt={opponent.name} className="w-5 h-5 object-contain" />
+                                    <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                   ) : (
                                     <Shield className="w-5 h-5 text-neutral-300" />
                                   )}
