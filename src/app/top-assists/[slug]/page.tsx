@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Handshake, Shield, User } from "lucide-react";
+import { Handshake, Shield, User, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import {
   getTopAssistsForCompetition,
@@ -166,6 +166,23 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
               </div>
             </div>
           )}
+
+          {/* Cross-links */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <Link
+              href={`/competitions/${slug}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+            >
+              <Trophy className="w-4 h-4" />
+              {competition.name} Standings
+            </Link>
+            <Link
+              href={`/top-scorers/${slug}`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+            >
+              Top Scorers →
+            </Link>
+          </div>
         </div>
       </div>
     </>
