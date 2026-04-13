@@ -1,6 +1,7 @@
 import { FileText } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   description: "Read the terms and conditions for using DataSports. Understand your rights and responsibilities when using our platform.",
   openGraph: {
     title: "Terms of Service – DataSports",
-    description: "Terms and conditions for using DataSports.",
+    description: "Read the terms and conditions for using DataSports. Understand your rights and responsibilities when using our platform.",
     url: `${BASE_URL}/terms`,
     siteName: "DataSports",
     type: "website",
@@ -23,6 +24,13 @@ export default function TermsPage() {
   const lastUpdated = "March 2026";
 
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "Terms of Service", url: `${BASE_URL}/terms` },
+      ]}
+    />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 text-white py-16">
@@ -171,5 +179,6 @@ export default function TermsPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

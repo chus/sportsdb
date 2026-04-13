@@ -156,7 +156,11 @@ export function CompetitionJsonLd({
     "@type": "SportsOrganization",
     name,
     url,
-    sport: "https://www.wikidata.org/entity/Q2736",
+    sport: {
+      "@type": "Thing",
+      name: "Association football",
+      sameAs: "https://www.wikidata.org/entity/Q2736",
+    },
     ...(logo && { logo }),
     ...(location && {
       location: {
@@ -178,6 +182,7 @@ export function VenueJsonLd({
   image,
   address,
   capacity,
+  geo,
   events,
 }: {
   name: string;
@@ -185,6 +190,7 @@ export function VenueJsonLd({
   image?: string | null;
   address?: { city?: string | null; country?: string | null } | null;
   capacity?: number | null;
+  geo?: { latitude?: number | null; longitude?: number | null } | null;
   events?: { name: string; startDate: string; url?: string }[];
 }) {
   const data: Record<string, unknown> = {
@@ -199,6 +205,13 @@ export function VenueJsonLd({
         "@type": "PostalAddress",
         ...(address.city && { addressLocality: address.city }),
         ...(address.country && { addressCountry: address.country }),
+      },
+    }),
+    ...(geo && geo.latitude && geo.longitude && {
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: geo.latitude,
+        longitude: geo.longitude,
       },
     }),
     ...(events && events.length > 0 && {
@@ -281,6 +294,24 @@ export function MatchJsonLd({
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     sport: "https://www.wikidata.org/entity/Q2736",
     image: `${matchUrl}/opengraph-image`,
+    competitor: [
+      {
+        "@type": "SportsTeam",
+        name: homeTeam.name,
+        url: homeTeam.url,
+        ...(homeScore !== null && homeScore !== undefined && {
+          result: { "@type": "Text", name: String(homeScore) },
+        }),
+      },
+      {
+        "@type": "SportsTeam",
+        name: awayTeam.name,
+        url: awayTeam.url,
+        ...(awayScore !== null && awayScore !== undefined && {
+          result: { "@type": "Text", name: String(awayScore) },
+        }),
+      },
+    ],
     performer: [
       {
         "@type": "SportsTeam",

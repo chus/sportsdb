@@ -3,7 +3,7 @@ import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
-import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -28,6 +28,9 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     description,
     alternates: {
       canonical: `${BASE_URL}/news${qs(page)}`,
+      types: {
+        "application/rss+xml": `${BASE_URL}/feed.xml`,
+      },
     },
     ...(page > 1 && { robots: { index: false, follow: true } }),
   };
@@ -74,6 +77,13 @@ export default async function NewsPage({ searchParams }: Props) {
       ]}
     />
     <CollectionPageJsonLd name="Football News" description="Latest football news, match reports, player spotlights, and competition recaps." url={`${BASE_URL}/news`} />
+    <FAQJsonLd
+      items={[
+        { question: "What types of articles does DataSports publish?", answer: "DataSports publishes match reports with post-game analysis, matchday recaps covering full round results, and player spotlights featuring standout performers." },
+        { question: "How often is news content published?", answer: "New articles are published regularly after each matchday, covering all major competitions. Match reports typically appear within 24 hours of final whistle." },
+        { question: "Can I filter articles by type?", answer: "Yes, you can filter articles by type — All News, Match Reports, Matchday Recaps, or Player Spotlights — using the filter buttons at the top of the news page." },
+      ]}
+    />
     {page === 1 && (
       <ItemListJsonLd
         name="Football News"

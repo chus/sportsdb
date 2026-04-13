@@ -9,7 +9,7 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { SearchBar } from "@/components/search/search-bar";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
-import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -101,6 +101,14 @@ export default async function PlayersPage() {
           }))}
         />
       )}
+      <FAQJsonLd
+        items={[
+          { question: "How many football players are in the DataSports database?", answer: "DataSports covers thousands of players across all major football competitions worldwide, including the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1." },
+          { question: "Can I browse players by position or nationality?", answer: "Yes, you can browse players by position (Goalkeeper, Defender, Midfielder, Forward) or by nationality. Each category shows player counts and links to detailed profile pages." },
+          { question: "What statistics are available for each player?", answer: "Player profiles include career goals, assists, appearances, minutes played, yellow and red cards. Season-by-season breakdowns are available for competitions with data coverage." },
+          { question: "How often is player data updated?", answer: "Player statistics are updated regularly after each match round, typically within 24 hours of matches being completed." },
+        ]}
+      />
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

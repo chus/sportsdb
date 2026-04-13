@@ -4,7 +4,8 @@ import { Trophy, MapPin, Users, Calendar, ChevronRight, Globe } from "lucide-rea
 import { db } from "@/lib/db";
 import { competitions, competitionSeasons, standings, teams, venues, seasons } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { JsonLd } from "@/components/seo/json-ld";
+import { JsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { PageTracker } from "@/components/analytics/page-tracker";
 import { CountdownTimer } from "./countdown-timer";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -118,25 +119,58 @@ export default async function WorldCup2026Page() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "World Cup 2026", url: `${BASE_URL}/world-cup-2026` },
+        ]}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "SportsEvent",
           name: "FIFA World Cup 2026",
           description:
-            "The 23rd FIFA World Cup, jointly hosted by the United States, Mexico, and Canada.",
+            "The 23rd FIFA World Cup, jointly hosted by the United States, Mexico, and Canada. 48 teams, 12 groups, 104 matches across 16 stadiums.",
           startDate: WC_START_DATE,
           endDate: "2026-07-19T00:00:00Z",
-          location: {
-            "@type": "Place",
-            name: "United States, Mexico, Canada",
-          },
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          sport: "https://www.wikidata.org/entity/Q2736",
+          location: [
+            { "@type": "Country", name: "United States" },
+            { "@type": "Country", name: "Mexico" },
+            { "@type": "Country", name: "Canada" },
+          ],
           organizer: {
             "@type": "Organization",
             name: "FIFA",
+            url: "https://www.fifa.com",
           },
           url: `${BASE_URL}/world-cup-2026`,
+          numberOfAttendees: { "@type": "QuantitativeValue", value: 48, unitText: "teams" },
         }}
+      />
+      <PageTracker />
+      <FAQJsonLd
+        items={[
+          {
+            question: "When is the FIFA World Cup 2026?",
+            answer: "The FIFA World Cup 2026 runs from June 11 to July 19, 2026.",
+          },
+          {
+            question: "Where is the World Cup 2026 being held?",
+            answer: "The 2026 World Cup is jointly hosted by the United States (11 stadiums), Mexico (3 stadiums), and Canada (2 stadiums) across 16 venues.",
+          },
+          {
+            question: "How many teams are in the World Cup 2026?",
+            answer: "The 2026 World Cup features 48 teams divided into 12 groups of 4, making it the first expanded World Cup format.",
+          },
+          {
+            question: "How many matches will be played at the World Cup 2026?",
+            answer: "A total of 104 matches will be played across the tournament, from the group stage through to the final.",
+          },
+        ]}
       />
 
       <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">

@@ -169,6 +169,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
       image={venue.imageUrl}
       address={{ city: venue.city, country: venue.country }}
       capacity={venue.capacity}
+      geo={{ latitude: venue.latitude ? Number(venue.latitude) : null, longitude: venue.longitude ? Number(venue.longitude) : null }}
       events={upcomingMatches.slice(0, 5).map((m) => ({
         name: `${m.homeTeam.name} vs ${m.awayTeam.name}`,
         startDate: new Date(m.match.scheduledAt).toISOString(),

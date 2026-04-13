@@ -183,10 +183,28 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
             ))}
           </div>
 
-          {/* Cross-link to positions */}
+          {/* Cross-links */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">Browse by Position</h2>
+            <h2 className="text-lg font-bold text-neutral-900 mb-4">Explore More</h2>
             <div className="flex flex-wrap gap-3">
+              <Link
+                href="/players"
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              >
+                All Players
+              </Link>
+              <Link
+                href="/players/nationality"
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+              >
+                All Nationalities
+              </Link>
+              <Link
+                href={`/teams/country/${encodeURIComponent(nationality.toLowerCase())}`}
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-green-300 hover:text-green-600 transition-colors"
+              >
+                {adjective} Teams
+              </Link>
               {["Goalkeeper", "Defender", "Midfielder", "Forward"].map((pos) => (
                 <Link
                   key={pos}

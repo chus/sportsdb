@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { SearchBar } from "@/components/search/search-bar";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
-import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -67,6 +67,13 @@ export default async function CompetitionsPage() {
         ]}
       />
       <CollectionPageJsonLd name="Football Competitions" description="Explore football leagues and tournaments worldwide. Browse standings, results, and stats." url={`${BASE_URL}/competitions`} />
+      <FAQJsonLd
+        items={[
+          { question: "Which football leagues does DataSports cover?", answer: "DataSports covers major leagues including the Premier League, La Liga, Serie A, Bundesliga, Ligue 1, as well as cup competitions and international tournaments." },
+          { question: "What data is available for each competition?", answer: "Each competition page includes current standings, top scorers, top assists, recent results, upcoming fixtures, and matchday-by-matchday breakdowns." },
+          { question: "How are competitions organized on DataSports?", answer: "Competitions are grouped by type (leagues vs cups) and by region (Europe, South America, International). You can browse or search for any competition." },
+        ]}
+      />
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

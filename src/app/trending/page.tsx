@@ -6,6 +6,7 @@ import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/compon
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -46,6 +47,7 @@ export default async function TrendingPage() {
         description="The most viewed football players, popular teams, and top searches right now on DataSports"
         url={`${BASE_URL}/trending`}
       />
+      <PageTracker />
       {trendingPlayers.length > 0 && (
         <ItemListJsonLd
           name="Trending Football Players"

@@ -137,14 +137,35 @@ export default async function PositionPlayersPage({ params }: PageProps) {
             ))}
           </div>
 
-          {/* Cross-link to nationalities */}
-          <div className="mt-8">
+          {/* Cross-links */}
+          <div className="flex flex-wrap gap-3 mt-8">
+            <Link
+              href="/players"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+            >
+              All Players
+            </Link>
+            <Link
+              href="/players/position"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+            >
+              All Positions
+            </Link>
             <Link
               href="/players/nationality"
               className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
             >
               Browse by Nationality →
             </Link>
+            {VALID_POSITIONS.filter((p) => p !== position).map((p) => (
+              <Link
+                key={p}
+                href={`/players/position/${p}`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-purple-300 hover:text-purple-600 transition-colors"
+              >
+                {capitalize(p)}s
+              </Link>
+            ))}
           </div>
         </div>
       </div>

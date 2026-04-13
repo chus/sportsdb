@@ -6,7 +6,8 @@ import {
   getTopPlayerPairs,
   getPlayerWithAggregatedStats,
 } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld";
+import { PageTracker } from "@/components/analytics/page-tracker";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { ExternalLinks } from "@/components/entity/external-links";
 
@@ -172,6 +173,29 @@ export default async function CompareMatchupPage({ params }: PageProps) {
           { name: `${player1.name} vs ${player2.name}`, url: `${BASE_URL}/compare/${matchup}` },
         ]}
       />
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: `${player1.name} vs ${player2.name} – Stats Comparison`,
+        url: `${BASE_URL}/compare/${matchup}`,
+        about: [
+          {
+            "@type": "Person",
+            name: player1.name,
+            url: `${BASE_URL}/players/${player1.slug}`,
+            ...(player1.imageUrl && { image: player1.imageUrl }),
+            jobTitle: player1.position,
+          },
+          {
+            "@type": "Person",
+            name: player2.name,
+            url: `${BASE_URL}/players/${player2.slug}`,
+            ...(player2.imageUrl && { image: player2.imageUrl }),
+            jobTitle: player2.position,
+          },
+        ],
+      }} />
+      <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">
         <div className="max-w-5xl mx-auto px-4 py-8">

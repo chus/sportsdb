@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, FAQJsonLd, JsonLd } from "@/components/seo/json-ld";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -53,6 +54,34 @@ export default function PricingLayout({
           },
         ]}
       />
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: "DataSports Pro",
+        description: "Premium football statistics platform with advanced stats, unlimited player comparisons, historical data, and priority support.",
+        url: `${BASE_URL}/pricing`,
+        brand: { "@type": "Organization", name: "DataSports" },
+        offers: [
+          {
+            "@type": "Offer",
+            name: "Free Plan",
+            price: "0",
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+            description: "Core football data with basic stats and limited comparisons.",
+          },
+          {
+            "@type": "Offer",
+            name: "Pro Plan",
+            price: "8",
+            priceCurrency: "EUR",
+            availability: "https://schema.org/InStock",
+            priceValidUntil: "2026-12-31",
+            description: "Full access to advanced stats, unlimited comparisons, historical data, and export features.",
+          },
+        ],
+      }} />
+      <PageTracker />
       {children}
     </>
   );

@@ -43,6 +43,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@datasports_co",
+    creator: "@datasports_co",
     title: "DataSports – The International Sports Database",
     description:
       "The comprehensive, structured database for football. Search players, teams, and competitions.",
@@ -102,6 +104,9 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://media.api-sports.io" />
+        <link rel="dns-prefetch" href="https://crests.football-data.org" />
+        <link rel="dns-prefetch" href="https://flagcdn.com" />
         <link rel="alternate" type="application/rss+xml" title="DataSports RSS Feed" href="/feed.xml" />
       </head>
       <body className="font-sans antialiased">

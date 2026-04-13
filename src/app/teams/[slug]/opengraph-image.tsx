@@ -2,12 +2,13 @@ import { ImageResponse } from "next/og";
 import { getTeamBySlug } from "@/lib/queries/teams";
 
 export const runtime = "edge";
-export const alt = "Team profile on SportsDB";
+export const alt = "Team profile on DataSports";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default async function Image({ params }: { params: { slug: string } }) {
-  const team = await getTeamBySlug(params.slug);
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const team = await getTeamBySlug(slug);
 
   if (!team) {
     return new ImageResponse(
@@ -25,7 +26,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
             fontWeight: 700,
           }}
         >
-          Team Not Found – SportsDB
+          Team Not Found – DataSports
         </div>
       ),
       { ...size }
@@ -82,10 +83,10 @@ export default async function Image({ params }: { params: { slug: string } }) {
           }}
         >
           <div style={{ fontSize: 28, fontWeight: 700, opacity: 0.9 }}>
-            SportsDB
+            DataSports
           </div>
           <div style={{ fontSize: 20, opacity: 0.6 }}>
-            sportsdb-nine.vercel.app
+            datasports.co
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Shield, Trophy, ChevronRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { getTeamBrowseData } from "@/lib/queries/browse";
-import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { SearchBar } from "@/components/search/search-bar";
@@ -54,6 +54,13 @@ export default async function TeamsPage() {
         ]}
       />
       <CollectionPageJsonLd name="Football Teams" description="Browse football clubs and teams worldwide. View squads, results, and standings." url={`${BASE_URL}/teams`} />
+      <FAQJsonLd
+        items={[
+          { question: "How can I find a specific football team?", answer: "Use the search bar at the top of the page, browse by country or competition, or explore current league leaders to find any team in our database." },
+          { question: "What information is available on team pages?", answer: "Each team page includes the current squad, recent match results, upcoming fixtures, historical standings, and links to competitions the team participates in." },
+          { question: "How many teams does DataSports cover?", answer: "DataSports covers teams across all major European leagues, South American competitions, and international tournaments — spanning hundreds of clubs worldwide." },
+        ]}
+      />
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

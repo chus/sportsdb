@@ -6,6 +6,7 @@ import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/compon
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { PageHeader } from "@/components/layout/page-header";
+import { PageTracker } from "@/components/analytics/page-tracker";
 import { format } from "date-fns";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -40,6 +41,7 @@ export default async function TransfersPage() {
         description="Latest football transfers, signings, and player movements between clubs"
         url={`${BASE_URL}/transfers`}
       />
+      <PageTracker />
       {transfers.length > 0 && (
         <ItemListJsonLd
           name="Recent Football Transfers"

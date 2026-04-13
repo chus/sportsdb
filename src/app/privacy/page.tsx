@@ -1,5 +1,6 @@
 import { Shield } from "lucide-react";
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   description: "Learn how DataSports collects, uses, and protects your personal information. Our commitment to your privacy.",
   openGraph: {
     title: "Privacy Policy – DataSports",
-    description: "Learn how DataSports handles your personal information.",
+    description: "Learn how DataSports collects, uses, and protects your personal information. Our commitment to your privacy.",
     url: `${BASE_URL}/privacy`,
     siteName: "DataSports",
     type: "website",
@@ -22,6 +23,13 @@ export default function PrivacyPage() {
   const lastUpdated = "March 2026";
 
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "Privacy Policy", url: `${BASE_URL}/privacy` },
+      ]}
+    />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 text-white py-16">
@@ -323,5 +331,6 @@ export default function PrivacyPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
