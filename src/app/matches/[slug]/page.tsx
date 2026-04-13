@@ -21,7 +21,7 @@ import {
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
 import { getTeamStats, getTeamTopScorer } from "@/lib/queries/teams";
-import { MatchJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { MatchJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
 import { FormationView } from "@/components/match/formation-view";
@@ -282,6 +282,68 @@ function ordinal(n: number) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
+function buildMatchFaqs({
+  homeTeam,
+  awayTeam,
+  homeScore,
+  awayScore,
+  status,
+  scheduledAt,
+  venue,
+  competition,
+  goalScorers,
+}: {
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  status: string;
+  scheduledAt: Date;
+  venue: string | null;
+  competition: string | null;
+  goalScorers: string[];
+}): { question: string; answer: string }[] {
+  const faqs: { question: string; answer: string }[] = [];
+  const vs = `${homeTeam} vs ${awayTeam}`;
+
+  if (status === "finished" && homeScore !== null && awayScore !== null) {
+    faqs.push({
+      question: `What was the final score of ${vs}?`,
+      answer: `${homeTeam} ${homeScore}–${awayScore} ${awayTeam}.`,
+    });
+    if (goalScorers.length > 0) {
+      const unique = [...new Set(goalScorers)];
+      faqs.push({
+        question: `Who scored in ${vs}?`,
+        answer: `The goal scorers were ${unique.join(", ")}.`,
+      });
+    }
+  }
+
+  if (status === "scheduled") {
+    faqs.push({
+      question: `When is ${vs}?`,
+      answer: `The match is scheduled for ${format(new Date(scheduledAt), "EEEE, MMMM d, yyyy 'at' h:mm a")}.`,
+    });
+  }
+
+  if (venue) {
+    faqs.push({
+      question: `Where is ${vs} being played?`,
+      answer: `The match ${status === "finished" ? "was" : "is"} played at ${venue}.`,
+    });
+  }
+
+  if (competition) {
+    faqs.push({
+      question: `What competition is ${vs} part of?`,
+      answer: `This match is part of the ${competition}.`,
+    });
+  }
+
+  return faqs;
+}
+
 export default async function MatchPage({ params }: MatchPageProps) {
   const { slug } = await params;
 
@@ -360,6 +422,20 @@ export default async function MatchPage({ params }: MatchPageProps) {
         matchUrl={matchUrl}
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      <FAQJsonLd items={buildMatchFaqs({
+        homeTeam: homeTeam.name,
+        awayTeam: awayTeam.name,
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+        status: match.status,
+        scheduledAt: match.scheduledAt,
+        venue: venue?.name ?? null,
+        competition: competition?.name ?? null,
+        goalScorers: events
+          .filter((e) => e.type === "goal" || e.type === "penalty")
+          .map((e) => e.player?.name)
+          .filter(Boolean) as string[],
+      })} />
       <PageTracker entityType="match" entityId={matchId} />
     <div className="min-h-screen bg-neutral-50">
       {/* Scoreboard Header */}

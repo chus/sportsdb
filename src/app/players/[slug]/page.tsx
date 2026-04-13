@@ -236,6 +236,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         height={player.heightCm}
         position={player.position}
         team={currentTeam && teamUrl ? { name: currentTeam.name, url: teamUrl } : null}
+        competition={rankings[0] ? { name: rankings[0].competitionName, url: `${BASE_URL}/competitions/${rankings[0].competitionSlug}` } : null}
         sameAs={[
           player.wikipediaUrl,
           player.websiteUrl,
@@ -376,6 +377,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             )}
                           </div>
                           <p className="text-xs text-neutral-500 truncate mt-0.5">{rankings[0].competitionName}</p>
+                        </Link>
+                      ) : null}
+
+                      {/* Competition */}
+                      {rankings[0] ? (
+                        <Link
+                          href={`/competitions/${rankings[0].competitionSlug}`}
+                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                        >
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Trophy className="w-3.5 h-3.5 text-purple-500" />
+                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League</h3>
+                          </div>
+                          <span className="text-sm font-bold text-neutral-900 truncate">{rankings[0].competitionName}</span>
+                          <p className="text-xs text-neutral-500 mt-0.5">View standings & results</p>
                         </Link>
                       ) : (
                         <div className="bg-white rounded-xl border border-neutral-200 p-4">

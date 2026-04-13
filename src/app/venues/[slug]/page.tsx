@@ -162,6 +162,11 @@ export default async function VenuePage({ params }: VenuePageProps) {
       image={venue.imageUrl}
       address={{ city: venue.city, country: venue.country }}
       capacity={venue.capacity}
+      events={upcomingMatches.slice(0, 5).map((m) => ({
+        name: `${m.homeTeam.name} vs ${m.awayTeam.name}`,
+        startDate: new Date(m.match.scheduledAt).toISOString(),
+        ...(m.match.slug && { url: `${BASE_URL}/matches/${m.match.slug}` }),
+      }))}
     />
     {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
     <div className="min-h-screen bg-neutral-50">

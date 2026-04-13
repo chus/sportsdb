@@ -24,6 +24,7 @@ export function PlayerJsonLd({
   team,
   position,
   sameAs,
+  competition,
 }: {
   name: string;
   url: string;
@@ -35,7 +36,25 @@ export function PlayerJsonLd({
   team?: { name: string; url: string } | null;
   position?: string | null;
   sameAs?: string[];
+  competition?: { name: string; url: string } | null;
 }) {
+  const memberOf: Record<string, unknown>[] = [];
+  if (team) {
+    const teamObj: Record<string, unknown> = {
+      "@type": "SportsTeam",
+      name: team.name,
+      url: team.url,
+    };
+    if (competition) {
+      teamObj.memberOf = {
+        "@type": "SportsOrganization",
+        name: competition.name,
+        url: competition.url,
+      };
+    }
+    memberOf.push(teamObj);
+  }
+
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -47,13 +66,7 @@ export function PlayerJsonLd({
     ...(birthPlace && { birthPlace: { "@type": "Place", name: birthPlace } }),
     ...(height && { height: { "@type": "QuantitativeValue", value: height, unitCode: "CMT" } }),
     ...(position && { jobTitle: position }),
-    ...(team && {
-      memberOf: {
-        "@type": "SportsTeam",
-        name: team.name,
-        url: team.url,
-      },
-    }),
+    ...(memberOf.length > 0 && { memberOf: memberOf.length === 1 ? memberOf[0] : memberOf }),
     ...(sameAs && sameAs.length > 0 && { sameAs }),
   };
 
@@ -165,12 +178,14 @@ export function VenueJsonLd({
   image,
   address,
   capacity,
+  events,
 }: {
   name: string;
   url: string;
   image?: string | null;
   address?: { city?: string | null; country?: string | null } | null;
   capacity?: number | null;
+  events?: { name: string; startDate: string; url?: string }[];
 }) {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -185,6 +200,15 @@ export function VenueJsonLd({
         ...(address.city && { addressLocality: address.city }),
         ...(address.country && { addressCountry: address.country }),
       },
+    }),
+    ...(events && events.length > 0 && {
+      event: events.map((e) => ({
+        "@type": "SportsEvent",
+        name: e.name,
+        startDate: e.startDate,
+        ...(e.url && { url: e.url }),
+        location: { "@type": "StadiumOrArena", name },
+      })),
     }),
   };
 
