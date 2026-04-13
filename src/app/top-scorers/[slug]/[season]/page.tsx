@@ -9,7 +9,7 @@ import {
   getAllCompetitionSlugs,
   getCurrentSeasonUrlLabel,
 } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const title = `${competition.name} Top Scorers ${seasonLabel} | DataSports`;
-  const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. Goals, assists, and appearances.`;
+  const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. Full rankings with goals, assists, and appearances for every player.`;
 
   // If the requested season is the current season, canonical points to /top-scorers/[slug]
   // to avoid duplicate content with the current-season hub page.
@@ -83,6 +83,15 @@ export default async function HistoricalTopScorersPage({ params }: PageProps) {
           { name: competition.name, url: `${BASE_URL}/top-scorers/${slug}` },
           { name: seasonLabel, url: `${BASE_URL}/top-scorers/${slug}/${season}` },
         ]}
+      />
+      <ItemListJsonLd
+        name={`${competition.name} Top Scorers ${seasonLabel}`}
+        items={scorers.slice(0, 20).map((s, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/players/${s.player.slug}`,
+          name: `${s.player.name} (${s.stat.goals} goals)`,
+          image: s.player.imageUrl,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">

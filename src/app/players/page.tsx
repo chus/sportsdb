@@ -9,7 +9,7 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { SearchBar } from "@/components/search/search-bar";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
-import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -90,6 +90,17 @@ export default async function PlayersPage() {
         ]}
       />
       <CollectionPageJsonLd name="Football Players" description="Browse football players worldwide. Search by name, nationality, or position." url={`${BASE_URL}/players`} />
+      {topScorers.length > 0 && (
+        <ItemListJsonLd
+          name="Top Football Players"
+          items={topScorers.slice(0, 20).map((entry, i) => ({
+            position: i + 1,
+            url: `${BASE_URL}/players/${entry.player.slug}`,
+            name: `${entry.player.name} (${entry.stat.goals} goals)`,
+            image: entry.player.imageUrl,
+          }))}
+        />
+      )}
       <PageTracker />
 
       <div className="min-h-screen bg-neutral-50">

@@ -15,7 +15,8 @@ export const metadata: Metadata = {
     "Browse football players by nationality. Find players from every country in our comprehensive football database.",
   openGraph: {
     title: "Football Players by Nationality | DataSports",
-    description: "Browse football players by nationality.",
+    description:
+      "Browse football players by nationality. Find players from every country in our comprehensive football database.",
     url: `${BASE_URL}/players/nationality`,
   },
   alternates: {

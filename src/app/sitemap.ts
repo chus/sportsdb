@@ -149,6 +149,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const competitionSlugsWithStats = new Set(competitionsWithStats.map((c) => c.slug));
 
+  // Historical season labels per competition (for /top-scorers/[slug]/[season] and /top-assists/[slug]/[season])
+  const historicalSeasonPairs = await db
+    .selectDistinct({
+      compSlug: competitions.slug,
+      seasonLabel: seasons.label,
+      isCurrent: seasons.isCurrent,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(competitionSeasons, eq(playerSeasonStats.competitionSeasonId, competitionSeasons.id))
+    .innerJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+    .innerJoin(seasons, eq(competitionSeasons.seasonId, seasons.id))
+    .where(eq(seasons.isCurrent, false));
+
   // Fetch only what we need — teams, competitions, articles, venues, matches, players, hub data
   const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs, teamCountries] = await Promise.all([
     // Teams with quality-relevant data for filtering
@@ -343,6 +356,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
+  // Historical season top-scorers/assists pages (e.g. /top-scorers/premier-league/2023-24)
+  const historicalSeasonPages: MetadataRoute.Sitemap = historicalSeasonPairs
+    .filter((pair) => competitionPageSlugs.has(pair.compSlug))
+    .flatMap((pair) => {
+      const seasonUrl = pair.seasonLabel.replace("/", "-");
+      return [
+        {
+          url: `${BASE_URL}/top-scorers/${pair.compSlug}/${seasonUrl}`,
+          lastModified: new Date(),
+          changeFrequency: "yearly" as const,
+          priority: 0.4,
+        },
+        {
+          url: `${BASE_URL}/top-assists/${pair.compSlug}/${seasonUrl}`,
+          lastModified: new Date(),
+          changeFrequency: "yearly" as const,
+          priority: 0.4,
+        },
+      ];
+    });
+
   // Venue pages — enriched venues with Wikipedia or capacity data
   const venuePages: MetadataRoute.Sitemap = allVenues.map((venue) => ({
     url: `${BASE_URL}/venues/${venue.slug}`,
@@ -420,6 +454,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articlePages,
     ...topScorerCompPages,
     ...topAssistCompPages,
+    ...historicalSeasonPages,
     ...comparePages,
     ...teamCountryPages,
     ...playerPositionPages,

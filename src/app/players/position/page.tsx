@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     "Browse football players by position: goalkeepers, defenders, midfielders, and forwards. Find players by their role on the pitch.",
   openGraph: {
     title: "Football Players by Position | DataSports",
-    description: "Browse football players by position.",
+    description:
+      "Browse football players by position: goalkeepers, defenders, midfielders, and forwards. Find players by their role on the pitch.",
     url: `${BASE_URL}/players/position`,
   },
   alternates: {
