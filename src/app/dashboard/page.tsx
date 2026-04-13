@@ -18,6 +18,7 @@ import { getUserSubscription } from "@/lib/queries/subscriptions";
 export const metadata: Metadata = {
   title: "Dashboard - DataSports",
   description: "Your personalized sports dashboard.",
+  robots: { index: false, follow: false },
 };
 
 export default async function DashboardPage() {

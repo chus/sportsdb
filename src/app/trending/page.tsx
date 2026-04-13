@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TrendingUp, Search, Shield, User } from "lucide-react";
 import type { Metadata } from "next";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
@@ -41,6 +41,22 @@ export default async function TrendingPage() {
           { name: "Trending", url: `${BASE_URL}/trending` },
         ]}
       />
+      <CollectionPageJsonLd
+        name="Trending Football Players & Teams"
+        description="The most viewed football players, popular teams, and top searches right now on DataSports"
+        url={`${BASE_URL}/trending`}
+      />
+      {trendingPlayers.length > 0 && (
+        <ItemListJsonLd
+          name="Trending Football Players"
+          items={trendingPlayers.map((p, i) => ({
+            position: i + 1,
+            url: `${BASE_URL}/players/${p.slug}`,
+            name: p.name,
+            image: p.imageUrl,
+          }))}
+        />
+      )}
 
       <div className="min-h-screen bg-neutral-50">
         <PageHeader

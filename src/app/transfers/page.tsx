@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRightLeft, User, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getRecentTransfers, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { PageHeader } from "@/components/layout/page-header";
@@ -35,6 +35,21 @@ export default async function TransfersPage() {
           { name: "Transfers", url: `${BASE_URL}/transfers` },
         ]}
       />
+      <CollectionPageJsonLd
+        name="Football Transfers"
+        description="Latest football transfers, signings, and player movements between clubs"
+        url={`${BASE_URL}/transfers`}
+      />
+      {transfers.length > 0 && (
+        <ItemListJsonLd
+          name="Recent Football Transfers"
+          items={transfers.slice(0, 20).map((t, i) => ({
+            position: i + 1,
+            url: `${BASE_URL}/players/${t.player.slug}`,
+            name: `${t.player.name} → ${t.toTeam.name}`,
+          }))}
+        />
+      )}
 
       <div className="min-h-screen bg-neutral-50">
         <PageHeader

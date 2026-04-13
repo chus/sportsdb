@@ -8,14 +8,30 @@ import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const metadata: Metadata = {
-  title: "Football News & Match Reports | DataSports",
-  description:
-    "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.",
-  alternates: {
-    canonical: `${BASE_URL}/news`,
-  },
-};
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseInt(params.page || "1", 10);
+  const type = params.type || "";
+  const title = "Football News & Match Reports | DataSports";
+  const description =
+    "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.";
+
+  const qs = (p: number) => {
+    const parts: string[] = [];
+    if (type) parts.push(`type=${type}`);
+    if (p > 1) parts.push(`page=${p}`);
+    return parts.length ? `?${parts.join("&")}` : "";
+  };
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${BASE_URL}/news${qs(page)}`,
+    },
+    ...(page > 1 && { robots: { index: false, follow: true } }),
+  };
+}
 
 const ARTICLE_TYPES = [
   { value: "", label: "All News", icon: Newspaper },
