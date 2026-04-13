@@ -344,6 +344,20 @@ export async function MatchInternalLinks({
               <p className="text-xs text-neutral-500">View standings & fixtures</p>
             </div>
           </Link>
+          <div className="flex gap-2 mt-3">
+            <Link
+              href={`/top-scorers/${competitionSlug}`}
+              className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 hover:bg-blue-100 transition-colors"
+            >
+              Top Scorers
+            </Link>
+            <Link
+              href={`/top-assists/${competitionSlug}`}
+              className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 hover:bg-blue-100 transition-colors"
+            >
+              Top Assists
+            </Link>
+          </div>
         </div>
       )}
 

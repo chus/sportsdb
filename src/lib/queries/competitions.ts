@@ -59,6 +59,24 @@ export async function getTopScorers(competitionSeasonId: string, limit = 10) {
 }
 
 /**
+ * Get top assist providers for a competition-season.
+ */
+export async function getTopAssists(competitionSeasonId: string, limit = 10) {
+  return db
+    .select({
+      stat: playerSeasonStats,
+      player: players,
+      team: teams,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(players, eq(players.id, playerSeasonStats.playerId))
+    .innerJoin(teams, eq(teams.id, playerSeasonStats.teamId))
+    .where(eq(playerSeasonStats.competitionSeasonId, competitionSeasonId))
+    .orderBy(desc(playerSeasonStats.assists))
+    .limit(limit);
+}
+
+/**
  * Get competition-season by competition slug and season label (e.g., '2024-25').
  * If no season label provided, tries current season first, then falls back to most recent.
  */

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Trophy, Shield, Target, Calendar, TrendingUp, ChevronRight } from "lucide-react";
+import { Trophy, Shield, Target, Calendar, TrendingUp, ChevronRight, Handshake } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
@@ -10,6 +10,7 @@ import {
   getCompetitionSeason,
   getStandings,
   getTopScorers,
+  getTopAssists,
   getCompetitionRecentAndUpcoming,
 } from "@/lib/queries/competitions";
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
@@ -87,14 +88,16 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   let competitionSeason: Awaited<ReturnType<typeof getCompetitionSeason>> = null;
   let standingsData: Awaited<ReturnType<typeof getStandings>> = [];
   let topScorers: Awaited<ReturnType<typeof getTopScorers>> = [];
+  let topAssists: Awaited<ReturnType<typeof getTopAssists>> = [];
   let matchesData: Awaited<ReturnType<typeof getCompetitionRecentAndUpcoming>> = { recent: [], upcoming: [] };
 
   try {
     competitionSeason = await getCompetitionSeason(slug);
     if (competitionSeason) {
-      [standingsData, topScorers, matchesData] = await Promise.all([
+      [standingsData, topScorers, topAssists, matchesData] = await Promise.all([
         getStandings(competitionSeason.competitionSeason.id),
         getTopScorers(competitionSeason.competitionSeason.id, 10),
+        getTopAssists(competitionSeason.competitionSeason.id, 10),
         getCompetitionRecentAndUpcoming(competitionSeason.competitionSeason.id, 6, 3),
       ]);
     }
@@ -408,6 +411,38 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                       </div>
                     )}
 
+                    {/* Top 3 Assists Mini-list */}
+                    {topAssists.length > 0 && (
+                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-sm font-bold text-neutral-900">Top Assists</h3>
+                          <Link href={`/top-assists/${slug}`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
+                            Full list <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                        <div className="space-y-2">
+                          {topAssists.slice(0, 3).map(({ stat, player, team }, index) => (
+                            <PlayerLink
+                              key={player.id}
+                              slug={player.slug}
+                              isLinkWorthy={player.isIndexable ?? false}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                            >
+                              <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-500">{index + 1}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-neutral-900 truncate">{player.name}</div>
+                                <div className="text-[11px] text-neutral-500">{team.shortName || team.name}</div>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-lg font-black text-neutral-900">{stat.assists}</span>
+                                <span className="text-[10px] text-neutral-500 ml-1">assists</span>
+                              </div>
+                            </PlayerLink>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Standings Table */}
                     {standingsData.length === 0 ? (
                       <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
@@ -481,6 +516,43 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                   ) : (
                     <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
                       <p className="text-neutral-500">No top scorer data available</p>
+                    </div>
+                  )}
+                </TabPanel>
+
+                {/* === TOP ASSISTS TAB === */}
+                <TabPanel tabId="assists" defaultTab="standings">
+                  {topAssists.length > 0 ? (
+                    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                      <div className="divide-y divide-neutral-100">
+                        {topAssists.map(({ stat, player, team }, index) => (
+                          <PlayerLink
+                            key={player.id}
+                            slug={player.slug}
+                            isLinkWorthy={player.isIndexable ?? false}
+                            className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition-colors group"
+                          >
+                            <span className="w-8 text-center text-sm font-bold text-neutral-400">{index + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">{player.name}</div>
+                              <div className="text-xs text-neutral-500">{team.name}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-neutral-900">{stat.assists}</div>
+                              <div className="text-xs text-neutral-500">assists</div>
+                            </div>
+                          </PlayerLink>
+                        ))}
+                      </div>
+                      <div className="border-t border-neutral-200 p-4">
+                        <Link href={`/top-assists/${slug}`} className="text-sm font-medium text-blue-600 hover:text-blue-700">
+                          View full Top Assists table →
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                      <p className="text-neutral-500">No top assist data available</p>
                     </div>
                   )}
                 </TabPanel>
