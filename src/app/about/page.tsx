@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { players, teams, competitions, matches, articles } from "@/lib/db/schema";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { sql, eq } from "drizzle-orm";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -80,6 +81,13 @@ export default async function AboutPage() {
   ];
 
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "About", url: `${BASE_URL}/about` },
+      ]}
+    />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-20">
@@ -252,5 +260,6 @@ export default async function AboutPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

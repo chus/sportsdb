@@ -517,6 +517,42 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Competition & Leaderboard Links */}
+            {primaryCompetitionSlug && primaryCompetitionName && (
+              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+                  <Trophy className="w-4 h-4" />
+                  League
+                </h3>
+                <Link
+                  href={`/competitions/${primaryCompetitionSlug}`}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors group"
+                >
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">{primaryCompetitionName}</p>
+                    <p className="text-xs text-neutral-500">View standings & results</p>
+                  </div>
+                </Link>
+                <div className="flex gap-2 mt-3">
+                  <Link
+                    href={`/top-scorers/${primaryCompetitionSlug}`}
+                    className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 hover:bg-blue-100 transition-colors"
+                  >
+                    Top Scorers
+                  </Link>
+                  <Link
+                    href={`/top-assists/${primaryCompetitionSlug}`}
+                    className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 hover:bg-blue-100 transition-colors"
+                  >
+                    Top Assists
+                  </Link>
+                </div>
+              </div>
+            )}
+
             <ExternalLinks
               wikipediaUrl={venue.wikipediaUrl}
               entityName={venue.name}

@@ -15,7 +15,7 @@ import {
   getRecentFinishedMatches,
 } from "@/lib/queries/matches";
 import { PageHeader } from "@/components/layout/page-header";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { MatchesContent } from "@/components/matches/matches-content";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -74,6 +74,14 @@ export default async function MatchesPage({
           { name: "Home", url: BASE_URL },
           { name: "Matches", url: `${BASE_URL}/matches` },
         ]}
+      />
+      <ItemListJsonLd
+        name="Football Matches"
+        items={allMatches.slice(0, 30).map((m, i) => ({
+          position: i + 1,
+          url: m.slug ? `${BASE_URL}/matches/${m.slug}` : `${BASE_URL}/matches/${m.id}`,
+          name: `${m.homeTeamName} vs ${m.awayTeamName}`,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">

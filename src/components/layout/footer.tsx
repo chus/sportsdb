@@ -32,11 +32,12 @@ export function Footer() {
     Discover: [
       { label: "Top Scorers", href: "/top-scorers" },
       { label: "Top Assists", href: "/top-assists" },
+      { label: "Transfers", href: "/transfers" },
       { label: "Teams by Country", href: "/teams/country" },
       { label: "Players by Position", href: "/players/position" },
+      { label: "Players by Nationality", href: "/players/nationality" },
       { label: "Venues", href: "/venues" },
       { label: "Compare Players", href: "/compare" },
-      { label: "Methodology", href: "/methodology" },
     ],
     [t("footer.legal")]: [
       { label: t("footer.about"), href: "/about" },
