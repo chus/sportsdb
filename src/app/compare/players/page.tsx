@@ -10,6 +10,8 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { ExternalLinks } from "@/components/entity/external-links";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 interface ComparePageProps {
   searchParams: Promise<{ p1?: string; p2?: string }>;
 }
@@ -17,6 +19,12 @@ interface ComparePageProps {
 export const metadata: Metadata = {
   title: "Compare Players – Head to Head Stats Comparison | DataSports",
   description: "Compare two football players side by side - stats, career, and performance metrics.",
+  openGraph: {
+    title: "Compare Players – Head to Head Stats Comparison | DataSports",
+    description: "Compare two football players side by side - stats, career, and performance metrics.",
+    url: `${BASE_URL}/compare/players`,
+  },
+  alternates: { canonical: `${BASE_URL}/compare/players` },
 };
 
 interface PlayerWithStats {

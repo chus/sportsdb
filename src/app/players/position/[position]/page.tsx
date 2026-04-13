@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { User, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayersByPosition } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 
@@ -69,6 +69,15 @@ export default async function PositionPlayersPage({ params }: PageProps) {
           { name: "By Position", url: `${BASE_URL}/players/position` },
           { name: `${posName}s`, url: `${BASE_URL}/players/position/${position}` },
         ]}
+      />
+      <ItemListJsonLd
+        name={`Football ${posName}s`}
+        items={playersList.map((player, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/players/${player.slug}`,
+          name: player.name,
+          image: player.imageUrl,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">

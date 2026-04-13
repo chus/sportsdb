@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight, ArrowRightLeft, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight, ArrowRightLeft, ArrowDownLeft, ArrowUpRight, MapPin } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
@@ -229,7 +229,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       ? getTeamTopScorer(team.id, standing.competitionSeasonId)
       : Promise.resolve(null),
     db
-      .select({ name: venues.name, capacity: venues.capacity })
+      .select({ name: venues.name, slug: venues.slug, capacity: venues.capacity })
       .from(teamVenueHistory)
       .innerJoin(venues, eq(venues.id, teamVenueHistory.venueId))
       .where(and(eq(teamVenueHistory.teamId, team.id), isNull(teamVenueHistory.validTo)))
@@ -820,6 +820,25 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       ))}
                     </div>
                   </section>
+                )}
+
+                {venue && venue.slug && (
+                  <Link
+                    href={`/venues/${venue.slug}`}
+                    className="block bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-neutral-900">{venue.name}</p>
+                        <p className="text-xs text-neutral-500">
+                          {venue.capacity ? `Capacity: ${venue.capacity.toLocaleString()}` : "View stadium details"}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
                 )}
 
                 <ExternalLinks

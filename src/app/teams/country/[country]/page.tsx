@@ -7,7 +7,7 @@ import {
   getDistinctTeamCountries,
   getTeamsByCountry,
 } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { PageHeader } from "@/components/layout/page-header";
@@ -88,6 +88,15 @@ export default async function CountryTeamsPage({ params }: PageProps) {
           { name: "By Country", url: `${BASE_URL}/teams/country` },
           { name: decodedCountry, url: `${BASE_URL}/teams/country/${encodeURIComponent(decodedCountry)}` },
         ]}
+      />
+      <ItemListJsonLd
+        name={`${adjective} Football Teams`}
+        items={teamsList.map((team, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/teams/${team.slug}`,
+          name: team.name,
+          image: team.logoUrl,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">
