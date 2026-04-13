@@ -381,6 +381,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
           </nav>
 
           {/* Scoreboard */}
+          <h1 className="sr-only">
+            {homeTeam.name} vs {awayTeam.name}
+            {match.homeScore != null && match.awayScore != null ? ` – ${match.homeScore}-${match.awayScore}` : ""}
+            {competition ? ` | ${competition.name}` : ""}
+          </h1>
           <div className="flex items-center justify-center gap-4 md:gap-10 py-6">
             {/* Home Team */}
             <Link

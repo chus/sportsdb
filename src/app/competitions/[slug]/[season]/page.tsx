@@ -25,7 +25,7 @@ export async function generateMetadata({
   const competition = await getCompetitionBySlug(slug);
 
   if (!competition) {
-    return { title: "Competition Not Found" };
+    return { title: "Competition Not Found", robots: { index: false, follow: false } };
   }
 
   // Convert URL format to display format

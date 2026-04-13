@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug, season } = await params;
   const seasonLabel = season.replace("-", "/");
   const competition = await getCompetitionBySlug(slug);
-  if (!competition) return { title: "Not Found" };
+  if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const title = `${competition.name} Top Assists ${seasonLabel} | DataSports`;
   const description = `Top assist providers in the ${competition.name} for the ${seasonLabel} season. Assists, goals, and appearances.`;

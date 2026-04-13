@@ -28,7 +28,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { position } = await params;
-  if (!VALID_POSITIONS.includes(position as ValidPosition)) return { title: "Not Found" };
+  if (!VALID_POSITIONS.includes(position as ValidPosition)) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const posName = capitalize(position);
   const title = `Football ${posName}s – Full Player List | DataSports`;

@@ -45,14 +45,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { matchup } = await params;
   const parsed = parseMatchup(matchup);
-  if (!parsed) return { title: "Not Found" };
+  if (!parsed) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const [p1, p2] = await Promise.all([
     getPlayerWithAggregatedStats(parsed.slug1),
     getPlayerWithAggregatedStats(parsed.slug2),
   ]);
 
-  if (!p1 || !p2) return { title: "Not Found" };
+  if (!p1 || !p2) return { title: "Not Found", robots: { index: false, follow: false } };
 
   // Soft-404 guard: if neither player has any recorded career appearances, the
   // page body is all zeros — Google flags these as "Soft 404". Noindex them.

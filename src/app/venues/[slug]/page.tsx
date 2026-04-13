@@ -42,7 +42,10 @@ export async function generateMetadata({
   const venue = await getVenueBySlug(slug);
 
   if (!venue) {
-    return { title: "Venue Not Found" };
+    return {
+      title: "Venue Not Found | DataSports",
+      robots: { index: false, follow: false },
+    };
   }
 
   // Thin page check: venue needs at least a city

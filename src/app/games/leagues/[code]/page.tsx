@@ -15,7 +15,7 @@ export async function generateMetadata({
   const { code } = await params;
   const league = await getLeagueByCode(code);
 
-  if (!league) return { title: "League Not Found" };
+  if (!league) return { title: "League Not Found", robots: { index: false, follow: false } };
 
   return {
     title: `${league.name} — Private League | SportsDB`,
