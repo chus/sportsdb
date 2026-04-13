@@ -64,13 +64,20 @@ export async function generateMetadata({
       url: `${BASE_URL}/venues/${slug}`,
       siteName: "DataSports",
       type: "website",
-      ...(venue.imageUrl && { images: [{ url: venue.imageUrl, alt: venue.name }] }),
+      images: [
+        {
+          url: venue.imageUrl || `${BASE_URL}/venues/${slug}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: venue.name,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(venue.imageUrl && { images: [venue.imageUrl] }),
+      images: [venue.imageUrl || `${BASE_URL}/venues/${slug}/opengraph-image`],
     },
     alternates: {
       canonical: `${BASE_URL}/venues/${slug}`,

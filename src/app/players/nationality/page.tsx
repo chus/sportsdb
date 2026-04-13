@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Globe, ChevronRight, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { getDistinctNationalities } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -34,6 +34,11 @@ export default async function NationalityIndexPage() {
           { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Nationality", url: `${BASE_URL}/players/nationality` },
         ]}
+      />
+      <CollectionPageJsonLd
+        name="Football Players by Nationality"
+        description={`Browse football players from ${nationalities.length} countries around the world`}
+        url={`${BASE_URL}/players/nationality`}
       />
 
       <div className="min-h-screen bg-neutral-50">

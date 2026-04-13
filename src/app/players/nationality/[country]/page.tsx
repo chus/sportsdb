@@ -7,7 +7,7 @@ import {
   getDistinctNationalities,
   getPlayersByNationality,
 } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { PageHeader } from "@/components/layout/page-header";
@@ -113,6 +113,15 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
           { name: "By Nationality", url: `${BASE_URL}/players/nationality` },
           { name: nationality, url: `${BASE_URL}/players/nationality/${encodeURIComponent(nationality)}` },
         ]}
+      />
+      <ItemListJsonLd
+        name={`${adjective} Football Players`}
+        items={playersList.map((player, i) => ({
+          position: i + 1,
+          url: `${BASE_URL}/players/${player.slug}`,
+          name: player.name,
+          image: player.imageUrl,
+        }))}
       />
 
       <div className="min-h-screen bg-neutral-50">

@@ -80,11 +80,20 @@ export async function generateMetadata({
       url,
       siteName: "DataSports",
       type: "website",
+      images: [
+        {
+          url: `${url}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [`${url}/opengraph-image`],
     },
     alternates: {
       canonical: url,

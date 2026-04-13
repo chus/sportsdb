@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MapPin, ChevronRight, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { getDistinctTeamCountries } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -34,6 +34,11 @@ export default async function TeamCountryIndexPage() {
           { name: "Teams", url: `${BASE_URL}/teams` },
           { name: "By Country", url: `${BASE_URL}/teams/country` },
         ]}
+      />
+      <CollectionPageJsonLd
+        name="Football Teams by Country"
+        description={`Browse football clubs from ${countries.length} countries around the world`}
+        url={`${BASE_URL}/teams/country`}
       />
 
       <div className="min-h-screen bg-neutral-50">

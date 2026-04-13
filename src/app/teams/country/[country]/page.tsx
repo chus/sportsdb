@@ -151,6 +151,31 @@ export default async function CountryTeamsPage({ params }: PageProps) {
               </Link>
             ))}
           </div>
+
+          {/* Cross-link back to hub */}
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-neutral-900 mb-4">Browse More</h2>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/teams/country"
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+              >
+                All Countries
+              </Link>
+              <Link
+                href="/players/nationality"
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+              >
+                Players by Nationality
+              </Link>
+              <Link
+                href="/teams"
+                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              >
+                All Teams
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </>

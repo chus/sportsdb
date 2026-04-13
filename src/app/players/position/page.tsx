@@ -2,7 +2,7 @@ import Link from "next/link";
 import { User, ChevronRight, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { getPositionCounts } from "@/lib/queries/leaderboards";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -40,6 +40,11 @@ export default async function PositionIndexPage() {
           { name: "Players", url: `${BASE_URL}/players` },
           { name: "By Position", url: `${BASE_URL}/players/position` },
         ]}
+      />
+      <CollectionPageJsonLd
+        name="Football Players by Position"
+        description="Browse football players by position: goalkeepers, defenders, midfielders, and forwards"
+        url={`${BASE_URL}/players/position`}
       />
 
       <div className="min-h-screen bg-neutral-50">
