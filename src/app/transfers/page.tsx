@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRightLeft, User, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
-import { getRecentTransfers } from "@/lib/queries/leaderboards";
+import { getRecentTransfers, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
@@ -12,19 +12,17 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Football Transfers 2025/26 – Latest Signings | DataSports",
-  description:
-    "Latest football transfers and signings for the 2025/26 season. Track player movements between clubs.",
-  openGraph: {
-    title: "Football Transfers 2025/26 – Latest Signings | DataSports",
-    description: "Latest football transfers and signings for the 2025/26 season.",
-    url: `${BASE_URL}/transfers`,
-  },
-  alternates: {
-    canonical: `${BASE_URL}/transfers`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const sl = await getCurrentSeasonLabel();
+  const title = `Football Transfers ${sl} – Latest Signings | DataSports`;
+  const description = `Latest football transfers and signings for the ${sl} season. Track player movements between clubs.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, url: `${BASE_URL}/transfers` },
+    alternates: { canonical: `${BASE_URL}/transfers` },
+  };
+}
 
 export default async function TransfersPage() {
   const transfers = await getRecentTransfers(50);

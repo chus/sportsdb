@@ -6,6 +6,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer, getTeamTransfers } from "@/lib/queries/teams";
+import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
 import { TeamJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { FollowButton } from "@/components/follow-button";
@@ -83,9 +84,10 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   });
   const isThin = quality.isThin;
 
-  const title = `${team.name} – Squad, Results & Standings 2025/26 | DataSports`;
+  const seasonLabel = await getCurrentSeasonLabel();
+  const title = `${team.name} – Squad, Results & Standings ${seasonLabel} | DataSports`;
   const mvStr = team.squadMarketValue ? ` Squad value: ${formatMarketValue(team.squadMarketValue)}.` : "";
-  const description = `${team.name} squad, fixtures, results, and standings for the 2025/26 season.${mvStr} View full roster, recent matches, and league position.`;
+  const description = `${team.name} squad, fixtures, results, and standings for the ${seasonLabel} season.${mvStr} View full roster, recent matches, and league position.`;
 
   return {
     title,

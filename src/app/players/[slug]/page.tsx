@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
+import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
 import { format, differenceInYears, formatDistanceToNowStrict } from "date-fns";
 import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
@@ -73,7 +74,8 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const totalAssists = statsHistory.reduce((sum, s) => sum + s.stat.assists, 0);
   const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
 
-  const title = `${player.name} – Stats, Goals & Career History 2025/26 | DataSports`;
+  const seasonLabel = await getCurrentSeasonLabel();
+  const title = `${player.name} – Stats, Goals & Career History ${seasonLabel} | DataSports`;
 
   // Build data-rich description
   const statsParts: string[] = [];

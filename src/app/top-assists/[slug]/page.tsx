@@ -7,6 +7,7 @@ import {
   getAllCompetitionSlugs,
   getCompetitionBySlug,
   getCompetitionSeasonLabels,
+  getCurrentSeasonLabel,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
@@ -31,8 +32,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const competition = await getCompetitionBySlug(slug);
   if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
 
-  const title = `${competition.name} Top Assists 2025/26 – Assists & Stats | DataSports`;
-  const description = `Top assist providers in the ${competition.name} for the 2025/26 season. See assists, goals, and appearances.`;
+  const seasonLabel = await getCurrentSeasonLabel();
+  const title = `${competition.name} Top Assists ${seasonLabel} – Assists & Stats | DataSports`;
+  const description = `Top assist providers in the ${competition.name} for the ${seasonLabel} season. See assists, goals, and appearances.`;
 
   return {
     title,

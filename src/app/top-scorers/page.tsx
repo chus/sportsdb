@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Trophy, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
-import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
+import { getTopScorersGlobal, getAllCompetitionSlugs, getCompetitionBySlug, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
@@ -11,25 +11,23 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Top Scorers 2025/26 – Goals & Stats | DataSports",
-  description:
-    "Top scorers across all major football competitions for the 2025/26 season. See goals, assists, and appearances for the leading strikers.",
-  openGraph: {
-    title: "Top Scorers 2025/26 – Goals & Stats | DataSports",
-    description:
-      "Top scorers across all major football competitions for the 2025/26 season.",
-    url: `${BASE_URL}/top-scorers`,
-  },
-  alternates: {
-    canonical: `${BASE_URL}/top-scorers`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const sl = await getCurrentSeasonLabel();
+  const title = `Top Scorers ${sl} – Goals & Stats | DataSports`;
+  const description = `Top scorers across all major football competitions for the ${sl} season. See goals, assists, and appearances for the leading strikers.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, url: `${BASE_URL}/top-scorers` },
+    alternates: { canonical: `${BASE_URL}/top-scorers` },
+  };
+}
 
 export default async function TopScorersPage() {
-  const [scorers, competitionSlugs] = await Promise.all([
+  const [scorers, competitionSlugs, seasonLabel] = await Promise.all([
     getTopScorersGlobal(),
     getAllCompetitionSlugs(),
+    getCurrentSeasonLabel(),
   ]);
 
   // Get competition names for the links section
@@ -46,9 +44,9 @@ export default async function TopScorersPage() {
           { name: "Top Scorers", url: `${BASE_URL}/top-scorers` },
         ]}
       />
-      <CollectionPageJsonLd name="Top Scorers 2025/26" description="Top scorers across all major football competitions for the 2025/26 season." url={`${BASE_URL}/top-scorers`} />
+      <CollectionPageJsonLd name={`Top Scorers ${seasonLabel}`} description={`Top scorers across all major football competitions for the ${seasonLabel} season.`} url={`${BASE_URL}/top-scorers`} />
       <ItemListJsonLd
-        name="Top Scorers 2025/26"
+        name={`Top Scorers ${seasonLabel}`}
         items={scorers.map((s, i) => ({
           position: i + 1,
           url: `${BASE_URL}/players/${s.player.slug}`,

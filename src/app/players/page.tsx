@@ -143,7 +143,7 @@ export default async function PlayersPage() {
                     {entry.team.logoUrl && (
                       <ImageWithFallback
                         src={entry.team.logoUrl}
-                        alt=""
+                        alt={entry.team.name}
                         width={16}
                         height={16}
                         className="w-4 h-4 object-contain"

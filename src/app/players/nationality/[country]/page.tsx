@@ -161,7 +161,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                     {player.team && (
                       <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
                         {player.team.logoUrl ? (
-                          <ImageWithFallback src={player.team.logoUrl} alt="" className="w-3 h-3 object-contain" width={12} height={12} />
+                          <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-3 h-3 object-contain" width={12} height={12} />
                         ) : (
                           <Shield className="w-3 h-3" />
                         )}

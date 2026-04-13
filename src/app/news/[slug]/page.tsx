@@ -792,7 +792,7 @@ export default async function ArticlePage({ params }: Props) {
                     {homeStanding && (
                       <Link href={`/competitions/${homeStanding.competitionSlug}`} className="flex items-center gap-3 group">
                         {matchData.homeTeam.logoUrl && (
-                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
                         <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
                           {ordinal(homeStanding.standing.position)}
@@ -805,7 +805,7 @@ export default async function ArticlePage({ params }: Props) {
                     {awayStanding && (
                       <Link href={`/competitions/${awayStanding.competitionSlug}`} className="flex items-center gap-3 group">
                         {matchData.awayTeam.logoUrl && (
-                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
                         <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
                           {ordinal(awayStanding.standing.position)}
@@ -830,7 +830,7 @@ export default async function ArticlePage({ params }: Props) {
                     {homeStanding?.standing.form && (
                       <div className="flex items-center gap-3">
                         {matchData.homeTeam.logoUrl && (
-                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                          <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
                         <div className="flex gap-1">
                           {homeStanding.standing.form.split(",").slice(-5).map((r, i) => (
@@ -851,7 +851,7 @@ export default async function ArticlePage({ params }: Props) {
                     {awayStanding?.standing.form && (
                       <div className="flex items-center gap-3">
                         {matchData.awayTeam.logoUrl && (
-                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                          <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
                         <div className="flex gap-1">
                           {awayStanding.standing.form.split(",").slice(-5).map((r, i) => (
@@ -892,7 +892,7 @@ export default async function ArticlePage({ params }: Props) {
                   </div>
                   <div className="flex items-center gap-3 mb-2">
                     {primaryTeam.logoUrl && (
-                      <ImageWithFallback src={primaryTeam.logoUrl} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <ImageWithFallback src={primaryTeam.logoUrl} alt={primaryTeam.name} width={28} height={28} className="w-7 h-7 object-contain" />
                     )}
                     <div>
                       <span className="text-lg font-bold text-neutral-900">{ordinal(primaryStanding.standing.position)}</span>
@@ -1021,7 +1021,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div>
                   <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
                     {matchData.homeTeam.logoUrl && (
-                      <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
                     {matchData.homeTeam.name}
                   </h4>
@@ -1076,7 +1076,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div>
                   <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
                     {matchData.awayTeam.logoUrl && (
-                      <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
                     {matchData.awayTeam.name}
                   </h4>
@@ -1170,7 +1170,7 @@ export default async function ArticlePage({ params }: Props) {
                               className="text-neutral-900 hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               {row.team.logoUrl && (
-                                <ImageWithFallback src={row.team.logoUrl} alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+                                <ImageWithFallback src={row.team.logoUrl} alt={row.team.name} width={16} height={16} className="w-4 h-4 object-contain" />
                               )}
                               {row.team.name}
                             </Link>
@@ -1210,7 +1210,7 @@ export default async function ArticlePage({ params }: Props) {
                 >
                   <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {matchData.homeTeam.logoUrl ? (
-                        <ImageWithFallback src={matchData.homeTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
+                        <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}
@@ -1228,7 +1228,7 @@ export default async function ArticlePage({ params }: Props) {
                 >
                   <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {matchData.awayTeam.logoUrl ? (
-                        <ImageWithFallback src={matchData.awayTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
+                        <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}
@@ -1251,7 +1251,7 @@ export default async function ArticlePage({ params }: Props) {
                 >
                   <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {primaryTeam.logoUrl ? (
-                      <ImageWithFallback src={primaryTeam.logoUrl} alt="" fill sizes="48px" className="object-contain" />
+                      <ImageWithFallback src={primaryTeam.logoUrl} alt={primaryTeam.name} fill sizes="48px" className="object-contain" />
                     ) : (
                       <Shield className="w-6 h-6 text-neutral-400" />
                     )}
@@ -1338,7 +1338,7 @@ export default async function ArticlePage({ params }: Props) {
                 >
                     <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                       {team.logoUrl ? (
-                        <ImageWithFallback src={team.logoUrl} alt="" fill sizes="48px" className="object-contain" />
+                        <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="48px" className="object-contain" />
                       ) : (
                         <Shield className="w-6 h-6 text-neutral-400" />
                       )}

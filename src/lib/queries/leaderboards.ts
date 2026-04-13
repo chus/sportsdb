@@ -229,6 +229,25 @@ export async function getCurrentSeasonUrlLabel(
   return result[0]?.label.replace("/", "-") ?? null;
 }
 
+/**
+ * Returns the label of the current season (e.g. "2025/26").
+ * Used by pages that need a dynamic season string in metadata.
+ * Falls back to a date-based calculation if no DB row is found.
+ */
+export async function getCurrentSeasonLabel(): Promise<string> {
+  const result = await db
+    .select({ label: seasons.label })
+    .from(seasons)
+    .where(eq(seasons.isCurrent, true))
+    .limit(1);
+  if (result[0]?.label) return result[0].label;
+  // Fallback: European football season runs Aug–Jun
+  const now = new Date();
+  const y = now.getFullYear();
+  const startYear = now.getMonth() >= 7 ? y : y - 1;
+  return `${startYear}/${String(startYear + 1).slice(2)}`;
+}
+
 // ============================================================
 // PLAYERS BY POSITION
 // ============================================================

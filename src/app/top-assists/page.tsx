@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Handshake, Shield, User, ChevronRight, Trophy } from "lucide-react";
 import type { Metadata } from "next";
-import { getTopAssistsGlobal, getAllCompetitionSlugs, getCompetitionBySlug } from "@/lib/queries/leaderboards";
+import { getTopAssistsGlobal, getAllCompetitionSlugs, getCompetitionBySlug, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageHeader } from "@/components/layout/page-header";
@@ -11,25 +11,23 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Top Assists 2025/26 – Assists & Stats | DataSports",
-  description:
-    "Top assist providers across all major football competitions for the 2025/26 season. See assists, goals, and appearances for the leading playmakers.",
-  openGraph: {
-    title: "Top Assists 2025/26 – Assists & Stats | DataSports",
-    description:
-      "Top assist providers across all major football competitions for the 2025/26 season.",
-    url: `${BASE_URL}/top-assists`,
-  },
-  alternates: {
-    canonical: `${BASE_URL}/top-assists`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const sl = await getCurrentSeasonLabel();
+  const title = `Top Assists ${sl} – Assists & Stats | DataSports`;
+  const description = `Top assist providers across all major football competitions for the ${sl} season. See assists, goals, and appearances for the leading playmakers.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, url: `${BASE_URL}/top-assists` },
+    alternates: { canonical: `${BASE_URL}/top-assists` },
+  };
+}
 
 export default async function TopAssistsPage() {
-  const [leaders, competitionSlugs] = await Promise.all([
+  const [leaders, competitionSlugs, seasonLabel] = await Promise.all([
     getTopAssistsGlobal(),
     getAllCompetitionSlugs(),
+    getCurrentSeasonLabel(),
   ]);
 
   const competitionsData = await Promise.all(
@@ -45,9 +43,9 @@ export default async function TopAssistsPage() {
           { name: "Top Assists", url: `${BASE_URL}/top-assists` },
         ]}
       />
-      <CollectionPageJsonLd name="Top Assists 2025/26" description="Top assist providers across all major football competitions for the 2025/26 season." url={`${BASE_URL}/top-assists`} />
+      <CollectionPageJsonLd name={`Top Assists ${seasonLabel}`} description={`Top assist providers across all major football competitions for the ${seasonLabel} season.`} url={`${BASE_URL}/top-assists`} />
       <ItemListJsonLd
-        name="Top Assists 2025/26"
+        name={`Top Assists ${seasonLabel}`}
         items={leaders.map((s, i) => ({
           position: i + 1,
           url: `${BASE_URL}/players/${s.player.slug}`,

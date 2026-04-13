@@ -14,6 +14,7 @@ import {
   getCompetitionRecentAndUpcoming,
 } from "@/lib/queries/competitions";
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
+import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
@@ -49,8 +50,9 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
   const competitionSeason = await getCompetitionSeason(slug);
   const isThin = !competitionSeason;
 
-  const title = `${competition.name} Standings & Results 2025/26 | DataSports`;
-  const description = `Full ${competition.name} 2025/26 standings, fixtures, results, and top scorers. Updated regularly.`;
+  const seasonLabel = await getCurrentSeasonLabel();
+  const title = `${competition.name} Standings & Results ${seasonLabel} | DataSports`;
+  const description = `Full ${competition.name} ${seasonLabel} standings, fixtures, results, and top scorers. Updated regularly.`;
 
   return {
     title,
