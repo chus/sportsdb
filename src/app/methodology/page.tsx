@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Database, RefreshCw, BarChart3, Globe, PenTool, Shield } from "lucide-react";
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Methodology – How We Source & Present Football Data | DataSports",
     description:
-      "Learn how DataSports collects, processes, and presents football data.",
+      "Learn how DataSports collects, processes, and presents football data. Our methodology covers data sources, update frequency, quality practices, and editorial standards.",
     url: `${BASE_URL}/methodology`,
   },
   alternates: {
@@ -27,6 +27,30 @@ export default function MethodologyPage() {
         items={[
           { name: "Home", url: BASE_URL },
           { name: "Methodology", url: `${BASE_URL}/methodology` },
+        ]}
+      />
+      <FAQJsonLd
+        items={[
+          {
+            question: "Where does DataSports get its football data?",
+            answer: "DataSports aggregates football data from multiple trusted providers including Football-Data.org for match results, standings, and competition structures, and API-Football for player profiles, squad information, transfer records, and match events.",
+          },
+          {
+            question: "How often is the data updated?",
+            answer: "Match results and standings are updated automatically after each matchday, typically within a few hours. Squad rosters and player profiles are refreshed weekly. Transfer records are updated daily during active windows and weekly off-season.",
+          },
+          {
+            question: "How does DataSports ensure data quality?",
+            answer: "We employ a multi-signal quality scoring system evaluating every entity page. Teams and players are scored on data completeness. Pages below our quality threshold are excluded from search engine indexing until enriched. We use time-aware modeling and automated audits to flag anomalies.",
+          },
+          {
+            question: "How is editorial content generated?",
+            answer: "Match reports, round recaps, player spotlights, and season reviews are generated with AI assistance using real match data and verified statistics. Every article is grounded in actual results — we never fabricate statistics or outcomes.",
+          },
+          {
+            question: "Which competitions does DataSports cover?",
+            answer: "We cover the Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Primeira Liga, Eredivisie, Brasileirão Série A, Primera División (Argentina), UEFA Champions League, UEFA Europa League, Copa Libertadores, and the FIFA World Cup.",
+          },
         ]}
       />
 

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Learn about DataSports, the structured canonical database for football. Our mission is to provide accurate, time-aware sports data for fans, researchers, and developers.",
   openGraph: {
     title: "About DataSports",
-    description: "The structured canonical database for football. Accurate, time-aware sports data.",
+    description: "Learn about DataSports, the structured canonical database for football. Accurate, time-aware sports data for fans, researchers, and developers.",
     url: `${BASE_URL}/about`,
     siteName: "DataSports",
     type: "website",

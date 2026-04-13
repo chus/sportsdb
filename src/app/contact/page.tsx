@@ -1,6 +1,7 @@
 import { Mail, MessageSquare, Github, Twitter } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -64,6 +65,14 @@ export default function ContactPage() {
   ];
 
   return (
+    <>
+    <BreadcrumbJsonLd
+      items={[
+        { name: "Home", url: BASE_URL },
+        { name: "Contact", url: `${BASE_URL}/contact` },
+      ]}
+    />
+    <FAQJsonLd items={faqItems} />
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-20">
@@ -225,5 +234,6 @@ export default function ContactPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
