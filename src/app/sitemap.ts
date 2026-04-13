@@ -27,6 +27,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
+      url: `${BASE_URL}/competitions`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/teams`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/players`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
       url: `${BASE_URL}/news`,
       lastModified: new Date(),
       changeFrequency: "daily",
@@ -57,6 +75,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     {
+      url: `${BASE_URL}/compare`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    {
       url: `${BASE_URL}/venues`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -67,6 +91,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    // Hub / browse pages
+    {
+      url: `${BASE_URL}/teams/country`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/players/position`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/about`,
@@ -106,8 +143,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const competitionSlugsWithStats = new Set(competitionsWithStats.map((c) => c.slug));
 
-  // Fetch only what we need — teams, competitions, articles, venues, matches, players
-  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs] = await Promise.all([
+  // Fetch only what we need — teams, competitions, articles, venues, matches, players, hub data
+  const [allTeams, allCompetitions, allArticles, allVenues, finishedMatches, indexablePlayers, topPlayerPairs, teamCountries] = await Promise.all([
     // Teams with quality-relevant data for filtering
     db
       .selectDistinct({
@@ -224,6 +261,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .where(ne(players.position, "Unknown"))
       .orderBy(desc(players.popularityScore))
       .limit(15),
+    // Distinct team countries with 3+ teams (for /teams/country/[country])
+    db
+      .selectDistinct({ country: teams.country })
+      .from(teams)
+      .where(isNotNull(teams.country))
+      .groupBy(teams.country)
+      .having(sql`count(*) >= 3`),
   ]);
 
   // Team pages — only include teams that pass quality scoring (Tier A: score >= 40)
@@ -340,6 +384,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Teams-by-country pages (e.g. /teams/country/england)
+  const teamCountryPages: MetadataRoute.Sitemap = teamCountries
+    .filter((row) => row.country)
+    .map((row) => ({
+      url: `${BASE_URL}/teams/country/${encodeURIComponent(row.country!.toLowerCase())}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
+
+  // Players-by-position pages (e.g. /players/position/forward)
+  const POSITIONS = ["goalkeeper", "defender", "midfielder", "forward"];
+  const playerPositionPages: MetadataRoute.Sitemap = POSITIONS.map((pos) => ({
+    url: `${BASE_URL}/players/position/${pos}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
   return [
     ...staticPages,
     ...matchesHubPage,
@@ -352,5 +415,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...topScorerCompPages,
     ...topAssistCompPages,
     ...comparePages,
+    ...teamCountryPages,
+    ...playerPositionPages,
   ];
 }

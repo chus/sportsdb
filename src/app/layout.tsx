@@ -102,6 +102,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="alternate" type="application/rss+xml" title="DataSports RSS Feed" href="/feed.xml" />
       </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
