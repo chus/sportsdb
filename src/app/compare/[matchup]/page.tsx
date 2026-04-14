@@ -71,6 +71,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       url: `${BASE_URL}/compare/${matchup}`,
+      siteName: "DataSports",
+      type: "website",
     },
     alternates: { canonical: `${BASE_URL}/compare/${matchup}` },
     robots: emptyBoth ? { index: false, follow: false } : undefined,

@@ -21,6 +21,8 @@ export const metadata: Metadata = {
     description:
       "See which football players and teams are trending right now. Live popularity rankings, most-searched players, and rising teams updated daily on DataSports.",
     url: `${BASE_URL}/trending`,
+    siteName: "DataSports",
+    type: "website",
   },
   alternates: {
     canonical: `${BASE_URL}/trending`,

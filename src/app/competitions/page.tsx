@@ -23,6 +23,8 @@ export const metadata: Metadata = {
     description:
       "Explore football leagues and tournaments worldwide. Browse Premier League, La Liga, Bundesliga, Serie A, Champions League and more.",
     url: `${BASE_URL}/competitions`,
+    siteName: "DataSports",
+    type: "website",
   },
   alternates: {
     canonical: `${BASE_URL}/competitions`,

@@ -25,6 +25,8 @@ export const metadata: Metadata = {
     title: "Compare Players – Head to Head Stats Comparison | DataSports",
     description: "Compare any two football players head to head. View career goals, assists, appearances, ratings, and performance stats side by side on DataSports.",
     url: `${BASE_URL}/compare/players`,
+    siteName: "DataSports",
+    type: "website",
   },
   alternates: { canonical: `${BASE_URL}/compare/players` },
 };

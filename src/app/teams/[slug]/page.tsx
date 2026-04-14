@@ -348,6 +348,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
           team.instagramHandle && `https://instagram.com/${team.instagramHandle}`,
           team.twitterHandle && `https://x.com/${team.twitterHandle}`,
         ].filter(Boolean) as string[]}
+        memberOf={competitionName && competitionSlug ? {
+          name: competitionName,
+          url: `${BASE_URL}/competitions/${competitionSlug}`,
+        } : null}
       />
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="team" entityId={team.id} />

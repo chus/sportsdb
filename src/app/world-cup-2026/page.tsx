@@ -21,6 +21,7 @@ export const metadata: Metadata = {
       "48 teams, 12 groups, 16 stadiums across 3 countries. Explore the first expanded World Cup.",
     url: `${BASE_URL}/world-cup-2026`,
     type: "website",
+    siteName: "DataSports",
   },
   twitter: {
     card: "summary_large_image",

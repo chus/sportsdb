@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    openGraph: { title, description, url: `${BASE_URL}/top-scorers` },
+    openGraph: { title, description, url: `${BASE_URL}/top-scorers`, siteName: "DataSports", type: "website" },
     alternates: { canonical: `${BASE_URL}/top-scorers` },
   };
 }

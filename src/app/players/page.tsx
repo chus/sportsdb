@@ -28,6 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Explore football players across all major competitions. Browse by position, nationality, or discover top scorers and rising stars.",
       url: `${BASE_URL}/players`,
+      siteName: "DataSports",
+      type: "website",
     },
     alternates: {
       canonical: `${BASE_URL}/players`,

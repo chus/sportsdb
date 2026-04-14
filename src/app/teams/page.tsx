@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Explore football clubs across all major competitions. Browse by country, league, or discover table leaders.",
       url: `${BASE_URL}/teams`,
+      siteName: "DataSports",
+      type: "website",
     },
     alternates: {
       canonical: `${BASE_URL}/teams`,

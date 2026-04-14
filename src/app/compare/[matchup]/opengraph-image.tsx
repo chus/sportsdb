@@ -1,16 +1,35 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Trending Football";
+export const alt = "Player Comparison";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function Image() {
+function titleCase(str: string): string {
+  return str
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ matchup: string }>;
+}) {
+  const { matchup } = await params;
+  const decoded = decodeURIComponent(matchup);
+  const parts = decoded.split("-vs-");
+
+  const player1 = parts[0] ? titleCase(parts[0]) : "Player 1";
+  const player2 = parts[1] ? titleCase(parts[1]) : "Player 2";
+  const title =
+    parts.length === 2 ? `${player1} vs ${player2}` : "Player Comparison";
+
   return new ImageResponse(
     (
       <div
         style={{
-          background: "linear-gradient(135deg, #c2410c, #ea580c, #f97316)",
+          background: "linear-gradient(135deg, #1e3a5f, #2563eb, #7c3aed)",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -22,7 +41,7 @@ export default function Image() {
         }}
       >
         <div style={{ fontSize: 80, marginBottom: 8, display: "flex" }}>
-          &#x1F525;
+          &#x2694;&#xFE0F;
         </div>
         <div
           style={{
@@ -34,7 +53,7 @@ export default function Image() {
             maxWidth: 900,
           }}
         >
-          Trending Now
+          {title}
         </div>
         <div
           style={{
@@ -45,7 +64,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          Most popular football players, teams, and searches on DataSports
+          Head-to-head stats comparison on DataSports
         </div>
         <div
           style={{

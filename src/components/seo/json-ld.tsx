@@ -82,6 +82,7 @@ export function TeamJsonLd({
   coach,
   athletes,
   sameAs,
+  memberOf,
 }: {
   name: string;
   url: string;
@@ -91,6 +92,7 @@ export function TeamJsonLd({
   coach?: string | null;
   athletes?: { name: string; url: string }[];
   sameAs?: string[];
+  memberOf?: { name: string; url: string } | null;
 }) {
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -115,6 +117,13 @@ export function TeamJsonLd({
       },
     }),
     ...(sameAs && sameAs.length > 0 && { sameAs }),
+    ...(memberOf && {
+      memberOf: {
+        "@type": "SportsOrganization",
+        name: memberOf.name,
+        url: memberOf.url,
+      },
+    }),
   };
 
   return <JsonLd data={data} />;

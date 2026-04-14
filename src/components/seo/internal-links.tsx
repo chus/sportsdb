@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Users, Shield, Trophy, MapPin, GitCompare, TrendingUp } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { db } from "@/lib/db";
 import { players, teams, competitions } from "@/lib/db/schema";
 import { eq, and, ne, sql, desc } from "drizzle-orm";
@@ -133,9 +134,11 @@ export async function PlayerInternalLinks({
               >
                 <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
                   {player.imageUrl ? (
-                    <img
+                    <ImageWithFallback
                       src={player.imageUrl}
                       alt={player.name}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
@@ -176,9 +179,11 @@ export async function PlayerInternalLinks({
               >
                 <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
                   {player.imageUrl ? (
-                    <img
+                    <ImageWithFallback
                       src={player.imageUrl}
                       alt={player.name}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
@@ -235,9 +240,11 @@ export async function TeamInternalLinks({
               >
                 <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center">
                   {team.logoUrl ? (
-                    <img
+                    <ImageWithFallback
                       src={team.logoUrl}
                       alt={team.name}
+                      width={24}
+                      height={24}
                       className="w-6 h-6 object-contain"
                     />
                   ) : (
@@ -274,9 +281,11 @@ export async function TeamInternalLinks({
             >
               <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
                 {player.imageUrl ? (
-                  <img
+                  <ImageWithFallback
                     src={player.imageUrl}
                     alt={player.name}
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
@@ -376,9 +385,11 @@ export async function MatchInternalLinks({
             >
               <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
                 {player.imageUrl ? (
-                  <img
+                  <ImageWithFallback
                     src={player.imageUrl}
                     alt={player.name}
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
