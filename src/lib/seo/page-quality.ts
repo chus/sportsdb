@@ -89,6 +89,13 @@ export function scoreTeamPage(input: TeamQualityInput): QualityResult {
   if (input.hasStandings) score += 10;
   if (input.hasMatches) score += 10;
 
+  // Hard content gate: a team page with no squad and no standings is a
+  // shell page with only basic metadata. Force it thin (noindex) even if
+  // country + city + logo push the score above 40.
+  if (input.squadSize === 0 && !input.hasStandings) {
+    score = Math.min(score, 35);
+  }
+
   const tier: Tier = score >= 40 ? "A" : score >= 25 ? "B" : score >= 15 ? "C" : "D";
   return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 15 };
 }

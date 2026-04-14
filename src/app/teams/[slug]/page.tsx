@@ -110,6 +110,9 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
     alternates: {
       canonical: `${BASE_URL}/teams/${slug}`,
     },
+    other: {
+      ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
+    },
   };
 }
 
@@ -371,7 +374,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
           icon={
             <div className="relative w-16 h-16 bg-white rounded-xl flex items-center justify-center flex-shrink-0 p-2">
               {team.logoUrl ? (
-                <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="64px" className="object-contain" />
+                <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="64px" className="object-contain" priority />
               ) : (
                 <Shield className="w-8 h-8 text-neutral-300" />
               )}
@@ -407,6 +410,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
           }
         />
       </div>
+      {team.updatedAt && (
+        <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+          Updated {formatDistanceToNowStrict(new Date(team.updatedAt), { addSuffix: true })}
+        </p>
+      )}
 
       {/* Tabs */}
       <TeamTabs squadCount={squad.length}>

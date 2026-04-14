@@ -98,6 +98,9 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
     },
+    other: {
+      ...(match.updatedAt && { "article:modified_time": match.updatedAt.toISOString() }),
+    },
   };
 }
 
@@ -482,7 +485,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
               </span>
               <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
                 {homeTeam.logoUrl ? (
-                  <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={48} height={48} className="w-full h-full object-contain" />
+                  <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={48} height={48} className="w-full h-full object-contain" priority />
                 ) : (
                   <Shield className="w-8 h-8 text-neutral-300" />
                 )}
@@ -555,6 +558,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
             )}
           </div>
         </div>
+        {match.updatedAt && (
+          <p className="text-xs text-neutral-500 text-center pb-2">
+            Updated {formatDistanceToNowStrict(new Date(match.updatedAt), { addSuffix: true })}
+          </p>
+        )}
       </div>
 
       {/* Scheduled Match Dashboard */}

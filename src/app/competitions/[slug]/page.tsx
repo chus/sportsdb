@@ -78,6 +78,9 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
         "application/rss+xml": `${BASE_URL}/feed/${slug}.xml`,
       },
     },
+    other: {
+      ...(competition.updatedAt && { "article:modified_time": competition.updatedAt.toISOString() }),
+    },
   };
 }
 
@@ -185,7 +188,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           icon={
             <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center flex-shrink-0 p-2">
               {competition.logoUrl ? (
-                <ImageWithFallback src={competition.logoUrl} alt={competition.name} width={40} height={40} className="w-10 h-10 object-contain" />
+                <ImageWithFallback src={competition.logoUrl} alt={competition.name} width={40} height={40} className="w-10 h-10 object-contain" priority />
               ) : (
                 <Trophy className="w-7 h-7 text-indigo-300" />
               )}
@@ -200,6 +203,11 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             <FollowButton entityType="competition" entityId={competition.id} entityName={competition.name} variant="hero" />
           }
         />
+        {competition.updatedAt && (
+          <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+            Updated {formatDistanceToNowStrict(new Date(competition.updatedAt), { addSuffix: true })}
+          </p>
+        )}
 
         {/* Tabs */}
         <CompetitionTabs teamCount={standingsData.length}>

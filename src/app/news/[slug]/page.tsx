@@ -576,6 +576,7 @@ export default async function ArticlePage({ params }: Props) {
                         fill
                         sizes="64px"
                         className="object-contain"
+                        priority
                       />
                     ) : (
                       <Shield className="w-10 h-10 text-neutral-300" />

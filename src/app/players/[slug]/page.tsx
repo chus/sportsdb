@@ -112,6 +112,9 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
     alternates: {
       canonical: `${BASE_URL}/players/${slug}`,
     },
+    other: {
+      ...(player.updatedAt && { "article:modified_time": player.updatedAt.toISOString() }),
+    },
   };
 }
 
@@ -274,6 +277,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 fill
                 sizes="80px"
                 className="object-cover"
+                priority
               />
             ) : (
               <User className="w-10 h-10 text-white/60" />
@@ -315,6 +319,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           <FollowButton entityType="player" entityId={player.id} entityName={player.name} variant="hero" />
         }
       />
+      {player.updatedAt && (
+        <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+          Updated {formatDistanceToNowStrict(new Date(player.updatedAt), { addSuffix: true })}
+        </p>
+      )}
 
       {/* Tab navigation + content */}
       <PlayerTabs
