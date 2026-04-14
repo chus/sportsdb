@@ -82,18 +82,18 @@ export function StandingsTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="text-xs text-neutral-500 uppercase tracking-wide border-b border-neutral-200">
-            <th className="text-left py-2 pl-3 pr-1 w-8">#</th>
-            <th className="text-left py-2 px-2">Team</th>
-            <th className="text-center py-2 px-1.5 w-8">P</th>
+            <th scope="col" className="text-left py-2 pl-3 pr-1 w-8">#</th>
+            <th scope="col" className="text-left py-2 px-2">Team</th>
+            <th scope="col" className="text-center py-2 px-1.5 w-8">P</th>
             {!compact && (
               <>
-                <th className="text-center py-2 px-1.5 w-8">W</th>
-                <th className="text-center py-2 px-1.5 w-8">D</th>
-                <th className="text-center py-2 px-1.5 w-8">L</th>
+                <th scope="col" className="text-center py-2 px-1.5 w-8">W</th>
+                <th scope="col" className="text-center py-2 px-1.5 w-8">D</th>
+                <th scope="col" className="text-center py-2 px-1.5 w-8">L</th>
               </>
             )}
-            <th className="text-center py-2 px-1.5 w-8">GD</th>
-            <th className="text-center py-2 px-2 w-10 font-bold">Pts</th>
+            <th scope="col" className="text-center py-2 px-1.5 w-8">GD</th>
+            <th scope="col" className="text-center py-2 px-2 w-10 font-bold">Pts</th>
           </tr>
         </thead>
         <tbody>

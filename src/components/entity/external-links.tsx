@@ -52,7 +52,7 @@ export function ExternalLinks({
             key={link.href}
             href={link.href}
             target="_blank"
-            rel="noreferrer noopener"
+            rel="nofollow noopener noreferrer"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 hover:text-blue-600 transition-colors group"
           >
             <span className="text-neutral-400 group-hover:text-blue-500 flex-shrink-0">

@@ -153,13 +153,13 @@ export default async function TopAssistsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                      <th className="px-2 sm:px-4 py-3 font-medium">#</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium">Player</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium">Team</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium hidden md:table-cell">Competition</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">Apps</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium text-center">Assists</th>
-                      <th className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium">#</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Player</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Team</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium hidden md:table-cell">Competition</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">Apps</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">Assists</th>
+                      <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">

@@ -564,11 +564,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         <table className="w-full text-xs">
                           <thead>
                             <tr className="bg-neutral-50 text-left text-[10px] text-neutral-500 uppercase">
-                              <th className="px-3 py-2 font-medium">Season</th>
-                              <th className="px-3 py-2 font-medium">Team</th>
-                              <th className="px-3 py-2 font-medium text-center">Apps</th>
-                              <th className="px-3 py-2 font-medium text-center">G</th>
-                              <th className="px-3 py-2 font-medium text-center">A</th>
+                              <th scope="col" className="px-3 py-2 font-medium">Season</th>
+                              <th scope="col" className="px-3 py-2 font-medium">Team</th>
+                              <th scope="col" className="px-3 py-2 font-medium text-center">Apps</th>
+                              <th scope="col" className="px-3 py-2 font-medium text-center">G</th>
+                              <th scope="col" className="px-3 py-2 font-medium text-center">A</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-neutral-50">
@@ -668,13 +668,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="bg-neutral-50 text-left text-xs text-neutral-500 uppercase">
-                                <th className="px-3 py-2.5 font-medium">Season</th>
-                                <th className="px-3 py-2.5 font-medium">Team</th>
-                                <th className="px-3 py-2.5 font-medium hidden sm:table-cell">Competition</th>
-                                <th className="px-3 py-2.5 font-medium text-center">Apps</th>
-                                <th className="px-3 py-2.5 font-medium text-center">Goals</th>
-                                <th className="px-3 py-2.5 font-medium text-center">Assists</th>
-                                <th className="px-3 py-2.5 font-medium text-center hidden sm:table-cell">Mins</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium">Season</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium">Team</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium hidden sm:table-cell">Competition</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center">Apps</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center">Goals</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center">Assists</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center hidden sm:table-cell">Mins</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-100">

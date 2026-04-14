@@ -129,16 +129,16 @@ export function PlayerStatsSection({
             <table className="w-full text-sm">
               <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-neutral-500">Season</th>
-                  <th className="px-4 py-3 text-left font-medium text-neutral-500">Competition</th>
-                  <th className="px-4 py-3 text-left font-medium text-neutral-500">Team</th>
-                  <th className="px-4 py-3 text-center font-medium text-neutral-500">Apps</th>
-                  <th className="px-4 py-3 text-center font-medium text-neutral-500">Goals</th>
-                  <th className="px-4 py-3 text-center font-medium text-neutral-500">Assists</th>
-                  <th className="px-4 py-3 text-center font-medium text-neutral-500">
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Season</th>
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Competition</th>
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Team</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Apps</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Goals</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Assists</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">
                     <span className="inline-block w-4 h-4 bg-yellow-400 rounded-sm" title="Yellow Cards" />
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-neutral-500">
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">
                     <span className="inline-block w-4 h-4 bg-red-500 rounded-sm" title="Red Cards" />
                   </th>
                 </tr>

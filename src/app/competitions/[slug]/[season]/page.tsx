@@ -7,7 +7,8 @@ import {
   getHistoricalStandings,
   getAllSeasons,
 } from "@/lib/queries/competitions";
-import { CompetitionJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { CompetitionJsonLd, BreadcrumbJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { FollowButton } from "@/components/follow-button";
 import { SeasonSelector } from "@/components/time/season-selector";
 
@@ -121,6 +122,16 @@ export default async function CompetitionSeasonPage({
           { name: seasonData.label, url: competitionUrl },
         ]}
       />
+      {standingsData.length > 0 && (
+        <ItemListJsonLd
+          name={`${competition.name} ${seasonData.label} Standings`}
+          items={standingsData.map(({ standing, team }) => ({
+            name: team.name,
+            url: `${BASE_URL}/teams/${team.slug}`,
+            position: standing.position,
+          }))}
+        />
+      )}
       <div className="min-h-screen bg-neutral-50">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white">
@@ -145,9 +156,11 @@ export default async function CompetitionSeasonPage({
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
                 {competition.logoUrl ? (
-                  <img
+                  <ImageWithFallback
                     src={competition.logoUrl}
                     alt={competition.name}
+                    width={128}
+                    height={128}
                     className="w-full h-full object-contain"
                   />
                 ) : (
@@ -219,14 +232,14 @@ export default async function CompetitionSeasonPage({
                   <table className="w-full">
                     <thead>
                       <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                        <th className="px-2 sm:px-4 py-3 font-medium">#</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium">Team</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center">P</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center">W</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">D</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center">L</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">GD</th>
-                        <th className="px-2 sm:px-4 py-3 font-medium text-center">
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium">#</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Team</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">P</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">W</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">D</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">L</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center hidden sm:table-cell">GD</th>
+                        <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">
                           Pts
                         </th>
                       </tr>
@@ -259,9 +272,11 @@ export default async function CompetitionSeasonPage({
                               >
                                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-neutral-100 rounded flex items-center justify-center flex-shrink-0">
                                   {team.logoUrl ? (
-                                    <img
+                                    <ImageWithFallback
                                       src={team.logoUrl}
                                       alt={team.name}
+                                      width={24}
+                                      height={24}
                                       className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                                     />
                                   ) : (

@@ -42,6 +42,7 @@ export async function GET(
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
       <description>${escapeXml(article.excerpt)}</description>
+      <content:encoded><![CDATA[${article.content}]]></content:encoded>
       <pubDate>${pubDate}</pubDate>
       <category>${escapeXml(category)}</category>
     </item>`;
@@ -49,11 +50,11 @@ export async function GET(
     .join("\n");
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>SportsDB – ${escapeXml(comp.name)} News</title>
+    <title>DataSports – ${escapeXml(comp.name)} News</title>
     <link>${BASE_URL}/competitions/${slug}</link>
-    <description>Latest ${escapeXml(comp.name)} news, match reports, and analysis from SportsDB.</description>
+    <description>Latest ${escapeXml(comp.name)} news, match reports, and analysis from DataSports.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${BASE_URL}/feed/${slug}.xml" rel="self" type="application/rss+xml" />

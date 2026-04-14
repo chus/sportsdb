@@ -116,11 +116,11 @@ export default async function TransfersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
-                      <th className="px-4 py-3 font-medium">Player</th>
-                      <th className="px-4 py-3 font-medium hidden md:table-cell">From</th>
-                      <th className="px-4 py-3 font-medium">To</th>
-                      <th className="px-4 py-3 font-medium hidden sm:table-cell">Type</th>
-                      <th className="px-4 py-3 font-medium text-right">Date</th>
+                      <th scope="col" className="px-4 py-3 font-medium">Player</th>
+                      <th scope="col" className="px-4 py-3 font-medium hidden md:table-cell">From</th>
+                      <th scope="col" className="px-4 py-3 font-medium">To</th>
+                      <th scope="col" className="px-4 py-3 font-medium hidden sm:table-cell">Type</th>
+                      <th scope="col" className="px-4 py-3 font-medium text-right">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">

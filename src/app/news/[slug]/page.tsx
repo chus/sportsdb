@@ -1031,10 +1031,10 @@ export default async function ArticlePage({ params }: Props) {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-neutral-200 text-neutral-500">
-                          <th className="text-left py-2 font-medium">Player</th>
-                          <th className="text-center py-2 font-medium w-12">Pos</th>
-                          <th className="text-center py-2 font-medium w-14">Rating</th>
-                          <th className="text-center py-2 font-medium w-12">Mins</th>
+                          <th scope="col" className="text-left py-2 font-medium">Player</th>
+                          <th scope="col" className="text-center py-2 font-medium w-12">Pos</th>
+                          <th scope="col" className="text-center py-2 font-medium w-14">Rating</th>
+                          <th scope="col" className="text-center py-2 font-medium w-12">Mins</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1086,10 +1086,10 @@ export default async function ArticlePage({ params }: Props) {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-neutral-200 text-neutral-500">
-                          <th className="text-left py-2 font-medium">Player</th>
-                          <th className="text-center py-2 font-medium w-12">Pos</th>
-                          <th className="text-center py-2 font-medium w-14">Rating</th>
-                          <th className="text-center py-2 font-medium w-12">Mins</th>
+                          <th scope="col" className="text-left py-2 font-medium">Player</th>
+                          <th scope="col" className="text-center py-2 font-medium w-12">Pos</th>
+                          <th scope="col" className="text-center py-2 font-medium w-14">Rating</th>
+                          <th scope="col" className="text-center py-2 font-medium w-12">Mins</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1143,14 +1143,14 @@ export default async function ArticlePage({ params }: Props) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b-2 border-neutral-200 text-neutral-500">
-                      <th className="text-left py-2 font-medium w-8">#</th>
-                      <th className="text-left py-2 font-medium">Team</th>
-                      <th className="text-center py-2 font-medium w-8">P</th>
-                      <th className="text-center py-2 font-medium w-8">W</th>
-                      <th className="text-center py-2 font-medium w-8 hidden sm:table-cell">D</th>
-                      <th className="text-center py-2 font-medium w-8">L</th>
-                      <th className="text-center py-2 font-medium w-10 hidden sm:table-cell">GD</th>
-                      <th className="text-center py-2 font-medium w-10">Pts</th>
+                      <th scope="col" className="text-left py-2 font-medium w-8">#</th>
+                      <th scope="col" className="text-left py-2 font-medium">Team</th>
+                      <th scope="col" className="text-center py-2 font-medium w-8">P</th>
+                      <th scope="col" className="text-center py-2 font-medium w-8">W</th>
+                      <th scope="col" className="text-center py-2 font-medium w-8 hidden sm:table-cell">D</th>
+                      <th scope="col" className="text-center py-2 font-medium w-8">L</th>
+                      <th scope="col" className="text-center py-2 font-medium w-10 hidden sm:table-cell">GD</th>
+                      <th scope="col" className="text-center py-2 font-medium w-10">Pts</th>
                     </tr>
                   </thead>
                   <tbody>
