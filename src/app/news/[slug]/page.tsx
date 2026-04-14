@@ -334,9 +334,10 @@ export default async function ArticlePage({ params }: Props) {
       "@id": articleUrl,
     },
     image: [ogImageUrl, ...(article.imageUrl ? [article.imageUrl] : [])],
+    inLanguage: "en",
     isAccessibleForFree: true,
     ...(article.wordCount && { wordCount: article.wordCount }),
-    ...(article.excerpt && { articleBody: article.excerpt }),
+    ...(article.content && { articleBody: article.content.slice(0, 5000) }),
     ...(competition && {
       about: {
         "@type": "SportsOrganization",

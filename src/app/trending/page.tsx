@@ -15,11 +15,11 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Trending – Popular Football Players & Teams | DataSports",
   description:
-    "Discover the most trending football players, popular teams, and top searches right now on DataSports.",
+    "See which football players and teams are trending right now. Live popularity rankings, most-searched players, and rising teams updated daily on DataSports.",
   openGraph: {
     title: "Trending – Popular Football Players & Teams | DataSports",
     description:
-      "Discover the most trending football players, popular teams, and top searches right now on DataSports.",
+      "See which football players and teams are trending right now. Live popularity rankings, most-searched players, and rising teams updated daily on DataSports.",
     url: `${BASE_URL}/trending`,
   },
   alternates: {

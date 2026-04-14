@@ -17,6 +17,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { MatchesContent } from "@/components/matches/matches-content";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -26,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const today = format(new Date(), "yyyy-MM-dd");
   return {
     title: "Football Matches — Live Scores, Fixtures & Results | DataSports",
-    description: `Live football scores, upcoming fixtures and recent results for ${today}. Browse matches across all major competitions.`,
+    description: `Football matches for ${today}: live scores, lineups, and results. Browse upcoming fixtures and recent results across the Premier League, La Liga, Serie A, Bundesliga, and more.`,
     robots: { index: true, follow: true },
     alternates: {
       canonical: `${BASE_URL}/matches`,
@@ -89,6 +90,7 @@ export default async function MatchesPage({
         }))}
       />
 
+      <PageTracker />
       <div className="min-h-screen bg-neutral-50">
         <PageHeader
           compact

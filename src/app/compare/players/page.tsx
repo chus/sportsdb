@@ -9,6 +9,8 @@ import { PlayerSearchSelector } from "@/components/search/player-search-selector
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 import { ExternalLinks } from "@/components/entity/external-links";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -18,10 +20,10 @@ interface ComparePageProps {
 
 export const metadata: Metadata = {
   title: "Compare Players – Head to Head Stats Comparison | DataSports",
-  description: "Compare two football players side by side - stats, career, and performance metrics.",
+  description: "Compare any two football players head to head. View career goals, assists, appearances, ratings, and performance stats side by side on DataSports.",
   openGraph: {
     title: "Compare Players – Head to Head Stats Comparison | DataSports",
-    description: "Compare two football players side by side - stats, career, and performance metrics.",
+    description: "Compare any two football players head to head. View career goals, assists, appearances, ratings, and performance stats side by side on DataSports.",
     url: `${BASE_URL}/compare/players`,
   },
   alternates: { canonical: `${BASE_URL}/compare/players` },
@@ -204,6 +206,15 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   ]);
 
   return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: BASE_URL },
+          { name: "Players", url: `${BASE_URL}/players` },
+          { name: "Compare", url: `${BASE_URL}/compare/players` },
+        ]}
+      />
+      <PageTracker />
     <div className="min-h-screen bg-neutral-50">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
@@ -362,5 +373,6 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

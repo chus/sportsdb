@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getAllVenues } from "@/lib/queries/venues";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -48,6 +49,7 @@ export default async function VenuesPage() {
 
   return (
     <>
+      <PageTracker />
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: BASE_URL },

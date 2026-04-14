@@ -28,6 +28,7 @@ import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
 import { PageHeader } from "@/components/layout/page-header";
 import { ExternalLinks } from "@/components/entity/external-links";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface VenuePageProps {
   params: Promise<{ slug: string }>;
@@ -157,6 +158,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   return (
     <>
+    <PageTracker />
     <BreadcrumbJsonLd
       items={[
         { name: "Home", url: BASE_URL },
@@ -499,9 +501,11 @@ export default async function VenuePage({ params }: VenuePageProps) {
                       >
                         <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2">
                           {team.logoUrl ? (
-                            <img
+                            <ImageWithFallback
                               src={team.logoUrl}
                               alt={team.name}
+                              width={48}
+                              height={48}
                               className="w-full h-full object-contain"
                             />
                           ) : (
