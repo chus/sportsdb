@@ -33,6 +33,8 @@ export function Footer() {
       { label: "Top Scorers", href: "/top-scorers" },
       { label: "Top Assists", href: "/top-assists" },
       { label: "Transfers", href: "/transfers" },
+      { label: "Trending", href: "/trending" },
+      { label: "World Cup 2026", href: "/world-cup-2026" },
       { label: "Teams by Country", href: "/teams/country" },
       { label: "Players by Position", href: "/players/position" },
       { label: "Players by Nationality", href: "/players/nationality" },
@@ -60,7 +62,7 @@ export function Footer() {
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
-                <div className="font-bold text-lg">SportsDB</div>
+                <div className="font-bold text-lg">DataSports</div>
                 <div className="text-xs text-neutral-400">
                   {t("home.heroTagline")}
                 </div>

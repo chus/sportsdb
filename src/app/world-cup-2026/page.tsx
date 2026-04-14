@@ -223,7 +223,7 @@ export default async function WorldCup2026Page() {
                   key={country.name}
                   className="bg-white rounded-xl border border-neutral-200 p-8 text-center hover:shadow-xl transition-all"
                 >
-                  <div className="text-6xl mb-4">{country.flag}</div>
+                  <div className="text-6xl mb-4" role="img" aria-label={`Flag of ${country.name}`}>{country.flag}</div>
                   <h3 className="text-2xl font-bold text-neutral-900 mb-2">{country.name}</h3>
                   <p className="text-neutral-600">
                     {country.stadiums} {country.stadiums === 1 ? "stadium" : "stadiums"}

@@ -10,6 +10,7 @@ import {
   User,
   Target,
   TrendingUp,
+  Newspaper,
 } from "lucide-react";
 import { PlayerLink } from "@/components/player/player-link";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
@@ -21,6 +22,7 @@ import {
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
 import { getTeamStats, getTeamTopScorer } from "@/lib/queries/teams";
+import { getArticlesForMatch } from "@/lib/queries/articles";
 import { MatchJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
 import { HeadToHead } from "@/components/match/head-to-head";
@@ -367,9 +369,10 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const matchId = match.id;
   const matchUrl = `${BASE_URL}/matches/${slug}`;
 
-  const [events, lineups] = await Promise.all([
+  const [events, lineups, matchArticles] = await Promise.all([
     getMatchEventsWithPlayers(matchId),
     getMatchLineupsGrouped(matchId),
+    getArticlesForMatch(matchId, 5),
   ]);
 
   const { homeTeam, awayTeam, venue, competition, season } = match;
@@ -1092,6 +1095,43 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* Related Matches */}
             <RelatedMatches matchId={matchId} />
+
+            {/* Related Articles */}
+            {matchArticles.length > 0 && (
+              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-neutral-200 flex items-center gap-2">
+                  <Newspaper className="w-4 h-4 text-blue-500" />
+                  <h2 className="text-sm font-bold text-neutral-900">Match Coverage</h2>
+                </div>
+                <div className="divide-y divide-neutral-100">
+                  {matchArticles.map(({ article }) => (
+                    <Link
+                      key={article.id}
+                      href={`/news/${article.slug}`}
+                      className="flex gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors"
+                    >
+                      {article.imageUrl && (
+                        <ImageWithFallback
+                          src={article.imageUrl}
+                          alt={article.title}
+                          width={64}
+                          height={48}
+                          className="w-16 h-12 rounded-md object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-medium text-neutral-900 line-clamp-2 leading-snug">
+                          {article.title}
+                        </h3>
+                        <p className="text-xs text-neutral-500 mt-1 capitalize">
+                          {article.type.replace(/_/g, " ")}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Internal Links for SEO */}
             <MatchInternalLinks

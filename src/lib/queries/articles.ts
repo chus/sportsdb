@@ -333,6 +333,48 @@ export async function getArticlesForCompetition(
   return results;
 }
 
+export async function getArticlesForMatch(
+  matchId: string,
+  limit = 5
+): Promise<ArticleWithRelations[]> {
+  const results = await db
+    .select({
+      article: articles,
+      competition: {
+        name: competitions.name,
+        slug: competitions.slug,
+      },
+      season: {
+        label: seasons.label,
+      },
+      primaryPlayer: {
+        name: players.name,
+        slug: players.slug,
+      },
+      primaryTeam: {
+        name: teams.name,
+        slug: teams.slug,
+        logoUrl: teams.logoUrl,
+      },
+    })
+    .from(articles)
+    .leftJoin(
+      competitionSeasons,
+      eq(articles.competitionSeasonId, competitionSeasons.id)
+    )
+    .leftJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+    .leftJoin(seasons, eq(competitionSeasons.seasonId, seasons.id))
+    .leftJoin(players, eq(articles.primaryPlayerId, players.id))
+    .leftJoin(teams, eq(articles.primaryTeamId, teams.id))
+    .where(
+      and(eq(articles.status, "published"), eq(articles.matchId, matchId))
+    )
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit);
+
+  return results;
+}
+
 export async function getArticleCount(type?: string): Promise<number> {
   let whereClause = eq(articles.status, "published");
 
