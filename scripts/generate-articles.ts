@@ -478,9 +478,9 @@ async function generateRoundRecaps(): Promise<number> {
 }
 
 async function getTopPerformers(): Promise<any[]> {
-  // Find players with outstanding recent performances (2+ goals in recent matches)
+  // Find top scorers from player_season_stats for the current season
   return await sql`
-    WITH recent_stars AS (
+    WITH season_stars AS (
       SELECT
         p.id as player_id,
         p.name as player_name,
@@ -489,24 +489,25 @@ async function getTopPerformers(): Promise<any[]> {
         p.nationality,
         t.name as team_name,
         t.slug as team_slug,
-        COUNT(*)::int as recent_goals,
-        COUNT(DISTINCT m.id)::int as matches
-      FROM match_events me
-      INNER JOIN matches m ON me.match_id = m.id
-      INNER JOIN players p ON me.player_id = p.id
-      INNER JOIN teams t ON me.team_id = t.id
-      WHERE me.type IN ('goal', 'penalty')
-        AND m.scheduled_at >= CURRENT_DATE - INTERVAL '14 days'
-      GROUP BY p.id, p.name, p.slug, p.position, p.nationality, t.name, t.slug
-      HAVING COUNT(*) >= 2
+        pss.goals::int as recent_goals,
+        pss.assists::int as recent_assists,
+        pss.appearances::int as matches,
+        (pss.goals * 2 + pss.assists)::int as impact_score
+      FROM player_season_stats pss
+      INNER JOIN players p ON pss.player_id = p.id
+      INNER JOIN teams t ON pss.team_id = t.id
+      INNER JOIN competition_seasons cs ON pss.competition_season_id = cs.id
+      INNER JOIN seasons s ON cs.season_id = s.id
+      WHERE s.is_current = true
+        AND pss.goals >= 3
     )
-    SELECT rs.*
-    FROM recent_stars rs
-    LEFT JOIN articles a ON a.primary_player_id = rs.player_id
+    SELECT ss.*
+    FROM season_stars ss
+    LEFT JOIN articles a ON a.primary_player_id = ss.player_id
       AND a.type = 'player_spotlight'
-      AND a.published_at >= CURRENT_DATE - INTERVAL '14 days'
+      AND a.published_at >= CURRENT_DATE - INTERVAL '30 days'
     WHERE a.id IS NULL
-    ORDER BY rs.recent_goals DESC
+    ORDER BY ss.impact_score DESC, ss.recent_goals DESC
     LIMIT ${limit}
   `;
 }
@@ -520,46 +521,7 @@ async function generatePlayerSpotlights(): Promise<number> {
   let generated = 0;
 
   for (const player of performers) {
-    console.log(`\nProcessing: ${player.player_name} (${player.recent_goals} goals)`);
-
-    // Get recent match details for this player
-    const recentMatchDetails = await sql`
-      SELECT
-        opp.name as opponent,
-        CASE
-          WHEN (m.home_team_id = me.team_id AND m.home_score > m.away_score)
-            OR (m.away_team_id = me.team_id AND m.away_score > m.home_score) THEN 'W'
-          WHEN m.home_score = m.away_score THEN 'D'
-          ELSE 'L'
-        END as result,
-        COUNT(*) FILTER (WHERE me2.type IN ('goal', 'penalty'))::int as goals,
-        COUNT(*) FILTER (WHERE me2.type = 'assist')::int as assists
-      FROM match_events me
-      INNER JOIN matches m ON me.match_id = m.id
-      INNER JOIN teams opp ON opp.id = CASE
-        WHEN m.home_team_id = me.team_id THEN m.away_team_id
-        ELSE m.home_team_id
-      END
-      LEFT JOIN match_events me2 ON me2.match_id = m.id AND me2.player_id = me.player_id
-      WHERE me.player_id = ${player.player_id}
-        AND m.status = 'finished'
-        AND m.scheduled_at >= CURRENT_DATE - INTERVAL '30 days'
-      GROUP BY m.id, opp.name, m.home_team_id, m.away_team_id, me.team_id, m.home_score, m.away_score
-      ORDER BY m.scheduled_at DESC
-      LIMIT 5
-    `;
-
-    // Get season goal count
-    const seasonGoals = await sql`
-      SELECT COUNT(*)::int as total
-      FROM match_events me
-      INNER JOIN matches m ON me.match_id = m.id
-      INNER JOIN competition_seasons cs ON m.competition_season_id = cs.id
-      INNER JOIN seasons s ON cs.season_id = s.id
-      WHERE me.player_id = ${player.player_id}
-        AND me.type IN ('goal', 'penalty')
-        AND s.is_current = true
-    `;
+    console.log(`\nProcessing: ${player.player_name} (${player.recent_goals} goals, ${player.recent_assists || 0} assists)`);
 
     const context: PlayerSpotlightContext = {
       player: {
@@ -570,19 +532,14 @@ async function generatePlayerSpotlights(): Promise<number> {
         currentTeam: player.team_name,
         currentTeamSlug: player.team_slug,
       },
-      recentMatches: recentMatchDetails.map((m: any) => ({
-        opponent: m.opponent,
-        result: m.result,
-        goals: m.goals,
-        assists: m.assists,
-      })),
+      recentMatches: [],
       seasonStats: {
         appearances: player.matches,
-        goals: Number(seasonGoals[0]?.total) || player.recent_goals,
-        assists: 0,
+        goals: player.recent_goals,
+        assists: player.recent_assists || 0,
         competition: "League",
       },
-      achievement: `${player.recent_goals} goals in ${player.matches} recent matches`,
+      achievement: `${player.recent_goals} goals and ${player.recent_assists || 0} assists in ${player.matches} appearances this season`,
     };
 
     if (dryRun) {
@@ -639,7 +596,7 @@ async function getUpcomingMatches(limitNum: number): Promise<any[]> {
     LEFT JOIN venues v ON m.venue_id = v.id
     LEFT JOIN articles a ON m.id = a.match_id AND a.type = 'match_preview'
     WHERE m.status = 'scheduled'
-      AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '3 days'
+      AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '7 days'
       AND a.id IS NULL
     ORDER BY m.scheduled_at ASC
     LIMIT ${limitNum}

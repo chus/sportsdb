@@ -189,7 +189,6 @@ export async function GET(request: NextRequest) {
         INNER JOIN competition_seasons cs ON pss.competition_season_id = cs.id
         INNER JOIN seasons s ON cs.season_id = s.id
         WHERE s.is_current = true
-          AND p.is_indexable = true
           AND pss.goals >= 3
       )
       SELECT ss.*
