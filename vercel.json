@@ -6,11 +6,11 @@
     },
     {
       "path": "/api/cron/generate-articles",
-      "schedule": "0 12 * * *"
+      "schedule": "0 7,19 * * *"
     },
     {
       "path": "/api/cron/update-matches",
-      "schedule": "0 0 * * *"
+      "schedule": "0 0,8,14,20 * * *"
     },
     {
       "path": "/api/cron/generate-calendar",

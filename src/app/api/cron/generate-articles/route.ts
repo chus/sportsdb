@@ -243,10 +243,10 @@ export async function GET(request: NextRequest) {
       LEFT JOIN venues v ON m.venue_id = v.id
       LEFT JOIN articles a ON m.id = a.match_id AND a.type = 'match_preview'
       WHERE m.status = 'scheduled'
-        AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '3 days'
+        AND m.scheduled_at BETWEEN NOW() AND NOW() + INTERVAL '7 days'
         AND a.id IS NULL
       ORDER BY m.scheduled_at ASC
-      LIMIT 10
+      LIMIT 15
     `;
 
     const runMatchPreviews = async () => {
