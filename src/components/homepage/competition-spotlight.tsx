@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Target, TrendingUp } from "lucide-react";
+import { Globe, Shield, Target, TrendingUp, Users } from "lucide-react";
 import type { CompetitionSpotlight as Spotlight } from "@/lib/queries/homepage";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
@@ -14,7 +14,18 @@ function resultDot(r: {
 }
 
 export function CompetitionSpotlight({ data }: { data: Spotlight }) {
-  const { competition, season, leader, topScorer, nextFixture, recentForm } = data;
+  const {
+    competition,
+    season,
+    leader,
+    topScorer,
+    nextFixture,
+    recentForm,
+    teamCount,
+    featuredTeams,
+  } = data;
+
+  const hasStats = leader || topScorer || nextFixture || recentForm.length > 0;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
@@ -56,107 +67,158 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
           </div>
         </div>
 
-        <div className="p-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {leader && (
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
-                <TrendingUp className="w-3 h-3" />
-                LEAGUE LEADER
-              </div>
-              <Link
-                href={`/teams/${leader.slug}`}
-                className="flex items-center gap-3 group"
-              >
-                <div className="w-10 h-10 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center flex-shrink-0">
-                  {leader.logoUrl ? (
-                    <ImageWithFallback
-                      src={leader.logoUrl}
-                      alt={leader.name}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 object-contain"
-                    />
-                  ) : (
-                    <Shield className="w-5 h-5 text-neutral-400" />
-                  )}
+        {hasStats ? (
+          <div className="p-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {leader && (
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                  <TrendingUp className="w-3 h-3" />
+                  LEAGUE LEADER
                 </div>
-                <div className="min-w-0">
+                <Link
+                  href={`/teams/${leader.slug}`}
+                  className="flex items-center gap-3 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center flex-shrink-0">
+                    {leader.logoUrl ? (
+                      <ImageWithFallback
+                        src={leader.logoUrl}
+                        alt={leader.name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 object-contain"
+                      />
+                    ) : (
+                      <Shield className="w-5 h-5 text-neutral-400" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                      {leader.name}
+                    </div>
+                    <div className="text-xs text-neutral-500">
+                      {leader.points} pts · {leader.played} played
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            )}
+
+            {topScorer && (
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                  <Target className="w-3 h-3" />
+                  TOP SCORER
+                </div>
+                <Link
+                  href={`/players/${topScorer.slug}`}
+                  className="group block"
+                >
                   <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                    {leader.name}
+                    {topScorer.name}
+                  </div>
+                  <div className="text-xs text-neutral-500 truncate">
+                    {topScorer.teamName} · {topScorer.goals} goals
+                  </div>
+                </Link>
+              </div>
+            )}
+
+            {nextFixture && (
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                  NEXT FIXTURE
+                </div>
+                <Link
+                  href={`/matches/${nextFixture.slug ?? nextFixture.id}`}
+                  className="group block"
+                >
+                  <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                    {nextFixture.homeTeam.name} vs {nextFixture.awayTeam.name}
                   </div>
                   <div className="text-xs text-neutral-500">
-                    {leader.points} pts · {leader.played} played
+                    {new Date(nextFixture.scheduledAt).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })}
                   </div>
-                </div>
-              </Link>
-            </div>
-          )}
-
-          {topScorer && (
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
-                <Target className="w-3 h-3" />
-                TOP SCORER
+                </Link>
               </div>
-              <Link
-                href={`/players/${topScorer.slug}`}
-                className="group block"
-              >
-                <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                  {topScorer.name}
-                </div>
-                <div className="text-xs text-neutral-500 truncate">
-                  {topScorer.teamName} · {topScorer.goals} goals
-                </div>
-              </Link>
-            </div>
-          )}
+            )}
 
-          {nextFixture && (
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
-                NEXT FIXTURE
-              </div>
-              <Link
-                href={`/matches/${nextFixture.slug ?? nextFixture.id}`}
-                className="group block"
-              >
-                <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                  {nextFixture.homeTeam.name} vs {nextFixture.awayTeam.name}
+            {recentForm.length > 0 && (
+              <div>
+                <div className="text-xs font-medium text-neutral-500 mb-2">
+                  RECENT RESULTS
                 </div>
-                <div className="text-xs text-neutral-500">
-                  {new Date(nextFixture.scheduledAt).toLocaleDateString("en-US", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
+                <div className="flex items-center gap-1.5">
+                  {recentForm.slice(0, 5).map((r) => {
+                    const dot = resultDot(r);
+                    return (
+                      <div
+                        key={r.id}
+                        title={`${r.homeTeam} ${r.homeScore}-${r.awayScore} ${r.awayTeam}`}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${dot.className}`}
+                      >
+                        {dot.letter}
+                      </div>
+                    );
                   })}
                 </div>
-              </Link>
-            </div>
-          )}
-
-          {recentForm.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-neutral-500 mb-2">
-                RECENT RESULTS
               </div>
-              <div className="flex items-center gap-1.5">
-                {recentForm.slice(0, 5).map((r) => {
-                  const dot = resultDot(r);
-                  return (
-                    <div
-                      key={r.id}
-                      title={`${r.homeTeam} ${r.homeScore}-${r.awayScore} ${r.awayTeam}`}
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${dot.className}`}
+            )}
+          </div>
+        ) : (
+          <div className="p-6 grid md:grid-cols-2 gap-6">
+            {teamCount > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-3">
+                  <Users className="w-3 h-3" />
+                  TEAMS
+                </div>
+                <p className="text-sm font-semibold text-neutral-900 mb-3">
+                  {teamCount} teams compete
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {featuredTeams.map((t) => (
+                    <Link
+                      key={t.slug}
+                      href={`/teams/${t.slug}`}
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-50 border border-neutral-200 rounded-full text-xs font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
                     >
-                      {dot.letter}
-                    </div>
-                  );
-                })}
+                      {t.logoUrl ? (
+                        <ImageWithFallback
+                          src={t.logoUrl}
+                          alt={t.name}
+                          width={14}
+                          height={14}
+                          className="w-3.5 h-3.5 object-contain"
+                        />
+                      ) : (
+                        <Shield className="w-3 h-3 text-neutral-400" />
+                      )}
+                      {t.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
+            )}
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-3">
+                <Globe className="w-3 h-3" />
+                ABOUT
+              </div>
+              <p className="text-sm text-neutral-700">
+                {competition.country && (
+                  <span className="font-semibold">{competition.country}</span>
+                )}
+                {competition.country && " · "}
+                <span className="capitalize">{competition.type}</span>
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="border-t border-neutral-100 px-6 py-3 bg-neutral-50">
           <Link

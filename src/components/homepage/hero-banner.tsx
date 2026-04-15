@@ -3,6 +3,7 @@ import { Calendar, CheckCircle, Circle, Clock, Shield } from "lucide-react";
 import type { HeroBanner, HeroMatch } from "@/lib/queries/homepage";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { WorldCupHero } from "@/components/homepage/world-cup-hero";
 
 function formatClock(iso: string): string {
   try {
@@ -196,7 +197,7 @@ export function HeroBannerSection({ data }: { data: HeroBanner }) {
   }
 
   // Upcoming
-  if (!data.matches.length) return null;
+  if (!data.matches.length) return <WorldCupHero />;
   return (
     <section className="bg-neutral-900 text-white">
       <div className="max-w-7xl mx-auto px-4 py-10">

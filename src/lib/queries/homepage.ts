@@ -12,12 +12,14 @@ import {
   articles,
   competitions,
   competitionSeasons,
+  playerTeamHistory,
   players,
   playerSeasonStats,
   seasons,
   sportsEvents,
   standings,
   teams,
+  teamSeasons,
 } from "@/lib/db/schema";
 import { and, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import {
@@ -608,7 +610,14 @@ export async function getWeekPreview(days = 7): Promise<WeekPreviewDay[]> {
 
   return Array.from(byDate.values())
     .sort((a, b) => a.date.localeCompare(b.date))
-    .filter((d) => d.matches.length > 0 || d.events.length > 0);
+    .filter((d) => {
+      if (d.matches.length > 0) return true;
+      // Hide days that only have international_break events and no matches
+      const meaningfulEvents = d.events.filter(
+        (e) => e.type !== "international_break"
+      );
+      return meaningfulEvents.length > 0;
+    });
 }
 
 // ============================================================
@@ -622,6 +631,7 @@ export type CompetitionSpotlight = {
     slug: string;
     logoUrl: string | null;
     country: string | null;
+    type: string;
   };
   season: { label: string } | null;
   leader: {
@@ -648,6 +658,8 @@ export type CompetitionSpotlight = {
     homeScore: number | null;
     awayScore: number | null;
   }>;
+  teamCount: number;
+  featuredTeams: { name: string; slug: string; logoUrl: string | null }[];
 };
 
 /**
@@ -842,6 +854,32 @@ export async function getCompetitionSpotlight(
     }));
   }
 
+  // Fetch team count and featured teams for fallback display
+  let teamCount = 0;
+  let featuredTeams: { name: string; slug: string; logoUrl: string | null }[] =
+    [];
+
+  if (competitionSeason) {
+    const teamCountRow = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(teamSeasons)
+      .where(eq(teamSeasons.competitionSeasonId, competitionSeason.id));
+    teamCount = teamCountRow[0]?.count ?? 0;
+
+    const teamRows = await db
+      .select({
+        name: teams.name,
+        slug: teams.slug,
+        logoUrl: teams.logoUrl,
+      })
+      .from(teamSeasons)
+      .innerJoin(teams, eq(teams.id, teamSeasons.teamId))
+      .where(eq(teamSeasons.competitionSeasonId, competitionSeason.id))
+      .orderBy(sql`RANDOM()`)
+      .limit(6);
+    featuredTeams = teamRows;
+  }
+
   return {
     competition: {
       id: comp.id,
@@ -849,12 +887,15 @@ export async function getCompetitionSpotlight(
       slug: comp.slug,
       logoUrl: comp.logoUrl,
       country: comp.country,
+      type: comp.type,
     },
     season: season ? { label: season.label } : null,
     leader,
     topScorer,
     nextFixture,
     recentForm,
+    teamCount,
+    featuredTeams,
   };
 }
 
@@ -993,4 +1034,190 @@ export async function getTopCompetitionsForHome(limit = 12) {
     .from(competitions)
     .orderBy(competitions.name)
     .limit(limit);
+}
+
+// ============================================================
+// Featured leagues — top competitions by team count
+// ============================================================
+
+export type FeaturedLeague = {
+  id: string;
+  name: string;
+  slug: string;
+  country: string | null;
+  logoUrl: string | null;
+  teamCount: number;
+  sampleTeams: { name: string; slug: string; logoUrl: string | null }[];
+};
+
+export async function getFeaturedLeagues(
+  limit = 6
+): Promise<FeaturedLeague[]> {
+  const rows = await db.execute<{
+    id: string;
+    name: string;
+    slug: string;
+    country: string | null;
+    logo_url: string | null;
+    team_count: number;
+  }>(sql`
+    SELECT
+      c.id,
+      c.name,
+      c.slug,
+      c.country,
+      c.logo_url,
+      COUNT(ts.id)::int AS team_count
+    FROM competitions c
+    INNER JOIN competition_seasons cs ON cs.competition_id = c.id
+    INNER JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+    INNER JOIN team_seasons ts ON ts.competition_season_id = cs.id
+    GROUP BY c.id, c.name, c.slug, c.country, c.logo_url
+    ORDER BY team_count DESC
+    LIMIT ${limit}
+  `);
+
+  if (!rows.rows.length) return [];
+
+  // Fetch sample teams for each league
+  const leagueIds = rows.rows.map((r) => r.id);
+  const sampleRows = await db.execute<{
+    competition_id: string;
+    name: string;
+    slug: string;
+    logo_url: string | null;
+  }>(sql`
+    SELECT DISTINCT ON (c_id, t.id)
+      cs.competition_id AS c_id,
+      t.name,
+      t.slug,
+      t.logo_url
+    FROM team_seasons ts
+    INNER JOIN competition_seasons cs ON cs.id = ts.competition_season_id
+    INNER JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+    INNER JOIN teams t ON t.id = ts.team_id
+    WHERE cs.competition_id = ANY(${leagueIds}::uuid[])
+    ORDER BY c_id, t.id
+  `);
+
+  // Group samples by competition
+  const samplesByComp = new Map<
+    string,
+    { name: string; slug: string; logoUrl: string | null }[]
+  >();
+  for (const r of sampleRows.rows) {
+    const key = r.competition_id;
+    if (!samplesByComp.has(key)) samplesByComp.set(key, []);
+    const arr = samplesByComp.get(key)!;
+    if (arr.length < 4) {
+      arr.push({ name: r.name, slug: r.slug, logoUrl: r.logo_url });
+    }
+  }
+
+  return rows.rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    slug: r.slug,
+    country: r.country,
+    logoUrl: r.logo_url,
+    teamCount: r.team_count,
+    sampleTeams: samplesByComp.get(r.id) ?? [],
+  }));
+}
+
+// ============================================================
+// Daily team spotlight — rotating team with squad info
+// ============================================================
+
+export type TeamSpotlight = {
+  team: {
+    name: string;
+    slug: string;
+    country: string;
+    logoUrl: string | null;
+  };
+  competition: { name: string; slug: string } | null;
+  squadSize: number;
+  positions: { position: string; count: number }[];
+};
+
+export async function getDailyTeamSpotlight(
+  date: Date = new Date()
+): Promise<TeamSpotlight | null> {
+  // Pick a team that has current players (via player_team_history)
+  const teamRows = await db.execute<{
+    id: string;
+    name: string;
+    slug: string;
+    country: string;
+    logo_url: string | null;
+    squad_size: number;
+  }>(sql`
+    SELECT
+      t.id,
+      t.name,
+      t.slug,
+      t.country,
+      t.logo_url,
+      COUNT(pth.id)::int AS squad_size
+    FROM teams t
+    INNER JOIN player_team_history pth ON pth.team_id = t.id AND pth.valid_to IS NULL
+    GROUP BY t.id
+    HAVING COUNT(pth.id) >= 10
+    ORDER BY t.name
+  `);
+
+  if (!teamRows.rows.length) return null;
+
+  const idx = dailyRotationIndex(date, teamRows.rows.length);
+  const team = teamRows.rows[idx];
+
+  // Get position breakdown
+  const posRows = await db.execute<{
+    position: string;
+    count: number;
+  }>(sql`
+    SELECT
+      p.position,
+      COUNT(*)::int AS count
+    FROM player_team_history pth
+    INNER JOIN players p ON p.id = pth.player_id
+    WHERE pth.team_id = ${team.id}::uuid
+      AND pth.valid_to IS NULL
+    GROUP BY p.position
+    ORDER BY count DESC
+  `);
+
+  // Get the team's competition
+  const compRow = await db.execute<{
+    comp_name: string;
+    comp_slug: string;
+  }>(sql`
+    SELECT
+      c.name AS comp_name,
+      c.slug AS comp_slug
+    FROM team_seasons ts
+    INNER JOIN competition_seasons cs ON cs.id = ts.competition_season_id
+    INNER JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+    INNER JOIN competitions c ON c.id = cs.competition_id
+    WHERE ts.team_id = ${team.id}::uuid
+    LIMIT 1
+  `);
+
+  return {
+    team: {
+      name: team.name,
+      slug: team.slug,
+      country: team.country,
+      logoUrl: team.logo_url,
+    },
+    competition: compRow.rows[0]
+      ? { name: compRow.rows[0].comp_name, slug: compRow.rows[0].comp_slug }
+      : null,
+    squadSize: team.squad_size,
+    positions: posRows.rows.map((r) => ({
+      position: r.position,
+      count: r.count,
+    })),
+  };
 }

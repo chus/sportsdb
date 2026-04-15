@@ -11,6 +11,8 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 import { SearchBar } from "@/components/search/search-bar";
 import {
   getCompetitionSpotlight,
+  getDailyTeamSpotlight,
+  getFeaturedLeagues,
   getHeroBanner,
   getHomepageStats,
   getMatchOfTheDay,
@@ -25,6 +27,9 @@ import { StandoutPerformers } from "@/components/homepage/standout-performers";
 import { WeekPreview } from "@/components/homepage/week-preview";
 import { CompetitionSpotlight } from "@/components/homepage/competition-spotlight";
 import { LatestNewsStrip } from "@/components/homepage/latest-news-strip";
+import { FeaturedLeagues } from "@/components/homepage/featured-leagues";
+import { ExploreDatabase } from "@/components/homepage/explore-database";
+import { TeamSpotlightSection } from "@/components/homepage/team-spotlight";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -95,6 +100,8 @@ export default async function HomePage() {
     articles,
     stats,
     topCompetitions,
+    featuredLeagues,
+    teamSpotlight,
   ] = await Promise.all([
     getHeroBanner({ personalizedCompetitionIds: personalizedIds }),
     getMatchOfTheDay(),
@@ -104,6 +111,8 @@ export default async function HomePage() {
     getTimelyArticles(6),
     getHomepageStats(),
     getTopCompetitionsForHome(12),
+    getFeaturedLeagues(6),
+    getDailyTeamSpotlight(),
   ]);
 
   const viewerName =
@@ -135,7 +144,9 @@ export default async function HomePage() {
             <p className="text-neutral-400 mb-6 text-sm">
               {stats.players.toLocaleString()} players ·{" "}
               {stats.teams.toLocaleString()} teams ·{" "}
-              {stats.matches.toLocaleString()} matches
+              {stats.matches > 0
+                ? `${stats.matches.toLocaleString()} matches`
+                : `${stats.competitions.toLocaleString()} competitions`}
             </p>
             <div className="max-w-xl">
               <SearchBar
@@ -168,14 +179,23 @@ export default async function HomePage() {
           </section>
         )}
 
+        {/* Featured Leagues */}
+        <FeaturedLeagues leagues={featuredLeagues} />
+
         {/* This Week in Football */}
         {weekPreview.length > 0 && <WeekPreview data={weekPreview} />}
 
         {/* Competition Spotlight (rotating) */}
         {spotlight && <CompetitionSpotlight data={spotlight} />}
 
+        {/* Daily Team Spotlight */}
+        {teamSpotlight && <TeamSpotlightSection data={teamSpotlight} />}
+
         {/* Latest News (timely-first) */}
         {articles.length > 0 && <LatestNewsStrip articles={articles} />}
+
+        {/* Explore the Database */}
+        <ExploreDatabase stats={stats} />
 
         {/* Competition quick links */}
         {topCompetitions.length > 0 && (
