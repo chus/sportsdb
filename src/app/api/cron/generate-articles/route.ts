@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
 import OpenAI from "openai";
+import { submitUrlsToIndexNow, pingGoogleSitemap } from "@/lib/seo/indexnow";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
       matchPreviews: 0,
       errors: [] as string[],
     };
+    const generatedSlugs: string[] = [];
 
     // Hoist the players list once instead of reloading it inside every
     // linkArticleToPlayers call (was 50+ duplicate full table scans per run).
@@ -92,10 +94,11 @@ export async function GET(request: NextRequest) {
           if (article) {
             await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
             results.matchReports++;
+            generatedSlugs.push(article.slug);
           }
         } catch (error) {
           results.errors.push(`Match report ${match.id}: ${error}`);
-        }
+}
       });
     };
 
@@ -155,6 +158,7 @@ export async function GET(request: NextRequest) {
           if (article) {
             await insertRoundRecap(sql, article, md.competition_season_id, md.matchday, mdMatches, playersForLinking);
             results.roundRecaps++;
+            generatedSlugs.push(article.slug);
           }
         } catch (error) {
           results.errors.push(`Round recap ${md.competition} MD${md.matchday}: ${error}`);
@@ -207,6 +211,7 @@ export async function GET(request: NextRequest) {
           if (article) {
             await insertPlayerSpotlight(sql, article, player.player_id, player.team_slug, playersForLinking);
             results.playerSpotlights++;
+            generatedSlugs.push(article.slug);
           }
         } catch (error) {
           results.errors.push(`Player spotlight ${player.player_name}: ${error}`);
@@ -253,6 +258,7 @@ export async function GET(request: NextRequest) {
           if (article) {
             await insertArticle(sql, article, "match_preview", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
             results.matchPreviews++;
+            generatedSlugs.push(article.slug);
           }
         } catch (error) {
           results.errors.push(`Match preview ${match.id}: ${error}`);
@@ -269,9 +275,19 @@ export async function GET(request: NextRequest) {
       runMatchPreviews(),
     ]);
 
+    // Ping search engines about new content (non-blocking, non-critical)
+    if (generatedSlugs.length > 0) {
+      const urls = generatedSlugs.map((s) => `/news/${s}`);
+      await Promise.all([
+        submitUrlsToIndexNow(urls),
+        pingGoogleSitemap(),
+      ]).catch(() => {});
+    }
+
     return NextResponse.json({
       success: true,
       ...results,
+      indexNowPinged: generatedSlugs.length,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

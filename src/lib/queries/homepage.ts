@@ -82,6 +82,7 @@ export type HeroMatch = {
 export type HeroBanner =
   | { kind: "live"; count: number }
   | { kind: "today"; matches: HeroMatch[] }
+  | { kind: "results"; matches: HeroMatch[]; label: string }
   | { kind: "upcoming"; matches: HeroMatch[] };
 
 function hubMatchToHero(m: HubMatch): HeroMatch {
@@ -114,8 +115,10 @@ function hubMatchToHero(m: HubMatch): HeroMatch {
 /**
  * Returns the most relevant hero content for the current moment:
  *   1. Live matches if any
- *   2. Otherwise today's scheduled matches
- *   3. Otherwise the next upcoming fixtures
+ *   2. Today's scheduled/upcoming matches
+ *   3. Today's finished results (if games already played)
+ *   4. Yesterday's results (high-interest fallback)
+ *   5. Next upcoming fixtures
  */
 export async function getHeroBanner(opts?: {
   personalizedCompetitionIds?: string[];
@@ -134,13 +137,40 @@ export async function getHeroBanner(opts?: {
         opts.personalizedCompetitionIds!.includes(m.competitionId)
       )
     : todayMatches;
-  const todayScheduled = (filteredToday.length ? filteredToday : todayMatches)
+  const pool = filteredToday.length ? filteredToday : todayMatches;
+
+  // 2. Today's scheduled matches (games still to come)
+  const todayScheduled = pool
     .filter((m) => m.status === "scheduled" || m.status === "live")
     .slice(0, 8);
   if (todayScheduled.length > 0) {
     return { kind: "today", matches: todayScheduled.map(hubMatchToHero) };
   }
 
+  // 3. Today's finished results (games already played today)
+  const todayFinished = pool
+    .filter((m) => m.status === "finished")
+    .slice(0, 8);
+  if (todayFinished.length > 0) {
+    return { kind: "results", matches: todayFinished.map(hubMatchToHero), label: "Today's Results" };
+  }
+
+  // 4. Yesterday's results (high-interest fallback)
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStart = new Date(yesterday);
+  yStart.setHours(0, 0, 0, 0);
+  const yEnd = new Date(yesterday);
+  yEnd.setHours(23, 59, 59, 999);
+  const yesterdayMatches = await getMatchesForDateRange(yStart, yEnd);
+  const yesterdayFinished = yesterdayMatches
+    .filter((m) => m.status === "finished")
+    .slice(0, 8);
+  if (yesterdayFinished.length > 0) {
+    return { kind: "results", matches: yesterdayFinished.map(hubMatchToHero), label: "Yesterday's Results" };
+  }
+
+  // 5. Next upcoming fixtures
   const upcoming = await getUpcomingMatches(6);
   if (!upcoming.length) {
     return { kind: "upcoming", matches: [] };

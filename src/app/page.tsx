@@ -113,12 +113,12 @@ export default async function HomePage() {
     <>
       <WebsiteJsonLd
         url={BASE_URL}
-        name="SportsDB"
+        name="DataSports"
         description="The International Sports Database - Search across players, teams, competitions, and venues."
         searchUrl={`${BASE_URL}/search?q={search_term_string}`}
       />
       <OrganizationJsonLd
-        name="SportsDB"
+        name="DataSports"
         url={BASE_URL}
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
