@@ -241,7 +241,8 @@ async function processMatches(dryRun: boolean, specificLeague?: string) {
       // If month is Aug-Dec, season is YYYY/YYYY+1
       // If month is Jan-Jul, season is YYYY-1/YYYY
       const seasonYear = month >= 7 ? year : year - 1;
-      const seasonLabel = `${seasonYear}/${seasonYear + 1}`;
+      const nextYear = seasonYear + 1;
+      const seasonLabel = `${seasonYear}/${String(nextYear).slice(-2)}`;
 
       if (!matchesBySeason.has(seasonLabel)) {
         matchesBySeason.set(seasonLabel, []);

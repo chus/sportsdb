@@ -155,11 +155,26 @@ function getSeasonLabel(utcDate: string): string {
   const year = date.getFullYear();
   const month = date.getMonth();
   const seasonYear = month >= 7 ? year : year - 1;
-  return `${seasonYear}/${seasonYear + 1}`;
+  const nextYear = seasonYear + 1;
+  return `${seasonYear}/${String(nextYear).slice(-2)}`;
 }
 
-function getToday(): string {
-  return new Date().toISOString().slice(0, 10);
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Returns a date range: 3 days back + 7 days ahead.
+ * This ensures the cron catches recently finished matches (for scoring,
+ * article generation) and keeps upcoming fixtures populated for the homepage.
+ */
+function getDateRange(): { from: string; to: string } {
+  const now = new Date();
+  const from = new Date(now);
+  from.setDate(from.getDate() - 3);
+  const to = new Date(now);
+  to.setDate(to.getDate() + 7);
+  return { from: formatDate(from), to: formatDate(to) };
 }
 
 export async function GET() {
@@ -176,13 +191,13 @@ export async function GET() {
     );
   }
 
-  const today = getToday();
+  const { from, to } = getDateRange();
   let matchesUpdated = 0;
   const errors: string[] = [];
 
   for (const [code, league] of Object.entries(LEAGUE_MAPPING)) {
     try {
-      const url = `https://api.football-data.org/v4/competitions/${code}/matches?dateFrom=${today}&dateTo=${today}`;
+      const url = `https://api.football-data.org/v4/competitions/${code}/matches?dateFrom=${from}&dateTo=${to}`;
       const response = await fetch(url, {
         headers: { "X-Auth-Token": apiKey },
       });
