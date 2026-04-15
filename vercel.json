@@ -19,6 +19,14 @@
     {
       "path": "/api/cron/generate-event-content",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/distribute-social",
+      "schedule": "30 */2 * * *"
+    },
+    {
+      "path": "/api/cron/submit-indexing",
+      "schedule": "0 5 * * *"
     }
   ]
 }

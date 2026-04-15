@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
 import OpenAI from "openai";
-import { submitUrlsToIndexNow, pingGoogleSitemap } from "@/lib/seo/indexnow";
+import { submitUrlsToIndexNow, pingGoogleSitemap, submitUrlsToGoogle } from "@/lib/seo/indexnow";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -280,6 +280,7 @@ export async function GET(request: NextRequest) {
       const urls = generatedSlugs.map((s) => `/news/${s}`);
       await Promise.all([
         submitUrlsToIndexNow(urls),
+        submitUrlsToGoogle(urls),
         pingGoogleSitemap(),
       ]).catch(() => {});
     }

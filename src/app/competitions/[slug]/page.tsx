@@ -46,10 +46,6 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
     };
   }
 
-  // Thin page check: competition needs at least one season
-  const competitionSeason = await getCompetitionSeason(slug);
-  const isThin = !competitionSeason;
-
   const seasonLabel = await getCurrentSeasonLabel();
   const title = `${competition.name} Standings & Results ${seasonLabel} | DataSports`;
   const description = `Full ${competition.name} ${seasonLabel} standings, fixtures, results, and top scorers. Updated regularly.`;
@@ -57,7 +53,6 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
   return {
     title,
     description,
-    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,

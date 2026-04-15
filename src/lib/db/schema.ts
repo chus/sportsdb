@@ -1136,15 +1136,23 @@ export const socialPosts = pgTable(
   "social_posts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    platform: text("platform").notNull(), // 'twitter' | 'linkedin' | 'bluesky'
+    platform: text("platform").notNull(), // 'twitter' | 'reddit' | 'linkedin' | 'bluesky'
     content: text("content").notNull(),
     linkUrl: text("link_url"),
+    articleId: uuid("article_id").references(() => articles.id),
+    externalId: text("external_id"), // tweet ID or reddit post ID
+    status: text("status").notNull().default("pending"), // 'pending' | 'posted' | 'failed'
+    errorMessage: text("error_message"),
     postedAt: timestamp("posted_at", { withTimezone: true }),
     engagementClicks: integer("engagement_clicks").default(0),
     engagementImpressions: integer("engagement_impressions").default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
-  (table) => [index("idx_social_posts_platform").on(table.platform)]
+  (table) => [
+    index("idx_social_posts_platform").on(table.platform),
+    index("idx_social_posts_article").on(table.articleId),
+    index("idx_social_posts_status").on(table.status),
+  ]
 );
 
 export const agentLogs = pgTable(
