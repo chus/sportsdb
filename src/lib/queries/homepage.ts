@@ -1081,14 +1081,18 @@ export async function getFeaturedLeagues(
 
   // Fetch sample teams for each league
   const leagueIds = rows.rows.map((r) => r.id);
+  const idList = sql.join(
+    leagueIds.map((id) => sql`${id}::uuid`),
+    sql`, `
+  );
   const sampleRows = await db.execute<{
     competition_id: string;
     name: string;
     slug: string;
     logo_url: string | null;
   }>(sql`
-    SELECT DISTINCT ON (c_id, t.id)
-      cs.competition_id AS c_id,
+    SELECT DISTINCT ON (cs.competition_id, t.id)
+      cs.competition_id,
       t.name,
       t.slug,
       t.logo_url
@@ -1096,8 +1100,8 @@ export async function getFeaturedLeagues(
     INNER JOIN competition_seasons cs ON cs.id = ts.competition_season_id
     INNER JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
     INNER JOIN teams t ON t.id = ts.team_id
-    WHERE cs.competition_id = ANY(${leagueIds}::uuid[])
-    ORDER BY c_id, t.id
+    WHERE cs.competition_id IN (${idList})
+    ORDER BY cs.competition_id, t.id
   `);
 
   // Group samples by competition
