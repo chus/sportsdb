@@ -40,7 +40,7 @@ export default function LoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Sign in to SportsDB</h1>
+          <h1 className="text-3xl font-bold text-neutral-900">Sign in to DataSports</h1>
           <p className="mt-2 text-neutral-500">
             Welcome back! Enter your credentials to continue.
           </p>

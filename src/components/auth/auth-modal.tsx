@@ -158,8 +158,8 @@ function AuthModal({
           </h2>
           <p id={descriptionId} className="text-sm text-neutral-500">
             {tab === "signin"
-              ? "Sign in to your SportsDB account"
-              : "Join SportsDB to follow your favorite teams and players"}
+              ? "Sign in to your DataSports account"
+              : "Join DataSports to follow your favorite teams and players"}
           </p>
         </div>
 

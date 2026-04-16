@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
   const type = VALID_TYPES.has(rawType as EntityImageType)
     ? (rawType as EntityImageType)
     : "article";
-  const name = searchParams.get("name")?.trim() || "SportsDB";
+  const name = searchParams.get("name")?.trim() || "DataSports";
   const initials = getEntityInitials(name);
   const label = getFallbackEntityLabel(type);
   const theme = getFallbackEntityTheme(type);

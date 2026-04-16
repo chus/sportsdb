@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { article, competition, season } = result;
 
   // Enhanced title for match reports
-  let title = article.metaTitle || article.title;
+  let title = (article.metaTitle || article.title).replace(/\s*\|\s*(SportsDB|DataSports)\s*$/i, "");
   if (article.type === "match_report" && article.matchId) {
     const matchData = await getArticleMatchData(article.matchId);
     if (matchData && matchData.match.homeScore !== null && matchData.match.awayScore !== null) {
@@ -316,7 +316,7 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: article.publishedAt?.toISOString(),
     dateModified: (article.updatedAt || article.publishedAt)?.toISOString(),
     author: {
-      "@type": "Person",
+      "@type": "Organization",
       name: "DataSports Editorial",
       url: BASE_URL,
     },

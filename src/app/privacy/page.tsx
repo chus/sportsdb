@@ -5,10 +5,10 @@ import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – DataSports",
+  title: "Privacy Policy",
   description: "Learn how DataSports collects, uses, and protects your personal information. Our commitment to your privacy.",
   openGraph: {
-    title: "Privacy Policy – DataSports",
+    title: "Privacy Policy",
     description: "Learn how DataSports collects, uses, and protects your personal information. Our commitment to your privacy.",
     url: `${BASE_URL}/privacy`,
     siteName: "DataSports",
@@ -51,13 +51,13 @@ export default function PrivacyPage() {
               {/* 1. Introduction */}
               <h2>1. Introduction</h2>
               <p>
-                SportsDB (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website {BASE_URL} (the &quot;Site&quot;).
+                DataSports (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website {BASE_URL} (the &quot;Site&quot;).
               </p>
               <p>
                 Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
               </p>
               <p>
-                This policy is designed to comply with the General Data Protection Regulation (GDPR), the ePrivacy Directive, and other applicable data protection laws. The data controller responsible for your personal data is SportsDB, reachable at privacy@datasports.co.
+                This policy is designed to comply with the General Data Protection Regulation (GDPR), the ePrivacy Directive, and other applicable data protection laws. The data controller responsible for your personal data is DataSports, reachable at privacy@datasports.co.
               </p>
 
               {/* 2. Information We Collect */}

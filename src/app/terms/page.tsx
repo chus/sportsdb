@@ -6,10 +6,10 @@ import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Terms of Service – DataSports",
+  title: "Terms of Service",
   description: "Read the terms and conditions for using DataSports. Understand your rights and responsibilities when using our platform.",
   openGraph: {
-    title: "Terms of Service – DataSports",
+    title: "Terms of Service",
     description: "Read the terms and conditions for using DataSports. Understand your rights and responsibilities when using our platform.",
     url: `${BASE_URL}/terms`,
     siteName: "DataSports",
@@ -50,12 +50,12 @@ export default function TermsPage() {
             <div className="prose prose-neutral max-w-none">
               <h2>1. Acceptance of Terms</h2>
               <p>
-                By accessing and using SportsDB (&quot;the Site&quot;), you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Site.
+                By accessing and using DataSports (&quot;the Site&quot;), you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Site.
               </p>
 
               <h2>2. Description of Service</h2>
               <p>
-                SportsDB provides a database of football (soccer) information including player profiles, team information, match results, standings, and related statistics. The service is provided &quot;as is&quot; and we make no guarantees regarding the accuracy, completeness, or timeliness of the information.
+                DataSports provides a database of football (soccer) information including player profiles, team information, match results, standings, and related statistics. The service is provided &quot;as is&quot; and we make no guarantees regarding the accuracy, completeness, or timeliness of the information.
               </p>
 
               <h2>3. User Accounts</h2>
@@ -83,7 +83,7 @@ export default function TermsPage() {
 
               <h2>5. Intellectual Property</h2>
               <p>
-                The Site and its original content, features, and functionality are owned by SportsDB and are protected by international copyright, trademark, and other intellectual property laws.
+                The Site and its original content, features, and functionality are owned by DataSports and are protected by international copyright, trademark, and other intellectual property laws.
               </p>
               <p>
                 Sports data displayed on the Site may be subject to third-party rights. Team names, logos, and player likenesses are trademarks of their respective owners.
@@ -99,7 +99,7 @@ export default function TermsPage() {
 
               <h2>7. Data Usage</h2>
               <p>
-                The data provided on SportsDB is intended for personal, non-commercial use. Commercial use of our data requires explicit written permission. Please <Link href="/contact" className="text-blue-600 hover:underline">contact us</Link> for licensing inquiries.
+                The data provided on DataSports is intended for personal, non-commercial use. Commercial use of our data requires explicit written permission. Please <Link href="/contact" className="text-blue-600 hover:underline">contact us</Link> for licensing inquiries.
               </p>
               <p>
                 Automated access to our data (including scraping, crawling, or API access) requires prior authorization.
@@ -107,7 +107,7 @@ export default function TermsPage() {
 
               <h2>8. Subscriptions and Payments</h2>
               <p>
-                SportsDB offers optional paid subscription plans (Pro) that unlock additional features. By subscribing, you agree to the following:
+                DataSports offers optional paid subscription plans (Pro) that unlock additional features. By subscribing, you agree to the following:
               </p>
               <ul>
                 <li>Subscription fees are billed monthly and charged at the beginning of each billing period.</li>
@@ -136,43 +136,43 @@ export default function TermsPage() {
                 <li>The information on the Site is accurate or complete</li>
               </ul>
 
-              <h2>9. Limitation of Liability</h2>
+              <h2>11. Limitation of Liability</h2>
               <p>
-                TO THE FULLEST EXTENT PERMITTED BY LAW, SPORTSDB SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE SITE.
+                TO THE FULLEST EXTENT PERMITTED BY LAW, DATASPORTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE SITE.
               </p>
 
-              <h2>11. Indemnification</h2>
+              <h2>12. Indemnification</h2>
               <p>
-                You agree to indemnify and hold harmless SportsDB and its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Site or violation of these Terms.
+                You agree to indemnify and hold harmless DataSports and its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Site or violation of these Terms.
               </p>
 
-              <h2>12. Third-Party Links</h2>
+              <h2>13. Third-Party Links</h2>
               <p>
                 Our Site may contain links to third-party websites. We are not responsible for the content or practices of these external sites. We encourage you to review their terms and privacy policies.
               </p>
 
-              <h2>13. Modifications to Terms</h2>
+              <h2>14. Modifications to Terms</h2>
               <p>
                 We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting. Your continued use of the Site constitutes acceptance of the modified Terms.
               </p>
 
-              <h2>14. Termination</h2>
+              <h2>15. Termination</h2>
               <p>
                 We may terminate or suspend your access to the Site immediately, without prior notice, for any reason, including breach of these Terms. Upon termination, your right to use the Site will cease immediately.
               </p>
 
-              <h2>15. Governing Law</h2>
+              <h2>16. Governing Law</h2>
               <p>
                 These Terms shall be governed by and construed in accordance with applicable laws, without regard to conflict of law principles.
               </p>
 
-              <h2>16. Contact Information</h2>
+              <h2>17. Contact Information</h2>
               <p>
                 If you have any questions about these Terms, please contact us:
               </p>
               <ul>
-                <li>Email: legal@sportsdb.com</li>
-                <li>Contact form: <Link href="/contact" className="text-blue-600 hover:underline">sportsdb.com/contact</Link></li>
+                <li>Email: legal@datasports.co</li>
+                <li>Contact form: <Link href="/contact" className="text-blue-600 hover:underline">datasports.co/contact</Link></li>
               </ul>
             </div>
           </div>

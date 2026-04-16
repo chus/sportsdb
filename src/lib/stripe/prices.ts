@@ -13,13 +13,13 @@ interface PriceConfig {
 const TIER_PRICES: Record<"pro", Record<BillingPeriod, PriceConfig>> = {
   pro: {
     monthly: {
-      name: "SportsDB Pro (Monthly)",
+      name: "DataSports Pro (Monthly)",
       amount: 100, // €1.00
       lookupKey: "sportsdb_pro_monthly",
       interval: "month",
     },
     annual: {
-      name: "SportsDB Pro (Annual)",
+      name: "DataSports Pro (Annual)",
       amount: 800, // €8.00
       lookupKey: "sportsdb_pro_annual",
       interval: "year",

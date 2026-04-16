@@ -179,7 +179,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-8 h-8" />
-            <h2 className="text-3xl font-bold">Welcome to SportsDB!</h2>
+            <h2 className="text-3xl font-bold">Welcome to DataSports!</h2>
           </div>
 
           <p className="text-blue-100 text-lg">

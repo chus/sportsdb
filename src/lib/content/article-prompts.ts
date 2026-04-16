@@ -638,7 +638,7 @@ SEO REQUIREMENTS:
 2. Include team name in title or first paragraph
 3. First paragraph must link to ${playerLink}
 4. Include keywords: "${ctx.player.name} stats", "${ctx.player.name} ${ctx.player.currentTeam}"
-5. Meta title: "${ctx.player.name} | Player Spotlight | SportsDB" (max 60 chars)
+5. Meta title: "${ctx.player.name} | Player Spotlight" (max 60 chars)
 6. Meta description: Include achievement, stats, and team name (150-160 chars)
 
 READABILITY GUIDELINES:

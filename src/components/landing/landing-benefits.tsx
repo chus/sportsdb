@@ -39,7 +39,7 @@ export function LandingBenefits() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-4xl font-bold text-neutral-900 mb-6">
-              Why SportsDB?
+              Why DataSports?
             </h2>
             <div className="space-y-4">
               {benefits.map((benefit) => (
@@ -69,7 +69,7 @@ export function LandingBenefits() {
                       Welcome back, {user.name || "Champion"}!
                     </h3>
                     <p className="text-neutral-600">
-                      You have full access to all SportsDB features
+                      You have full access to all DataSports features
                     </p>
                   </div>
                   <Link
@@ -119,7 +119,7 @@ export function LandingBenefits() {
                     Ready to get started?
                   </h3>
                   <p className="text-neutral-600">
-                    Join thousands of sports fans already using SportsDB
+                    Join thousands of sports fans already using DataSports
                   </p>
                 </div>
                 <Link

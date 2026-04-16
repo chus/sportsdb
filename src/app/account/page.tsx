@@ -472,7 +472,7 @@ export default function AccountPage() {
                   href="/search"
                   className="inline-block px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Explore SportsDB
+                  Explore DataSports
                 </Link>
               </div>
             ) : (
@@ -793,7 +793,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-neutral-900">Refer a Friend</h2>
-                  <p className="text-sm text-neutral-600">Share SportsDB and earn rewards</p>
+                  <p className="text-sm text-neutral-600">Share DataSports and earn rewards</p>
                 </div>
               </div>
 
@@ -844,22 +844,22 @@ export default function AccountPage() {
                     {[
                       {
                         label: "WhatsApp",
-                        href: `https://wa.me/?text=${encodeURIComponent(`Check out SportsDB — the best football database! https://datasports.co?ref=${referralCode}`)}`,
+                        href: `https://wa.me/?text=${encodeURIComponent(`Check out DataSports — the best football database! https://datasports.co?ref=${referralCode}`)}`,
                         bg: "bg-green-500 hover:bg-green-600",
                       },
                       {
                         label: "Telegram",
-                        href: `https://t.me/share/url?url=${encodeURIComponent(`https://datasports.co?ref=${referralCode}`)}&text=${encodeURIComponent("Check out SportsDB — the best football database!")}`,
+                        href: `https://t.me/share/url?url=${encodeURIComponent(`https://datasports.co?ref=${referralCode}`)}&text=${encodeURIComponent("Check out DataSports — the best football database!")}`,
                         bg: "bg-blue-500 hover:bg-blue-600",
                       },
                       {
                         label: "X",
-                        href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out SportsDB — the best football database! https://datasports.co?ref=${referralCode}`)}`,
+                        href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out DataSports — the best football database! https://datasports.co?ref=${referralCode}`)}`,
                         bg: "bg-neutral-800 hover:bg-neutral-900",
                       },
                       {
                         label: "Email",
-                        href: `mailto:?subject=${encodeURIComponent("Check out SportsDB")}&body=${encodeURIComponent(`I've been using SportsDB and thought you'd like it: https://datasports.co?ref=${referralCode}`)}`,
+                        href: `mailto:?subject=${encodeURIComponent("Check out DataSports")}&body=${encodeURIComponent(`I've been using DataSports and thought you'd like it: https://datasports.co?ref=${referralCode}`)}`,
                         bg: "bg-neutral-600 hover:bg-neutral-700",
                       },
                     ].map((share) => (

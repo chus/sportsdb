@@ -7,7 +7,7 @@ import {
   competitions,
   seasons,
 } from "@/lib/db/schema";
-import { eq, desc, ne, and, isNotNull, sql, lte, gte } from "drizzle-orm";
+import { eq, desc, ne, and, isNotNull, isNull, sql, lte, gte } from "drizzle-orm";
 
 // ============================================================
 // SHARED TYPES
@@ -279,7 +279,7 @@ export async function getPositionCounts(): Promise<{ position: string; count: nu
       count: sql<number>`count(*)::int`.as("count"),
     })
     .from(players)
-    .where(ne(players.position, "Unknown"))
+    .where(and(ne(players.position, "Unknown"), isNotNull(players.position)))
     .groupBy(players.position)
     .orderBy(desc(sql`count(*)`));
 }
@@ -306,6 +306,8 @@ export async function getPlayersByPosition(position: string, limit = 100) {
     LEFT JOIN player_team_history pth ON pth.player_id = p.id AND pth.valid_to IS NULL
     LEFT JOIN teams t ON t.id = pth.team_id
     WHERE p.position = ${position}
+    GROUP BY p.id, p.name, p.slug, p.position, p.nationality, p.image_url, p.popularity_score, p.is_indexable,
+             t.name, t.slug, t.logo_url
     ORDER BY coalesce(p.popularity_score, 0) DESC
     LIMIT ${limit}
   `);
@@ -358,7 +360,7 @@ export async function getPlayersByNationality(nationality: string, limit = 100) 
     team_slug: string | null;
     team_logo_url: string | null;
   }>(sql`
-    SELECT
+    SELECT DISTINCT ON (p.id)
       p.id, p.name, p.slug, p.position, p.nationality, p.image_url, p.popularity_score,
       p.is_indexable,
       t.name as team_name, t.slug as team_slug, t.logo_url as team_logo_url
@@ -367,8 +369,7 @@ export async function getPlayersByNationality(nationality: string, limit = 100) 
     LEFT JOIN teams t ON t.id = pth.team_id
     WHERE p.nationality = ${nationality}
       AND p.position != 'Unknown'
-    ORDER BY coalesce(p.popularity_score, 0) DESC
-    LIMIT ${limit}
+    ORDER BY p.id, coalesce(p.popularity_score, 0) DESC
   `);
 
   return result.rows.map((r) => ({

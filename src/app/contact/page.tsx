@@ -6,7 +6,7 @@ import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Contact Us – DataSports",
+  title: "Contact Us",
   description: "Get in touch with the DataSports team. We welcome feedback, partnership inquiries, and data correction requests.",
   openGraph: {
     title: "Contact DataSports",
@@ -26,37 +26,37 @@ export default function ContactPage() {
       icon: Mail,
       title: "Email",
       description: "For general inquiries and support",
-      value: "hello@sportsdb.com",
-      href: "mailto:hello@sportsdb.com",
+      value: "hello@datasports.co",
+      href: "mailto:hello@datasports.co",
     },
     {
       icon: Github,
       title: "GitHub",
       description: "Report issues or contribute",
-      value: "github.com/sportsdb",
-      href: "https://github.com/sportsdb",
+      value: "github.com/datasports",
+      href: "https://github.com/datasports",
     },
     {
       icon: Twitter,
       title: "Twitter / X",
       description: "Follow us for updates",
-      value: "@sportsdb",
-      href: "https://twitter.com/sportsdb",
+      value: "@datasportsco",
+      href: "https://twitter.com/datasportsco",
     },
   ];
 
   const faqItems = [
     {
       question: "How can I report incorrect data?",
-      answer: "If you find any incorrect information in our database, please email us at hello@sportsdb.com with details about the error and the correct information. We review all submissions and update our database accordingly.",
+      answer: "If you find any incorrect information in our database, please email us at hello@datasports.co with details about the error and the correct information. We review all submissions and update our database accordingly.",
     },
     {
       question: "Do you offer an API?",
       answer: "We're currently developing a public API for developers. If you're interested in early access, please reach out via email with details about your use case.",
     },
     {
-      question: "Can I use SportsDB data for my project?",
-      answer: "SportsDB data is available for personal and educational use. For commercial use or large-scale data access, please contact us to discuss licensing options.",
+      question: "Can I use DataSports data for my project?",
+      answer: "DataSports data is available for personal and educational use. For commercial use or large-scale data access, please contact us to discuss licensing options.",
     },
     {
       question: "How often is the data updated?",

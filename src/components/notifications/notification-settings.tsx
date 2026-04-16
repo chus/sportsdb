@@ -72,7 +72,7 @@ const NOTIFICATION_TYPES = [
   {
     key: "achievement" as const,
     label: "Achievements",
-    description: "Your SportsDB achievements and badges",
+    description: "Your DataSports achievements and badges",
     icon: Award,
   },
 ];

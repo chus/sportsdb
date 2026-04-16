@@ -341,7 +341,7 @@ function buildMatchReportPrompt(match: any, events: any[]): string {
   const cards = events.filter(e => e.type === 'yellow_card' || e.type === 'red_card');
   const substitutions = events.filter(e => e.type === 'substitution');
 
-  return `You are an experienced sports journalist writing an in-depth match report for SportsDB, a professional football database website. Write with authority, insight, and engaging storytelling.
+  return `You are an experienced sports journalist writing an in-depth match report for DataSports, a professional football database website. Write with authority, insight, and engaging storytelling.
 
 LENGTH REQUIREMENT (CRITICAL — READ FIRST):
 This article MUST be a MINIMUM of 1300 words. Target 1500-1800 words. Articles shorter than 1300 words will be rejected and regenerated.

@@ -16,7 +16,7 @@ import { getDashboardData } from "@/lib/queries/dashboard";
 import { getUserSubscription } from "@/lib/queries/subscriptions";
 
 export const metadata: Metadata = {
-  title: "Dashboard - DataSports",
+  title: "Dashboard",
   description: "Your personalized sports dashboard.",
   robots: { index: false, follow: false },
 };

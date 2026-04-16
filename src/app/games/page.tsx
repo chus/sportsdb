@@ -4,10 +4,15 @@ import { Target, Vote, Brain, Trophy, Zap, ArrowRight } from "lucide-react";
 import { getCombinedLeaderboard } from "@/lib/queries/games-common";
 import { getCurrentUser } from "@/lib/auth";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export const metadata: Metadata = {
   title: "Games — Predict, Pick & Challenge",
   description:
     "Test your football knowledge with score predictions, Pick'em, and daily trivia challenges. Compete on leaderboards and earn bragging rights.",
+  alternates: {
+    canonical: `${BASE_URL}/games`,
+  },
 };
 
 const GAMES = [

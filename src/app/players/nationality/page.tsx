@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { getDistinctNationalities } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
+import { getCountryFlagUrl } from "@/lib/utils/country-flags";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -64,7 +66,14 @@ export default async function NationalityIndexPage() {
                 className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-teal-500" />
+                  {(() => {
+                    const flagUrl = getCountryFlagUrl(item.nationality, 40);
+                    return flagUrl ? (
+                      <ImageWithFallback src={flagUrl} alt={`${item.nationality} flag`} width={28} height={20} className="w-7 h-5 object-cover rounded-sm shadow-sm" />
+                    ) : (
+                      <Globe className="w-5 h-5 text-teal-500" />
+                    );
+                  })()}
                   <div>
                     <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
                       {item.nationality}

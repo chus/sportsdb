@@ -9,7 +9,7 @@ import { sql, eq } from "drizzle-orm";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "About DataSports – The International Sports Database",
+  title: "About — The International Sports Database",
   description: "Learn about DataSports, the structured canonical database for football. Our mission is to provide accurate, time-aware sports data for fans, researchers, and developers.",
   openGraph: {
     title: "About DataSports",

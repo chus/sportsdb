@@ -100,7 +100,7 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
             <h2 className="text-3xl font-bold">Choose Your Plan</h2>
           </div>
           <p className="text-blue-100 text-lg max-w-xl mx-auto">
-            Unlock the full power of SportsDB with a plan that fits your needs
+            Unlock the full power of DataSports with a plan that fits your needs
           </p>
         </div>
 

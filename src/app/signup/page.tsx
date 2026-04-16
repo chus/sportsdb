@@ -47,7 +47,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-neutral-900">Create your account</h1>
           <p className="mt-2 text-neutral-500">
-            Join SportsDB to follow your favorite teams and players.
+            Join DataSports to follow your favorite teams and players.
           </p>
         </div>
 
