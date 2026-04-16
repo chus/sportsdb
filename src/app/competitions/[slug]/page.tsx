@@ -41,13 +41,13 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
 
   if (!competition) {
     return {
-      title: "Competition Not Found | DataSports",
+      title: "Competition Not Found",
       robots: { index: false, follow: false },
     };
   }
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${competition.name} Standings & Results ${seasonLabel} | DataSports`;
+  const title = `${competition.name} Standings & Results ${seasonLabel}`;
   const description = `Full ${competition.name} ${seasonLabel} standings, fixtures, results, and top scorers. Updated regularly.`;
 
   return {

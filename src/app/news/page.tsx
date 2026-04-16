@@ -1,7 +1,8 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
-import { Newspaper, FileText, Users, Trophy } from "lucide-react";
+import { Newspaper, FileText, Users, Trophy, Eye } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
@@ -12,7 +13,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
   const type = params.type || "";
-  const title = "Football News & Match Reports | DataSports";
+  const title = "Football News & Match Reports";
   const description =
     "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.";
 
@@ -40,6 +41,7 @@ const ARTICLE_TYPES = [
   { value: "", label: "All News", icon: Newspaper },
   { value: "match_report", label: "Match Reports", icon: FileText },
   { value: "round_recap", label: "Matchday Recaps", icon: Trophy },
+  { value: "match_preview", label: "Match Previews", icon: Eye },
   { value: "player_spotlight", label: "Player Spotlights", icon: Users },
 ];
 
@@ -139,7 +141,7 @@ export default async function NewsPage({ searchParams }: Props) {
           const Icon = t.icon;
           const isActive = type === t.value;
           return (
-            <a
+            <Link
               key={t.value}
               href={t.value ? `/news?type=${t.value}` : "/news"}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -150,7 +152,7 @@ export default async function NewsPage({ searchParams }: Props) {
             >
               <Icon className="w-4 h-4" />
               {t.label}
-            </a>
+            </Link>
           );
         })}
       </div>
@@ -182,23 +184,23 @@ export default async function NewsPage({ searchParams }: Props) {
           {totalPages > 1 && (
             <div className="flex justify-center gap-2">
               {page > 1 && (
-                <a
+                <Link
                   href={`/news?${type ? `type=${type}&` : ""}page=${page - 1}`}
                   className="px-4 py-2 bg-white border border-neutral-200 rounded-lg text-sm hover:border-blue-300 transition-colors"
                 >
                   Previous
-                </a>
+                </Link>
               )}
               <span className="px-4 py-2 text-sm text-neutral-500">
                 Page {page} of {totalPages}
               </span>
               {page < totalPages && (
-                <a
+                <Link
                   href={`/news?${type ? `type=${type}&` : ""}page=${page + 1}`}
                   className="px-4 py-2 bg-white border border-neutral-200 rounded-lg text-sm hover:border-blue-300 transition-colors"
                 >
                   Next
-                </a>
+                </Link>
               )}
             </div>
           )}

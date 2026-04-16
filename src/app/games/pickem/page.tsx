@@ -5,7 +5,7 @@ import { getPickemCommunityPercentages, getUserPickems, getPickemLeaderboard } f
 import { PickemForm } from "./pickem-form";
 
 export const metadata: Metadata = {
-  title: "Pick'em — Games | SportsDB",
+  title: "Pick'em — Games",
   description: "Pick Home, Draw, or Away for upcoming matches. See community vote percentages and compete on the leaderboard.",
 };
 

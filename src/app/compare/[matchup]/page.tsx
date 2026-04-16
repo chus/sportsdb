@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (p1.totalStats.appearances ?? 0) === 0 &&
     (p2.totalStats.appearances ?? 0) === 0;
 
-  const title = `${p1.name} vs ${p2.name} – Stats Comparison | DataSports`;
+  const title = `${p1.name} vs ${p2.name} – Stats Comparison`;
   const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, and career statistics.`;
 
   return {

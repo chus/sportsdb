@@ -4,7 +4,7 @@ import { getAvailableMatches, getUserPredictions, getGlobalLeaderboard } from "@
 import { ProdeForm } from "./prode-form";
 
 export const metadata: Metadata = {
-  title: "Score Predictions (Prode) — Games | SportsDB",
+  title: "Score Predictions (Prode) — Games",
   description: "Predict exact scores for upcoming football matches. Earn 3 points for an exact match, 1 for the correct result.",
 };
 

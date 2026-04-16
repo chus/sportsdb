@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const competition = await getCompetitionBySlug(slug);
   if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
 
-  const title = `${competition.name} Top Scorers ${seasonLabel} | DataSports`;
+  const title = `${competition.name} Top Scorers ${seasonLabel}`;
   const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. Full rankings with goals, assists, and appearances for every player.`;
 
   // If the requested season is the current season, canonical points to /top-scorers/[slug]

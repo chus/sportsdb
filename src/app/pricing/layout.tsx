@@ -5,11 +5,11 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Pricing – Free & Pro Plans | DataSports",
+  title: "Pricing – Free & Pro Plans",
   description:
     "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €8/year.",
   openGraph: {
-    title: "Pricing – Free & Pro Plans | DataSports",
+    title: "Pricing – Free & Pro Plans",
     description:
       "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €8/year.",
     url: `${BASE_URL}/pricing`,

@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
 
   if (!player) {
     return {
-      title: "Player Not Found | DataSports",
+      title: "Player Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
 
   if (quality.shouldReturn404) {
     return {
-      title: "Player Not Found | DataSports",
+      title: "Player Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${player.name} – Stats, Goals & Career History ${seasonLabel} | DataSports`;
+  const title = `${player.name} – Stats, Goals & Career History ${seasonLabel}`;
 
   // Build data-rich description
   const statsParts: string[] = [];

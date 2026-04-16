@@ -6,11 +6,11 @@ import { PageHeader } from "@/components/layout/page-header";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const metadata: Metadata = {
-  title: "Methodology – How We Source & Present Football Data | DataSports",
+  title: "Methodology – How We Source & Present Football Data",
   description:
     "Learn how DataSports collects, processes, and presents football data. Our methodology covers data sources, update frequency, quality practices, and editorial standards.",
   openGraph: {
-    title: "Methodology – How We Source & Present Football Data | DataSports",
+    title: "Methodology – How We Source & Present Football Data",
     description:
       "Learn how DataSports collects, processes, and presents football data. Our methodology covers data sources, update frequency, quality practices, and editorial standards.",
     url: `${BASE_URL}/methodology`,

@@ -26,7 +26,7 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   const today = format(new Date(), "yyyy-MM-dd");
   return {
-    title: "Football Matches — Live Scores, Fixtures & Results | DataSports",
+    title: "Football Matches — Live Scores, Fixtures & Results",
     description: `Football matches for ${today}: live scores, lineups, and results. Browse upcoming fixtures and recent results across the Premier League, La Liga, Serie A, Bundesliga, and more.`,
     robots: { index: true, follow: true },
     alternates: {

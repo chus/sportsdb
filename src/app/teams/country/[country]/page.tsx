@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const decodedCountry = decodeURIComponent(country);
   const adjective = countryAdjective(decodedCountry);
 
-  const title = `${adjective} Football Teams – Clubs & Info | DataSports`;
+  const title = `${adjective} Football Teams – Clubs & Info`;
   const description = `Browse all football clubs from ${decodedCountry}. View team profiles, stadiums, and squad information.`;
 
   return {

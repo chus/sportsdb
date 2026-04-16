@@ -11,7 +11,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Football Stadiums & Venues – Capacity, Location & Info | DataSports",
+  title: "Football Stadiums & Venues – Capacity, Location & Info",
   description: "Explore football stadiums and venues worldwide. Find capacity, location, opening year, and home teams for every major venue.",
   alternates: { canonical: `${BASE_URL}/venues` },
 };

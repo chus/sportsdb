@@ -5,7 +5,7 @@ import { getCombinedLeaderboard } from "@/lib/queries/games-common";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Games — Predict, Pick & Challenge | SportsDB",
+  title: "Games — Predict, Pick & Challenge",
   description:
     "Test your football knowledge with score predictions, Pick'em, and daily trivia challenges. Compete on leaderboards and earn bragging rights.",
 };

@@ -4,7 +4,7 @@ import { getUserLeagues } from "@/lib/queries/leagues";
 import { LeaguesContent } from "./leagues-content";
 
 export const metadata: Metadata = {
-  title: "Private Leagues — Games | SportsDB",
+  title: "Private Leagues — Games",
   description:
     "Create or join private prediction leagues. Compete with friends and climb your league leaderboard.",
 };

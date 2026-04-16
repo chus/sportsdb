@@ -13,7 +13,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const sl = await getCurrentSeasonLabel();
-  const title = `Top Scorers ${sl} – Goals & Stats | DataSports`;
+  const title = `Top Scorers ${sl} – Goals & Stats`;
   const description = `Top scorers across all major football competitions for the ${sl} season. See goals, assists, and appearances for the leading strikers.`;
   return {
     title,

@@ -15,11 +15,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Football Competitions – Leagues & Tournaments | DataSports",
+  title: "Football Competitions – Leagues & Tournaments",
   description:
     "Explore football leagues and tournaments worldwide. Browse Premier League, La Liga, Bundesliga, Serie A, Champions League and more.",
   openGraph: {
-    title: "Football Competitions – Leagues & Tournaments | DataSports",
+    title: "Football Competitions – Leagues & Tournaments",
     description:
       "Explore football leagues and tournaments worldwide. Browse Premier League, La Liga, Bundesliga, Serie A, Champions League and more.",
     url: `${BASE_URL}/competitions`,

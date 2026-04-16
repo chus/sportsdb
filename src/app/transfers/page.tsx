@@ -15,7 +15,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const sl = await getCurrentSeasonLabel();
-  const title = `Football Transfers ${sl} – Latest Signings | DataSports`;
+  const title = `Football Transfers ${sl} – Latest Signings`;
   const description = `Latest football transfers and signings for the ${sl} season. Track player movements between clubs.`;
   return {
     title,

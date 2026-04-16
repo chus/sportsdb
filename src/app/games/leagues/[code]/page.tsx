@@ -18,7 +18,7 @@ export async function generateMetadata({
   if (!league) return { title: "League Not Found", robots: { index: false, follow: false } };
 
   return {
-    title: `${league.name} — Private League | SportsDB`,
+    title: `${league.name} — Private League`,
     description: `Join ${league.name} and compete with friends. Use code ${league.code} to join.`,
     robots: { index: false, follow: false },
   };

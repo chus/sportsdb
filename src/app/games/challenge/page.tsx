@@ -4,7 +4,7 @@ import { getDailyQuestions, getUserDailyProgress, getChallengeLeaderboard } from
 import { ChallengeGame } from "./challenge-game";
 
 export const metadata: Metadata = {
-  title: "Daily Challenge — Games | SportsDB",
+  title: "Daily Challenge — Games",
   description: "Test your football knowledge with 5 new trivia questions every day. Categories include history, stats, transfers, and more.",
 };
 

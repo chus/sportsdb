@@ -13,11 +13,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Trending – Popular Football Players & Teams | DataSports",
+  title: "Trending – Popular Football Players & Teams",
   description:
     "See which football players and teams are trending right now. Live popularity rankings, most-searched players, and rising teams updated daily on DataSports.",
   openGraph: {
-    title: "Trending – Popular Football Players & Teams | DataSports",
+    title: "Trending – Popular Football Players & Teams",
     description:
       "See which football players and teams are trending right now. Live popularity rankings, most-searched players, and rising teams updated daily on DataSports.",
     url: `${BASE_URL}/trending`,
@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: `${BASE_URL}/trending`,
   },
+  robots: { index: false, follow: true },
 };
 
 export default async function TrendingPage() {

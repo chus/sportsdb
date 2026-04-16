@@ -31,7 +31,7 @@ export async function generateMetadata({
 
   // Convert URL format to display format
   const displaySeason = season.replace("-", "/");
-  const title = `${competition.name} ${displaySeason} – Standings & Stats | DataSports`;
+  const title = `${competition.name} ${displaySeason} – Standings & Stats`;
   const description = `${competition.name} ${displaySeason} season standings, teams, top scorers, and statistics on DataSports.`;
 
   // If this is the current season, canonical points to /competitions/[slug]

@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
 
   if (!team) {
     return {
-      title: "Team Not Found | DataSports",
+      title: "Team Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   const isThin = quality.isThin;
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${team.name} – Squad, Results & Standings ${seasonLabel} | DataSports`;
+  const title = `${team.name} – Squad, Results & Standings ${seasonLabel}`;
   const mvStr = team.squadMarketValue ? ` Squad value: ${formatMarketValue(team.squadMarketValue)}.` : "";
   const description = `${team.name} squad, fixtures, results, and standings for the ${seasonLabel} season.${mvStr} View full roster, recent matches, and league position.`;
 
@@ -256,8 +256,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const nextMatch = matchesData.upcoming[0] ?? null;
   const recentMatches = matchesData.recent.slice(0, 5);
 
-  // Guard: skip city if it's a number (data quality bug)
-  const safeCity = team.city && !/^\d+$/.test(team.city) ? team.city : null;
+  // Guard: skip city if it's a number or looks like a street address
+  const safeCity = team.city && !/^\d+$/.test(team.city) && !/^(Avenida|Calle|Camí|Street|Road|Via)\b/i.test(team.city) ? team.city : null;
   // Guard: skip shortName if truncated mid-word (15 char API limit)
   const safeShortName = team.shortName && team.shortName.length < 15 ? team.shortName : null;
 

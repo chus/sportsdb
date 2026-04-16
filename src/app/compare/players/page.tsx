@@ -19,10 +19,10 @@ interface ComparePageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Compare Players – Head to Head Stats Comparison | DataSports",
+  title: "Compare Players – Head to Head Stats Comparison",
   description: "Compare any two football players head to head. View career goals, assists, appearances, ratings, and performance stats side by side on DataSports.",
   openGraph: {
-    title: "Compare Players – Head to Head Stats Comparison | DataSports",
+    title: "Compare Players – Head to Head Stats Comparison",
     description: "Compare any two football players head to head. View career goals, assists, appearances, ratings, and performance stats side by side on DataSports.",
     url: `${BASE_URL}/compare/players`,
     siteName: "DataSports",

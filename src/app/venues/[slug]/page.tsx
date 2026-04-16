@@ -45,7 +45,7 @@ export async function generateMetadata({
 
   if (!venue) {
     return {
-      title: "Venue Not Found | DataSports",
+      title: "Venue Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -53,7 +53,7 @@ export async function generateMetadata({
   // Thin page check: venue needs at least a city
   const isThin = !venue.city;
 
-  const title = `${venue.name} – Stadium Info & History | DataSports`;
+  const title = `${venue.name} – Stadium Info & History`;
   const description = `${venue.name}${venue.city ? ` in ${venue.city}` : ""}${venue.country ? `, ${venue.country}` : ""}. Capacity: ${venue.capacity?.toLocaleString() || "N/A"}. View teams, matches, and stadium information.`;
 
   return {

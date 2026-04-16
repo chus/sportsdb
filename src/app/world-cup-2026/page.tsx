@@ -12,7 +12,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 const WC_START_DATE = "2026-06-11T00:00:00Z";
 
 export const metadata: Metadata = {
-  title: "FIFA World Cup 2026 – Groups, Schedule, Venues & Countdown",
+  title: "FIFA World Cup 2026 – Countdown, Host Countries & Key Players",
   description:
     "Everything about the FIFA World Cup 2026 hosted by USA, Mexico, and Canada. 48 teams, 12 groups, 16 stadiums. Explore groups, venues, key players, and countdown to kickoff.",
   openGraph: {

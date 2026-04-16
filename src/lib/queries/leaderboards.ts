@@ -7,7 +7,7 @@ import {
   competitions,
   seasons,
 } from "@/lib/db/schema";
-import { eq, desc, ne, and, isNotNull, sql } from "drizzle-orm";
+import { eq, desc, ne, and, isNotNull, sql, lte, gte } from "drizzle-orm";
 
 // ============================================================
 // SHARED TYPES
@@ -235,13 +235,33 @@ export async function getCurrentSeasonUrlLabel(
  * Falls back to a date-based calculation if no DB row is found.
  */
 export async function getCurrentSeasonLabel(): Promise<string> {
-  const result = await db
+  const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+
+  // 1. Prefer a current season whose date range contains today
+  const active = await db
+    .select({ label: seasons.label })
+    .from(seasons)
+    .where(
+      and(
+        eq(seasons.isCurrent, true),
+        lte(seasons.startDate, today),
+        gte(seasons.endDate, today),
+      ),
+    )
+    .orderBy(desc(seasons.startDate))
+    .limit(1);
+  if (active[0]?.label) return active[0].label;
+
+  // 2. No season spans today — pick the most recent current season by start date
+  const fallbackRow = await db
     .select({ label: seasons.label })
     .from(seasons)
     .where(eq(seasons.isCurrent, true))
+    .orderBy(desc(seasons.startDate))
     .limit(1);
-  if (result[0]?.label) return result[0].label;
-  // Fallback: European football season runs Aug–Jun
+  if (fallbackRow[0]?.label) return fallbackRow[0].label;
+
+  // 3. No current seasons at all — date-based guess (European Aug–Jun pattern)
   const now = new Date();
   const y = now.getFullYear();
   const startYear = now.getMonth() >= 7 ? y : y - 1;

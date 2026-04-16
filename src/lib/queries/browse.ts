@@ -367,6 +367,18 @@ export async function getCompetitionBrowseData() {
     Portugal: "Europe",
     Europe: "Europe",
     Brazil: "South America",
+    Argentina: "South America",
+    Colombia: "South America",
+    Chile: "South America",
+    Uruguay: "South America",
+    Peru: "South America",
+    Ecuador: "South America",
+    Paraguay: "South America",
+    Venezuela: "South America",
+    Bolivia: "South America",
+    Mexico: "North America",
+    USA: "North America",
+    "United States": "North America",
     World: "International",
   };
 

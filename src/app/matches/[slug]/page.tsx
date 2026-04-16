@@ -51,7 +51,7 @@ export async function generateMetadata({
 
   if (!match || !match.homeTeam || !match.awayTeam) {
     return {
-      title: "Match Not Found | DataSports",
+      title: "Match Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -62,7 +62,7 @@ export async function generateMetadata({
     match.status === "finished" || match.status === "live"
       ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`
       : "vs";
-  const title = `${homeTeam} ${score} ${awayTeam} | DataSports`;
+  const title = `${homeTeam} ${score} ${awayTeam}`;
   const description = `${match.homeTeam.name} vs ${match.awayTeam.name}${
     match.competition ? ` - ${match.competition.name}` : ""
   }${match.venue ? ` at ${match.venue.name}` : ""}. Match events, lineups, and statistics.`;

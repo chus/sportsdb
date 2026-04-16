@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!result) {
     return {
-      title: "Article Not Found | DataSports",
+      title: "Article Not Found",
       robots: { index: false, follow: false },
     };
   }

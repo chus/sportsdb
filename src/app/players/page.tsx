@@ -20,11 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const { totalPlayers } = await getPlayerBrowseData();
 
   return {
-    title: `Football Players – Browse ${totalPlayers.toLocaleString()} Players | DataSports`,
+    title: `Football Players – Browse ${totalPlayers.toLocaleString()} Players`,
     description:
       "Explore football players across all major competitions. Browse by position, nationality, or discover top scorers and rising stars.",
     openGraph: {
-      title: `Football Players – Browse ${totalPlayers.toLocaleString()} Players | DataSports`,
+      title: `Football Players – Browse ${totalPlayers.toLocaleString()} Players`,
       description:
         "Explore football players across all major competitions. Browse by position, nationality, or discover top scorers and rising stars.",
       url: `${BASE_URL}/players`,

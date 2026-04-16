@@ -9,11 +9,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Football Players by Position | DataSports",
+  title: "Football Players by Position",
   description:
     "Browse football players by position: goalkeepers, defenders, midfielders, and forwards. Find players by their role on the pitch.",
   openGraph: {
-    title: "Football Players by Position | DataSports",
+    title: "Football Players by Position",
     description:
       "Browse football players by position: goalkeepers, defenders, midfielders, and forwards. Find players by their role on the pitch.",
     url: `${BASE_URL}/players/position`,

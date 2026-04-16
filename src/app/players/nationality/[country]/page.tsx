@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const nationality = decodeURIComponent(country);
   const adjective = nationalityAdjective(nationality);
 
-  const title = `${adjective} Football Players – Full List | DataSports`;
+  const title = `${adjective} Football Players – Full List`;
   const description = `Browse all ${adjective} football players. View profiles, positions, and current teams for players from ${nationality}.`;
 
   return {
@@ -200,7 +200,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                 All Nationalities
               </Link>
               <Link
-                href={`/teams/country/${encodeURIComponent(nationality.toLowerCase())}`}
+                href={`/teams/country/${encodeURIComponent(nationality)}`}
                 className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-green-300 hover:text-green-600 transition-colors"
               >
                 {adjective} Teams

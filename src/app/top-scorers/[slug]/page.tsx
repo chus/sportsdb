@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${competition.name} Top Scorers ${seasonLabel} – Goals & Stats | DataSports`;
+  const title = `${competition.name} Top Scorers ${seasonLabel} – Goals & Stats`;
   const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. See goals, assists, and appearances.`;
 
   return {
