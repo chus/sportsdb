@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const { slug } = await params;
   const player = await getPlayerBySlug(slug);
 
-  if (!player || player.position === "Unknown") {
+  if (!player) {
     return {
       title: "Player Not Found | DataSports",
       robots: { index: false, follow: false },
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const mvStr = player.marketValueEur ? ` Valued at ${formatMarketValue(player.marketValueEur)}.` : "";
   const description = statsStr
     ? `${player.name} has ${statsStr}${teamStr}.${mvStr} Full career history, season stats, and player profile.`
-    : `${player.name} is a ${player.position}${player.nationality ? ` from ${player.nationality}` : ""}.${mvStr} View career history, teams, and stats on DataSports.`;
+    : `${player.name} is a ${player.position && player.position !== "Unknown" ? player.position : "football player"}${player.nationality ? ` from ${player.nationality}` : ""}.${mvStr} View career history, teams, and stats on DataSports.`;
 
   return {
     title,
@@ -133,7 +133,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   const player = await getPlayerBySlug(slug);
 
-  if (!player || player.position === "Unknown") {
+  if (!player) {
     notFound();
   }
 
