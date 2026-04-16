@@ -3,9 +3,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { getDailyQuestions, getUserDailyProgress, getChallengeLeaderboard } from "@/lib/queries/challenge";
 import { ChallengeGame } from "./challenge-game";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export const metadata: Metadata = {
   title: "Daily Challenge — Games",
   description: "Test your football knowledge with 5 new trivia questions every day. Categories include history, stats, transfers, and more.",
+  alternates: {
+    canonical: `${BASE_URL}/games/challenge`,
+  },
 };
 
 export default async function ChallengePage() {

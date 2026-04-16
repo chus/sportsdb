@@ -3,9 +3,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { getAvailableMatches, getUserPredictions, getGlobalLeaderboard } from "@/lib/queries/predictions";
 import { ProdeForm } from "./prode-form";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export const metadata: Metadata = {
   title: "Score Predictions (Prode) — Games",
   description: "Predict exact scores for upcoming football matches. Earn 3 points for an exact match, 1 for the correct result.",
+  alternates: {
+    canonical: `${BASE_URL}/games/prode`,
+  },
 };
 
 export default async function ProdePage() {

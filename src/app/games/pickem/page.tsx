@@ -4,9 +4,14 @@ import { getAvailableMatches } from "@/lib/queries/predictions";
 import { getPickemCommunityPercentages, getUserPickems, getPickemLeaderboard } from "@/lib/queries/pickem";
 import { PickemForm } from "./pickem-form";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
+
 export const metadata: Metadata = {
   title: "Pick'em — Games",
   description: "Pick Home, Draw, or Away for upcoming matches. See community vote percentages and compete on the leaderboard.",
+  alternates: {
+    canonical: `${BASE_URL}/games/pickem`,
+  },
 };
 
 export default async function PickemPage() {

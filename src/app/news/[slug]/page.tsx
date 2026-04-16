@@ -260,8 +260,14 @@ export default async function ArticlePage({ params }: Props) {
     primaryPlayerStats = pStats;
   }
 
+  // Sanitize malformed URLs in content (GPT sometimes generates https://teams/ instead of /teams/)
+  const sanitizedContent = article.content
+    .replace(/https?:\/\/(www\.)?teams\//g, "/teams/")
+    .replace(/https?:\/\/(www\.)?competitions[./]/g, "/competitions/")
+    .replace(/https?:\/\/(www\.)?players\//g, "/players/");
+
   // Parse markdown content
-  let htmlContent = marked.parse(article.content, { async: false }) as string;
+  let htmlContent = marked.parse(sanitizedContent, { async: false }) as string;
 
   // Build entity list for linkification
   const linkableEntities: Array<{ name: string; slug: string; type: "player" | "team" | "competition" }> = [];
