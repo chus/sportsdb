@@ -904,6 +904,46 @@ export async function getCompetitionSpotlight(
 // ============================================================
 
 /**
+ * Picks articles ensuring type diversity. Takes at most 2 articles of any
+ * single type before moving to the next, so the homepage news section
+ * shows a mix of match_report, round_recap, player_spotlight, etc.
+ */
+function diversifyByType(
+  pool: ArticleWithRelations[],
+  limit: number
+): ArticleWithRelations[] {
+  if (pool.length <= limit) return pool;
+  const result: ArticleWithRelations[] = [];
+  const typeCounts = new Map<string, number>();
+  const maxPerType = 2;
+
+  // First pass: pick up to maxPerType of each type (maintains recency order)
+  for (const a of pool) {
+    if (result.length >= limit) break;
+    const t = a.article.type;
+    const count = typeCounts.get(t) ?? 0;
+    if (count < maxPerType) {
+      result.push(a);
+      typeCounts.set(t, count + 1);
+    }
+  }
+
+  // Second pass: if still under limit, fill with remaining articles
+  if (result.length < limit) {
+    const seen = new Set(result.map((r) => r.article.id));
+    for (const a of pool) {
+      if (result.length >= limit) break;
+      if (!seen.has(a.article.id)) {
+        result.push(a);
+        seen.add(a.article.id);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Surfaces event-linked articles first (matches today's sports_events),
  * then pads with the newest published articles.
  */
@@ -963,17 +1003,16 @@ export async function getTimelyArticles(
     timely = rows;
   }
 
-  if (timely.length >= limit) return timely;
+  if (timely.length >= limit) return diversifyByType(timely, limit);
 
-  const padding = await getPublishedArticles(limit * 2);
+  const padding = await getPublishedArticles(limit * 4);
   const seen = new Set(timely.map((t) => t.article.id));
   for (const a of padding) {
-    if (timely.length >= limit) break;
     if (seen.has(a.article.id)) continue;
     timely.push(a);
     seen.add(a.article.id);
   }
-  return timely;
+  return diversifyByType(timely, limit);
 }
 
 // ============================================================
