@@ -746,14 +746,18 @@ async function insertArticle(
     article.slug = `${article.slug}-${Date.now()}`;
   }
 
+  // Get home team logo for article image
+  const [homeTeam] = await sql`SELECT logo_url FROM teams WHERE slug = ${homeTeamSlug}`;
+  const imageUrl = homeTeam?.logo_url || null;
+
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      match_id, status, published_at, model_version, word_count
+      match_id, image_url, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${matchId}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+      ${matchId}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
@@ -787,14 +791,22 @@ async function insertRoundRecap(
     article.slug = `${article.slug}-${Date.now()}`;
   }
 
+  // Get competition logo for article image
+  const [compLogo] = await sql`
+    SELECT c.logo_url FROM competition_seasons cs
+    INNER JOIN competitions c ON cs.competition_id = c.id
+    WHERE cs.id = ${competitionSeasonId}
+  `;
+  const imageUrl = compLogo?.logo_url || null;
+
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      competition_season_id, matchday, status, published_at, model_version, word_count
+      competition_season_id, matchday, image_url, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, 'round_recap', ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${competitionSeasonId}, ${matchday}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+      ${competitionSeasonId}, ${matchday}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
@@ -828,14 +840,19 @@ async function insertPlayerSpotlight(
     article.slug = `${article.slug}-${Date.now()}`;
   }
 
+  // Get player image or team logo for article image
+  const [playerImg] = await sql`SELECT image_url FROM players WHERE id = ${playerId}`;
+  const [teamImg] = await sql`SELECT logo_url FROM teams WHERE slug = ${teamSlug}`;
+  const imageUrl = playerImg?.image_url || teamImg?.logo_url || null;
+
   await sql`
     INSERT INTO articles (
       slug, type, title, excerpt, content, meta_title, meta_description,
-      primary_player_id, status, published_at, model_version, word_count
+      primary_player_id, image_url, status, published_at, model_version, word_count
     ) VALUES (
       ${article.slug}, 'player_spotlight', ${article.title}, ${article.excerpt}, ${article.content},
       ${article.metaTitle}, ${article.metaDescription},
-      ${playerId}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+      ${playerId}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
     )
   `;
 
