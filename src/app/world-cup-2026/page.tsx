@@ -353,7 +353,7 @@ export default async function WorldCup2026Page() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 rounded-2xl p-12 text-white text-center">
               <Trophy className="w-16 h-16 mx-auto mb-6 text-yellow-400" />
-              <h2 className="text-3xl font-bold mb-4">Follow the World Cup on SportsDB</h2>
+              <h2 className="text-3xl font-bold mb-4">Follow the World Cup on DataSports</h2>
               <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
                 Track teams, follow players, and stay up to date with every goal, every match, and every moment of the 2026 World Cup.
               </p>

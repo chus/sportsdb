@@ -9,13 +9,33 @@ import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
+const TYPE_META: Record<string, { title: string; description: string }> = {
+  match_report: {
+    title: "Match Reports — Post-Game Analysis & Results",
+    description: "In-depth football match reports with post-game analysis, key moments, and player ratings across the Premier League, La Liga, Serie A, and more.",
+  },
+  round_recap: {
+    title: "Matchday Recaps — Round-by-Round Summaries",
+    description: "Complete matchday recaps covering all results, standout performances, and talking points from each round of major football competitions.",
+  },
+  match_preview: {
+    title: "Match Previews — Upcoming Fixtures & Predictions",
+    description: "Pre-match previews with team form, head-to-head records, and key players to watch for upcoming football fixtures.",
+  },
+  player_spotlight: {
+    title: "Player Spotlights — Standout Performers & Season Reviews",
+    description: "Featured profiles and season reviews of football's standout performers, with stats, achievements, and career analysis.",
+  },
+};
+
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
   const type = params.type || "";
-  const title = "Football News & Match Reports";
-  const description =
-    "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage.";
+
+  const meta = type && TYPE_META[type]
+    ? TYPE_META[type]
+    : { title: "Football News & Match Reports", description: "Latest football news, match reports, player spotlights, and competition recaps. Stay updated with in-depth analysis and coverage." };
 
   const qs = (p: number) => {
     const parts: string[] = [];
@@ -25,8 +45,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 
   return {
-    title,
-    description,
+    title: meta.title,
+    description: meta.description,
     alternates: {
       canonical: `${BASE_URL}/news${qs(page)}`,
       types: {
@@ -56,11 +76,12 @@ export default async function NewsPage({ searchParams }: Props) {
   const pageSize = 12;
   const offset = (page - 1) * pageSize;
 
-  const [articles, totalCount, matchReportCount, recapCount, spotlightCount] = await Promise.all([
+  const [articles, totalCount, matchReportCount, recapCount, previewCount, spotlightCount] = await Promise.all([
     getPublishedArticles(pageSize, offset, type || undefined),
     getArticleCount(type || undefined),
     getArticleCount("match_report"),
     getArticleCount("round_recap"),
+    getArticleCount("match_preview"),
     getArticleCount("player_spotlight"),
   ]);
 
@@ -81,9 +102,9 @@ export default async function NewsPage({ searchParams }: Props) {
     <CollectionPageJsonLd name="Football News" description="Latest football news, match reports, player spotlights, and competition recaps." url={`${BASE_URL}/news`} />
     <FAQJsonLd
       items={[
-        { question: "What types of articles does DataSports publish?", answer: "DataSports publishes match reports with post-game analysis, matchday recaps covering full round results, and player spotlights featuring standout performers." },
+        { question: "What types of articles does DataSports publish?", answer: "DataSports publishes match reports with post-game analysis, matchday recaps covering full round results, match previews for upcoming fixtures, and player spotlights featuring standout performers." },
         { question: "How often is news content published?", answer: "New articles are published regularly after each matchday, covering all major competitions. Match reports typically appear within 24 hours of final whistle." },
-        { question: "Can I filter articles by type?", answer: "Yes, you can filter articles by type — All News, Match Reports, Matchday Recaps, or Player Spotlights — using the filter buttons at the top of the news page." },
+        { question: "Can I filter articles by type?", answer: "Yes, you can filter articles by type — All News, Match Reports, Matchday Recaps, Match Previews, or Player Spotlights — using the filter buttons at the top of the news page." },
       ]}
     />
     {page === 1 && (
@@ -111,7 +132,7 @@ export default async function NewsPage({ searchParams }: Props) {
       <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Summary Stats */}
       {page === 1 && !type && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
           <div className="bg-white rounded-xl border border-neutral-200 p-4">
             <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Articles</div>
             <div className="text-2xl font-bold text-neutral-900">{totalCount}</div>
@@ -126,6 +147,11 @@ export default async function NewsPage({ searchParams }: Props) {
             <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Matchday Recaps</div>
             <div className="text-2xl font-bold text-neutral-900">{recapCount}</div>
             <div className="text-xs text-neutral-500">round summaries</div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Match Previews</div>
+            <div className="text-2xl font-bold text-neutral-900">{previewCount}</div>
+            <div className="text-xs text-neutral-500">upcoming fixtures</div>
           </div>
           <div className="bg-white rounded-xl border border-neutral-200 p-4">
             <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Player Spotlights</div>

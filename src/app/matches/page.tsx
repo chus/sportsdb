@@ -24,7 +24,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = format(new Date(), "MMMM d, yyyy");
   return {
     title: "Football Matches — Live Scores, Fixtures & Results",
     description: `Football matches for ${today}: live scores, lineups, and results. Browse upcoming fixtures and recent results across the Premier League, La Liga, Serie A, Bundesliga, and more.`,
