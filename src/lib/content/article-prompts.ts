@@ -649,7 +649,7 @@ READABILITY GUIDELINES:
 - Use active voice and strong verbs
 - Include analytical insights, not just stat recaps
 
-Slug format: "${ctx.player.slug}-spotlight-${Date.now()}"
+Slug format: "${ctx.player.slug}-season-spotlight-2025-26"
 
 Return as JSON:
 {

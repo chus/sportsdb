@@ -631,7 +631,7 @@ REQUIREMENTS:
 - Open with a vivid description of the player's standout moment
 - Use stats naturally within prose, not as dry lists
 
-Slug format: "${player.player_slug}-spotlight-${Date.now()}"
+Slug format: "${player.player_slug}-season-spotlight-2025-26"
 
 Return as JSON:
 {
