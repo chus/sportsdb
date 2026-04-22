@@ -125,7 +125,14 @@ function mapPosition(position: string | null): string {
 }
 
 async function clearDatabase() {
-  console.log("🗑️  Clearing existing data...");
+  console.log("🗑️  Clearing existing data (preserving articles)...");
+
+  // Detach articles from entities before clearing
+  const rawSql = neon(process.env.DATABASE_URL!);
+  await rawSql`DELETE FROM article_players`;
+  await rawSql`DELETE FROM article_teams`;
+  await rawSql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
+  await rawSql`UPDATE social_posts SET article_id = NULL WHERE article_id IS NOT NULL`;
 
   // Delete in order to respect foreign keys
   await db.delete(schema.searchIndex);
@@ -363,12 +370,13 @@ async function ingestTeamsAndPlayers(
       // Standings not available for this competition
     }
 
-    // Fetch recent matches
+    // Fetch matches (all finished matches for the season)
     try {
       const matchesData = await rateLimitedFetch(
-        `${BASE_URL}/competitions/${compCode}/matches?status=FINISHED&limit=20`
+        `${BASE_URL}/competitions/${compCode}/matches?status=FINISHED&limit=500`
       );
 
+      let matchCount = 0;
       for (const apiMatch of matchesData.matches || []) {
         const homeTeam = teamMap.get(apiMatch.homeTeam.id);
         const awayTeam = teamMap.get(apiMatch.awayTeam.id);
@@ -386,16 +394,17 @@ async function ingestTeamsAndPlayers(
           homeTeamId: homeTeam.id,
           awayTeamId: awayTeam.id,
           matchday: apiMatch.matchday,
-          scheduledAt: apiMatch.utcDate,
+          scheduledAt: new Date(apiMatch.utcDate),
           status: "finished",
           homeScore: apiMatch.score?.fullTime?.home,
           awayScore: apiMatch.score?.fullTime?.away,
           referee: apiMatch.referees?.[0]?.name || null,
         }).onConflictDoNothing();
+        matchCount++;
       }
-      console.log(`   ⚽ Recent matches loaded`);
-    } catch {
-      // Matches not available
+      console.log(`   ⚽ ${matchCount} matches loaded`);
+    } catch (error: any) {
+      console.log(`   ⚠️  Matches error: ${error.message || error}`);
     }
 
     console.log("");

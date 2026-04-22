@@ -8,6 +8,9 @@
  *   OPENAI_API_KEY=xxx npx tsx scripts/generate-articles.ts --dry-run
  */
 
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { neon } from "@neondatabase/serverless";
 import OpenAI from "openai";
 import {

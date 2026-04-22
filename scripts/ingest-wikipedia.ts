@@ -566,9 +566,18 @@ function normalizePosition(pos: string): string {
 }
 
 async function clearDatabase() {
-  console.log("🗑️  Clearing existing data...\n");
+  console.log("🗑️  Clearing existing data (preserving articles)...\n");
 
-  // Use raw SQL TRUNCATE with CASCADE to avoid foreign key issues
+  // Detach articles from entities that will be truncated
+  // Join tables have NOT NULL FKs to players/teams, so delete those rows (regenerated with articles)
+  await sql`DELETE FROM article_players`;
+  await sql`DELETE FROM article_teams`;
+  // Null out direct FKs on articles so CASCADE doesn't destroy them
+  await sql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
+  // Also detach social_posts from articles FK chain
+  await sql`UPDATE social_posts SET article_id = NULL WHERE article_id IS NOT NULL`;
+
+  // Now safe to truncate ingestion tables — articles survive
   await sql`TRUNCATE TABLE search_index, player_season_stats, match_events, match_lineups, matches, standings, team_seasons, competition_seasons, player_team_history, team_venue_history, players, venues, teams, competitions, seasons CASCADE`;
 }
 

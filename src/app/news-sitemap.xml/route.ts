@@ -14,11 +14,11 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
-  // Google News sitemap: only articles from last 48 hours
+  // Google News sitemap: articles from last 48 hours, fallback to most recent
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-  const recentArticles = await db
+  let recentArticles = await db
     .select({
       slug: articles.slug,
       title: articles.title,
@@ -37,6 +37,30 @@ export async function GET() {
     )
     .orderBy(desc(articles.publishedAt))
     .limit(1000);
+
+  // Fallback: if no recent articles, return most recent published articles
+  // This prevents an empty sitemap which Google flags as invalid XML
+  if (recentArticles.length === 0) {
+    recentArticles = await db
+      .select({
+        slug: articles.slug,
+        title: articles.title,
+        publishedAt: articles.publishedAt,
+        type: articles.type,
+        competitionName: competitions.name,
+      })
+      .from(articles)
+      .leftJoin(competitionSeasons, eq(articles.competitionSeasonId, competitionSeasons.id))
+      .leftJoin(competitions, eq(competitionSeasons.competitionId, competitions.id))
+      .where(eq(articles.status, "published"))
+      .orderBy(desc(articles.publishedAt))
+      .limit(50);
+  }
+
+  // If still no articles, return 404 to avoid invalid XML in Google Search Console
+  if (recentArticles.length === 0) {
+    return new Response("", { status: 404 });
+  }
 
   const urls = recentArticles
     .map((article) => {
