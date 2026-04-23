@@ -14,8 +14,19 @@ const COMPETITION_SLUG_ALIASES: Record<string, string> = {
   "world-cup": "fifa-world-cup",
 };
 
+const CANONICAL_HOST = "datasports.co";
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
+  const host = request.headers.get("host") || "";
+
+  // Redirect Vercel preview domains to canonical domain
+  // Prevents duplicate content and "Site Behavior: Navigation" issues in AdSense
+  if (host.includes("vercel.app") && !pathname.startsWith("/api/")) {
+    const canonicalUrl = new URL(pathname, `https://${CANONICAL_HOST}`);
+    canonicalUrl.search = searchParams.toString();
+    return NextResponse.redirect(canonicalUrl, 301);
+  }
 
   // Capture referral code from ?ref= param on any page
   const refCode = searchParams.get("ref");

@@ -5,8 +5,8 @@
  * whether a page should be noindexed or 404'd.
  *
  * Thresholds:
- *   Score < 15  → 404 (truly empty)
- *   Score 15-39 → 200 + noindex
+ *   Score < 30  → 404 (thin / empty — don't waste crawl budget)
+ *   Score 30-39 → 200 + noindex
  *   Score >= 40 → 200 + indexed
  */
 
@@ -60,7 +60,7 @@ export function scorePlayerPage(input: PlayerQualityInput): QualityResult {
   }
 
   const tier: Tier = score >= 60 ? "A" : score >= 40 ? "B" : score >= 20 ? "C" : "D";
-  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 15 };
+  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 30 };
 }
 
 /** Whether a player has enough data to warrant an indexable link */
@@ -97,5 +97,5 @@ export function scoreTeamPage(input: TeamQualityInput): QualityResult {
   }
 
   const tier: Tier = score >= 40 ? "A" : score >= 25 ? "B" : score >= 15 ? "C" : "D";
-  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 15 };
+  return { score, tier, isThin: tier === "C" || tier === "D", shouldReturn404: score < 25 };
 }

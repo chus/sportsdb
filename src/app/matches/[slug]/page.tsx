@@ -21,7 +21,7 @@ import {
   getMatchEventsWithPlayers,
   getMatchLineupsGrouped,
 } from "@/lib/queries/matches";
-import { getTeamStats, getTeamTopScorer } from "@/lib/queries/teams";
+import { getTeamStats } from "@/lib/queries/teams";
 import { getArticlesForMatch } from "@/lib/queries/articles";
 import { MatchJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { RelatedMatches } from "@/components/entity/related-entities";
@@ -49,7 +49,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const match = await getMatchWithDetailsBySlug(slug);
 
-  if (!match || !match.homeTeam || !match.awayTeam) {
+  if (!match || !match.homeTeam || !match.awayTeam || (match.status !== "finished" && match.status !== "live")) {
     return {
       title: "Match Not Found",
       robots: { index: false, follow: false },
@@ -366,6 +366,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
     notFound();
   }
 
+  // 404 non-finished matches to avoid thin pages hurting domain quality
+  if (match.status !== "finished" && match.status !== "live") {
+    notFound();
+  }
+
   const matchId = match.id;
   const matchUrl = `${BASE_URL}/matches/${slug}`;
 
@@ -386,15 +391,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const homeStanding = homeTeamStats[0]?.standing;
   const awayStanding = awayTeamStats[0]?.standing;
 
-  // For scheduled matches, get top scorers
-  let homeTopScorer: Awaited<ReturnType<typeof getTeamTopScorer>> | null = null;
-  let awayTopScorer: Awaited<ReturnType<typeof getTeamTopScorer>> | null = null;
-  if (match.status === "scheduled" && match.competitionSeasonId) {
-    [homeTopScorer, awayTopScorer] = await Promise.all([
-      getTeamTopScorer(homeTeam.id, match.competitionSeasonId),
-      getTeamTopScorer(awayTeam.id, match.competitionSeasonId),
-    ]);
-  }
+  const homeTopScorer = null;
+  const awayTopScorer = null;
 
   // Separate events by team
   const homeEvents = events.filter((e) => e.teamId === homeTeam.id);
@@ -568,106 +566,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         )}
       </div>
 
-      {/* Scheduled Match Dashboard */}
-      {match.status === "scheduled" && (
-        <div className="max-w-7xl mx-auto px-4 pt-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Countdown */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Kickoff</h3>
-              </div>
-              <div className="text-lg font-black text-neutral-900">
-                {formatDistanceToNowStrict(new Date(match.scheduledAt), { addSuffix: true })}
-              </div>
-              <p className="text-xs text-neutral-500 mt-0.5">{format(new Date(match.scheduledAt), "EEE, MMM d · h:mm a")}</p>
-            </div>
-
-            {/* League Positions */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Standings</h3>
-              </div>
-              {homeStanding && awayStanding ? (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-neutral-700 truncate">{homeTeam.shortName || homeTeam.name}</span>
-                    <span className="font-bold text-neutral-900 flex-shrink-0 ml-1">{ordinal(homeStanding.position)} · {homeStanding.points}pts</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-neutral-700 truncate">{awayTeam.shortName || awayTeam.name}</span>
-                    <span className="font-bold text-neutral-900 flex-shrink-0 ml-1">{ordinal(awayStanding.position)} · {awayStanding.points}pts</span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-neutral-400">No data</p>
-              )}
-            </div>
-
-            {/* Form */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
-              </div>
-              {homeStanding?.form || awayStanding?.form ? (
-                <div className="space-y-2">
-                  {homeStanding?.form && (
-                    <div>
-                      <p className="text-[10px] text-neutral-500 mb-1">{homeTeam.shortName || homeTeam.name}</p>
-                      <div className="flex gap-1">
-                        {homeStanding.form.split("").slice(-5).map((r, i) => (
-                          <span key={i} className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {awayStanding?.form && (
-                    <div>
-                      <p className="text-[10px] text-neutral-500 mb-1">{awayTeam.shortName || awayTeam.name}</p>
-                      <div className="flex gap-1">
-                        {awayStanding.form.split("").slice(-5).map((r, i) => (
-                          <span key={i} className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-neutral-400">No data</p>
-              )}
-            </div>
-
-            {/* Top Scorers */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Target className="w-3.5 h-3.5 text-red-500" />
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Dangermen</h3>
-              </div>
-              {homeTopScorer || awayTopScorer ? (
-                <div className="space-y-1.5">
-                  {homeTopScorer && (
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-neutral-900 truncate">{homeTopScorer.player.name}</span>
-                      <span className="text-neutral-500 flex-shrink-0 ml-1">{homeTopScorer.goals}G {homeTopScorer.assists}A</span>
-                    </div>
-                  )}
-                  {awayTopScorer && (
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-neutral-900 truncate">{awayTopScorer.player.name}</span>
-                      <span className="text-neutral-500 flex-shrink-0 ml-1">{awayTopScorer.goals}G {awayTopScorer.assists}A</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-neutral-400">No data</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Scheduled Match Dashboard removed — scheduled matches now 404 */}
 
       {/* Finished Match Dashboard — 4 cards */}
       {match.status === "finished" && (
@@ -891,9 +790,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 <div className="p-8 text-center text-neutral-500">
                   <Clock className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
                   <p>
-                    {match.status === "scheduled"
-                      ? "Match has not started yet"
-                      : "No events recorded"}
+                    No events recorded
                   </p>
                 </div>
               </section>
