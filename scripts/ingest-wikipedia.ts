@@ -568,17 +568,33 @@ function normalizePosition(pos: string): string {
 async function clearDatabase() {
   console.log("🗑️  Clearing existing data (preserving articles)...\n");
 
-  // Detach articles from entities that will be truncated
-  // Join tables have NOT NULL FKs to players/teams, so delete those rows (regenerated with articles)
+  // TRUNCATE CASCADE ignores NULLs — it truncates ANY table with a FK constraint
+  // pointing to the truncated table. So we must drop the constraints first, then restore them.
+
+  // 1. Clear article join tables (will be regenerated)
   await sql`DELETE FROM article_players`;
   await sql`DELETE FROM article_teams`;
-  // Null out direct FKs on articles so CASCADE doesn't destroy them
-  await sql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
-  // Also detach social_posts from articles FK chain
   await sql`UPDATE social_posts SET article_id = NULL WHERE article_id IS NOT NULL`;
 
-  // Now safe to truncate ingestion tables — articles survive
+  // 2. Null out article FKs and drop constraints so CASCADE can't reach articles
+  await sql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
+  await sql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_match_id_matches_id_fk`;
+  await sql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_competition_season_id_competition_seasons_id_fk`;
+  await sql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_primary_player_id_players_id_fk`;
+  await sql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_primary_team_id_teams_id_fk`;
+  await sql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_sports_event_id_sports_events_id_fk`;
+
+  // 3. Now safe to truncate — articles table is completely detached
   await sql`TRUNCATE TABLE search_index, player_season_stats, match_events, match_lineups, matches, standings, team_seasons, competition_seasons, player_team_history, team_venue_history, players, venues, teams, competitions, seasons CASCADE`;
+
+  // 4. Restore FK constraints
+  await sql`ALTER TABLE articles ADD CONSTRAINT articles_match_id_matches_id_fk FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await sql`ALTER TABLE articles ADD CONSTRAINT articles_competition_season_id_competition_seasons_id_fk FOREIGN KEY (competition_season_id) REFERENCES competition_seasons(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await sql`ALTER TABLE articles ADD CONSTRAINT articles_primary_player_id_players_id_fk FOREIGN KEY (primary_player_id) REFERENCES players(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await sql`ALTER TABLE articles ADD CONSTRAINT articles_primary_team_id_teams_id_fk FOREIGN KEY (primary_team_id) REFERENCES teams(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await sql`ALTER TABLE articles ADD CONSTRAINT articles_sports_event_id_sports_events_id_fk FOREIGN KEY (sports_event_id) REFERENCES sports_events(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+
+  console.log("✅ Database cleared (articles preserved)\n");
 }
 
 async function main() {

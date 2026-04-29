@@ -127,14 +127,22 @@ function mapPosition(position: string | null): string {
 async function clearDatabase() {
   console.log("🗑️  Clearing existing data (preserving articles)...");
 
-  // Detach articles from entities before clearing
   const rawSql = neon(process.env.DATABASE_URL!);
+
+  // 1. Clear article join tables and detach FKs
   await rawSql`DELETE FROM article_players`;
   await rawSql`DELETE FROM article_teams`;
-  await rawSql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
   await rawSql`UPDATE social_posts SET article_id = NULL WHERE article_id IS NOT NULL`;
+  await rawSql`UPDATE articles SET match_id = NULL, competition_season_id = NULL, primary_player_id = NULL, primary_team_id = NULL, sports_event_id = NULL`;
 
-  // Delete in order to respect foreign keys
+  // 2. Drop FK constraints so CASCADE/delete can't reach articles
+  await rawSql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_match_id_matches_id_fk`;
+  await rawSql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_competition_season_id_competition_seasons_id_fk`;
+  await rawSql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_primary_player_id_players_id_fk`;
+  await rawSql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_primary_team_id_teams_id_fk`;
+  await rawSql`ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_sports_event_id_sports_events_id_fk`;
+
+  // 3. Delete in order to respect remaining foreign keys
   await db.delete(schema.searchIndex);
   await db.delete(schema.playerSeasonStats);
   await db.delete(schema.matchEvents);
@@ -151,7 +159,14 @@ async function clearDatabase() {
   await db.delete(schema.competitions);
   await db.delete(schema.seasons);
 
-  console.log("✅ Database cleared\n");
+  // 4. Restore FK constraints
+  await rawSql`ALTER TABLE articles ADD CONSTRAINT articles_match_id_matches_id_fk FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await rawSql`ALTER TABLE articles ADD CONSTRAINT articles_competition_season_id_competition_seasons_id_fk FOREIGN KEY (competition_season_id) REFERENCES competition_seasons(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await rawSql`ALTER TABLE articles ADD CONSTRAINT articles_primary_player_id_players_id_fk FOREIGN KEY (primary_player_id) REFERENCES players(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await rawSql`ALTER TABLE articles ADD CONSTRAINT articles_primary_team_id_teams_id_fk FOREIGN KEY (primary_team_id) REFERENCES teams(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+  await rawSql`ALTER TABLE articles ADD CONSTRAINT articles_sports_event_id_sports_events_id_fk FOREIGN KEY (sports_event_id) REFERENCES sports_events(id) ON DELETE NO ACTION ON UPDATE NO ACTION`;
+
+  console.log("✅ Database cleared (articles preserved)\n");
 }
 
 async function ingestSeasons() {
