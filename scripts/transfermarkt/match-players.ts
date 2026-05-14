@@ -209,11 +209,15 @@ async function main() {
       const heightCm = parseInt(tmPlayer.height_in_cm) || null;
       const foot = tmPlayer.foot || null;
       const imageUrl = tmPlayer.image_url || null;
+      const nationality = tmPlayer.country_of_citizenship || null;
+      const dateOfBirth = parseDob(tmPlayer.date_of_birth);
 
       let extraEnrich = false;
       if (!dbPlayer.height_cm && heightCm) { updates.push("height"); extraEnrich = true; }
       if (!dbPlayer.preferred_foot && foot) { updates.push("foot"); extraEnrich = true; }
       if (!dbPlayer.image_url && imageUrl) { updates.push("image"); extraEnrich = true; }
+      if (!dbPlayer.nationality && nationality) { updates.push("nationality"); extraEnrich = true; }
+      if (!dbPlayer.date_of_birth && dateOfBirth) { updates.push("dob"); extraEnrich = true; }
       if (extraEnrich) enriched++;
 
       if (!dryRun) {
@@ -225,7 +229,9 @@ async function main() {
             contract_expiration_date = ${contractExpiry},
             height_cm = COALESCE(height_cm, ${heightCm}),
             preferred_foot = COALESCE(preferred_foot, ${foot}),
-            image_url = COALESCE(image_url, ${imageUrl})
+            image_url = COALESCE(image_url, ${imageUrl}),
+            nationality = COALESCE(nationality, ${nationality}),
+            date_of_birth = COALESCE(date_of_birth, ${dateOfBirth})
           WHERE id = ${dbPlayer.id}
         `;
       }
