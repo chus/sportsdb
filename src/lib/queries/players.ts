@@ -219,12 +219,13 @@ export async function getPlayerQuality(player: {
 }) {
   const { scorePlayerPage } = await import("@/lib/seo/page-quality");
 
-  const [career, currentTeam, statsHistory, lineupCount, articleCount] = await Promise.all([
+  const [career, currentTeam, statsHistory, lineupCount, articleCount, transferCount] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(playerTeamHistory).where(eq(playerTeamHistory.playerId, player.id)),
     db.select({ count: sql<number>`count(*)` }).from(playerTeamHistory).where(and(eq(playerTeamHistory.playerId, player.id), isNull(playerTeamHistory.validTo))),
     db.select({ count: sql<number>`count(*)` }).from(playerSeasonStats).where(eq(playerSeasonStats.playerId, player.id)),
     db.select({ count: sql<number>`count(*)` }).from(matchLineups).where(eq(matchLineups.playerId, player.id)),
     db.select({ count: sql<number>`count(*)` }).from(articlePlayers).where(eq(articlePlayers.playerId, player.id)),
+    db.select({ count: sql<number>`count(*)` }).from(transfers).where(eq(transfers.playerId, player.id)),
   ]);
 
   return scorePlayerPage({
@@ -239,6 +240,7 @@ export async function getPlayerQuality(player: {
     statsCount: Number(statsHistory[0]?.count ?? 0),
     lineupCount: Number(lineupCount[0]?.count ?? 0),
     articleCount: Number(articleCount[0]?.count ?? 0),
+    transferCount: Number(transferCount[0]?.count ?? 0),
   });
 }
 

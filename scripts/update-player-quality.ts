@@ -30,6 +30,7 @@ interface PlayerRow {
   stats_count: number;
   lineup_count: number;
   article_count: number;
+  transfer_count: number;
   is_indexable: boolean;
 }
 
@@ -54,7 +55,8 @@ function scorePlayer(p: PlayerRow): number {
   const hasRealContent =
     Number(p.stats_count) > 0 ||
     Number(p.lineup_count) > 0 ||
-    Number(p.article_count) > 0;
+    Number(p.article_count) > 0 ||
+    Number(p.transfer_count) > 0;
   if (!hasRealContent) {
     score = Math.min(score, 35);
   }
@@ -82,7 +84,8 @@ async function main() {
       COALESCE(current.cnt, 0) as current_team,
       COALESCE(stats.cnt, 0) as stats_count,
       COALESCE(lineups.cnt, 0) as lineup_count,
-      COALESCE(articles.cnt, 0) as article_count
+      COALESCE(articles.cnt, 0) as article_count,
+      COALESCE(xfers.cnt, 0) as transfer_count
     FROM players p
     LEFT JOIN LATERAL (
       SELECT count(*) as cnt FROM player_team_history WHERE player_id = p.id
@@ -99,6 +102,9 @@ async function main() {
     LEFT JOIN LATERAL (
       SELECT count(*) as cnt FROM article_players WHERE player_id = p.id
     ) articles ON true
+    LEFT JOIN LATERAL (
+      SELECT count(*) as cnt FROM transfers WHERE player_id = p.id
+    ) xfers ON true
   ` as PlayerRow[];
 
   console.log(`  Found ${players.length} players\n`);

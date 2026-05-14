@@ -31,6 +31,7 @@ export interface PlayerQualityInput {
   statsCount: number;
   lineupCount: number;
   articleCount: number;
+  transferCount: number;
 }
 
 export function scorePlayerPage(input: PlayerQualityInput): QualityResult {
@@ -50,11 +51,11 @@ export function scorePlayerPage(input: PlayerQualityInput): QualityResult {
   if (input.articleCount > 0) score += 10;
 
   // Hard content gate: a page with only bio metadata (position, nationality,
-  // DOB, current team) but zero actual match/stat/article content is a
+  // DOB, current team) but zero actual match/stat/article/transfer content is a
   // "Crawled - currently not indexed" candidate. Force it into Tier C even if
   // the metadata score is high enough to pass the 40-point threshold.
   const hasRealContent =
-    input.statsCount > 0 || input.lineupCount > 0 || input.articleCount > 0;
+    input.statsCount > 0 || input.lineupCount > 0 || input.articleCount > 0 || input.transferCount > 0;
   if (!hasRealContent) {
     score = Math.min(score, 35);
   }
