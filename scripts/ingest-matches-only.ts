@@ -73,9 +73,17 @@ async function main() {
       const compName = matchesData.competition?.name || compCode;
       console.log(`📋 ${compName}: ${matchesData.resultSet?.count || 0} matches available`);
 
+      // API name → DB name aliases
+      const NAME_ALIASES: Record<string, string> = {
+        "Primera Division": "La Liga",
+        "UEFA Champions League": "UEFA Champions League",
+        "FIFA World Cup": "FIFA World Cup",
+      };
+      const dbName = NAME_ALIASES[compName] || compName;
+
       // Find matching competition season
       const compSeason = compSeasons.find(
-        (cs) => cs.competitionName === compName || cs.competitionSlug === compName.toLowerCase().replace(/\s+/g, "-")
+        (cs) => cs.competitionName === dbName || cs.competitionName === compName || cs.competitionSlug === compName.toLowerCase().replace(/\s+/g, "-")
       );
 
       if (!compSeason) {
