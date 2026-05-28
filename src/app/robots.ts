@@ -7,12 +7,27 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/entity-image", "/matches", "/players/", "/compare/", "/venues", "/competitions", "/top-scorers", "/top-assists", "/teams", "/news", "/transfers", "/trending", "/games"],
+        allow: [
+          "/",
+          "/api/entity-image",
+        ],
+        // Disallow both the default-locale (unprefixed) form and the /es
+        // form for every private route. Robots.txt is prefix-matched, so
+        // "/admin/" does NOT cover "/es/admin/" — they must be listed.
         disallow: [
           "/api/",
           "/admin/",
-          "/search",
+          "/es/admin/",
+          "/account/",
+          "/es/account/",
           "/dashboard",
+          "/es/dashboard",
+          "/login",
+          "/es/login",
+          "/signup",
+          "/es/signup",
+          "/search",
+          "/es/search",
         ],
       },
     ],

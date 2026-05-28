@@ -50,6 +50,25 @@ async function getWikipediaPage(title: string): Promise<cheerio.CheerioAPI> {
   return cheerio.load(html);
 }
 
+/**
+ * Clean a Wikipedia infobox cell value:
+ *   1. Drop leaked CSS selectors like ".mw-parser-output .geo-default …" —
+ *      these come from inline <style scoped> blocks Wikipedia injects inside
+ *      coordinate cells. (Callers should already strip <style>/<script>
+ *      children from the cell, but inline CSS sometimes survives as a text
+ *      node when the markup is malformed.)
+ *   2. Strip footnote markers like "[a]" or "[1]".
+ *   3. Collapse runs of whitespace and trim.
+ */
+function sanitizeInfoboxValue(raw: string): string {
+  return raw
+    .replace(/\.mw-parser-output[^\n]*?\}/g, "")
+    .replace(/\.mw-parser-output[^\n,]*$/gm, "")
+    .replace(/\[[a-z0-9]+\]/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -319,12 +338,15 @@ async function extractStadiumDetails(
 
     const details: StadiumDetails = { name: stadiumName };
 
-    // Parse stadium infobox
+    // Parse stadium infobox (strip <style>/<script> before reading — see
+    // sanitizeInfoboxValue for why)
     $stadium(".infobox th, .infobox .infobox-label").each((_, th) => {
       const $th = $stadium(th);
       const label = $th.text().toLowerCase().trim();
       const $td = $th.next("td, .infobox-data");
-      const value = $td.text().trim();
+      const $clone = $td.clone();
+      $clone.find("style, script").remove();
+      const value = sanitizeInfoboxValue($clone.text());
 
       // Capacity - parse numbers like "53,400" or "53400"
       if (label.includes("capacity") || label.includes("seating")) {
@@ -393,7 +415,14 @@ async function extractTeamDetails(
       const $th = $(th);
       const label = $th.text().toLowerCase().trim();
       const $td = $th.next("td, .infobox-data");
-      const value = $td.text().trim();
+      // Strip <style>/<script> blocks before reading text — Wikipedia inlines
+      // a <style> with CSS like ".mw-parser-output .geo-default {…}" inside
+      // coordinate cells, and cheerio's .text() concatenates that into the
+      // value (the source of the "Buenos Aires.mw-parser-output .geo-default"
+      // pollution we cleaned up).
+      const $clone = $td.clone();
+      $clone.find("style, script").remove();
+      const value = sanitizeInfoboxValue($clone.text());
 
       if (label.includes("ground") || label.includes("stadium")) {
         const $link = $td.find("a").first();
@@ -409,7 +438,7 @@ async function extractTeamDetails(
         }
       }
       if (label.includes("city") || label.includes("location")) {
-        details.city = value.split(",")[0].split("\n")[0];
+        details.city = value.split(",")[0].split("\n")[0].trim();
       }
       if (label === "founded") {
         const year = value.match(/\d{4}/);
