@@ -49,6 +49,7 @@ export const teams = pgTable(
     name: text("name").notNull(), // 'Manchester City'
     shortName: text("short_name"), // 'Man City'
     slug: text("slug").notNull().unique(), // 'manchester-city'
+    teamType: text("team_type").notNull().default("club"), // 'club' | 'national'
     country: text("country").notNull(),
     city: text("city"),
     foundedYear: integer("founded_year"),
@@ -127,6 +128,59 @@ export const venues = pgTable("venues", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+
+// ============================================================
+// NATIONAL TEAM TOURNAMENTS
+// ============================================================
+
+export const tournaments = pgTable("tournaments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(), // 'fifa-world-cup' | 'copa-america' | 'uefa-euro' | 'afcon' | 'asian-cup' | 'gold-cup'
+  name: text("name").notNull(), // 'FIFA World Cup'
+  shortName: text("short_name"), // 'World Cup'
+  region: text("region"), // 'World' | 'South America' | 'Europe' | 'Africa' | 'Asia' | 'North America'
+  governingBody: text("governing_body"), // 'FIFA' | 'CONMEBOL' | 'UEFA' | 'CAF' | 'AFC' | 'CONCACAF'
+  foundedYear: integer("founded_year"), // 1930
+  editionFrequencyYears: integer("edition_frequency_years"), // 4 for WC/Euro, varies for Copa
+  logoUrl: text("logo_url"),
+  wikidataId: text("wikidata_id"),
+  wikipediaUrl: text("wikipedia_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const nationalTeamTournaments = pgTable(
+  "national_team_tournaments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    tournamentId: uuid("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    year: integer("year").notNull(),
+    hostCountry: text("host_country"),
+    // 'Champions' | 'Runners-up' | 'Third place' | 'Fourth place' |
+    // 'Semi-finals' | 'Quarter-finals' | 'Round of 16' | 'Group stage' |
+    // 'Did not qualify' | 'Did not enter' | 'Withdrew'
+    stageReached: text("stage_reached").notNull(),
+    finishingPosition: integer("finishing_position"), // 1..4 for medalists
+    played: integer("played"),
+    won: integer("won"),
+    drew: integer("drew"),
+    lost: integer("lost"),
+    goalsFor: integer("goals_for"),
+    goalsAgainst: integer("goals_against"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("idx_ntt_team_tournament_year").on(table.teamId, table.tournamentId, table.year),
+    index("idx_ntt_team").on(table.teamId),
+    index("idx_ntt_tournament_year").on(table.tournamentId, table.year),
+  ]
+);
 
 // ============================================================
 // TEMPORAL RELATIONSHIPS (valid_from / valid_to)

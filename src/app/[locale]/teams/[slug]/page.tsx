@@ -26,6 +26,7 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { TabPanel } from "@/components/ui/tab-navigation";
 import { TeamTabs } from "./team-tabs";
+import { NationalTeamPage } from "./national-team-page";
 import { db } from "@/lib/db";
 import { playerTeamHistory, players, standings as standingsTable, competitionSeasons, seasons, teamVenueHistory, venues, teams as teamsTable } from "@/lib/db/schema";
 import { eq, and, isNull, ne, sql, asc } from "drizzle-orm";
@@ -51,6 +52,35 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
 
   if (!team) {
     notFound();
+  }
+
+  // National teams get their own metadata path — the club thin-page heuristics
+  // (squad size, standings) don't apply.
+  if (team.teamType === "national") {
+    const title = `${team.name} National Football Team – World Cup History, Squad & Results`;
+    const description = `${team.name} men's national football team — World Cup history, Copa América / Euro / AFCON record, top players, and recent fixtures.`;
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `${BASE_URL}/teams/${slug}`,
+        siteName: "DataSports",
+        type: "website",
+        ...(team.logoUrl && { images: [{ url: team.logoUrl, alt: team.name }] }),
+      },
+      twitter: {
+        card: "summary",
+        title,
+        description,
+        ...(team.logoUrl && { images: [team.logoUrl] }),
+      },
+      alternates: { canonical: `${BASE_URL}/teams/${slug}` },
+      other: {
+        ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
+      },
+    };
   }
 
   // Multi-signal thin page scoring
@@ -185,6 +215,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   if (!team) {
     notFound();
+  }
+
+  // National teams get a dedicated template — they have no league, no stadium,
+  // no club squad, and their value lives in tournament history + national-team
+  // squad pool. The club-page logic below assumes all of those.
+  if (team.teamType === "national") {
+    return <NationalTeamPage team={team} baseUrl={BASE_URL} />;
   }
 
   // Quick quality check for hard 404 on truly empty team pages

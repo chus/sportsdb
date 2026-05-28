@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
+
+const intlMiddleware = createIntlMiddleware(routing);
 
 // Detect legacy /matches/{uuid} URLs to 301 redirect to the slug-based URL.
 const MATCH_UUID_PATH_RE =
@@ -46,20 +50,27 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Strip locale prefix for legacy-redirect detection so /es/competitions/...
+  // and /competitions/... resolve via the same alias map. The matching
+  // response preserves whatever locale prefix the request had.
+  const localePrefix = pathname.match(/^\/(es)(\/|$)/)?.[1] ?? "";
+  const stripped = localePrefix ? pathname.slice(`/${localePrefix}`.length) : pathname;
+
   // Legacy competition slug: /competitions/{alias}(/...) → 301 canonical slug
-  if (pathname.startsWith("/competitions/")) {
-    const rest = pathname.slice("/competitions/".length);
+  if (stripped.startsWith("/competitions/")) {
+    const rest = stripped.slice("/competitions/".length);
     const [firstSegment, ...tail] = rest.split("/");
     const canonical = COMPETITION_SLUG_ALIASES[firstSegment];
     if (canonical) {
       const url = request.nextUrl.clone();
-      url.pathname = ["/competitions", canonical, ...tail].join("/");
+      const prefix = localePrefix ? `/${localePrefix}` : "";
+      url.pathname = [prefix, "competitions", canonical, ...tail].join("/").replace(/\/+/g, "/");
       return NextResponse.redirect(url, 301);
     }
   }
 
   // Legacy match URL: /matches/{uuid} → 301 redirect to /matches/{slug}
-  const matchUuidMatch = pathname.match(MATCH_UUID_PATH_RE);
+  const matchUuidMatch = stripped.match(MATCH_UUID_PATH_RE);
   if (matchUuidMatch) {
     const matchId = matchUuidMatch[1];
     try {
@@ -69,8 +80,9 @@ export async function middleware(request: NextRequest) {
       if (lookup.ok) {
         const { slug } = (await lookup.json()) as { slug: string | null };
         if (slug) {
+          const prefix = localePrefix ? `/${localePrefix}` : "";
           return NextResponse.redirect(
-            new URL(`/matches/${slug}`, request.url),
+            new URL(`${prefix}/matches/${slug}`, request.url),
             301,
           );
         }
@@ -81,9 +93,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Only protect /admin routes
-  if (!pathname.startsWith("/admin")) {
-    return NextResponse.next();
+  // Non-admin routes pass through next-intl so locale prefixes (/es) are
+  // rewritten to the matching [locale] segment. Admin routes are auth-gated
+  // below and never localized.
+  const isAdmin = pathname.startsWith("/admin") || pathname.startsWith("/es/admin");
+  if (!isAdmin) {
+    return intlMiddleware(request);
   }
 
   // Check session cookie
@@ -110,5 +125,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  // Match everything except Next internals, API routes, and any path with a
+  // dot (catches /sitemap.xml, /robots.txt, /feed.xml, /favicon.svg, images).
+  // Critical because next-intl middleware otherwise tries to locale-rewrite
+  // /sitemap.xml into /en/sitemap.xml, which 404s.
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };
