@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/submit-indexing",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-standings",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
