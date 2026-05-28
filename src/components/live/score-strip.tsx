@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLiveMatches } from "@/hooks/use-live-matches";
 import { cn } from "@/lib/utils/cn";

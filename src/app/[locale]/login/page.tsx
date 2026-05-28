@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { GoogleButton, AuthDivider } from "@/components/auth/google-button";

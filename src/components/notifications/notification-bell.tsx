@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Bell, Check, X } from "lucide-react";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatDistanceToNow } from "date-fns";

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Target, Vote, Brain, Trophy, Zap, ArrowRight } from "lucide-react";
 import { getCombinedLeaderboard } from "@/lib/queries/games-common";
 import { getCurrentUser } from "@/lib/auth";

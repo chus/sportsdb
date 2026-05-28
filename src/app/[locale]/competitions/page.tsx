@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { Trophy, ChevronRight, Globe } from "lucide-react";
 import type { Metadata } from "next";

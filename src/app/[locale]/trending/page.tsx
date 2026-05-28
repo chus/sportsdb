@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { TrendingUp, Search, Shield, User } from "lucide-react";
 import type { Metadata } from "next";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";

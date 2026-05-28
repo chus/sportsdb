@@ -2,7 +2,7 @@
 
 import { Search, X, Users, Shield, Trophy, MapPin, Loader2, Newspaper } from "lucide-react";
 import { useState, useEffect, useRef, useCallback, useId } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import type { SearchResult } from "@/types/entities";
 import { useRecentSearches } from "@/hooks/use-recent-searches";
 import { RecentSearches } from "./recent-searches";

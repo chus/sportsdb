@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, X, TrendingUp, Search, Loader2, Zap } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";

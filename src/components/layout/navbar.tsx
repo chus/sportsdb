@@ -1,10 +1,10 @@
 "use client";
 
 import { Search, Menu, X, LogOut, User, CreditCard, ChevronDown, LayoutDashboard, Zap } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { Logo } from "@/components/layout/logo";
 import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";

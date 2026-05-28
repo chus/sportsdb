@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy, Eye } from "lucide-react";

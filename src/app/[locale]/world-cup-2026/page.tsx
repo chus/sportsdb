@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Trophy, MapPin, Users, Calendar, ChevronRight, Globe } from "lucide-react";
 import { db } from "@/lib/db";
 import { competitions, competitionSeasons, standings, teams, venues, seasons } from "@/lib/db/schema";

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600; // ISR: revalidate every hour
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import {
   getArticleBySlug,

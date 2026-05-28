@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight, Shield, Users } from "lucide-react";
 import type { TeamSpotlight } from "@/lib/queries/homepage";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";

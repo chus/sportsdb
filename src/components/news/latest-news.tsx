@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRight, Newspaper } from "lucide-react";
 import { getPublishedArticles } from "@/lib/queries/articles";
 import { ArticleCard } from "./article-card";

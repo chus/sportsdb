@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Users, Shield, Trophy, MapPin, GitCompare, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { db } from "@/lib/db";

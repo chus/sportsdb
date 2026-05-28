@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import {
   format, addDays, parseISO, isSameDay,
   isToday as dateFnsIsToday, startOfDay,

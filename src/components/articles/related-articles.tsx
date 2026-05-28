@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Newspaper, ChevronRight } from "lucide-react";
 import { getArticlesForPlayer, getArticlesForTeam } from "@/lib/queries/articles";
 import { format } from "date-fns";

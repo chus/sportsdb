@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Trophy, ChevronRight } from "lucide-react";
 
 const WC_START_DATE = "2026-06-11T00:00:00Z";

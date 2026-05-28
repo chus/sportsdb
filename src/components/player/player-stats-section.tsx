@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { TrendingUp, Target, Clock, AlertTriangle } from "lucide-react";
 import { EntitySeasonSelector } from "@/components/time/entity-season-selector";
 

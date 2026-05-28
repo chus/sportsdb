@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Star } from "lucide-react";
 import type { StandoutPerformer } from "@/lib/queries/homepage";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";

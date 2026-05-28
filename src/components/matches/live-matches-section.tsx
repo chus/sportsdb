@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveMatches } from "@/hooks/use-live-matches";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { formatDistanceToNowStrict } from "date-fns";
 

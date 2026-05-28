@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Lock } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { cn } from "@/lib/utils/cn";

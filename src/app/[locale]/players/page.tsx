@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Users, ArrowRight, Shield, Crosshair, ShieldHalf, Goal } from "lucide-react";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Sparkles, TrendingUp, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { getPlayerMatchSummaries } from "@/lib/queries/summaries";

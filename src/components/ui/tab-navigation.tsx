@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { ReactNode, useCallback } from "react";
 import { cn } from "@/lib/utils/cn";
 

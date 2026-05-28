@@ -1,5 +1,5 @@
 import { Trophy, Database, Globe, Users, Zap, Shield, BarChart3, BookOpen } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { players, teams, competitions, matches, articles } from "@/lib/db/schema";

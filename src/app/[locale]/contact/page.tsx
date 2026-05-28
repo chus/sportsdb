@@ -1,5 +1,5 @@
 import { Mail, MessageSquare, Github, Twitter } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 

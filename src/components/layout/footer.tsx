@@ -1,7 +1,7 @@
 "use client";
 
 import { Trophy } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { AlertTriangle, Trash2, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
 interface DangerZoneSectionProps {

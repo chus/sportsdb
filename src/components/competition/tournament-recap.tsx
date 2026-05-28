@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Sparkles, TrendingUp, TrendingDown, Trophy, Users } from "lucide-react";
 import { getLatestTournamentSummary } from "@/lib/queries/summaries";
 

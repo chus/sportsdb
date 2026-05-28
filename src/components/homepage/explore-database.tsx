@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight, Globe, Shield, Trophy, Users } from "lucide-react";
 import type { HomepageStats } from "@/lib/queries/homepage";
 

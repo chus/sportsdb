@@ -5,7 +5,7 @@ import { Target, Trophy, Lock, Zap } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { useAnalytics } from "@/hooks/use-analytics";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 interface Match {
   id: string;

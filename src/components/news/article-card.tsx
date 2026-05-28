@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { formatDistanceToNow } from "date-fns";
 import type { ArticleWithRelations } from "@/lib/queries/articles";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";

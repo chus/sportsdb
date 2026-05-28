@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Calendar, Shield, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { getUpcomingMatches } from "@/lib/queries/matches";

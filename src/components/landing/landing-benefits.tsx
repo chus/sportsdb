@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Check, Sparkles, ArrowRight } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useSubscription } from "@/components/subscription/subscription-provider";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Zap, BarChart3, Shield, Star, Ban } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { cn } from "@/lib/utils/cn";

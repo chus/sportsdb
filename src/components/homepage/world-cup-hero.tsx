@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Globe, Trophy, Users } from "lucide-react";
 
 const KICKOFF = new Date("2026-06-11T00:00:00Z").getTime();

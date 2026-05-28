@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 

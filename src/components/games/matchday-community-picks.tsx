@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Vote, Lock, Zap } from "lucide-react";
 import { db } from "@/lib/db";
 import { matches, teams, pickemPredictions } from "@/lib/db/schema";

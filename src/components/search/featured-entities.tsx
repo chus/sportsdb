@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Users, Shield, Trophy, ArrowRight, GitCompare } from "lucide-react";
 import { getFeaturedEntities } from "@/lib/queries/search";
 

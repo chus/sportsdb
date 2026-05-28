@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Globe, Shield, Target, TrendingUp, Users } from "lucide-react";
 import type { CompetitionSpotlight as Spotlight } from "@/lib/queries/homepage";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";

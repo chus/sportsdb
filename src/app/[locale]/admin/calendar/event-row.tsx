@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Check, FileText, Loader2, Pencil, Sparkles, Star, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 

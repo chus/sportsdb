@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Calendar, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 

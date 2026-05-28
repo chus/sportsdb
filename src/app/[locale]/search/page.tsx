@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Users, Shield, Trophy, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import { searchEntities, getEntitiesByType } from "@/lib/queries/search";

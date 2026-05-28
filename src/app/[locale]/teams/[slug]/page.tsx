@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Shield, Users, Calendar, Trophy, TrendingUp, Target, ChevronRight, ArrowRightLeft, ArrowDownLeft, ArrowUpRight, MapPin } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 

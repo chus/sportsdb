@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Shield, Calendar, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { getCompetitionFixtures } from "@/lib/queries/matches";

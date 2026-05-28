@@ -1,5 +1,6 @@
-import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight, Flame, Trophy } from "lucide-react";
 import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";

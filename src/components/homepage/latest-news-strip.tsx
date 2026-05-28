@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ChevronRight, Newspaper } from "lucide-react";
 import type { ArticleWithRelations } from "@/lib/queries/articles";
 

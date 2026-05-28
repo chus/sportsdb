@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Plus, Users, Lock, Copy, Check, ArrowRight } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { useAnalytics } from "@/hooks/use-analytics";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 interface League {
   id: string;

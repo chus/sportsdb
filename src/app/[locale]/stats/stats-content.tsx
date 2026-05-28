@@ -7,7 +7,7 @@ import {
   Loader2,
   Search,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";

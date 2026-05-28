@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Building, MapPin, Users, Calendar } from "lucide-react";
 import type { Metadata } from "next";
 import { getAllVenues } from "@/lib/queries/venues";

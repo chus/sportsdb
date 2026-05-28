@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { MapPin, ChevronRight, Shield } from "lucide-react";
 import type { Metadata } from "next";
 import { getDistinctTeamCountries } from "@/lib/queries/leaderboards";

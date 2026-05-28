@@ -2,7 +2,7 @@
 
 import { Search, X, Users, Loader2 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import type { SearchResult } from "@/types/entities";
 
 interface PlayerSearchSelectorProps {

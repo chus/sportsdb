@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Handshake, Shield, User, ChevronRight, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import { getTopAssistsGlobal, getAllCompetitionSlugs, getCompetitionBySlug, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";

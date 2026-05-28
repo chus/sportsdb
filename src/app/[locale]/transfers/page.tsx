@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowRightLeft, User, Shield, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getRecentTransfers, getCurrentSeasonLabel } from "@/lib/queries/leaderboards";

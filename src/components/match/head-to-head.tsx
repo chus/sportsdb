@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { Trophy, Minus } from "lucide-react";
 import { getHeadToHead } from "@/lib/queries/related";

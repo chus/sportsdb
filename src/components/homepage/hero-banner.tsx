@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Calendar, CheckCircle, Circle, Clock, Shield } from "lucide-react";
 import type { HeroBanner, HeroMatch } from "@/lib/queries/homepage";
 import { LiveMatchesSection } from "@/components/live/live-matches-section";
