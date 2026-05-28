@@ -1,10 +1,6 @@
-import { Ban, BarChart3, ChevronRight, Heart, Shield } from "lucide-react";
+import { Ban, BarChart3, Heart, Shield } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
-import { db } from "@/lib/db";
-import { userLeaguePreferences } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { getCurrentUser } from "@/lib/auth";
 import { WebsiteJsonLd, OrganizationJsonLd } from "@/components/seo/json-ld";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageTracker } from "@/components/analytics/page-tracker";
@@ -75,22 +71,10 @@ export const metadata: Metadata = {
   ],
 };
 
-async function resolvePersonalization(
-  user: Awaited<ReturnType<typeof getCurrentUser>>
-): Promise<string[] | undefined> {
-  if (!user || user.role !== "pro") return undefined;
-  const prefs = await db
-    .select({ competitionId: userLeaguePreferences.competitionId })
-    .from(userLeaguePreferences)
-    .where(eq(userLeaguePreferences.userId, user.id));
-  if (!prefs.length) return undefined;
-  return prefs.map((p) => p.competitionId);
-}
-
 export default async function HomePage() {
-  const currentUser = await getCurrentUser();
-  const personalizedIds = await resolvePersonalization(currentUser);
-
+  // No auth read on the server: keeps the homepage ISR-cacheable so Google
+  // sees s-maxage instead of no-store. Pro personalization (followed leagues
+  // in the hero, "Welcome back" greeting) is handled client-side after mount.
   const [
     hero,
     matchOfTheDay,
@@ -103,7 +87,7 @@ export default async function HomePage() {
     featuredLeagues,
     teamSpotlight,
   ] = await Promise.all([
-    getHeroBanner({ personalizedCompetitionIds: personalizedIds }),
+    getHeroBanner(),
     getMatchOfTheDay(),
     getStandoutPerformers(30, 3),
     getWeekPreview(7),
@@ -114,9 +98,6 @@ export default async function HomePage() {
     getFeaturedLeagues(6),
     getDailyTeamSpotlight(),
   ]);
-
-  const viewerName =
-    currentUser?.name || currentUser?.email?.split("@")[0] || null;
 
   return (
     <>
@@ -139,7 +120,7 @@ export default async function HomePage() {
         <section className="bg-neutral-900 text-white">
           <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
-              {viewerName ? `Welcome back, ${viewerName}` : "The Sports Database"}
+              The Sports Database
             </h1>
             <p className="text-neutral-400 mb-6 text-sm">
               {stats.players.toLocaleString()} players ·{" "}
@@ -232,58 +213,38 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* Pro / Dashboard CTA */}
-        {!currentUser && (
-          <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-            <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-              <h2 className="text-2xl font-bold text-white mb-3">
-                Unlock the Full Experience
-              </h2>
-              <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
-                Ad-free browsing, advanced stats, unlimited follows and
-                comparisons — all for less than a coffee per month.
-              </p>
-              <div className="flex items-center justify-center gap-6 mb-8">
-                {[
-                  { icon: Ban, label: "Ad-Free" },
-                  { icon: BarChart3, label: "Advanced Stats" },
-                  { icon: Heart, label: "Unlimited Follows" },
-                ].map((f) => (
-                  <div key={f.label} className="text-white text-center">
-                    <f.icon className="w-6 h-6 mx-auto mb-1" />
-                    <span className="text-xs font-medium">{f.label}</span>
-                  </div>
-                ))}
-              </div>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
-              >
-                Go Pro — from &euro;8/year
-              </Link>
+        {/* Pro CTA — always rendered so the page stays cacheable. Logged-in
+            users get their Dashboard link from the navbar; no need for a
+            duplicate CTA here. */}
+        <section className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+          <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+            <h2 className="text-2xl font-bold text-white mb-3">
+              Unlock the Full Experience
+            </h2>
+            <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
+              Ad-free browsing, advanced stats, unlimited follows and
+              comparisons — all for less than a coffee per month.
+            </p>
+            <div className="flex items-center justify-center gap-6 mb-8">
+              {[
+                { icon: Ban, label: "Ad-Free" },
+                { icon: BarChart3, label: "Advanced Stats" },
+                { icon: Heart, label: "Unlimited Follows" },
+              ].map((f) => (
+                <div key={f.label} className="text-white text-center">
+                  <f.icon className="w-6 h-6 mx-auto mb-1" />
+                  <span className="text-xs font-medium">{f.label}</span>
+                </div>
+              ))}
             </div>
-          </section>
-        )}
-
-        {currentUser && (
-          <section className="max-w-7xl mx-auto px-4 py-12">
             <Link
-              href="/dashboard"
-              className="block bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white hover:shadow-lg transition-shadow group"
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
             >
-              <h3 className="font-bold text-xl mb-1 group-hover:underline">
-                Your Dashboard
-              </h3>
-              <p className="text-sm text-blue-100 mb-3">
-                Follow leagues, check standings, and see upcoming fixtures — all
-                in one place.
-              </p>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold">
-                Open Dashboard <ChevronRight className="w-4 h-4" />
-              </span>
+              Go Pro — from &euro;8/year
             </Link>
-          </section>
-        )}
+          </div>
+        </section>
       </div>
     </>
   );
