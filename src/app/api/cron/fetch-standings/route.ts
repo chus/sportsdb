@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
 
@@ -11,19 +11,30 @@ export const maxDuration = 60;
  *
  * Scheduled because team and competition pages render "No standings data"
  * when this table is empty — which Google reads as thin content and drops
- * from the index. Runs hourly during the football week.
+ * from the index.
  *
- * Free-tier limit: 10 requests/minute. We cover 5 leagues per run with a
- * 7-second pause between each → total run ~35 seconds, well under the
- * 60-second function timeout.
+ * Two groups so each run stays under the 60-second function timeout
+ * (free tier is 10 req/min → 6.5 s between calls):
+ *   ?group=top5      (default)  PL, PD, BL1, SA, FL1
+ *   ?group=secondary            DED, PPL, ELC, CL
+ *
+ * Schedule both groups in vercel.json on staggered times.
  */
 
-const LEAGUE_MAP: Record<string, string> = {
-  PL: "premier-league",
-  PD: "la-liga",
-  BL1: "bundesliga",
-  SA: "serie-a",
-  FL1: "ligue-1",
+const LEAGUE_GROUPS: Record<string, Record<string, string>> = {
+  top5: {
+    PL: "premier-league",
+    PD: "la-liga",
+    BL1: "bundesliga",
+    SA: "serie-a",
+    FL1: "ligue-1",
+  },
+  secondary: {
+    DED: "eredivisie",
+    PPL: "primeira-liga",
+    ELC: "championship",
+    CL: "uefa-champions-league",
+  },
 };
 
 interface StandingEntry {
@@ -48,7 +59,7 @@ async function verifyCronSecret() {
   return authHeader === `Bearer ${cronSecret}`;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await verifyCronSecret())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -62,10 +73,19 @@ export async function GET() {
     return NextResponse.json({ error: "Missing DATABASE_URL" }, { status: 500 });
   }
 
+  const groupParam = request.nextUrl.searchParams.get("group") ?? "top5";
+  const leagueMap = LEAGUE_GROUPS[groupParam];
+  if (!leagueMap) {
+    return NextResponse.json(
+      { error: `Unknown group "${groupParam}". Valid: ${Object.keys(LEAGUE_GROUPS).join(", ")}` },
+      { status: 400 },
+    );
+  }
+
   const sql = neon(DATABASE_URL);
   const summary: Record<string, { fetched: number; upserted: number; notFound: number }> = {};
 
-  for (const [code, slug] of Object.entries(LEAGUE_MAP)) {
+  for (const [code, slug] of Object.entries(leagueMap)) {
     const comp = await sql`
       SELECT cs.id as competition_season_id
       FROM competitions c
@@ -161,6 +181,7 @@ export async function GET() {
 
   return NextResponse.json({
     success: true,
+    group: groupParam,
     summary,
     timestamp: new Date().toISOString(),
   });

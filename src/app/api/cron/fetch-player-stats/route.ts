@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
 
@@ -14,18 +14,28 @@ export const maxDuration = 60;
  * never played a match" — the second-biggest content gap behind missing
  * standings.
  *
- * Coverage: top 5 European leagues. 6.5 s between API calls + small
- * upsert loops keeps the run under the 60-second function timeout.
- * For full 11-league coverage use the manual script
- * (scripts/fetch-player-stats.ts).
+ * Two groups so each run stays under the 60-second function timeout
+ * (free tier is 10 req/min → 6.5 s between calls):
+ *   ?group=top5      (default)  PL, PD, BL1, SA, FL1
+ *   ?group=secondary            DED, PPL, ELC, CL
+ *
+ * Schedule both groups in vercel.json on staggered times.
  */
 
-const COMPETITION_MAP: Record<string, string[]> = {
-  PL: ["premier-league"],
-  PD: ["primera-division", "la-liga"],
-  BL1: ["bundesliga"],
-  SA: ["serie-a"],
-  FL1: ["ligue-1"],
+const COMPETITION_GROUPS: Record<string, Record<string, string[]>> = {
+  top5: {
+    PL: ["premier-league"],
+    PD: ["primera-division", "la-liga"],
+    BL1: ["bundesliga"],
+    SA: ["serie-a"],
+    FL1: ["ligue-1"],
+  },
+  secondary: {
+    DED: ["eredivisie"],
+    PPL: ["primeira-liga"],
+    ELC: ["championship"],
+    CL: ["uefa-champions-league", "champions-league"],
+  },
 };
 
 interface ApiScorer {
@@ -57,7 +67,7 @@ async function verifyCronSecret() {
   return authHeader === `Bearer ${cronSecret}`;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await verifyCronSecret())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -67,6 +77,15 @@ export async function GET() {
     process.env.FOOTBALL_DATA_API_KEY ?? "226de578459844eeb0c5539b1859ed1e";
   if (!DATABASE_URL) {
     return NextResponse.json({ error: "Missing DATABASE_URL" }, { status: 500 });
+  }
+
+  const groupParam = request.nextUrl.searchParams.get("group") ?? "top5";
+  const competitionMap = COMPETITION_GROUPS[groupParam];
+  if (!competitionMap) {
+    return NextResponse.json(
+      { error: `Unknown group "${groupParam}". Valid: ${Object.keys(COMPETITION_GROUPS).join(", ")}` },
+      { status: 400 },
+    );
   }
 
   const sql = neon(DATABASE_URL);
@@ -110,7 +129,7 @@ export async function GET() {
     skipped?: string;
   }> = {};
 
-  for (const [code, possibleSlugs] of Object.entries(COMPETITION_MAP)) {
+  for (const [code, possibleSlugs] of Object.entries(competitionMap)) {
     let compSeasonId: string | undefined;
     for (const slug of possibleSlugs) {
       compSeasonId = compSeasonMap.get(slug);
@@ -189,6 +208,7 @@ export async function GET() {
 
   return NextResponse.json({
     success: true,
+    group: groupParam,
     summary,
     timestamp: new Date().toISOString(),
   });

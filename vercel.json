@@ -33,8 +33,16 @@
       "schedule": "0 */6 * * *"
     },
     {
+      "path": "/api/cron/fetch-standings?group=secondary",
+      "schedule": "15 */6 * * *"
+    },
+    {
       "path": "/api/cron/fetch-player-stats",
       "schedule": "30 */6 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-player-stats?group=secondary",
+      "schedule": "45 */6 * * *"
     }
   ]
 }
