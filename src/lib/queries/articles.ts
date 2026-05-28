@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import {
   articles,
@@ -90,9 +91,9 @@ export async function getPublishedArticles(
   return results;
 }
 
-export async function getArticleBySlug(
+export const getArticleBySlug = cache(async (
   slug: string
-): Promise<ArticleWithRelations | null> {
+): Promise<ArticleWithRelations | null> => {
   const [result] = await db
     .select({
       article: articles,
@@ -126,7 +127,7 @@ export async function getArticleBySlug(
     .limit(1);
 
   return result || null;
-}
+});
 
 export async function getRelatedArticles(
   articleId: string,

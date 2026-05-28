@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers, transfers } from "@/lib/db/schema";
 import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
@@ -5,8 +6,11 @@ import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
 /**
  * Get a player by their URL slug.
  * Returns full player data with current team.
+ *
+ * Wrapped in React cache() so generateMetadata + Page share a single
+ * lookup per request instead of hitting the DB twice.
  */
-export async function getPlayerBySlug(slug: string) {
+export const getPlayerBySlug = cache(async (slug: string) => {
   const result = await db
     .select()
     .from(players)
@@ -14,7 +18,7 @@ export async function getPlayerBySlug(slug: string) {
     .limit(1);
 
   return result[0] ?? null;
-}
+});
 
 /**
  * Get the current team for a player (valid_to IS NULL).

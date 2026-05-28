@@ -1,11 +1,15 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { teams, standings, competitionSeasons, competitions, seasons, playerTeamHistory, players, playerSeasonStats, transfers } from "@/lib/db/schema";
 import { eq, and, isNull, lte, or, gte, isNotNull, desc, ne, sql } from "drizzle-orm";
 
 /**
  * Get a team by their URL slug.
+ *
+ * Wrapped in React cache() so generateMetadata + Page share a single
+ * lookup per request.
  */
-export async function getTeamBySlug(slug: string) {
+export const getTeamBySlug = cache(async (slug: string) => {
   const result = await db
     .select()
     .from(teams)
@@ -13,7 +17,7 @@ export async function getTeamBySlug(slug: string) {
     .limit(1);
 
   return result[0] ?? null;
-}
+});
 
 /**
  * Get team standings for a specific season.

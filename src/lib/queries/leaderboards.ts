@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import {
   playerSeasonStats,
@@ -144,7 +145,7 @@ export async function getAllCompetitionSlugs(): Promise<{ slug: string }[]> {
     .from(competitions);
 }
 
-export async function getCompetitionBySlug(slug: string) {
+export const getCompetitionBySlug = cache(async (slug: string) => {
   const [comp] = await db
     .select({
       id: competitions.id,
@@ -157,7 +158,7 @@ export async function getCompetitionBySlug(slug: string) {
     .where(eq(competitions.slug, slug))
     .limit(1);
   return comp ?? null;
-}
+});
 
 // ============================================================
 // HISTORICAL SEASON LEADERBOARDS
@@ -234,7 +235,7 @@ export async function getCurrentSeasonUrlLabel(
  * Used by pages that need a dynamic season string in metadata.
  * Falls back to a date-based calculation if no DB row is found.
  */
-export async function getCurrentSeasonLabel(): Promise<string> {
+export const getCurrentSeasonLabel = cache(async (): Promise<string> => {
   const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
   // 1. Prefer a current season whose date range contains today
@@ -266,7 +267,7 @@ export async function getCurrentSeasonLabel(): Promise<string> {
   const y = now.getFullYear();
   const startYear = now.getMonth() >= 7 ? y : y - 1;
   return `${startYear}/${String(startYear + 1).slice(2)}`;
-}
+});
 
 // ============================================================
 // PLAYERS BY POSITION

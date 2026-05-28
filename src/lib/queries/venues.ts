@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import {
   venues,
@@ -11,9 +12,10 @@ import {
 import { eq, and, isNull, or, desc, gte, asc } from "drizzle-orm";
 
 /**
- * Get a venue by their URL slug.
+ * Get a venue by their URL slug. cache()d so generateMetadata + Page
+ * share a single lookup per request.
  */
-export async function getVenueBySlug(slug: string) {
+export const getVenueBySlug = cache(async (slug: string) => {
   const result = await db
     .select()
     .from(venues)
@@ -21,7 +23,7 @@ export async function getVenueBySlug(slug: string) {
     .limit(1);
 
   return result[0] ?? null;
-}
+});
 
 /**
  * Get teams that play at this venue (current and historical).

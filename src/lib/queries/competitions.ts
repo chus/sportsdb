@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "@/lib/db";
 import {
   competitions,
@@ -13,9 +14,10 @@ import { alias } from "drizzle-orm/pg-core";
 import { matches } from "@/lib/db/schema";
 
 /**
- * Get a competition by slug.
+ * Get a competition by slug. cache()d so generateMetadata + Page share
+ * a single lookup per request.
  */
-export async function getCompetitionBySlug(slug: string) {
+export const getCompetitionBySlug = cache(async (slug: string) => {
   const result = await db
     .select()
     .from(competitions)
@@ -23,7 +25,7 @@ export async function getCompetitionBySlug(slug: string) {
     .limit(1);
 
   return result[0] ?? null;
-}
+});
 
 /**
  * Get standings for a competition-season.
