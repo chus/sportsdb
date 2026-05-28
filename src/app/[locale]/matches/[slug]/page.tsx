@@ -15,6 +15,7 @@ import {
 import { PlayerLink } from "@/components/player/player-link";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   getMatchWithDetailsBySlug,
@@ -99,9 +100,7 @@ export async function generateMetadata({
       description,
       images: [`${url}/opengraph-image`],
     },
-    alternates: {
-      canonical: url,
-    },
+    alternates: localizedAlternates(`/matches/${slug}`),
     other: {
       ...(match.updatedAt && { "article:modified_time": match.updatedAt.toISOString() }),
     },

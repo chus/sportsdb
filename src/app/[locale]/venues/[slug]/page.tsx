@@ -16,6 +16,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   getVenueBySlug,
@@ -78,9 +79,7 @@ export async function generateMetadata({
       description,
       images: [venue.imageUrl || `${BASE_URL}/venues/${slug}/opengraph-image`],
     },
-    alternates: {
-      canonical: `${BASE_URL}/venues/${slug}`,
-    },
+    alternates: localizedAlternates(`/venues/${slug}`),
   };
 }
 

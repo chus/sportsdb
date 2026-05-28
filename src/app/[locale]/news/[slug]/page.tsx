@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import { Link } from "@/i18n/navigation";
@@ -74,7 +75,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         return {
           title,
           description: desc,
-          alternates: { canonical: `${BASE_URL}/news/${slug}` },
+          alternates: localizedAlternates(`/news/${slug}`),
           robots: {
             index: true,
             follow: true,
@@ -111,7 +112,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description: article.metaDescription || article.excerpt,
-    alternates: { canonical: `${BASE_URL}/news/${slug}` },
+    alternates: localizedAlternates(`/news/${slug}`),
     robots: {
       index: true,
       follow: true,

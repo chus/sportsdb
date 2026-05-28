@@ -6,6 +6,7 @@ import {
   Trophy, Target, TrendingUp, ChevronRight, ArrowRightLeft
 } from "lucide-react";
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
@@ -103,9 +104,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
       description,
       ...(player.imageUrl && { images: [player.imageUrl] }),
     },
-    alternates: {
-      canonical: `${BASE_URL}/players/${slug}`,
-    },
+    alternates: localizedAlternates(`/players/${slug}`),
     other: {
       ...(player.updatedAt && { "article:modified_time": player.updatedAt.toISOString() }),
     },

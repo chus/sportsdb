@@ -5,6 +5,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import {
   getCompetitionBySlug,
   getCompetitionSeason,
@@ -65,7 +66,7 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
       ...(competition.logoUrl && { images: [competition.logoUrl] }),
     },
     alternates: {
-      canonical: `${BASE_URL}/competitions/${slug}`,
+      ...localizedAlternates(`/competitions/${slug}`),
       types: {
         "application/rss+xml": `${BASE_URL}/feed/${slug}.xml`,
       },

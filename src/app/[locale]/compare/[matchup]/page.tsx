@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { Users, TrendingUp, Target, Clock, AlertTriangle, Shield } from "lucide-react";
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import {
   getTopPlayerPairs,
   getPlayerWithAggregatedStats,
@@ -76,7 +77,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: "DataSports",
       type: "website",
     },
-    alternates: { canonical: `${BASE_URL}/compare/${matchup}` },
+    alternates: localizedAlternates(`/compare/${matchup}`),
   };
 }
 

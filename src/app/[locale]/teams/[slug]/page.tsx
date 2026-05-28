@@ -5,6 +5,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer, getTeamTransfers } from "@/lib/queries/teams";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
@@ -76,7 +77,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
         description,
         ...(team.logoUrl && { images: [team.logoUrl] }),
       },
-      alternates: { canonical: `${BASE_URL}/teams/${slug}` },
+      alternates: localizedAlternates(`/teams/${slug}`),
       other: {
         ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
       },
@@ -134,9 +135,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
       description,
       ...(team.logoUrl && { images: [team.logoUrl] }),
     },
-    alternates: {
-      canonical: `${BASE_URL}/teams/${slug}`,
-    },
+    alternates: localizedAlternates(`/teams/${slug}`),
     other: {
       ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
     },
