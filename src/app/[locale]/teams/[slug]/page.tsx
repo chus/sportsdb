@@ -41,7 +41,7 @@ import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
 import { ProTeaser } from "@/components/subscription/pro-teaser";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { buildTeamAbout, buildTeamFaqs } from "@/lib/seo/entity-copy";
+import { buildTeamAbout, buildTeamAboutEs, buildTeamFaqs, buildTeamFaqsEs } from "@/lib/seo/entity-copy";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
@@ -232,7 +232,7 @@ function ordinal(n: number) {
 }
 
 export default async function TeamPage({ params }: TeamPageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   const team = await getTeamBySlug(slug);
 
@@ -331,7 +331,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
   const primaryColor = team.primaryColor || "#2563eb";
 
   const teamUrl = `${BASE_URL}/teams/${slug}`;
-  const aboutParagraphs = buildTeamAbout({
+  const aboutArgs = {
     name: team.name,
     shortName: safeShortName,
     city: safeCity,
@@ -355,8 +355,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
     venueCapacity: venue?.capacity ?? null,
     coachName: team.coachName,
     squadMarketValue: team.squadMarketValue,
-  });
-  const faqItems = buildTeamFaqs({
+  };
+  const aboutParagraphs = locale === "es"
+    ? buildTeamAboutEs(aboutArgs)
+    : buildTeamAbout(aboutArgs);
+
+  const faqArgs = {
     name: team.name,
     city: safeCity,
     country: team.country,
@@ -369,7 +373,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
     standing,
     coachName: team.coachName,
     squadMarketValue: team.squadMarketValue,
-  });
+  };
+  const faqItems = locale === "es"
+    ? buildTeamFaqsEs(faqArgs)
+    : buildTeamFaqs(faqArgs);
 
   // Breadcrumb items
   const breadcrumbItems = [

@@ -45,6 +45,15 @@ function positionDescriptor(position: string): string {
   return lower;
 }
 
+function positionDescriptorEs(position: string): string {
+  const lower = position.toLowerCase();
+  if (lower === "forward") return "delantero";
+  if (lower === "goalkeeper") return "portero";
+  if (lower === "defender") return "defensa";
+  if (lower === "midfielder") return "centrocampista";
+  return "futbolista";
+}
+
 function teamLink(name: string, slug: string): string {
   return `[${name}](/teams/${slug})`;
 }
@@ -182,6 +191,80 @@ export function buildPlayerAbout(args: {
   return [para1, para2].filter(Boolean);
 }
 
+/**
+ * Spanish version of buildPlayerAbout. Intentionally simpler than the
+ * English version — uses one consistent template instead of mirroring the
+ * 5-way conditional sentence variants. Reads naturally and conveys all
+ * the structured data; users browsing /es get translated body content
+ * without us having to handle Spanish gender/number across 20+ templates.
+ */
+export function buildPlayerAboutEs(args: Parameters<typeof buildPlayerAbout>[0]): string[] {
+  const pos = positionDescriptorEs(args.position);
+  const sn = surname(args.name);
+  const sentences: string[] = [];
+
+  // --- Sentence 1: identity ---
+  // Spanish grammar: "portero de Uruguay" (preposition + country) rather than
+  // adjective ("uruguayo") which would require per-country forms. The "de NN
+  // años" age clause goes after the nationality.
+  const natBit = args.nationality ? ` de ${args.nationality}` : "";
+  const ageBit = args.age != null ? `, de ${args.age} años` : "";
+  if (args.totalAppearances > 0) {
+    sentences.push(
+      `${args.name} es un ${pos}${natBit}${ageBit}, con ${args.totalAppearances} partidos de carrera, ${args.totalGoals} goles y ${args.totalAssists} asistencias.`,
+    );
+  } else {
+    sentences.push(`${args.name} es un ${pos}${natBit}${ageBit}.`);
+  }
+
+  // --- Sentence 2: current team + transfer narrative ---
+  const previousClubs = args.career.filter((c) => c.validTo !== null);
+  const currentClubFromCareer = args.career.find((c) => c.validTo === null);
+
+  if (args.currentTeamName && args.currentTeamSlug && previousClubs.length > 0) {
+    const lastPrevious = previousClubs[previousClubs.length - 1];
+    const joinYear = currentClubFromCareer
+      ? yearFromDate(currentClubFromCareer.validFrom)
+      : null;
+    const joinClause = joinYear ? ` en ${joinYear}` : "";
+    const currentLink = teamLink(args.currentTeamName, args.currentTeamSlug);
+    const prevLink = teamLink(lastPrevious.teamName, lastPrevious.teamSlug);
+    sentences.push(`${sn} se incorporó a ${currentLink} desde ${prevLink}${joinClause}.`);
+  } else if (args.currentTeamName && args.currentTeamSlug && args.career.length === 1) {
+    const currentLink = teamLink(args.currentTeamName, args.currentTeamSlug);
+    sentences.push(`Formado en ${currentLink}, ha desarrollado allí toda su carrera profesional.`);
+  } else if (args.currentTeamName && args.currentTeamSlug) {
+    const currentLink = teamLink(args.currentTeamName, args.currentTeamSlug);
+    sentences.push(`Actualmente juega en ${currentLink}.`);
+  } else if (args.career.length > 0) {
+    const plural = args.career.length === 1 ? "club" : "clubes";
+    sentences.push(`Su carrera ha pasado por ${args.career.length} ${plural}.`);
+  }
+
+  // --- Sentence 3: current season ---
+  let para2Sentences: string[] = [];
+  if (args.currentSeasonStats && args.currentSeasonStats.appearances > 0) {
+    const s = args.currentSeasonStats;
+    const goalsWord = s.goals === 1 ? "gol" : "goles";
+    const assistsWord = s.assists === 1 ? "asistencia" : "asistencias";
+    const appsWord = s.appearances === 1 ? "partido" : "partidos";
+    para2Sentences.push(
+      `Esta temporada acumula ${s.goals} ${goalsWord} y ${s.assists} ${assistsWord} en ${s.appearances} ${appsWord} en ${s.competition}.`,
+    );
+  }
+
+  // --- Sentence 4: market value ---
+  if (args.marketValueEur) {
+    para2Sentences.push(
+      `Su valor de mercado actual se estima en ${formatMarketValue(args.marketValueEur)}.`,
+    );
+  }
+
+  const para1 = sentences.join(" ");
+  const para2 = para2Sentences.join(" ");
+  return [para1, para2].filter(Boolean);
+}
+
 export function buildPlayerFaqs(args: {
   name: string;
   nationality?: string | null;
@@ -260,6 +343,77 @@ export function buildPlayerFaqs(args: {
     faqs.push({
       question: `What is ${args.name}'s market value?`,
       answer: `${args.name}'s current estimated market value is ${formatMarketValue(args.marketValueEur)}.`,
+    });
+  }
+
+  return faqs;
+}
+
+export function buildPlayerFaqsEs(args: Parameters<typeof buildPlayerFaqs>[0]): FaqItem[] {
+  const pos = positionDescriptorEs(args.position);
+  const faqs: FaqItem[] = [
+    {
+      question: `¿Quién es ${args.name}?`,
+      answer: `${args.name} es un ${pos}${args.nationality ? ` de ${args.nationality}` : ""}${args.currentTeamName ? ` que juega en ${args.currentTeamName}` : ""}.`,
+    },
+    {
+      question: `¿En qué posición juega ${args.name}?`,
+      answer: `${args.name} juega como ${pos}.`,
+    },
+  ];
+
+  if (args.currentTeamName) {
+    faqs.push({
+      question: `¿En qué equipo juega ${args.name}?`,
+      answer: `${args.name} juega en ${args.currentTeamName}.`,
+    });
+  }
+
+  if (args.age) {
+    const dobClause = args.dateOfBirth
+      ? `, nacido el ${new Date(args.dateOfBirth).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}`
+      : "";
+    faqs.push({
+      question: `¿Cuántos años tiene ${args.name}?`,
+      answer: `${args.name} tiene ${args.age} años${dobClause}.`,
+    });
+  }
+
+  if (args.preferredFoot) {
+    const foot = args.preferredFoot.toLowerCase() === "right" ? "derecho"
+      : args.preferredFoot.toLowerCase() === "left" ? "izquierdo"
+      : "ambidiestro";
+    faqs.push({
+      question: `¿Cuál es el pie preferido de ${args.name}?`,
+      answer: `${args.name} es ${foot}.`,
+    });
+  }
+
+  if (args.totalApps && args.totalApps > 0) {
+    faqs.push({
+      question: `¿Cuántos goles ha marcado ${args.name}?`,
+      answer: `${args.name} ha marcado ${args.totalGoals ?? 0} goles y ha dado ${args.totalAssists ?? 0} asistencias en ${args.totalApps} partidos de carrera.`,
+    });
+  }
+
+  if (args.heightCm) {
+    faqs.push({
+      question: `¿Cuánto mide ${args.name}?`,
+      answer: `${args.name} mide ${args.heightCm} cm.`,
+    });
+  }
+
+  if (args.careerTeams && args.careerTeams.length > 1) {
+    faqs.push({
+      question: `¿En qué clubes ha jugado ${args.name}?`,
+      answer: `${args.name} ha jugado en ${args.careerTeams.join(", ")}.`,
+    });
+  }
+
+  if (args.marketValueEur) {
+    faqs.push({
+      question: `¿Cuál es el valor de mercado de ${args.name}?`,
+      answer: `El valor de mercado actual estimado de ${args.name} es ${formatMarketValue(args.marketValueEur)}.`,
     });
   }
 
@@ -388,6 +542,106 @@ export function buildTeamAbout(args: {
       para4 = `${args.name} play their home matches at ${args.venueName}, which has a capacity of ${args.venueCapacity.toLocaleString()} spectators.`;
     } else {
       para4 = `${args.name} play their home matches at ${args.venueName}.`;
+    }
+  }
+
+  return [para1, para2, para3, para4].filter(Boolean);
+}
+
+export function buildTeamAboutEs(args: Parameters<typeof buildTeamAbout>[0]): string[] {
+  const safeCity = args.city && !/^\d+$/.test(args.city) ? args.city : null;
+  const location = safeCity && args.country
+    ? `${safeCity}, ${args.country}`
+    : safeCity || args.country || null;
+
+  // --- Paragraph 1: Identity ---
+  let identity: string;
+  if (args.foundedYear && location) {
+    identity = `Fundado en ${args.foundedYear}, ${args.name} es un club de fútbol con sede en ${location}.`;
+  } else if (location) {
+    identity = `${args.name} es un club de fútbol con sede en ${location}.`;
+  } else if (args.foundedYear) {
+    identity = `Fundado en ${args.foundedYear}, ${args.name} es un club de fútbol profesional.`;
+  } else {
+    identity = `${args.name} es un club de fútbol profesional.`;
+  }
+
+  let competition = "";
+  if (args.competitionName && args.seasonLabel) {
+    competition = ` Compite en ${args.competitionName} en la temporada ${args.seasonLabel}.`;
+  } else if (args.competitionName) {
+    competition = ` Compite en ${args.competitionName}.`;
+  }
+
+  const para1 = identity + competition;
+
+  // --- Paragraph 2: Current standing ---
+  let standingText = "";
+  if (args.standing && args.seasonLabel) {
+    const s = args.standing;
+    const compLabel = args.competitionName || "la liga";
+    const gdText = s.goalDifference > 0 ? `+${s.goalDifference}` : String(s.goalDifference);
+    standingText = `${args.name} ocupa actualmente el puesto ${s.position} en ${compLabel} con ${s.points} puntos y un balance de ${s.won}V-${s.drawn}E-${s.lost}D (DG: ${gdText}).`;
+
+    if (s.position > 1 && args.leaderName && args.leaderPoints != null) {
+      const gap = args.leaderPoints - s.points;
+      if (gap > 0) {
+        const ptsWord = gap === 1 ? "punto" : "puntos";
+        standingText += ` Está a ${gap} ${ptsWord} del líder ${args.leaderName}.`;
+      }
+    } else if (s.position === 1) {
+      standingText += " Lidera la tabla.";
+    }
+
+    if (s.form && s.form.length >= 3) {
+      const formArr = s.form.split("");
+      const recent5 = formArr.slice(-5);
+      const wins = recent5.filter((f) => f === "W").length;
+      const unbeaten = recent5.filter((f) => f === "W" || f === "D").length;
+      if (wins >= 4) {
+        standingText += ` Su forma reciente es excelente, con ${wins} victorias en sus últimos ${recent5.length} partidos.`;
+      } else if (unbeaten === recent5.length) {
+        standingText += ` Lleva ${recent5.length} partidos invicto.`;
+      } else if (wins <= 1) {
+        const winsWord = wins === 1 ? "victoria" : "victorias";
+        standingText += ` La forma es preocupante, con solo ${wins} ${winsWord} en sus últimos ${recent5.length} partidos.`;
+      }
+    }
+  }
+
+  const para2 = standingText;
+
+  // --- Paragraph 3: Coach + top scorer + squad ---
+  const parts3: string[] = [];
+  if (args.coachName) {
+    parts3.push(`El equipo está dirigido por ${args.coachName}.`);
+  }
+  if (args.topScorer && args.topScorer.goals > 0) {
+    const goalsWord = args.topScorer.goals === 1 ? "gol" : "goles";
+    parts3.push(
+      `${args.topScorer.name} es el máximo goleador del club esta temporada con ${args.topScorer.goals} ${goalsWord}.`,
+    );
+  }
+  if (args.squadSize > 0) {
+    const valueSuffix = args.squadMarketValue
+      ? `, valorada en ${formatMarketValue(args.squadMarketValue)}`
+      : "";
+    const formerClause = args.formerPlayersCount > 0
+      ? `, con ${args.formerPlayersCount} exjugadores que han representado al club en temporadas recientes`
+      : "";
+    parts3.push(
+      `La plantilla del primer equipo cuenta con ${args.squadSize} jugadores${valueSuffix}${formerClause}.`,
+    );
+  }
+  const para3 = parts3.join(" ");
+
+  // --- Paragraph 4: Venue ---
+  let para4 = "";
+  if (args.venueName) {
+    if (args.venueCapacity) {
+      para4 = `${args.name} disputa sus partidos como local en ${args.venueName}, con capacidad para ${args.venueCapacity.toLocaleString("es-ES")} espectadores.`;
+    } else {
+      para4 = `${args.name} disputa sus partidos como local en ${args.venueName}.`;
     }
   }
 
@@ -573,6 +827,71 @@ export function buildTeamFaqs(args: {
     faqs.push({
       question: `What is ${args.name}'s squad market value?`,
       answer: `${args.name}'s current squad is valued at approximately ${formatMarketValue(args.squadMarketValue)}.`,
+    });
+  }
+
+  return faqs;
+}
+
+export function buildTeamFaqsEs(args: Parameters<typeof buildTeamFaqs>[0]): FaqItem[] {
+  const faqs: FaqItem[] = [];
+
+  if (args.country) {
+    faqs.push({
+      question: `¿De qué país es ${args.name}?`,
+      answer: args.city
+        ? `${args.name} tiene su sede en ${args.city}, ${args.country}.`
+        : `${args.name} tiene su sede en ${args.country}.`,
+    });
+  }
+
+  if (args.foundedYear) {
+    faqs.push({
+      question: `¿Cuándo fue fundado ${args.name}?`,
+      answer: `${args.name} fue fundado en ${args.foundedYear}.`,
+    });
+  }
+
+  const playerWord = args.squadSize === 1 ? "jugador" : "jugadores";
+  faqs.push({
+    question: `¿Qué tamaño tiene la plantilla de ${args.name}?`,
+    answer: `La plantilla actual de ${args.name} tiene ${args.squadSize} ${playerWord}.`,
+  });
+
+  if (args.standing && args.seasonLabel) {
+    const label = args.competitionName || args.seasonLabel;
+    faqs.push({
+      question: `¿Cuál es la posición actual de ${args.name} en la liga?`,
+      answer: `${args.name} ocupa el puesto ${args.standing.position} en ${label} con ${args.standing.points} puntos.`,
+    });
+  }
+
+  if (args.venueName) {
+    faqs.push({
+      question: `¿En qué estadio juega ${args.name}?`,
+      answer: `${args.name} disputa sus partidos como local en ${args.venueName}.`,
+    });
+  }
+
+  if (args.goalsFor != null && args.goalsAgainst != null && args.seasonLabel) {
+    const label = args.competitionName || args.seasonLabel;
+    faqs.push({
+      question: `¿Cuántos goles ha marcado ${args.name} esta temporada?`,
+      answer: `${args.name} ha marcado ${args.goalsFor} goles y ha encajado ${args.goalsAgainst} en ${label} esta temporada.`,
+    });
+  }
+
+  if (args.coachName) {
+    faqs.push({
+      question: `¿Quién es el entrenador de ${args.name}?`,
+      answer: `${args.name} está dirigido por ${args.coachName}.`,
+    });
+  }
+
+  if (args.squadMarketValue) {
+    faqs.push({
+      question: `¿Cuál es el valor de mercado de la plantilla de ${args.name}?`,
+      answer: `La plantilla actual de ${args.name} está valorada en aproximadamente ${formatMarketValue(args.squadMarketValue)}.`,
     });
   }
 

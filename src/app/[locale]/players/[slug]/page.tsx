@@ -23,7 +23,7 @@ import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
 import { ProTeaserWithModal } from "@/components/subscription/pro-teaser-with-modal";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { buildPlayerAbout, buildPlayerFaqs } from "@/lib/seo/entity-copy";
+import { buildPlayerAbout, buildPlayerAboutEs, buildPlayerFaqs, buildPlayerFaqsEs } from "@/lib/seo/entity-copy";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { PageHeader } from "@/components/layout/page-header";
 import { TabPanel } from "@/components/ui/tab-navigation";
@@ -149,7 +149,7 @@ function renderBioWithLinks(text: string) {
 
 
 export default async function PlayerPage({ params }: PlayerPageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   const player = await getPlayerBySlug(slug);
 
@@ -201,7 +201,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       }
     : null;
 
-  const aboutParagraphs = buildPlayerAbout({
+  const aboutArgs = {
     name: player.name,
     knownAs: player.knownAs,
     nationality: player.nationality,
@@ -220,8 +220,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     totalGoals,
     totalAssists,
     marketValueEur: player.marketValueEur,
-  });
-  const faqItems = buildPlayerFaqs({
+  };
+  const aboutParagraphs = locale === "es"
+    ? buildPlayerAboutEs(aboutArgs)
+    : buildPlayerAbout(aboutArgs);
+
+  const faqArgs = {
     name: player.name,
     nationality: player.nationality,
     position: player.position,
@@ -235,7 +239,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     heightCm: player.heightCm,
     careerTeams: career.length > 1 ? career.map((c) => c.team.name) : undefined,
     marketValueEur: player.marketValueEur,
-  });
+  };
+  const faqItems = locale === "es"
+    ? buildPlayerFaqsEs(faqArgs)
+    : buildPlayerFaqs(faqArgs);
 
   // Build breadcrumb items
   const breadcrumbItems = [
