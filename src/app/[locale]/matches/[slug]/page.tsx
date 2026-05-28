@@ -15,6 +15,7 @@ import {
 import { PlayerLink } from "@/components/player/player-link";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import {
@@ -40,7 +41,7 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 export const revalidate = 3600;
 
 interface MatchPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 const BASE_URL =
@@ -49,7 +50,7 @@ const BASE_URL =
 export async function generateMetadata({
   params,
 }: MatchPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const match = await getMatchWithDetailsBySlug(slug);
 
   // Trigger a real 404 from metadata so the response status is 404 (not 200).
@@ -59,16 +60,25 @@ export async function generateMetadata({
     notFound();
   }
 
+  const t = await getTranslations({ locale, namespace: "meta.match" });
+
   const homeTeam = match.homeTeam.shortName || match.homeTeam.name;
   const awayTeam = match.awayTeam.shortName || match.awayTeam.name;
-  const score =
-    match.status === "finished" || match.status === "live"
-      ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`
-      : "vs";
-  const title = `${homeTeam} ${score} ${awayTeam}`;
-  const description = `${match.homeTeam.name} vs ${match.awayTeam.name}${
-    match.competition ? ` - ${match.competition.name}` : ""
-  }${match.venue ? ` at ${match.venue.name}` : ""}. Match events, lineups, and statistics.`;
+  const score = `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
+  const title = t("title", { home: homeTeam, score, away: awayTeam });
+
+  // " - Premier League" / " — Premier League" depending on locale would need
+  // proper i18n; for now the dash is universal punctuation.
+  const competition = match.competition ? ` - ${match.competition.name}` : "";
+  // Same for the venue preposition: in es "en {venue}", in en "at {venue}".
+  const venuePrep = locale === "es" ? "en" : "at";
+  const venue = match.venue ? ` ${venuePrep} ${match.venue.name}` : "";
+  const description = t("description", {
+    home: match.homeTeam.name,
+    away: match.awayTeam.name,
+    competition,
+    venue,
+  });
 
   // Only index finished matches with scores — scheduled/cancelled matches are thin
   const isIndexable = match.status === "finished" && match.homeScore != null && match.awayScore != null;

@@ -125,5 +125,43 @@
     "english": "English",
     "spanish": "Español",
     "switchLanguage": "Switch language"
+  },
+  "positions": {
+    "Goalkeeper": "Goalkeeper",
+    "Defender": "Defender",
+    "Midfielder": "Midfielder",
+    "Forward": "Forward",
+    "Unknown": "football player"
+  },
+  "meta": {
+    "player": {
+      "title": "{name} – Stats, Goals & Career History {season}",
+      "descriptionWithStats": "{name} has {statsLine}{teamLine}.{marketValue} Full career history, season stats, and player profile.",
+      "descriptionNoStats": "{name} is a {role}{nationality}.{marketValue} View career history, teams, and stats on DataSports.",
+      "stats": {
+        "goals": "{count, plural, =1 {1 goal} other {# goals}}",
+        "assists": "{count, plural, =1 {1 assist} other {# assists}}",
+        "appearances": "in {count, plural, =1 {1 appearance} other {# appearances}}"
+      },
+      "forTeam": " for {team}",
+      "marketValueSuffix": " Valued at {value}.",
+      "fallbackRole": "football player",
+      "fromNationality": " from {nationality}"
+    },
+    "team": {
+      "title": "{name} – Squad, Results & Standings {season}",
+      "description": "{name} squad, fixtures, results, and standings for the {season} season.{marketValue} View full roster, recent matches, and league position.",
+      "marketValueSuffix": " Squad value: {value}.",
+      "nationalTitle": "{name} National Football Team – World Cup History, Squad & Results",
+      "nationalDescription": "{name} men's national football team — World Cup history, Copa América / Euro / AFCON record, top players, and recent fixtures."
+    },
+    "match": {
+      "title": "{home} {score} {away}",
+      "description": "{home} vs {away}{competition}{venue}. Match events, lineups, and statistics."
+    },
+    "competition": {
+      "titleSeasonal": "{name} {season} – Standings, Top Scorers & Fixtures",
+      "description": "Live {name} standings for {season}, top scorers, top assists, recent results, and upcoming fixtures."
+    }
   }
 }

@@ -5,6 +5,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { competitions } from "@/lib/db/schema";
 import { localizedAlternates } from "@/lib/seo/hreflang";
@@ -41,22 +42,25 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PlayerLink } from "@/components/player/player-link";
 
 interface CompetitionPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export async function generateMetadata({ params }: CompetitionPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const competition = await getCompetitionBySlug(slug);
 
   if (!competition) {
     notFound();
   }
 
-  const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${competition.name} Standings & Results ${seasonLabel}`;
-  const description = `Full ${competition.name} ${seasonLabel} standings, fixtures, results, and top scorers. Updated regularly.`;
+  const [seasonLabel, t] = await Promise.all([
+    getCurrentSeasonLabel(),
+    getTranslations({ locale, namespace: "meta.competition" }),
+  ]);
+  const title = t("titleSeasonal", { name: competition.name, season: seasonLabel });
+  const description = t("description", { name: competition.name, season: seasonLabel });
 
   return {
     title,

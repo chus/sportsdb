@@ -125,5 +125,43 @@
     "english": "English",
     "spanish": "Español",
     "switchLanguage": "Cambiar idioma"
+  },
+  "positions": {
+    "Goalkeeper": "portero",
+    "Defender": "defensa",
+    "Midfielder": "centrocampista",
+    "Forward": "delantero",
+    "Unknown": "futbolista"
+  },
+  "meta": {
+    "player": {
+      "title": "{name} – Estadísticas, goles e historial de carrera {season}",
+      "descriptionWithStats": "{name} acumula {statsLine}{teamLine}.{marketValue} Historial completo de carrera, estadísticas por temporada y perfil del jugador.",
+      "descriptionNoStats": "{name} es un {role}{nationality}.{marketValue} Consulta su trayectoria, equipos y estadísticas en DataSports.",
+      "stats": {
+        "goals": "{count, plural, =1 {1 gol} other {# goles}}",
+        "assists": "{count, plural, =1 {1 asistencia} other {# asistencias}}",
+        "appearances": "en {count, plural, =1 {1 partido} other {# partidos}}"
+      },
+      "forTeam": " con {team}",
+      "marketValueSuffix": " Valorado en {value}.",
+      "fallbackRole": "futbolista",
+      "fromNationality": " de {nationality}"
+    },
+    "team": {
+      "title": "{name} – Plantilla, resultados y clasificación {season}",
+      "description": "Plantilla, calendario, resultados y clasificación de {name} en la temporada {season}.{marketValue} Consulta el plantel completo, partidos recientes y posición en la liga.",
+      "marketValueSuffix": " Valor de la plantilla: {value}.",
+      "nationalTitle": "Selección de fútbol de {name} – Historial en Copas del Mundo, plantilla y resultados",
+      "nationalDescription": "Selección masculina de fútbol de {name} — historial en Copas del Mundo, palmarés en Copa América / Eurocopa / Copa Africana, jugadores destacados y partidos recientes."
+    },
+    "match": {
+      "title": "{home} {score} {away}",
+      "description": "{home} vs {away}{competition}{venue}. Resumen del partido, alineaciones y estadísticas."
+    },
+    "competition": {
+      "titleSeasonal": "{name} {season} – Clasificación, máximos goleadores y calendario",
+      "description": "Clasificación en vivo de {name} {season}, máximos goleadores, máximos asistentes, resultados recientes y próximos partidos."
+    }
   }
 }

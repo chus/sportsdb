@@ -5,6 +5,7 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer, getTeamTransfers } from "@/lib/queries/teams";
 
@@ -52,7 +53,7 @@ import { playerTeamHistory, players, standings as standingsTable, competitionSea
 import { eq, and, isNull, ne, sql, asc } from "drizzle-orm";
 
 interface TeamPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -67,18 +68,20 @@ function formatMarketValue(valueEur: number): string {
 }
 
 export async function generateMetadata({ params }: TeamPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const team = await getTeamBySlug(slug);
 
   if (!team) {
     notFound();
   }
 
+  const t = await getTranslations({ locale, namespace: "meta.team" });
+
   // National teams get their own metadata path — the club thin-page heuristics
   // (squad size, standings) don't apply.
   if (team.teamType === "national") {
-    const title = `${team.name} National Football Team – World Cup History, Squad & Results`;
-    const description = `${team.name} men's national football team — World Cup history, Copa América / Euro / AFCON record, top players, and recent fixtures.`;
+    const title = t("nationalTitle", { name: team.name });
+    const description = t("nationalDescription", { name: team.name });
     return {
       title,
       description,
@@ -132,9 +135,11 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   const isThin = quality.isThin;
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${team.name} – Squad, Results & Standings ${seasonLabel}`;
-  const mvStr = team.squadMarketValue ? ` Squad value: ${formatMarketValue(team.squadMarketValue)}.` : "";
-  const description = `${team.name} squad, fixtures, results, and standings for the ${seasonLabel} season.${mvStr} View full roster, recent matches, and league position.`;
+  const title = t("title", { name: team.name, season: seasonLabel });
+  const marketValue = team.squadMarketValue
+    ? t("marketValueSuffix", { value: formatMarketValue(team.squadMarketValue) })
+    : "";
+  const description = t("description", { name: team.name, season: seasonLabel, marketValue });
 
   return {
     title,

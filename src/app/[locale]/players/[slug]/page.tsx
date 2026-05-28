@@ -6,6 +6,7 @@ import {
   Trophy, Target, TrendingUp, ChevronRight, ArrowRightLeft
 } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
@@ -31,7 +32,7 @@ import { PlayerTabs } from "./player-tabs";
 export const revalidate = 3600; // ISR: revalidate every hour
 
 interface PlayerPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -46,7 +47,7 @@ function formatMarketValue(valueEur: number): string {
 }
 
 export async function generateMetadata({ params }: PlayerPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const player = await getPlayerBySlug(slug);
 
   if (!player) {
@@ -59,9 +60,11 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
     notFound();
   }
 
-  const [currentTeamData, statsHistory] = await Promise.all([
+  const [currentTeamData, statsHistory, t, tPosition] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerStatsHistory(player.id),
+    getTranslations({ locale, namespace: "meta.player" }),
+    getTranslations({ locale, namespace: "positions" }),
   ]);
   const isThin = quality.isThin;
 
@@ -71,20 +74,44 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   const totalApps = statsHistory.reduce((sum, s) => sum + s.stat.appearances, 0);
 
   const seasonLabel = await getCurrentSeasonLabel();
-  const title = `${player.name} – Stats, Goals & Career History ${seasonLabel}`;
+  const title = t("title", { name: player.name, season: seasonLabel });
 
-  // Build data-rich description
+  // Build localized stats line ("N goals and M assists in K appearances").
   const statsParts: string[] = [];
-  if (totalGoals > 0) statsParts.push(`${totalGoals} goals`);
-  if (totalAssists > 0) statsParts.push(`${totalAssists} assists`);
-  if (totalApps > 0) statsParts.push(`in ${totalApps} appearances`);
+  if (totalGoals > 0) statsParts.push(t("stats.goals", { count: totalGoals }));
+  if (totalAssists > 0) statsParts.push(t("stats.assists", { count: totalAssists }));
+  if (totalApps > 0) statsParts.push(t("stats.appearances", { count: totalApps }));
+  const statsLine = statsParts.join(" · ");
 
-  const statsStr = statsParts.length > 0 ? statsParts.join(" and ") : "";
-  const teamStr = currentTeam ? ` for ${currentTeam.name}` : "";
-  const mvStr = player.marketValueEur ? ` Valued at ${formatMarketValue(player.marketValueEur)}.` : "";
-  const description = statsStr
-    ? `${player.name} has ${statsStr}${teamStr}.${mvStr} Full career history, season stats, and player profile.`
-    : `${player.name} is a ${player.position && player.position !== "Unknown" ? player.position : "football player"}${player.nationality ? ` from ${player.nationality}` : ""}.${mvStr} View career history, teams, and stats on DataSports.`;
+  const teamLine = currentTeam ? t("forTeam", { team: currentTeam.name }) : "";
+  const marketValue = player.marketValueEur
+    ? t("marketValueSuffix", { value: formatMarketValue(player.marketValueEur) })
+    : "";
+
+  // Translate the position via the positions namespace; falls back to the
+  // localized "footballer" word when the DB value is missing or "Unknown".
+  const positionKey = (player.position ?? "Unknown") as
+    | "Goalkeeper" | "Defender" | "Midfielder" | "Forward" | "Unknown";
+  const role = positionKey === "Unknown"
+    ? t("fallbackRole")
+    : tPosition(positionKey);
+  const nationality = player.nationality
+    ? t("fromNationality", { nationality: player.nationality })
+    : "";
+
+  const description = statsLine
+    ? t("descriptionWithStats", {
+        name: player.name,
+        statsLine,
+        teamLine,
+        marketValue,
+      })
+    : t("descriptionNoStats", {
+        name: player.name,
+        role,
+        nationality,
+        marketValue,
+      });
 
   return {
     title,
