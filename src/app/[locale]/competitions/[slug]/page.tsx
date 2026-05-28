@@ -21,9 +21,17 @@ import {
 // Pre-render all competitions at build time — only ~10–20 of them,
 // they're hub pages with the highest traffic per page, and Googlebot's
 // first request hits a cached HTML response instead of triggering ISR.
+// On any DB error (missing DATABASE_URL on a preview build, etc.) fall
+// back to runtime ISR so the build never breaks.
 export async function generateStaticParams() {
-  const rows = await db.select({ slug: competitions.slug }).from(competitions);
-  return rows.map((r) => ({ slug: r.slug }));
+  if (!process.env.DATABASE_URL) return [];
+  try {
+    const rows = await db.select({ slug: competitions.slug }).from(competitions);
+    return rows.map((r) => ({ slug: r.slug }));
+  } catch (err) {
+    console.warn("[competitions/[slug] generateStaticParams] skipping pre-render:", err);
+    return [];
+  }
 }
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";

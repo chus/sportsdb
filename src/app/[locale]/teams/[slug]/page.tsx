@@ -11,21 +11,33 @@ import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScor
 
 // Pre-render Tier 1–2 teams at build time so Googlebot lands on a cached
 // page. Smaller clubs and national teams stay on ISR-on-demand to keep
-// the build fast. The query runs against the build-time DATABASE_URL.
+// the build fast.
+//
+// Wrapped in try/catch because the query references columns that may not
+// exist in every environment (team_type was added in migration 0007) and
+// the build-time DATABASE_URL may not be set on every preview/CI run.
+// On failure we return [] — every team falls back to runtime ISR, which
+// matches the pre-generateStaticParams behaviour.
 export async function generateStaticParams() {
-  const { db } = await import("@/lib/db");
-  const { teams } = await import("@/lib/db/schema");
-  const { sql } = await import("drizzle-orm");
-  const rows = await db
-    .select({ slug: teams.slug })
-    .from(teams)
-    .where(sql`${teams.tier} <= 2 AND ${teams.teamType} = 'club' AND EXISTS (
-      SELECT 1 FROM standings s
-      JOIN competition_seasons cs ON cs.id = s.competition_season_id
-      JOIN seasons se ON se.id = cs.season_id
-      WHERE s.team_id = ${teams.id} AND se.is_current = true
-    )`);
-  return rows.map((r) => ({ slug: r.slug }));
+  if (!process.env.DATABASE_URL) return [];
+  try {
+    const { db } = await import("@/lib/db");
+    const { teams } = await import("@/lib/db/schema");
+    const { sql } = await import("drizzle-orm");
+    const rows = await db
+      .select({ slug: teams.slug })
+      .from(teams)
+      .where(sql`${teams.tier} <= 2 AND EXISTS (
+        SELECT 1 FROM standings s
+        JOIN competition_seasons cs ON cs.id = s.competition_season_id
+        JOIN seasons se ON se.id = cs.season_id
+        WHERE s.team_id = ${teams.id} AND se.is_current = true
+      )`);
+    return rows.map((r) => ({ slug: r.slug }));
+  } catch (err) {
+    console.warn("[teams/[slug] generateStaticParams] skipping pre-render:", err);
+    return [];
+  }
 }
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
