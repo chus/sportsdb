@@ -115,29 +115,39 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Cap at 200 (Google's daily quota)
-    paths = paths.slice(0, 200);
+    // IndexNow has no daily limit, so submit both locales (en at root,
+    // es prefixed). Google's Indexing API caps at 200/day — we cap the
+    // English-locale set at 200 there and skip Spanish (most submissions
+    // for non-JobPosting/BroadcastEvent content are ignored anyway).
+    const enPaths = paths.slice(0, 200);
+    const indexNowPaths = [
+      ...paths,
+      ...paths.map((p) => `/es${p === "/" ? "" : p}`),
+    ];
 
     if (dryRun) {
       return NextResponse.json({
         dryRun: true,
         category,
         dayOfWeek,
-        urlCount: paths.length,
-        sampleUrls: paths.slice(0, 10),
+        enUrlCount: enPaths.length,
+        indexNowUrlCount: indexNowPaths.length,
+        sampleEnUrls: enPaths.slice(0, 5),
+        sampleEsUrls: paths.slice(0, 5).map((p) => `/es${p === "/" ? "" : p}`),
       });
     }
 
     const [googleResult] = await Promise.all([
-      submitUrlsToGoogle(paths),
-      submitUrlsToIndexNow(paths),
+      submitUrlsToGoogle(enPaths),
+      submitUrlsToIndexNow(indexNowPaths),
     ]);
 
     return NextResponse.json({
       success: true,
       category,
       dayOfWeek,
-      urlCount: paths.length,
+      enUrlCount: enPaths.length,
+      indexNowUrlCount: indexNowPaths.length,
       googleSubmitted: googleResult.submitted,
       googleErrors: googleResult.errors.length,
       timestamp: new Date().toISOString(),
