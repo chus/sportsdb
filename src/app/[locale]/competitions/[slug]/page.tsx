@@ -5,6 +5,8 @@ import { format, formatDistanceToNowStrict } from "date-fns";
 
 export const revalidate = 3600; // ISR: revalidate every hour
 import type { Metadata } from "next";
+import { db } from "@/lib/db";
+import { competitions } from "@/lib/db/schema";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 import {
   getCompetitionBySlug,
@@ -14,6 +16,14 @@ import {
   getTopAssists,
   getCompetitionRecentAndUpcoming,
 } from "@/lib/queries/competitions";
+
+// Pre-render all competitions at build time — only ~10–20 of them,
+// they're hub pages with the highest traffic per page, and Googlebot's
+// first request hits a cached HTML response instead of triggering ISR.
+export async function generateStaticParams() {
+  const rows = await db.select({ slug: competitions.slug }).from(competitions);
+  return rows.map((r) => ({ slug: r.slug }));
+}
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
