@@ -18,6 +18,7 @@ import {
   getWeekPreview,
 } from "@/lib/queries/homepage";
 import { HeroBannerSection } from "@/components/homepage/hero-banner";
+import { HomepageGreeting } from "@/components/homepage/homepage-greeting";
 import { MatchOfTheDayCard } from "@/components/homepage/match-of-the-day-card";
 import { StandoutPerformers } from "@/components/homepage/standout-performers";
 import { WeekPreview } from "@/components/homepage/week-preview";
@@ -120,7 +121,7 @@ export default async function HomePage() {
         <section className="bg-neutral-900 text-white">
           <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
             <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
-              The Sports Database
+              <HomepageGreeting fallback="The Sports Database" />
             </h1>
             <p className="text-neutral-400 mb-6 text-sm">
               {stats.players.toLocaleString()} players ·{" "}
