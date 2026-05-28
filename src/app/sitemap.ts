@@ -514,7 +514,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
-  return [
+  const allEntries: MetadataRoute.Sitemap = [
     ...staticPages,
     ...matchesHubPage,
     ...competitionPages,
@@ -531,4 +531,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...playerPositionPages,
     ...playerNationalityPages,
   ];
+
+  // Attach hreflang alternates to every entry. The canonical URL is the
+  // default-locale (en) form; the Spanish alternate is the same path
+  // prefixed with /es. Tells Google "this same content also exists in es"
+  // so the right locale variant is shown to the right user.
+  return allEntries.map((entry) => {
+    const path = entry.url.startsWith(BASE_URL)
+      ? entry.url.slice(BASE_URL.length) || "/"
+      : entry.url;
+    const esUrl =
+      path === "/"
+        ? `${BASE_URL}/es`
+        : `${BASE_URL}/es${path}`;
+    return {
+      ...entry,
+      alternates: {
+        languages: {
+          en: entry.url,
+          es: esUrl,
+          "x-default": entry.url,
+        },
+      },
+    };
+  });
 }
