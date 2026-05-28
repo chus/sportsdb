@@ -60,15 +60,20 @@ async function main() {
   `;
   const articlePaths = articles.map((a) => `/news/${a.slug}`);
 
-  // Finished matches with articles (same as sitemap)
+  // Finished matches with both scores set (mirrors sitemap gate after we
+  // dropped the article-exists requirement; match pages render rich
+  // structured content even without a linked article).
   const matches = await sql`
     SELECT m.slug FROM matches m
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN seasons s ON s.id = cs.season_id
     WHERE m.status = 'finished'
       AND m.home_score IS NOT NULL
+      AND m.away_score IS NOT NULL
       AND m.slug IS NOT NULL
-      AND EXISTS (SELECT 1 FROM articles a WHERE a.match_id = m.id AND a.status = 'published')
+      AND s.is_current = true
     ORDER BY m.scheduled_at DESC
-    LIMIT 200
+    LIMIT 500
   `;
   const matchPaths = matches.map((m) => `/matches/${m.slug}`);
 
