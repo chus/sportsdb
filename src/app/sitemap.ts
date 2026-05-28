@@ -279,10 +279,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           sql`EXISTS (SELECT 1 FROM team_venue_history tvh WHERE tvh.venue_id = ${venues.id} AND tvh.valid_to IS NULL)`,
         )
       ),
-    // Finished matches with scores (quality gate: must have both teams scored).
+    // Finished matches with scores (quality gate: both teams scored).
     // Slug must be set — we no longer expose UUID URLs in the sitemap.
-    // Hard gate: must have a published article. Without an article, the page
-    // is just a scoreboard row which Google treats as "Crawled - not indexed".
+    //
+    // The match page renders rich structured content even without a related
+    // article: scores, events, lineups, formations, head-to-head, stat bars,
+    // SportsEvent JSON-LD. The previous article-exists gate was over-
+    // restrictive — articles are a side panel, not the primary content —
+    // and was zeroing the match section of the sitemap. Removed in favour
+    // of the structural quality gates (status + scores + slug + current
+    // season + lineups present).
     db.execute<{
       id: string;
       slug: string;
@@ -299,12 +305,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         AND m.away_score IS NOT NULL
         AND m.slug IS NOT NULL
         AND s.is_current = true
-        AND EXISTS (
-          SELECT 1 FROM articles a
-          WHERE a.match_id = m.id AND a.status = 'published'
-        )
       ORDER BY m.scheduled_at DESC
-      LIMIT 500
+      LIMIT 1500
     `),
     // Indexable players — beyond is_indexable, require real on-pitch evidence:
     // at least one season with appearances > 0 AND a current team. is_indexable
