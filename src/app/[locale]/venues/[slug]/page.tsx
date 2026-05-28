@@ -25,14 +25,14 @@ import {
 } from "@/lib/queries/venues";
 import { getTeamStats } from "@/lib/queries/teams";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
-import { buildVenueFaqs, buildVenueAbout } from "@/lib/seo/entity-copy";
+import { buildVenueFaqs, buildVenueFaqsEs, buildVenueAbout, buildVenueAboutEs } from "@/lib/seo/entity-copy";
 import { PageHeader } from "@/components/layout/page-header";
 import { ExternalLinks } from "@/components/entity/external-links";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
 interface VenuePageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 const BASE_URL =
@@ -84,7 +84,7 @@ export async function generateMetadata({
 }
 
 export default async function VenuePage({ params }: VenuePageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   const venue = await getVenueBySlug(slug);
 
@@ -122,7 +122,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
 
   const venueUrl = `${BASE_URL}/venues/${slug}`;
 
-  const aboutParagraphs = buildVenueAbout({
+  const aboutArgs = {
     name: venue.name,
     city: venue.city,
     country: venue.country,
@@ -132,16 +132,22 @@ export default async function VenuePage({ params }: VenuePageProps) {
     historicalTeamCount: historicalTeams.length,
     recentMatchCount: recentMatches.length,
     upcomingMatchCount: upcomingMatches.length,
-  });
+  };
+  const aboutParagraphs = locale === "es"
+    ? buildVenueAboutEs(aboutArgs)
+    : buildVenueAbout(aboutArgs);
 
-  const faqItems = buildVenueFaqs({
+  const faqArgs = {
     name: venue.name,
     city: venue.city,
     country: venue.country,
     capacity: venue.capacity,
     openedYear: venue.openedYear,
     homeTeamNames: currentTeams.map((t) => t.team.name),
-  });
+  };
+  const faqItems = locale === "es"
+    ? buildVenueFaqsEs(faqArgs)
+    : buildVenueFaqs(faqArgs);
 
   const subtitle = [
     venue.city,

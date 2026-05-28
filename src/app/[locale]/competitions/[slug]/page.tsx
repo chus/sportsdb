@@ -27,7 +27,7 @@ export async function generateStaticParams() {
 }
 import { CompetitionJsonLd, BreadcrumbJsonLd, FAQJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
-import { buildCompetitionFaqs, buildCompetitionAbout } from "@/lib/seo/entity-copy";
+import { buildCompetitionFaqs, buildCompetitionFaqsEs, buildCompetitionAbout, buildCompetitionAboutEs } from "@/lib/seo/entity-copy";
 import { FollowButton } from "@/components/follow-button";
 import { TournamentRecap } from "@/components/competition/tournament-recap";
 import { CompetitionFixtures } from "@/components/matches/competition-fixtures";
@@ -92,7 +92,7 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
 }
 
 export default async function CompetitionPage({ params }: CompetitionPageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
 
   const competition = await getCompetitionBySlug(slug);
 
@@ -133,7 +133,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
   const topScorer = topScorers.length > 0
     ? { name: topScorers[0].player.name, goals: topScorers[0].stat.goals, teamName: topScorers[0].team.shortName || topScorers[0].team.name }
     : null;
-  const aboutParagraphs = buildCompetitionAbout({
+  const aboutArgs = {
     name: competition.name,
     country: competition.country,
     type: competition.type,
@@ -141,16 +141,22 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
     teamCount: standingsData.length,
     leader,
     topScorer,
-  });
+  };
+  const aboutParagraphs = locale === "es"
+    ? buildCompetitionAboutEs(aboutArgs)
+    : buildCompetitionAbout(aboutArgs);
 
-  const faqItems = buildCompetitionFaqs({
+  const faqArgs = {
     name: competition.name,
     country: competition.country,
     teamCount: standingsData.length,
     seasonLabel: competitionSeason?.season.label,
     leader,
     topScorer,
-  });
+  };
+  const faqItems = locale === "es"
+    ? buildCompetitionFaqsEs(faqArgs)
+    : buildCompetitionFaqs(faqArgs);
 
   return (
     <>

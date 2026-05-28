@@ -984,3 +984,148 @@ export function buildVenueFaqs(args: {
 
   return faqs;
 }
+
+export function buildCompetitionAboutEs(args: Parameters<typeof buildCompetitionAbout>[0]): string[] {
+  let sentence1: string;
+  const compType = args.type === "cup" ? "competición de copa" : "liga";
+  if (args.country) {
+    sentence1 = `La ${args.name} es la principal ${compType} de fútbol de ${args.country}.`;
+  } else {
+    sentence1 = `La ${args.name} es una ${compType} profesional de fútbol.`;
+  }
+
+  let sentence2 = "";
+  if (args.seasonLabel && args.teamCount > 0) {
+    sentence2 = `La temporada ${args.seasonLabel} cuenta con ${args.teamCount} equipos compitiendo por el título.`;
+  } else if (args.teamCount > 0) {
+    sentence2 = `La temporada actual cuenta con ${args.teamCount} equipos.`;
+  }
+
+  let sentence3 = "";
+  const goalsWord = (n: number) => (n === 1 ? "gol" : "goles");
+  if (args.leader && args.topScorer) {
+    sentence3 = `${args.leader.name} lidera la clasificación con ${args.leader.points} puntos, mientras que ${args.topScorer.name} (${args.topScorer.teamName}) encabeza la tabla de goleadores con ${args.topScorer.goals} ${goalsWord(args.topScorer.goals)}.`;
+  } else if (args.leader) {
+    sentence3 = `${args.leader.name} lidera actualmente la clasificación con ${args.leader.points} puntos.`;
+  } else if (args.topScorer) {
+    sentence3 = `${args.topScorer.name} (${args.topScorer.teamName}) lidera la tabla de goleadores con ${args.topScorer.goals} ${goalsWord(args.topScorer.goals)}.`;
+  }
+
+  const para1 = [sentence1, sentence2].filter(Boolean).join(" ");
+  return [para1, sentence3].filter(Boolean);
+}
+
+export function buildCompetitionFaqsEs(args: Parameters<typeof buildCompetitionFaqs>[0]): FaqItem[] {
+  const faqs: FaqItem[] = [];
+
+  if (args.teamCount > 0) {
+    faqs.push({
+      question: `¿Cuántos equipos hay en ${args.name}?`,
+      answer: `${args.name}${args.seasonLabel ? ` en la temporada ${args.seasonLabel}` : ""} tiene ${args.teamCount} equipos.`,
+    });
+  }
+
+  if (args.leader && args.seasonLabel) {
+    faqs.push({
+      question: `¿Quién lidera ${args.name}?`,
+      answer: `${args.leader.name} lidera ${args.name} con ${args.leader.points} puntos en la temporada ${args.seasonLabel}.`,
+    });
+  }
+
+  if (args.topScorer) {
+    const goalsWord = args.topScorer.goals === 1 ? "gol" : "goles";
+    faqs.push({
+      question: `¿Quién es el máximo goleador de ${args.name}?`,
+      answer: `${args.topScorer.name} (${args.topScorer.teamName}) es el máximo goleador de ${args.name} con ${args.topScorer.goals} ${goalsWord}.`,
+    });
+  }
+
+  if (args.country) {
+    faqs.push({
+      question: `¿En qué país se disputa ${args.name}?`,
+      answer: `${args.name} es la principal liga de fútbol de ${args.country}.`,
+    });
+  }
+
+  return faqs;
+}
+
+export function buildVenueAboutEs(args: Parameters<typeof buildVenueAbout>[0]): string[] {
+  const location = args.city && args.country
+    ? `${args.city}, ${args.country}`
+    : args.city || args.country || null;
+
+  let sentence1: string;
+  if (location && args.openedYear) {
+    sentence1 = `${args.name} es un estadio de fútbol situado en ${location}, inaugurado en ${args.openedYear}.`;
+  } else if (location) {
+    sentence1 = `${args.name} es un estadio de fútbol situado en ${location}.`;
+  } else {
+    sentence1 = `${args.name} es un estadio de fútbol profesional.`;
+  }
+
+  let sentence2 = "";
+  if (args.capacity) {
+    sentence2 = `El recinto tiene una capacidad de ${args.capacity.toLocaleString("es-ES")} espectadores.`;
+  }
+
+  let sentence3 = "";
+  if (args.currentTeamNames.length === 1) {
+    sentence3 = `Es la sede del ${args.currentTeamNames[0]}.`;
+  } else if (args.currentTeamNames.length > 1) {
+    sentence3 = `El estadio es compartido por ${args.currentTeamNames.join(" y ")}.`;
+  }
+
+  let sentence4 = "";
+  const totalMatches = args.recentMatchCount + args.upcomingMatchCount;
+  if (totalMatches > 0 && args.historicalTeamCount > 0) {
+    sentence4 = `Se han disputado o están programados ${totalMatches} partidos recientes en el estadio, y ${args.historicalTeamCount} clubes lo han tenido como sede en el pasado.`;
+  } else if (totalMatches > 0) {
+    sentence4 = `Se han disputado o están programados ${totalMatches} partidos recientes en el estadio.`;
+  } else if (args.historicalTeamCount > 0) {
+    sentence4 = `${args.historicalTeamCount} clubes lo han tenido como sede en el pasado.`;
+  }
+
+  const para1 = [sentence1, sentence2].filter(Boolean).join(" ");
+  const para2 = [sentence3, sentence4].filter(Boolean).join(" ");
+  return [para1, para2].filter(Boolean);
+}
+
+export function buildVenueFaqsEs(args: Parameters<typeof buildVenueFaqs>[0]): FaqItem[] {
+  const faqs: FaqItem[] = [];
+
+  if (args.city || args.country) {
+    const location = args.city && args.country
+      ? `${args.city}, ${args.country}`
+      : args.city || args.country;
+    faqs.push({
+      question: `¿Dónde está situado ${args.name}?`,
+      answer: `${args.name} está situado en ${location}.`,
+    });
+  }
+
+  if (args.capacity) {
+    faqs.push({
+      question: `¿Cuál es la capacidad de ${args.name}?`,
+      answer: `${args.name} tiene una capacidad de ${args.capacity.toLocaleString("es-ES")} espectadores.`,
+    });
+  }
+
+  if (args.homeTeamNames && args.homeTeamNames.length > 0) {
+    faqs.push({
+      question: `¿Qué equipos juegan en ${args.name}?`,
+      answer: args.homeTeamNames.length === 1
+        ? `${args.homeTeamNames[0]} disputa sus partidos como local en ${args.name}.`
+        : `${args.name} es la sede de ${args.homeTeamNames.join(" y ")}.`,
+    });
+  }
+
+  if (args.openedYear) {
+    faqs.push({
+      question: `¿Cuándo se construyó ${args.name}?`,
+      answer: `${args.name} fue inaugurado en ${args.openedYear}.`,
+    });
+  }
+
+  return faqs;
+}
