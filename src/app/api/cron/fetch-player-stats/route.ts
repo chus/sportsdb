@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
+import { findTeamByName } from "@/lib/seo/team-matcher";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -164,13 +165,22 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      // First try the pre-loaded in-memory slug maps (fast path for the
+      // common case), then fall back to the shared findTeamByName matcher
+      // which handles year suffixes, punctuation, diacritics, and aliases.
       const teamSlug = slugify(scorer.team.name);
       const teamShortSlug = slugify(scorer.team.shortName);
-      const dbTeam =
+      let dbTeam:
+        | { id: string; name?: string; slug?: string }
+        | undefined =
         teamSlugMap.get(teamSlug) ||
         teamSlugMap.get(teamShortSlug) ||
         teamNameSlugMap.get(teamSlug) ||
         teamNameSlugMap.get(teamShortSlug);
+      if (!dbTeam) {
+        const hit = await findTeamByName(sql, scorer.team.name);
+        if (hit) dbTeam = { id: hit.id, slug: hit.slug };
+      }
       if (!dbTeam) {
         missingTeam++;
         continue;

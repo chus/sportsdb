@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
+import { findTeamByName } from "@/lib/seo/team-matcher";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -116,30 +117,7 @@ export async function GET(request: NextRequest) {
     let notFound = 0;
 
     for (const entry of standings) {
-      // Three-tier team match: exact name/short_name, ILIKE partial, then
-      // strip "FC"/"CF"/"SC" suffix and ILIKE. Mirrors the manual script.
-      const teamName = entry.team.name;
-      const exact = await sql`
-        SELECT id FROM teams WHERE name = ${teamName} OR short_name = ${teamName} LIMIT 1
-      `;
-      let team = exact[0];
-      if (!team) {
-        const partial = await sql`
-          SELECT id FROM teams
-          WHERE name ILIKE ${`%${teamName}%`} OR short_name ILIKE ${`%${teamName}%`}
-          LIMIT 1
-        `;
-        team = partial[0];
-      }
-      if (!team) {
-        const cleanName = teamName.replace(/ FC$| CF$| SC$/i, "").trim();
-        const clean = await sql`
-          SELECT id FROM teams
-          WHERE name ILIKE ${`%${cleanName}%`} OR short_name ILIKE ${`%${cleanName}%`}
-          LIMIT 1
-        `;
-        team = clean[0];
-      }
+      const team = await findTeamByName(sql, entry.team.name);
       if (!team) {
         notFound++;
         continue;
