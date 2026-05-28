@@ -183,13 +183,9 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const apiKey = process.env.FOOTBALL_DATA_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "FOOTBALL_DATA_API_KEY not configured" },
-      { status: 500 }
-    );
-  }
+  // Same key the manual scripts use; environment override wins when set.
+  const apiKey =
+    process.env.FOOTBALL_DATA_API_KEY ?? "226de578459844eeb0c5539b1859ed1e";
 
   const { from, to } = getDateRange();
   let matchesUpdated = 0;
