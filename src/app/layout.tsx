@@ -7,27 +7,16 @@ export const viewport: Viewport = {
   themeColor: "#171717",
 };
 
-// Root layout intentionally minimal. Locale-aware layout, providers, navbar,
-// and footer live in app/[locale]/layout.tsx. Next.js requires <html>/<body>
-// in the root layout; the `lang` attribute is overridden per locale by the
-// nested layout's setRequestLocale call.
+// Pass-through root layout. The actual <html>/<body> shell lives in
+// app/[locale]/layout.tsx so the lang attribute matches the active locale
+// (a screen reader on /es needs lang="es", not "en").
+//
+// suppressHydrationWarning silences React's complaint about the [locale]
+// layout overriding the html element from a deeper segment.
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="dns-prefetch" href="https://media.api-sports.io" />
-        <link rel="dns-prefetch" href="https://crests.football-data.org" />
-        <link rel="dns-prefetch" href="https://flagcdn.com" />
-        <link rel="alternate" type="application/rss+xml" title="DataSports RSS Feed" href="/feed.xml" />
-      </head>
-      <body className="font-sans antialiased">{children}</body>
-    </html>
-  );
+  return children;
 }

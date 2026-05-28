@@ -109,39 +109,52 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <CookieConsentProvider>
-        <AuthProvider>
-          <SubscriptionProvider>
-            <AuthModalProvider>
-              <UpgradeModalProvider>
-                <OnboardingProvider>
-                  <WebsiteJsonLd
-                    url={BASE_URL}
-                    name="DataSports"
-                    description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
-                    searchUrl={`${BASE_URL}/search?q={search_term_string}`}
-                  />
-                  <OrganizationJsonLd
-                    name="DataSports"
-                    url={BASE_URL}
-                    logo={`${BASE_URL}/favicon.svg`}
-                    description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
-                  />
-                  <GoogleAnalytics />
-                  <AdSenseScript />
-                  <Navbar />
-                  <ScoreStrip />
-                  <main className="min-h-screen">{children}</main>
-                  <Footer />
-                  <CookieConsentBanner />
-                  <SpeedInsights />
-                </OnboardingProvider>
-              </UpgradeModalProvider>
-            </AuthModalProvider>
-          </SubscriptionProvider>
-        </AuthProvider>
-      </CookieConsentProvider>
-    </NextIntlClientProvider>
+    <html lang={locale}>
+      <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://media.api-sports.io" />
+        <link rel="dns-prefetch" href="https://crests.football-data.org" />
+        <link rel="dns-prefetch" href="https://flagcdn.com" />
+        <link rel="alternate" type="application/rss+xml" title="DataSports RSS Feed" href="/feed.xml" />
+      </head>
+      <body className="font-sans antialiased">
+        <NextIntlClientProvider messages={messages}>
+          <CookieConsentProvider>
+            <AuthProvider>
+              <SubscriptionProvider>
+                <AuthModalProvider>
+                  <UpgradeModalProvider>
+                    <OnboardingProvider>
+                      <WebsiteJsonLd
+                        url={BASE_URL}
+                        name="DataSports"
+                        description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
+                        searchUrl={`${BASE_URL}/search?q={search_term_string}`}
+                      />
+                      <OrganizationJsonLd
+                        name="DataSports"
+                        url={BASE_URL}
+                        logo={`${BASE_URL}/favicon.svg`}
+                        description="The comprehensive, structured database for football. Search players, teams, competitions, and matches with time-aware data."
+                      />
+                      <GoogleAnalytics />
+                      <AdSenseScript />
+                      <Navbar />
+                      <ScoreStrip />
+                      <main className="min-h-screen">{children}</main>
+                      <Footer />
+                      <CookieConsentBanner />
+                      <SpeedInsights />
+                    </OnboardingProvider>
+                  </UpgradeModalProvider>
+                </AuthModalProvider>
+              </SubscriptionProvider>
+            </AuthProvider>
+          </CookieConsentProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
