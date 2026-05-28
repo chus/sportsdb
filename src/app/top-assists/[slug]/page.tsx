@@ -30,7 +30,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const competition = await getCompetitionBySlug(slug);
-  if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
+  if (!competition) notFound();
 
   const seasonLabel = await getCurrentSeasonLabel();
   const title = `${competition.name} Top Assists ${seasonLabel} – Assists & Stats`;

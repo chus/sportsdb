@@ -50,10 +50,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
   const team = await getTeamBySlug(slug);
 
   if (!team) {
-    return {
-      title: "Team Not Found",
-      robots: { index: false, follow: false },
-    };
+    notFound();
   }
 
   // Multi-signal thin page scoring

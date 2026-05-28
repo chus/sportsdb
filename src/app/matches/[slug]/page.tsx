@@ -36,6 +36,8 @@ import { MatchPredictionWidget } from "@/components/games/match-prediction-widge
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
+export const revalidate = 3600;
+
 interface MatchPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -49,11 +51,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const match = await getMatchWithDetailsBySlug(slug);
 
+  // Trigger a real 404 from metadata so the response status is 404 (not 200).
+  // Returning "Match Not Found" metadata leaves the response as 200 and shows up
+  // in Search Console as a soft 404, which hurts overall domain quality.
   if (!match || !match.homeTeam || !match.awayTeam || (match.status !== "finished" && match.status !== "live")) {
-    return {
-      title: "Match Not Found",
-      robots: { index: false, follow: false },
-    };
+    notFound();
   }
 
   const homeTeam = match.homeTeam.shortName || match.homeTeam.name;

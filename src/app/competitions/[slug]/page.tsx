@@ -40,10 +40,7 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
   const competition = await getCompetitionBySlug(slug);
 
   if (!competition) {
-    return {
-      title: "Competition Not Found",
-      robots: { index: false, follow: false },
-    };
+    notFound();
   }
 
   const seasonLabel = await getCurrentSeasonLabel();

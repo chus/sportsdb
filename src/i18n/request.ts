@@ -1,18 +1,11 @@
 import { getRequestConfig } from "next-intl/server";
-import { cookies } from "next/headers";
-import { defaultLocale, locales, type Locale } from "./config";
+import { defaultLocale } from "./config";
 
-export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get("locale")?.value;
-
-  // Validate locale from cookie or use default
-  const locale: Locale = locales.includes(localeCookie as Locale)
-    ? (localeCookie as Locale)
-    : defaultLocale;
-
-  return {
-    locale,
-    messages: (await import(`./messages/${locale}.json`)).default,
-  };
-});
+// Static locale resolution. Reading cookies() here would force every page to
+// render dynamically (Cache-Control: no-store), which kills ISR and is the
+// root cause of Google deindexing nearly all pages. Until the routes are
+// migrated under /[locale]/, we serve the default locale to everyone.
+export default getRequestConfig(async () => ({
+  locale: defaultLocale,
+  messages: (await import(`./messages/${defaultLocale}.json`)).default,
+}));

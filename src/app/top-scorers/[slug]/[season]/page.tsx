@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug, season } = await params;
   const seasonLabel = season.replace("-", "/");
   const competition = await getCompetitionBySlug(slug);
-  if (!competition) return { title: "Not Found", robots: { index: false, follow: false } };
+  if (!competition) notFound();
 
   const title = `${competition.name} Top Scorers ${seasonLabel}`;
   const description = `Top goal scorers in the ${competition.name} for the ${seasonLabel} season. Full rankings with goals, assists, and appearances for every player.`;

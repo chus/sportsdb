@@ -12,7 +12,7 @@ import {
   venues,
   players,
 } from "@/lib/db/schema";
-import { eq, sql, or, and, isNotNull, ne, desc } from "drizzle-orm";
+import { eq, sql, or, and, isNotNull } from "drizzle-orm";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -263,20 +263,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(articles)
       .where(eq(articles.status, "published")),
-    // Venues with Wikidata enrichment (quality gate: must have wikipedia or capacity)
+    // Venues — capacity >= 10000 AND has at least one team association. Capacity
+    // alone leaves us with empty stub pages; require a real home team so the page
+    // has substantive content beyond "name + capacity".
     db
       .select({
         slug: venues.slug,
         updatedAt: venues.updatedAt,
-        wikipediaUrl: venues.wikipediaUrl,
-        capacity: venues.capacity,
-        latitude: venues.latitude,
       })
       .from(venues)
       .where(
-        or(
-          isNotNull(venues.wikipediaUrl),
+        and(
           isNotNull(venues.capacity),
+          sql`${venues.capacity} >= 10000`,
+          sql`EXISTS (SELECT 1 FROM team_venue_history tvh WHERE tvh.venue_id = ${venues.id} AND tvh.valid_to IS NULL)`,
         )
       ),
     // Finished matches with scores (quality gate: must have both teams scored).
@@ -306,23 +306,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ORDER BY m.scheduled_at DESC
       LIMIT 500
     `),
-    // Indexable players (quality score >= 40)
+    // Indexable players — beyond is_indexable, require real on-pitch evidence:
+    // at least one season with appearances > 0 AND a current team. is_indexable
+    // alone admits players with only bio + a stat row (e.g. zero apps), which
+    // Google reads as thin and drops from the index.
     db
       .select({
         slug: players.slug,
         updatedAt: players.updatedAt,
       })
       .from(players)
-      .where(eq(players.isIndexable, true)),
-    // Top players for compare matchup pages
-    db
-      .select({
-        slug: players.slug,
-      })
-      .from(players)
-      .where(ne(players.position, "Unknown"))
-      .orderBy(desc(players.popularityScore))
-      .limit(15),
+      .where(
+        and(
+          eq(players.isIndexable, true),
+          sql`EXISTS (
+            SELECT 1 FROM player_season_stats pss
+            WHERE pss.player_id = ${players.id} AND pss.appearances > 0
+          )`,
+          sql`EXISTS (
+            SELECT 1 FROM player_team_history pth
+            WHERE pth.player_id = ${players.id} AND pth.valid_to IS NULL
+          )`,
+        )
+      ),
+    // Top players for compare matchup pages — currently unused (compare matchup
+    // pages were dropped from the sitemap because popularity_score is 0 for all
+    // players, so the "top 15" was arbitrary and the pages rendered with all-zero
+    // stats). Re-enable when popularity_score is actually computed.
+    Promise.resolve([] as { slug: string }[]),
     // Distinct team countries with 3+ teams (for /teams/country/[country])
     db
       .selectDistinct({ country: teams.country })

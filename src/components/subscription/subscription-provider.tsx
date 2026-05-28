@@ -8,7 +8,6 @@ import {
   useCallback,
   ReactNode,
 } from "react";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   SubscriptionTier,
@@ -50,7 +49,6 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -84,14 +82,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     fetchSubscription();
   }, [fetchSubscription]);
 
-  // Re-fetch after returning from Stripe checkout (webhook may need a moment)
+  // Re-fetch after returning from Stripe checkout (webhook may need a moment).
+  // Read from window.location instead of useSearchParams so this client provider
+  // doesn't force every page into a Suspense boundary.
   useEffect(() => {
-    const upgraded = searchParams.get("upgraded");
-    if (upgraded && user) {
+    if (typeof window === "undefined" || !user) return;
+    const upgraded = new URLSearchParams(window.location.search).get("upgraded");
+    if (upgraded) {
       const timer = setTimeout(() => fetchSubscription(), 1500);
       return () => clearTimeout(timer);
     }
-  }, [searchParams, user, fetchSubscription]);
+  }, [user, fetchSubscription]);
 
   const tier: SubscriptionTier = subscription?.tier === "pro" ? "pro" : "free";
   const isPro = tier === "pro";

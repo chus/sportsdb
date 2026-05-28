@@ -46,20 +46,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { matchup } = await params;
   const parsed = parseMatchup(matchup);
-  if (!parsed) return { title: "Not Found", robots: { index: false, follow: false } };
+  if (!parsed) notFound();
 
   const [p1, p2] = await Promise.all([
     getPlayerWithAggregatedStats(parsed.slug1),
     getPlayerWithAggregatedStats(parsed.slug2),
   ]);
 
-  if (!p1 || !p2) return { title: "Not Found", robots: { index: false, follow: false } };
+  if (!p1 || !p2) notFound();
 
-  // Soft-404 guard: if neither player has any recorded career appearances, the
-  // page body is all zeros — Google flags these as "Soft 404". Noindex them.
+  // If neither player has any recorded career appearances, the comparison body
+  // is all zeros — return a hard 404 rather than soft-404 metadata so the page
+  // is dropped from Google's index instead of indexed-then-flagged.
   const emptyBoth =
     (p1.totalStats.appearances ?? 0) === 0 &&
     (p2.totalStats.appearances ?? 0) === 0;
+  if (emptyBoth) notFound();
 
   const title = `${p1.name} vs ${p2.name} – Stats Comparison`;
   const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, and career statistics.`;
@@ -75,7 +77,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "website",
     },
     alternates: { canonical: `${BASE_URL}/compare/${matchup}` },
-    robots: emptyBoth ? { index: false, follow: false } : undefined,
   };
 }
 
