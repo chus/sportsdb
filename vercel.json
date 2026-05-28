@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/fetch-player-stats?group=secondary",
       "schedule": "45 */6 * * *"
+    },
+    {
+      "path": "/api/cron/update-player-quality",
+      "schedule": "0 4 * * 1"
     }
   ]
 }
