@@ -187,26 +187,46 @@ async function insertArticle(
   matchday?: number
 ): Promise<boolean> {
   try {
-    // Check if slug already exists
+    // SEO: keep slug stable across regenerations. The previous behaviour
+    // appended Date.now() to the slug on collision, which orphaned every
+    // URL Google had already indexed (~533 articles with timestamp
+    // suffixes still exist in the DB from prior runs). Mirror the cron
+    // fix: UPDATE in place when the slug already exists.
     const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
     if (existing.length > 0) {
-      // Append timestamp to make unique
-      article.slug = `${article.slug}-${Date.now()}`;
+      await sql`
+        UPDATE articles SET
+          type = ${type},
+          title = ${article.title},
+          excerpt = ${article.excerpt},
+          content = ${article.content},
+          meta_title = ${article.metaTitle},
+          meta_description = ${article.metaDescription},
+          match_id = ${matchId || null},
+          competition_season_id = ${competitionSeasonId || null},
+          primary_player_id = ${primaryPlayerId || null},
+          primary_team_id = ${primaryTeamId || null},
+          matchday = ${matchday || null},
+          status = 'published',
+          model_version = 'gpt-4o-mini',
+          updated_at = NOW()
+        WHERE slug = ${article.slug}
+      `;
+    } else {
+      await sql`
+        INSERT INTO articles (
+          slug, type, title, excerpt, content, meta_title, meta_description,
+          match_id, competition_season_id, primary_player_id, primary_team_id,
+          matchday, status, published_at, model_version
+        ) VALUES (
+          ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
+          ${article.metaTitle}, ${article.metaDescription},
+          ${matchId || null}, ${competitionSeasonId || null},
+          ${primaryPlayerId || null}, ${primaryTeamId || null},
+          ${matchday || null}, 'published', NOW(), 'gpt-4o-mini'
+        )
+      `;
     }
-
-    await sql`
-      INSERT INTO articles (
-        slug, type, title, excerpt, content, meta_title, meta_description,
-        match_id, competition_season_id, primary_player_id, primary_team_id,
-        matchday, status, published_at, model_version
-      ) VALUES (
-        ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
-        ${article.metaTitle}, ${article.metaDescription},
-        ${matchId || null}, ${competitionSeasonId || null},
-        ${primaryPlayerId || null}, ${primaryTeamId || null},
-        ${matchday || null}, 'published', NOW(), 'gpt-4o-mini'
-      )
-    `;
     return true;
   } catch (error) {
     console.error("  Database error:", error);
