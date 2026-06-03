@@ -58,9 +58,15 @@ async function lookupMatch(slug: string): Promise<boolean> {
   const rows = await sql`SELECT 1 FROM matches WHERE slug = ${slug} LIMIT 1`;
   return rows.length > 0;
 }
+// Player check ALSO requires is_indexable=true. Tier C/D players
+// (bio-only profiles with no on-pitch evidence) exist in DB but are
+// thin content — Google flags them as "Excluded by noindex" and
+// AdSense reviewers count them against the "low value content" check.
+// 308-redirecting these to /players removes them from the domain's
+// visible surface entirely.
 async function lookupPlayer(slug: string): Promise<boolean> {
   const sql = neon(process.env.DATABASE_URL!);
-  const rows = await sql`SELECT 1 FROM players WHERE slug = ${slug} LIMIT 1`;
+  const rows = await sql`SELECT 1 FROM players WHERE slug = ${slug} AND is_indexable = true LIMIT 1`;
   return rows.length > 0;
 }
 async function lookupTeam(slug: string): Promise<boolean> {

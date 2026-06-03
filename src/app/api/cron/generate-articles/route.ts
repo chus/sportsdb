@@ -448,6 +448,46 @@ OUTPUT FORMAT (return valid JSON only):
 FINAL REMINDER: The "content" field must be at least 1300 words. Each ## section must hit its minimum. If you finish early, expand the analysis sections — never cut sections short.`;
 }
 
+// Strict originality rules baked into every article generation, regardless
+// of type. Goal: stop the model from producing the predictable, templated
+// match-recap voice that AdSense flags as low-value auto-generated content.
+const ORIGINALITY_RULES = `
+ORIGINALITY RULES — STRICT. Violating any of these is grounds for rejection:
+
+1. BANNED OPENINGS — do not start the article or any section with these or near-variants:
+   "In a thrilling", "A captivating", "Both teams put on", "What a match", "The stage was set",
+   "In a clash of", "kicked off in style", "It was a match to remember", "Football fans were treated",
+   "From the opening whistle", "A game of two halves", "Drama unfolded".
+
+2. BANNED FILLER PHRASES anywhere in the text:
+   "It was clear that", "Without a doubt", "Make no mistake", "In conclusion", "All things considered",
+   "It goes without saying", "At the end of the day", "When all is said and done", "Time will tell",
+   "The beautiful game", "the three points", "a result that will please the manager".
+
+3. BANNED EMPTY SUPERLATIVES — never use without an immediately following specific stat or fact:
+   "incredible", "amazing", "phenomenal", "spectacular", "stunning", "remarkable".
+   If you say someone had an "incredible game" you MUST cite the specific metric (e.g. "3 goals
+   and an assist in 67 minutes") in the same sentence.
+
+4. EVERY paragraph must reference at least one specific concrete fact from the supplied data:
+   a minute number, a player name with their action, a stat with a number, a date, a position
+   in the table, a head-to-head record. Pure prose paragraphs are forbidden.
+
+5. SENTENCE STRUCTURE VARIATION — do not begin three consecutive sentences with the same subject,
+   the same article ("The"), or the same name. Vary the syntax: simple, complex, fragment, question.
+
+6. SECTION OPENINGS — do not start a section's first sentence with the home or away team name.
+   Open with the action, the situation, the stat, or a question.
+
+7. ACTIVE VOICE for the actions. The reader is a football fan — do not explain what offside is,
+   what a corner is, what "stoppage time" means. Skip definitions.
+
+8. NO META-COMMENTARY — never write about "this match report" or "in this article". The piece
+   should read like a finished editorial, not a description of itself.
+
+These rules are stronger than any other instruction. Follow them.
+`.trim();
+
 async function generateArticle(openai: OpenAI, prompt: string): Promise<any | null> {
   try {
     const response = await openai.chat.completions.create({
@@ -455,12 +495,17 @@ async function generateArticle(openai: OpenAI, prompt: string): Promise<any | nu
       messages: [
         {
           role: "system",
-          content: "You are an expert sports journalist writing for a professional football database website. Write engaging, detailed articles with vivid language, clear structure, and excellent readability. Use short paragraphs (3-4 sentences max), varied sentence lengths, active voice, and strong transition words. Articles should be comprehensive and informative — never thin or generic. Always return valid JSON."
+          content:
+            "You are a sports journalist writing for DataSports, a structured football database. " +
+            "Your job is to turn database records into readable, specific, fact-dense prose. " +
+            "Vary sentence length and structure aggressively. Use short paragraphs (3-4 sentences). " +
+            "Active voice. Concrete details over adjectives. Every sentence should add information. " +
+            "Always return valid JSON.\n\n" + ORIGINALITY_RULES
         },
         { role: "user", content: prompt }
       ],
       max_tokens: 6000,
-      temperature: 0.7,
+      temperature: 0.85, // higher than default 0.7 — fights the templated voice GPT-4o-mini defaults to
     });
 
     const content = response.choices[0]?.message?.content;

@@ -62,8 +62,8 @@ export default async function AboutPage() {
     },
     {
       icon: BookOpen,
-      title: "Editorial Coverage",
-      description: "AI-assisted match reports, round recaps, and player spotlights reviewed against verified database records.",
+      title: "Data-Driven Editorial",
+      description: "Match reports, round recaps, and player spotlights written from verified database records — every claim traceable to a specific data point.",
     },
     {
       icon: Users,
@@ -211,18 +211,69 @@ export default async function AboutPage() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-neutral-900 mb-6">
-            Data-Driven Editorial
+            How We Write
           </h2>
           <div className="prose prose-lg max-w-none text-neutral-600">
             <p>
-              Every article published on DataSports is generated using AI and verified against our structured database. Match reports reference actual scorelines, goal scorers, and standings positions. Round recaps aggregate real results from every fixture in a matchday. Player spotlights are backed by verified career records and season statistics.
+              Every article on DataSports is written from verified database records. A match
+              report cites the actual scoreline, the goal scorers in order with their minutes,
+              the lineup that started, the position both clubs held in the table going in.
+              A round recap aggregates every fixture played that weekend — final scores,
+              standout performers, points-table movers. A player spotlight pulls from career
+              history, season-by-season stats, transfer records, and recent form. Nothing is
+              speculation; every claim traces to a row in our database.
             </p>
             <p>
-              This approach means our content is never speculative or opinion-based. Instead, every claim in every article can be traced back to a specific data point in our database. We publish match reports, round recaps, player spotlights, match previews, and season reviews across all the leagues we cover.
+              We use language models as a writing tool — the same way a journalist uses a
+              word processor — to turn structured data into readable prose at the scale our
+              coverage requires. The data itself, the facts, the statistics, the historical
+              context all come from our verified pipeline. We don&apos;t invent results, we
+              don&apos;t guess at lineups, we don&apos;t fabricate transfer fees. If we
+              can&apos;t source it, we don&apos;t publish it.
             </p>
             <p>
-              For more detail on our data practices, see our{" "}
-              <Link href="/methodology" className="text-blue-600 hover:underline">Methodology</Link> page.
+              Read more about how we source and verify our data on the{" "}
+              <Link href="/methodology" className="text-blue-600 hover:underline">Methodology</Link>{" "}
+              page, or get in touch via{" "}
+              <Link href="/contact" className="text-blue-600 hover:underline">Contact</Link>{" "}
+              if you spot an error.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Who Uses Us Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-6">
+            Who DataSports Is For
+          </h2>
+          <div className="prose prose-lg max-w-none text-neutral-600">
+            <p>
+              <strong className="text-neutral-900">Fans</strong> who want to follow a player
+              across clubs and seasons without piecing together fragments from a dozen
+              different sites. Our time-aware data model means you can see who was on
+              Liverpool&apos;s bench in May 2025, what Lamine Yamal&apos;s stat line looked
+              like in his second season, or how Inter&apos;s xG compares across the last
+              three years — all on one page, all consistent.
+            </p>
+            <p>
+              <strong className="text-neutral-900">Researchers and analysts</strong> who need
+              clean, structured football data without scraping or paying for an enterprise
+              API. Our pages are designed to be machine-readable (Schema.org SportsEvent and
+              SportsTeam markup throughout), with a public RSS feed for every major league
+              and an extensive sitemap covering every indexable entity.
+            </p>
+            <p>
+              <strong className="text-neutral-900">Journalists and bloggers</strong> looking
+              for a fast fact-check on a recent match, a quick lookup of a player&apos;s
+              transfer history, or a snapshot of where a team currently sits in the table.
+              Every entity page is a self-contained reference.
+            </p>
+            <p>
+              <strong className="text-neutral-900">Bettors and fantasy managers</strong> who
+              need reliable form data, head-to-head records, and current-season stats
+              without the editorial bias of a betting site.
             </p>
           </div>
         </div>

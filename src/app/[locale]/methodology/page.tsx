@@ -44,8 +44,12 @@ export default function MethodologyPage() {
             answer: "We employ a multi-signal quality scoring system evaluating every entity page. Teams and players are scored on data completeness. Pages below our quality threshold are excluded from search engine indexing until enriched. We use time-aware modeling and automated audits to flag anomalies.",
           },
           {
-            question: "How is editorial content generated?",
-            answer: "Match reports, round recaps, player spotlights, and season reviews are generated with AI assistance using real match data and verified statistics. Every article is grounded in actual results — we never fabricate statistics or outcomes.",
+            question: "How is editorial content produced?",
+            answer: "Match reports, round recaps, player spotlights, and season reviews are produced from our verified database. Every score, goal scorer, assist, lineup, and standings reference in our articles is sourced directly from the underlying match and player records — we never fabricate statistics or outcomes. Language models are used as a writing tool to turn structured data into readable prose at scale; the facts come from our pipeline.",
+          },
+          {
+            question: "What do you do when the data is wrong?",
+            answer: "Errors are corrected upstream — we update the source row in our database, which automatically propagates to every page that references it (entity pages, articles, sitemaps, RSS feeds). The next ISR revalidation rebuilds the affected pages. Readers can report errors via the Contact page; we triage same-day.",
           },
           {
             question: "Which competitions does DataSports cover?",
@@ -142,21 +146,61 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
                   <PenTool className="w-5 h-5 text-orange-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Editorial Content</h2>
+                <h2 className="text-2xl font-bold text-neutral-900 m-0">Editorial Standards</h2>
               </div>
               <p className="text-neutral-700 leading-relaxed">
-                Match reports, round recaps, player spotlights, and season reviews are generated
-                with AI assistance using real match data, verified statistics, and contextual
-                information from our database. Every article is grounded in actual results — we
-                never fabricate statistics or outcomes. Article content is generated using
-                structured prompts that reference real match events, standings data, and player
-                performance metrics.
+                Our editorial pieces — match reports, round recaps, player spotlights,
+                match previews, and season reviews — are produced directly from the verified
+                database. Each article is built around a specific source row: a finished
+                match, a completed matchday, a player&apos;s career record. Every scoreline,
+                goal scorer, minute, lineup, table position, and stat referenced in the prose
+                is pulled from our pipeline at write time and is reproducible against the
+                same data points anywhere on the site.
               </p>
               <p className="text-neutral-700 leading-relaxed">
-                Entity biographies for teams, players, competitions, and venues are generated
-                procedurally from database records, incorporating current season context,
-                career statistics, and competitive standings. These biographies update
-                automatically as underlying data changes throughout the season.
+                Language models are used as a writing tool — the way a journalist uses a word
+                processor — to render structured data into readable English and Spanish at
+                the scale our coverage requires. We do not invent results, we do not
+                speculate, we do not fabricate transfer fees, and we do not write about
+                fixtures that haven&apos;t happened. If the data isn&apos;t in the database,
+                it doesn&apos;t make it into an article.
+              </p>
+              <p className="text-neutral-700 leading-relaxed">
+                Entity descriptions for teams, players, competitions, and venues are
+                generated procedurally from database records — current season context,
+                career statistics, competitive standings — and refresh automatically as
+                the underlying data changes throughout the season. Country and position
+                index pages aggregate entity counts from real DB queries; we publish
+                only when there&apos;s enough underlying content to be useful.
+              </p>
+            </section>
+
+            <section className="mb-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-yellow-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-neutral-900 m-0">Corrections & Errors</h2>
+              </div>
+              <p className="text-neutral-700 leading-relaxed">
+                Sports data is imperfect — provider feeds occasionally lag, transfers get
+                misattributed, lineups are revised after kickoff. When we find an error, we
+                correct it at the source: the database row is updated, and on the next ISR
+                revalidation every page that references that row (the entity page, any
+                article citing it, the sitemap entry, the RSS feed) rebuilds automatically.
+                There is no manual chain of edits to keep in sync — the canonical record
+                is the database.
+              </p>
+              <p className="text-neutral-700 leading-relaxed">
+                If you spot an inaccuracy in a player&apos;s career history, a missing
+                match result, or a stat that doesn&apos;t match the official record, please
+                let us know via the{" "}
+                <a href="/contact" className="text-blue-600 hover:underline">Contact</a>{" "}
+                page or email{" "}
+                <a href="mailto:hello@datasports.co" className="text-blue-600 hover:underline">
+                  hello@datasports.co
+                </a>
+                . We triage corrections the same day.
               </p>
             </section>
 
