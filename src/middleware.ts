@@ -24,9 +24,13 @@ export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
-  // Redirect Vercel preview domains to canonical domain
-  // Prevents duplicate content and "Site Behavior: Navigation" issues in AdSense
-  if (host.includes("vercel.app") && !pathname.startsWith("/api/")) {
+  // Redirect Vercel preview domains AND www. subdomain to the apex
+  // (canonical) host. Both are configured as Vercel aliases for the
+  // same app, so without this every page is duplicate content across
+  // hostnames — Google flagged the www. variants as Soft 404.
+  const isPreview = host.includes("vercel.app");
+  const isWww = host === `www.${CANONICAL_HOST}`;
+  if ((isPreview || isWww) && !pathname.startsWith("/api/")) {
     const canonicalUrl = new URL(pathname, `https://${CANONICAL_HOST}`);
     canonicalUrl.search = searchParams.toString();
     return NextResponse.redirect(canonicalUrl, 301);

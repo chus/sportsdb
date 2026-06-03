@@ -33,9 +33,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${adjective} Football Teams – Clubs & Info`;
   const description = `Browse all football clubs from ${decodedCountry}. View team profiles, stadiums, and squad information.`;
 
+  // Match the sitemap gate (>= 3 teams). Countries with < 3 teams render
+  // a near-empty list — Google flags them as Soft 404. Emitting noindex
+  // here keeps them out of the index without depending on notFound()
+  // (which has the Next.js 16 streaming bug that returns HTTP 200).
+  const teamsCount = (await getTeamsByCountry(decodedCountry, 100)).length;
+  const isThin = teamsCount < 3;
+
   return {
     title,
     description,
+    ...(isThin && { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,

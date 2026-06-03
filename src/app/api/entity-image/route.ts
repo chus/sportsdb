@@ -95,6 +95,10 @@ export async function GET(request: NextRequest) {
     headers: {
       "Content-Type": "image/svg+xml; charset=utf-8",
       "Cache-Control": "public, max-age=31536000, immutable",
+      // Tell Google not to index the SVG directly. The ?name= query
+      // string makes Google treat each call as a content URL otherwise;
+      // it then flags them as Soft 404 because the body is just an SVG.
+      "X-Robots-Tag": "noindex",
     },
   });
 }
