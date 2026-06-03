@@ -1,8 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
+import { entityExists, type EntityType } from "@/lib/seo/entity-exists";
 
 const intlMiddleware = createIntlMiddleware(routing);
+
+// Entity routes where a missing slug should 308-redirect to the
+// section index (instead of rendering the not-found template, which
+// Next.js 16 serves as HTTP 200 + noindex,nofollow — Google then
+// flags as Soft 404 or Excluded by noindex).
+//
+// Each entry: pattern → entity type. Pattern captures the slug.
+const ENTITY_PATTERNS: Array<{
+  re: RegExp;
+  type: EntityType;
+  index: string;
+}> = [
+  { re: /^(?:\/es)?\/news\/([^/]+)$/, type: "news", index: "/news" },
+  { re: /^(?:\/es)?\/matches\/([^/]+)$/, type: "matches", index: "/matches" },
+  { re: /^(?:\/es)?\/players\/([^/]+)$/, type: "players", index: "/players" },
+  { re: /^(?:\/es)?\/teams\/([^/]+)$/, type: "teams", index: "/teams" },
+  { re: /^(?:\/es)?\/venues\/([^/]+)$/, type: "venues", index: "/venues" },
+  { re: /^(?:\/es)?\/competitions\/([^/]+)$/, type: "competitions", index: "/competitions" },
+];
+
+// Slugs that look like entity slugs but actually map to sub-routes,
+// not detail pages. Skip the exists check for these.
+const ENTITY_SUBROUTES: Record<EntityType, Set<string>> = {
+  news: new Set(),
+  matches: new Set(),
+  players: new Set(["nationality", "position"]),
+  teams: new Set(["country"]),
+  venues: new Set(),
+  competitions: new Set(),
+};
 
 // Detect legacy /matches/{uuid} URLs to 301 redirect to the slug-based URL.
 const MATCH_UUID_PATH_RE =
@@ -95,6 +126,24 @@ export async function middleware(request: NextRequest) {
       // Fall through to normal handling on lookup failure
     }
     return NextResponse.next();
+  }
+
+  // Entity-existence redirect — if /news/{slug}, /matches/{slug}, etc.
+  // points to a slug that's no longer in DB, 308-redirect to the section
+  // index so Google drops the dead URL and we pass PageRank to the
+  // working hub page. Necessary because Next.js 16's server-component
+  // permanentRedirect doesn't actually return 308 on ISR-eligible routes.
+  for (const { re, type, index } of ENTITY_PATTERNS) {
+    const m = pathname.match(re);
+    if (!m) continue;
+    const slug = decodeURIComponent(m[1]);
+    if (ENTITY_SUBROUTES[type].has(slug)) break; // skip /players/nationality, /teams/country, etc.
+    const exists = await entityExists(type, slug);
+    if (!exists) {
+      const prefix = localePrefix ? `/${localePrefix}` : "";
+      return NextResponse.redirect(new URL(`${prefix}${index}`, request.url), 308);
+    }
+    break;
   }
 
   // Non-admin routes pass through next-intl so locale prefixes (/es) are
