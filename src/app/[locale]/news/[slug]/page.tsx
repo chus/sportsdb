@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 
 export const revalidate = 3600; // ISR: revalidate every hour
@@ -49,7 +49,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const result = await getArticleBySlug(slug);
 
   if (!result) {
-    notFound();
+    // 308 redirect to /news instead of returning a noindex'd not-found
+    // page. Earlier article cron versions appended Date.now() to slugs
+    // on regeneration, orphaning hundreds of URLs Google had indexed.
+    // The 308 tells Google to drop the dead URL and pass PageRank to the
+    // news index. Re-renders the route as a redirect at metadata time so
+    // the page component never runs.
+    permanentRedirect("/news");
   }
 
   const { article, competition, season } = result;
@@ -209,7 +215,7 @@ export default async function ArticlePage({ params }: Props) {
   const result = await getArticleBySlug(slug);
 
   if (!result) {
-    notFound();
+    permanentRedirect("/news");
   }
 
   const { article, competition, season, primaryPlayer, primaryTeam } = result;
