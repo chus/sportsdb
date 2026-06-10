@@ -15,8 +15,11 @@ import { neon } from "@neondatabase/serverless";
 import { buildMatchSlugWithFallback } from "../src/lib/utils/match-slug";
 import { findTeamByName } from "../src/lib/seo/team-matcher";
 
-const API_KEY =
-  process.env.FOOTBALL_DATA_API_KEY ?? "226de578459844eeb0c5539b1859ed1e";
+const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
+if (!API_KEY) {
+  console.error("FOOTBALL_DATA_API_KEY environment variable is required");
+  process.exit(1);
+}
 const SEASON_LABEL = "2025/26";
 const DATE_FROM = "2025-07-01";
 const DATE_TO = "2026-06-30";

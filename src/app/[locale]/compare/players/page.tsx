@@ -11,6 +11,7 @@ import { PlayerLink } from "@/components/player/player-link";
 import { ExternalLinks } from "@/components/entity/external-links";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "DataSports",
     type: "website",
   },
-  alternates: { canonical: `${BASE_URL}/compare/players` },
+  alternates: localizedAlternates("/compare/players"),
 };
 
 interface PlayerWithStats {

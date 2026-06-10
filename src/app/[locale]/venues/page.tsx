@@ -5,6 +5,7 @@ import { getAllVenues } from "@/lib/queries/venues";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -13,7 +14,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Football Stadiums & Venues – Capacity, Location & Info",
   description: "Explore football stadiums and venues worldwide. Find capacity, location, opening year, and home teams for every major venue.",
-  alternates: { canonical: `${BASE_URL}/venues` },
+  alternates: localizedAlternates("/venues"),
 };
 
 export default async function VenuesPage() {

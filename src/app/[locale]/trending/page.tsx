@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { TrendingUp, Search, Shield, User } from "lucide-react";
 import type { Metadata } from "next";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getTrendingPlayers, getTrendingTeams, getTrendingSearches } from "@/lib/queries/trending";
 import { BreadcrumbJsonLd, CollectionPageJsonLd, ItemListJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
@@ -24,10 +25,11 @@ export const metadata: Metadata = {
     siteName: "DataSports",
     type: "website",
   },
-  alternates: {
-    canonical: `${BASE_URL}/trending`,
-  },
-  robots: { index: false, follow: true },
+  // Indexable: the page renders real trending data (popularity rankings,
+  // most-searched players) and is submitted in the sitemap. It previously
+  // carried robots noindex while ALSO being in the sitemap — a contradiction
+  // Google reported as "Excluded by noindex".
+  alternates: localizedAlternates("/trending"),
 };
 
 export default async function TrendingPage() {

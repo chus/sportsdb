@@ -74,10 +74,12 @@ export async function GET(request: NextRequest) {
   }
 
   const DATABASE_URL = process.env.DATABASE_URL;
-  const API_KEY =
-    process.env.FOOTBALL_DATA_API_KEY ?? "226de578459844eeb0c5539b1859ed1e";
+  const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
   if (!DATABASE_URL) {
     return NextResponse.json({ error: "Missing DATABASE_URL" }, { status: 500 });
+  }
+  if (!API_KEY) {
+    return NextResponse.json({ error: "Missing FOOTBALL_DATA_API_KEY" }, { status: 500 });
   }
 
   const groupParam = request.nextUrl.searchParams.get("group") ?? "top5";

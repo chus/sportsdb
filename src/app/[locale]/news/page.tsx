@@ -6,6 +6,7 @@ import { Newspaper, FileText, Users, Trophy, Eye } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageHeader } from "@/components/layout/page-header";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -48,7 +49,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title: meta.title,
     description: meta.description,
     alternates: {
-      canonical: `${BASE_URL}/news${qs(page)}`,
+      ...localizedAlternates(`/news${qs(page)}`),
       types: {
         "application/rss+xml": `${BASE_URL}/feed.xml`,
       },

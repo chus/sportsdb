@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/search/search-bar";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -26,9 +27,7 @@ export const metadata: Metadata = {
     siteName: "DataSports",
     type: "website",
   },
-  alternates: {
-    canonical: `${BASE_URL}/competitions`,
-  },
+  alternates: localizedAlternates("/competitions"),
 };
 
 export default async function CompetitionsPage() {

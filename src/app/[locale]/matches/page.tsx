@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { MatchesContent } from "@/components/matches/matches-content";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -29,9 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Football Matches — Live Scores, Fixtures & Results",
     description: `Football matches for ${today}: live scores, lineups, and results. Browse upcoming fixtures and recent results across the Premier League, La Liga, Serie A, Bundesliga, and more.`,
     robots: { index: true, follow: true },
-    alternates: {
-      canonical: `${BASE_URL}/matches`,
-    },
+    alternates: localizedAlternates("/matches"),
   };
 }
 

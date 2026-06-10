@@ -3,6 +3,7 @@ import { User, ChevronRight, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { getPositionCounts } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -18,9 +19,7 @@ export const metadata: Metadata = {
       "Browse football players by position: goalkeepers, defenders, midfielders, and forwards. Find players by their role on the pitch.",
     url: `${BASE_URL}/players/position`,
   },
-  alternates: {
-    canonical: `${BASE_URL}/players/position`,
-  },
+  alternates: localizedAlternates("/players/position"),
 };
 
 const POSITION_META: Record<string, { color: string; description: string }> = {

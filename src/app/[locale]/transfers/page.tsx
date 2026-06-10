@@ -8,6 +8,7 @@ import { PlayerLink } from "@/components/player/player-link";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { format } from "date-fns";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -21,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description, url: `${BASE_URL}/transfers`, siteName: "DataSports", type: "website" },
-    alternates: { canonical: `${BASE_URL}/transfers` },
+    alternates: localizedAlternates("/transfers"),
   };
 }
 

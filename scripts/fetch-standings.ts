@@ -7,7 +7,11 @@
 import { neon } from "@neondatabase/serverless";
 
 const DATABASE_URL = process.env.DATABASE_URL;
-const API_KEY = "226de578459844eeb0c5539b1859ed1e";
+const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
+if (!API_KEY) {
+  console.error("FOOTBALL_DATA_API_KEY environment variable is required");
+  process.exit(1);
+}
 
 if (!DATABASE_URL) {
   console.error("DATABASE_URL environment variable is required");

@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
         destination: "/news",
         permanent: false,
       },
+      // /stats was removed (rendered mock data); send any stragglers to /players
+      {
+        source: "/stats",
+        destination: "/players",
+        permanent: true,
+      },
+      {
+        source: "/es/stats",
+        destination: "/es/players",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

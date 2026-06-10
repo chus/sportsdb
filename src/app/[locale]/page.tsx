@@ -27,6 +27,7 @@ import { LatestNewsStrip } from "@/components/homepage/latest-news-strip";
 import { FeaturedLeagues } from "@/components/homepage/featured-leagues";
 import { ExploreDatabase } from "@/components/homepage/explore-database";
 import { TeamSpotlightSection } from "@/components/homepage/team-spotlight";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -52,9 +53,7 @@ export const metadata: Metadata = {
     description:
       "The comprehensive, structured database for football. Search players, teams, competitions, and venues.",
   },
-  alternates: {
-    canonical: BASE_URL,
-  },
+  alternates: localizedAlternates("/"),
   keywords: [
     "football",
     "soccer",
@@ -223,13 +222,13 @@ export default async function HomePage() {
               Unlock the Full Experience
             </h2>
             <p className="text-blue-100 mb-6 max-w-xl mx-auto text-sm">
-              Ad-free browsing, advanced stats, unlimited follows and
+              Ad-free browsing, unlimited follows and
               comparisons — all for less than a coffee per month.
             </p>
             <div className="flex items-center justify-center gap-6 mb-8">
               {[
                 { icon: Ban, label: "Ad-Free" },
-                { icon: BarChart3, label: "Advanced Stats" },
+                { icon: BarChart3, label: "Unlimited Comparisons" },
                 { icon: Heart, label: "Unlimited Follows" },
               ].map((f) => (
                 <div key={f.label} className="text-white text-center">

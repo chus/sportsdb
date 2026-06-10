@@ -6,6 +6,7 @@ import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld
 import { PageHeader } from "@/components/layout/page-header";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -21,9 +22,7 @@ export const metadata: Metadata = {
       "Browse football players by nationality. Find players from every country in our comprehensive football database.",
     url: `${BASE_URL}/players/nationality`,
   },
-  alternates: {
-    canonical: `${BASE_URL}/players/nationality`,
-  },
+  alternates: localizedAlternates("/players/nationality"),
 };
 
 export default async function NationalityIndexPage() {

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { ComparePageContent } from "./compare-content";
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
       "Compare football players side by side. Goals, assists, appearances, and career statistics head-to-head.",
     url: `${BASE_URL}/compare`,
   },
-  alternates: { canonical: `${BASE_URL}/compare` },
+  alternates: localizedAlternates("/compare"),
 };
 
 export default function ComparePage() {

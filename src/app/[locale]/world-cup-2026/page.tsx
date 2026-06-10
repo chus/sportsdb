@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { Trophy, MapPin, Users, Calendar, ChevronRight, Globe } from "lucide-react";
 import { db } from "@/lib/db";
-import { competitions, competitionSeasons, standings, teams, venues, seasons } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { competitions, competitionSeasons, standings, teams, venues, seasons, players, playerSeasonStats } from "@/lib/db/schema";
+import { eq, and, desc, sql } from "drizzle-orm";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 import { JsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { CountdownTimer } from "./countdown-timer";
@@ -42,10 +43,33 @@ export const metadata: Metadata = {
     "world cup venues",
     "world cup schedule",
   ],
-  alternates: {
-    canonical: `${BASE_URL}/world-cup-2026`,
-  },
+  alternates: localizedAlternates("/world-cup-2026"),
 };
+
+/**
+ * Top current-season scorers as "players to watch". Replaces a hardcoded
+ * list of 8 names that silently went stale (transfers, retirements, form).
+ * The query keys off real player_season_stats so the section refreshes
+ * with every ISR revalidation.
+ */
+async function getKeyPlayers() {
+  return db
+    .select({
+      name: players.name,
+      slug: players.slug,
+      position: players.position,
+      nationality: players.nationality,
+      goals: sql<number>`sum(${playerSeasonStats.goals})::int`,
+    })
+    .from(playerSeasonStats)
+    .innerJoin(players, eq(players.id, playerSeasonStats.playerId))
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, playerSeasonStats.competitionSeasonId))
+    .innerJoin(seasons, eq(seasons.id, competitionSeasons.seasonId))
+    .where(and(eq(seasons.isCurrent, true), eq(players.isIndexable, true)))
+    .groupBy(players.id, players.name, players.slug, players.position, players.nationality)
+    .orderBy(desc(sql`sum(${playerSeasonStats.goals})`))
+    .limit(8);
+}
 
 async function getWorldCupData() {
   // Find the World Cup competition
@@ -110,7 +134,7 @@ async function getWorldCupData() {
 }
 
 export default async function WorldCup2026Page() {
-  const data = await getWorldCupData();
+  const [data, keyPlayers] = await Promise.all([getWorldCupData(), getKeyPlayers()]);
 
   const hostCountries = [
     { name: "United States", flag: "🇺🇸", stadiums: 11 },
@@ -307,46 +331,39 @@ export default async function WorldCup2026Page() {
           </section>
         )}
 
-        {/* Key Players to Watch */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center gap-3 mb-8">
-              <Users className="w-6 h-6 text-orange-500" />
-              <h2 className="text-3xl font-bold text-neutral-900">Key Players to Watch</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { name: "Kylian Mbappé", team: "France", position: "Forward", slug: "kylian-mbappe" },
-                { name: "Erling Haaland", team: "Norway", position: "Forward", slug: "erling-haaland" },
-                { name: "Jude Bellingham", team: "England", position: "Midfielder", slug: "jude-bellingham" },
-                { name: "Vinícius Júnior", team: "Brazil", position: "Forward", slug: "vinicius-junior" },
-                { name: "Florian Wirtz", team: "Germany", position: "Midfielder", slug: "florian-wirtz" },
-                { name: "Lamine Yamal", team: "Spain", position: "Forward", slug: "lamine-yamal" },
-                { name: "Lionel Messi", team: "Argentina", position: "Forward", slug: "lionel-messi" },
-                { name: "Christian Pulisic", team: "USA", position: "Forward", slug: "christian-pulisic" },
-              ].map((player) => (
-                <Link
-                  key={player.slug}
-                  href={`/players/${player.slug}`}
-                  className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
-                    {player.name.split(" ").map((n) => n[0]).join("")}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                      {player.name}
+        {/* Key Players to Watch — top current-season scorers, refreshed by ISR */}
+        {keyPlayers.length > 0 && (
+          <section className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-center gap-3 mb-8">
+                <Users className="w-6 h-6 text-orange-500" />
+                <h2 className="text-3xl font-bold text-neutral-900">Key Players to Watch</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {keyPlayers.map((player) => (
+                  <Link
+                    key={player.slug}
+                    href={`/players/${player.slug}`}
+                    className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                      {player.name.split(" ").map((n) => n[0]).join("").slice(0, 3)}
                     </div>
-                    <div className="text-sm text-neutral-500 truncate">
-                      {player.position} · {player.team}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                        {player.name}
+                      </div>
+                      <div className="text-sm text-neutral-500 truncate">
+                        {player.goals} goals this season{player.nationality ? ` · ${player.nationality}` : ""}
+                      </div>
                     </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-blue-500 transition-colors" />
-                </Link>
-              ))}
+                    <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-blue-500 transition-colors" />
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* CTA */}
         <section className="py-16">

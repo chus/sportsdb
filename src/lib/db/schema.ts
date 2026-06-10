@@ -206,6 +206,10 @@ export const playerTeamHistory = pgTable(
     index("idx_pth_player").on(table.playerId),
     index("idx_pth_team").on(table.teamId),
     index("idx_pth_current").on(table.playerId),
+    // Temporal composites: "current team" lookups filter (player_id, valid_to)
+    // and historical squad queries scan (team_id, valid_to, valid_from).
+    index("idx_pth_player_temporal").on(table.playerId, table.validTo, table.validFrom),
+    index("idx_pth_team_temporal").on(table.teamId, table.validTo, table.validFrom),
   ]
 );
 
@@ -403,6 +407,9 @@ export const matchLineups = pgTable(
   (table) => [
     uniqueIndex("uq_match_lineup").on(table.matchId, table.playerId),
     index("idx_match_lineups_match").on(table.matchId),
+    // Player-side lookups: appearance counts in the quality scorer and
+    // getPlayerRecentMatches both filter by player_id alone.
+    index("idx_match_lineups_player").on(table.playerId),
   ]
 );
 

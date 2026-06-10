@@ -6,6 +6,7 @@ import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/compon
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { PageHeader } from "@/components/layout/page-header";
 import { PlayerLink } from "@/components/player/player-link";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -19,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     openGraph: { title, description, url: `${BASE_URL}/top-assists`, siteName: "DataSports", type: "website" },
-    alternates: { canonical: `${BASE_URL}/top-assists` },
+    alternates: localizedAlternates("/top-assists"),
   };
 }
 

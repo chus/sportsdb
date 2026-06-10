@@ -6,6 +6,7 @@ import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld
 import { PageHeader } from "@/components/layout/page-header";
 import { getCountryFlagUrl } from "@/lib/utils/country-flags";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -20,9 +21,7 @@ export const metadata: Metadata = {
     description: "Browse football clubs and teams by country.",
     url: `${BASE_URL}/teams/country`,
   },
-  alternates: {
-    canonical: `${BASE_URL}/teams/country`,
-  },
+  alternates: localizedAlternates("/teams/country"),
 };
 
 export default async function TeamCountryIndexPage() {
