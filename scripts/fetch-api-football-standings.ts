@@ -34,25 +34,25 @@ const sql = neon(DATABASE_URL);
 // Find league IDs at: https://www.api-football.com/demo
 const LEAGUE_MAP: Record<string, { id: number; season: number }> = {
   // South America
-  "brasileirao-serie-a": { id: 71, season: 2024 },
-  "liga-profesional-argentina": { id: 128, season: 2024 },
+  "brasileirao-serie-a": { id: 71, season: 2026 },
+  "liga-profesional-argentina": { id: 128, season: 2026 },
 
   // North/Central America
-  "liga-mx": { id: 262, season: 2024 },
-  "mls": { id: 253, season: 2024 },
+  "liga-mx": { id: 262, season: 2026 },
+  "mls": { id: 253, season: 2026 },
 
   // Europe (not covered by football-data.org free tier)
-  "eredivisie": { id: 88, season: 2024 },
-  "primeira-liga": { id: 94, season: 2024 },
+  "eredivisie": { id: 88, season: 2025 },
+  "primeira-liga": { id: 94, season: 2025 },
 
   // Other South American leagues
-  "primera-division-de-chile": { id: 265, season: 2024 },
-  "liga-betplay": { id: 239, season: 2024 }, // Colombia
-  "primera-division-de-uruguay": { id: 268, season: 2024 },
-  "liga-1-peru": { id: 281, season: 2024 },
+  "primera-division-de-chile": { id: 265, season: 2026 },
+  "liga-betplay": { id: 239, season: 2026 }, // Colombia
+  "primera-division-de-uruguay": { id: 268, season: 2026 },
+  "liga-1-peru": { id: 281, season: 2026 },
 
   // Champions League
-  "uefa-champions-league": { id: 2, season: 2024 },
+  "uefa-champions-league": { id: 2, season: 2025 },
 };
 
 interface APIFootballStanding {

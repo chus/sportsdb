@@ -40,7 +40,7 @@ async function main() {
     if (sRes.ok) {
       const data = await sRes.json();
       for (const entry of data.standings?.[0]?.table ?? []) {
-        const hit = await resolveTeam(sql, entry.team.id, entry.team.name);
+        const hit = await resolveTeam(sql, "fd", entry.team.id, entry.team.name);
         if (!hit) {
           tally.teams.miss++;
           console.log(`  ✗ team miss: ${entry.team.name}`);
@@ -61,7 +61,7 @@ async function main() {
     if (pRes.ok) {
       const data = await pRes.json();
       for (const scorer of data.scorers ?? []) {
-        const hit = await resolvePlayer(sql, scorer.player.id, scorer.player.name);
+        const hit = await resolvePlayer(sql, "fd", scorer.player.id, scorer.player.name);
         if (!hit) tally.players.miss++;
         else tally.players[hit.via === "external_id" ? "external_id" : "name_match"]++;
       }

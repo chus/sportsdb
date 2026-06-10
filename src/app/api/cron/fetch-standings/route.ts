@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
       // Identity-first: provider team ID is authoritative; name matching
       // only links once and stamps the ID. No creation here — an unknown
       // team in standings means our team set has a gap worth surfacing.
-      const team = await resolveTeam(sql, entry.team.id, entry.team.name);
+      const team = await resolveTeam(sql, "fd", entry.team.id, entry.team.name);
       if (!team) {
         notFound++;
         continue;

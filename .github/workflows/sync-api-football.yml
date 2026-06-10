@@ -2,14 +2,16 @@ name: API-Football Sync
 
 on:
   schedule:
-    # Runs at 6am UTC daily — enriches one league per day (round-robin)
+    # Daily 6am UTC full enrichment of every league. The round-robin
+    # one-league-per-day mode existed for the 100 req/day free tier;
+    # the Pro plan (7,500 req/day) covers all 11 leagues in one run.
     - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       mode:
         description: 'Sync mode'
         required: true
-        default: 'enrich-next'
+        default: 'enrich-all'
         type: choice
         options:
           - enrich-next
@@ -46,7 +48,7 @@ jobs:
       - name: Determine enrichment target
         id: target
         run: |
-          MODE="${{ github.event.inputs.mode || 'enrich-next' }}"
+          MODE="${{ github.event.inputs.mode || 'enrich-all' }}"
           SLUG="${{ github.event.inputs.slug || '' }}"
 
           if [ "$MODE" = "enrich-next" ]; then

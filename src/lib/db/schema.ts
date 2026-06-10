@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   unique,
   index,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 // ============================================================
@@ -1231,4 +1232,28 @@ export const agentLogs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [index("idx_agent_logs_layer").on(table.agentLayer)]
+);
+
+// ============================================================
+// EXTERNAL IDS — multi-provider identity mapping
+// ============================================================
+// One entity can carry IDs from several data providers (football-data
+// "fd", API-Football "af"). All ingestion resolves entities through
+// this table via src/lib/ingestion/resolve.ts — never by name in
+// steady state. The legacy single external_id columns on teams/players/
+// matches are kept for back-compat but new code reads/writes here.
+
+export const externalIds = pgTable(
+  "external_ids",
+  {
+    entityType: text("entity_type").notNull(), // 'team' | 'player' | 'match'
+    entityId: uuid("entity_id").notNull(),
+    provider: text("provider").notNull(), // 'fd' | 'af'
+    providerId: text("provider_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.provider, table.providerId, table.entityType] }),
+    index("idx_external_ids_entity").on(table.entityType, table.entityId),
+  ]
 );

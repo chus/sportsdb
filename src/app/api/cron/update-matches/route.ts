@@ -81,7 +81,7 @@ async function getOrCreateTeam(
   // slugify-or-create logic that manufactured the duplicate "garbage
   // teams" the SEO cleanup scripts later deleted, matches and all.
   const sql = neon(process.env.DATABASE_URL!);
-  return resolveTeam(sql, team.id, team.name, {
+  return resolveTeam(sql, "fd", team.id, team.name, {
     shortName: team.shortName,
     country,
     logoUrl: team.crest,

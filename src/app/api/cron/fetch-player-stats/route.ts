@@ -84,12 +84,21 @@ export async function GET(request: NextRequest) {
 
   const sql = neon(DATABASE_URL);
 
-  // Pre-load the external_id fast path once: most entities resolve from
-  // these maps with zero round trips. Misses fall through to resolveTeam/
-  // resolvePlayer which link by name once and stamp the ID.
+  // Pre-load the identity fast path from the external_ids mapping table:
+  // most entities resolve from these maps with zero round trips. Misses
+  // fall through to resolveTeam/resolvePlayer which link by name once
+  // and write the mapping.
   const [playerIds, teamIds, compSeasons] = await Promise.all([
-    sql`SELECT id, slug, external_id FROM players WHERE external_id IS NOT NULL`,
-    sql`SELECT id, slug, external_id FROM teams WHERE external_id IS NOT NULL`,
+    sql`
+      SELECT p.id, p.slug, x.provider_id
+      FROM external_ids x JOIN players p ON p.id = x.entity_id
+      WHERE x.entity_type = 'player' AND x.provider = 'fd'
+    `,
+    sql`
+      SELECT t.id, t.slug, x.provider_id
+      FROM external_ids x JOIN teams t ON t.id = x.entity_id
+      WHERE x.entity_type = 'team' AND x.provider = 'fd'
+    `,
     sql`
       SELECT cs.id, c.slug as comp_slug
       FROM competition_seasons cs
@@ -100,12 +109,12 @@ export async function GET(request: NextRequest) {
   ]);
 
   const playerByExternalId = new Map<string, { id: string; slug: string }>();
-  for (const p of playerIds as Array<{ id: string; slug: string; external_id: string }>) {
-    playerByExternalId.set(p.external_id, { id: p.id, slug: p.slug });
+  for (const p of playerIds as Array<{ id: string; slug: string; provider_id: string }>) {
+    playerByExternalId.set(`fd-player-${p.provider_id}`, { id: p.id, slug: p.slug });
   }
   const teamByExternalId = new Map<string, { id: string; slug: string }>();
-  for (const t of teamIds as Array<{ id: string; slug: string; external_id: string }>) {
-    teamByExternalId.set(t.external_id, { id: t.id, slug: t.slug });
+  for (const t of teamIds as Array<{ id: string; slug: string; provider_id: string }>) {
+    teamByExternalId.set(`fd-team-${t.provider_id}`, { id: t.id, slug: t.slug });
   }
 
   const compSeasonMap = new Map<string, string>();
@@ -152,7 +161,7 @@ export async function GET(request: NextRequest) {
       // resolver (links by name once + stamps the provider ID).
       const dbPlayer =
         playerByExternalId.get(`fd-player-${scorer.player.id}`) ??
-        (await resolvePlayer(sql, scorer.player.id, scorer.player.name));
+        (await resolvePlayer(sql, "fd", scorer.player.id, scorer.player.name));
       if (!dbPlayer) {
         missingPlayer++;
         continue;
@@ -160,7 +169,7 @@ export async function GET(request: NextRequest) {
 
       const dbTeam =
         teamByExternalId.get(`fd-team-${scorer.team.id}`) ??
-        (await resolveTeam(sql, scorer.team.id, scorer.team.name));
+        (await resolveTeam(sql, "fd", scorer.team.id, scorer.team.name));
       if (!dbTeam) {
         missingTeam++;
         continue;

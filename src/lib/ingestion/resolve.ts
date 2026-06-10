@@ -2,25 +2,29 @@
  * Identity-first entity resolution for ingestion.
  *
  * Every data provider sends stable numeric IDs with every payload
- * (football-data.org: team.id, player.id). Historically our ingestion
- * threw those away and matched by name string — every name variant
- * ("FC Bayern München" vs "FC Bayern Munich") spawned a duplicate row,
- * duplicates attracted fixtures, cleanup scripts deleted duplicates
- * plus their fixtures, and pages went empty. Months of that cycle.
+ * (football-data.org: team.id, player.id; API-Football: team.id,
+ * player.id). Historically our ingestion threw those away and matched
+ * by name string — every name variant ("FC Bayern München" vs
+ * "FC Bayern Munich") spawned a duplicate row, duplicates attracted
+ * fixtures, cleanup scripts deleted duplicates plus their fixtures,
+ * and pages went empty. Months of that cycle.
  *
- * The contract here:
- *   1. Look up by external_id — the only steady-state path.
- *   2. On miss, fall back to name matching ONCE, and stamp the
- *      external_id onto the matched row so the next sync hits step 1.
- *   3. Optionally create the entity, always with external_id set.
+ * Identity lives in the external_ids mapping table:
+ *   (entity_type, entity_id, provider, provider_id)
+ * One entity can carry IDs from several providers simultaneously —
+ * fd-* from football-data and af-* from API-Football resolve to the
+ * same row. (The legacy single external_id column couldn't express
+ * that: whichever provider stamped first locked the other out and
+ * forced it back to name matching.)
+ *
+ * The contract:
+ *   1. Look up the (provider, provider_id) mapping — the only
+ *      steady-state path.
+ *   2. On miss, fall back to name matching ONCE, and write the mapping
+ *      so the next sync hits step 1.
+ *   3. Optionally create the entity, always writing the mapping.
  *
  * Name matching is a linker, never an identifier.
- *
- * external_id conventions:
- *   teams:   fd-team-{id}     (football-data.org)
- *   players: fd-player-{id}
- *   matches: fd-{id}          (legacy format, kept for compatibility)
- *   Future API-Football entities: af-team-{id}, af-player-{id}.
  */
 import { findTeamByName } from "@/lib/seo/team-matcher";
 
@@ -28,6 +32,8 @@ import { findTeamByName } from "@/lib/seo/team-matcher";
 // across callers (same pattern as team-matcher.ts).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sql = any;
+
+export type Provider = "fd" | "af";
 
 export interface ResolvedEntity {
   id: string;
@@ -45,51 +51,57 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function fdTeamExternalId(providerTeamId: number): string {
-  return `fd-team-${providerTeamId}`;
+async function lookupMapping(
+  sql: Sql,
+  entityType: "team" | "player",
+  provider: Provider,
+  providerId: number,
+): Promise<{ id: string; slug: string } | null> {
+  const table = entityType === "team" ? "teams" : "players";
+  const rows = await sql.query(
+    `SELECT e.id, e.slug
+     FROM external_ids x
+     JOIN ${table} e ON e.id = x.entity_id
+     WHERE x.entity_type = $1 AND x.provider = $2 AND x.provider_id = $3
+     LIMIT 1`,
+    [entityType, provider, String(providerId)],
+  );
+  return rows[0] ?? null;
 }
 
-export function fdPlayerExternalId(providerPlayerId: number): string {
-  return `fd-player-${providerPlayerId}`;
+async function writeMapping(
+  sql: Sql,
+  entityType: "team" | "player",
+  entityId: string,
+  provider: Provider,
+  providerId: number,
+): Promise<void> {
+  await sql`
+    INSERT INTO external_ids (entity_type, entity_id, provider, provider_id)
+    VALUES (${entityType}, ${entityId}, ${provider}, ${String(providerId)})
+    ON CONFLICT (provider, provider_id, entity_type) DO NOTHING
+  `;
 }
 
 /**
- * Resolve a team by provider ID, stamping the external_id on name-match
+ * Resolve a team by provider ID, writing the mapping on name-match
  * fallback. Pass `create` to insert the team when nothing matches —
  * callers that should never create (e.g. stats ingestion, where an
  * unknown team signals a data problem) leave it undefined and get null.
  */
 export async function resolveTeam(
   sql: Sql,
+  provider: Provider,
   providerTeamId: number,
   name: string,
   create?: { shortName?: string | null; country?: string | null; logoUrl?: string | null },
 ): Promise<ResolvedEntity | null> {
-  const externalId = fdTeamExternalId(providerTeamId);
-
-  const byId = await sql`
-    SELECT id, slug FROM teams WHERE external_id = ${externalId} LIMIT 1
-  `;
-  if (byId[0]) return { ...byId[0], via: "external_id" } as ResolvedEntity;
+  const mapped = await lookupMapping(sql, "team", provider, providerTeamId);
+  if (mapped) return { ...mapped, via: "external_id" };
 
   const byName = await findTeamByName(sql, name);
   if (byName) {
-    // One-time link: stamp the provider ID so the next sync resolves by
-    // ID. Never overwrite an existing different external_id — that means
-    // two provider IDs claim the same row, which needs human eyes.
-    const stamped = await sql`
-      UPDATE teams SET external_id = ${externalId}, updated_at = NOW()
-      WHERE id = ${byName.id} AND external_id IS NULL
-      RETURNING id
-    `;
-    if (stamped.length === 0) {
-      const existing = await sql`SELECT external_id FROM teams WHERE id = ${byName.id}`;
-      if (existing[0]?.external_id !== externalId) {
-        console.warn(
-          `[resolve-team] conflict: "${name}" matched team ${byName.slug} which already has external_id ${existing[0]?.external_id} (provider sent ${externalId})`,
-        );
-      }
-    }
+    await writeMapping(sql, "team", byName.id, provider, providerTeamId);
     return { ...byName, via: "name_match" };
   }
 
@@ -98,50 +110,48 @@ export async function resolveTeam(
   const slug = slugify(name);
   const inserted = await sql`
     INSERT INTO teams (external_id, name, short_name, slug, country, logo_url, team_type)
-    VALUES (${externalId}, ${name}, ${create.shortName ?? null}, ${slug}, ${create.country ?? null}, ${create.logoUrl ?? null}, 'club')
+    VALUES (${`${provider}-team-${providerTeamId}`}, ${name}, ${create.shortName ?? null}, ${slug}, ${create.country ?? null}, ${create.logoUrl ?? null}, 'club')
     ON CONFLICT (slug) DO NOTHING
     RETURNING id, slug
   `;
-  if (inserted[0]) return { ...inserted[0], via: "created" } as ResolvedEntity;
-
-  // Slug collision raced or pre-existed — return the slug owner.
-  const owner = await sql`SELECT id, slug FROM teams WHERE slug = ${slug} LIMIT 1`;
-  return owner[0] ? ({ ...owner[0], via: "name_match" } as ResolvedEntity) : null;
+  const row = inserted[0] ?? (await sql`SELECT id, slug FROM teams WHERE slug = ${slug} LIMIT 1`)[0];
+  if (!row) return null;
+  await writeMapping(sql, "team", row.id, provider, providerTeamId);
+  return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
 }
 
 /**
- * Resolve a player by provider ID. Fallback matches by slugified name,
- * stamps the external_id, never creates (player creation belongs to the
- * dedicated squad-ingestion pipeline which carries full bio data).
+ * Resolve a player by provider ID. Fallback matches by slugified name
+ * and writes the mapping. Creation is opt-in via `create` — the
+ * API-Football squad sync passes bio data; stats-only ingestion doesn't.
  */
 export async function resolvePlayer(
   sql: Sql,
+  provider: Provider,
   providerPlayerId: number,
   name: string,
+  create?: { position?: string | null; nationality?: string | null; imageUrl?: string | null },
 ): Promise<ResolvedEntity | null> {
-  const externalId = fdPlayerExternalId(providerPlayerId);
-
-  const byId = await sql`
-    SELECT id, slug FROM players WHERE external_id = ${externalId} LIMIT 1
-  `;
-  if (byId[0]) return { ...byId[0], via: "external_id" } as ResolvedEntity;
+  const mapped = await lookupMapping(sql, "player", provider, providerPlayerId);
+  if (mapped) return { ...mapped, via: "external_id" };
 
   const slug = slugify(name);
   const bySlug = await sql`SELECT id, slug FROM players WHERE slug = ${slug} LIMIT 1`;
-  if (!bySlug[0]) return null;
-
-  const stamped = await sql`
-    UPDATE players SET external_id = ${externalId}, updated_at = NOW()
-    WHERE id = ${bySlug[0].id} AND external_id IS NULL
-    RETURNING id
-  `;
-  if (stamped.length === 0) {
-    const existing = await sql`SELECT external_id FROM players WHERE id = ${bySlug[0].id}`;
-    if (existing[0]?.external_id !== externalId) {
-      console.warn(
-        `[resolve-player] conflict: "${name}" matched player ${slug} which already has external_id ${existing[0]?.external_id} (provider sent ${externalId})`,
-      );
-    }
+  if (bySlug[0]) {
+    await writeMapping(sql, "player", bySlug[0].id, provider, providerPlayerId);
+    return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
   }
-  return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
+
+  if (!create) return null;
+
+  const inserted = await sql`
+    INSERT INTO players (external_id, name, slug, position, nationality, image_url)
+    VALUES (${`${provider}-player-${providerPlayerId}`}, ${name}, ${slug}, ${create.position ?? "Unknown"}, ${create.nationality ?? null}, ${create.imageUrl ?? null})
+    ON CONFLICT (slug) DO NOTHING
+    RETURNING id, slug
+  `;
+  const row = inserted[0] ?? (await sql`SELECT id, slug FROM players WHERE slug = ${slug} LIMIT 1`)[0];
+  if (!row) return null;
+  await writeMapping(sql, "player", row.id, provider, providerPlayerId);
+  return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
 }

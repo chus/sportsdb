@@ -113,21 +113,23 @@ interface LeagueConfig {
   isLatam: boolean;
 }
 
-// Free tier: access to seasons 2022–2024 only
+// Pro tier (paid 2026-06): all seasons available, 7,500 req/day.
+// European leagues: season 2025 = the 2025/26 campaign.
+// Calendar-year leagues (LATAM, MLS): season 2026.
 const LEAGUES: LeagueConfig[] = [
   // LATAM — primary targets (not covered by football-data.org free tier)
-  { slug: "liga-profesional-argentina", apiId: 128, season: 2024, country: "Argentina", name: "Liga Profesional Argentina", type: "league", isLatam: true },
-  { slug: "liga-mx", apiId: 262, season: 2024, country: "Mexico", name: "Liga MX", type: "league", isLatam: true },
-  { slug: "mls", apiId: 253, season: 2024, country: "USA", name: "Major League Soccer", type: "league", isLatam: true },
+  { slug: "liga-profesional-argentina", apiId: 128, season: 2026, country: "Argentina", name: "Liga Profesional Argentina", type: "league", isLatam: true },
+  { slug: "liga-mx", apiId: 262, season: 2026, country: "Mexico", name: "Liga MX", type: "league", isLatam: true },
+  { slug: "mls", apiId: 253, season: 2026, country: "USA", name: "Major League Soccer", type: "league", isLatam: true },
   // Already synced from football-data.org — API-Football used for enrichment only
-  { slug: "brasileirao-serie-a", apiId: 71, season: 2024, country: "Brazil", name: "Brasileirão Série A", type: "league", isLatam: true },
-  { slug: "premier-league", apiId: 39, season: 2024, country: "England", name: "Premier League", type: "league", isLatam: false },
-  { slug: "la-liga", apiId: 140, season: 2024, country: "Spain", name: "La Liga", type: "league", isLatam: false },
-  { slug: "bundesliga", apiId: 78, season: 2024, country: "Germany", name: "Bundesliga", type: "league", isLatam: false },
-  { slug: "serie-a", apiId: 135, season: 2024, country: "Italy", name: "Serie A", type: "league", isLatam: false },
-  { slug: "ligue-1", apiId: 61, season: 2024, country: "France", name: "Ligue 1", type: "league", isLatam: false },
-  { slug: "eredivisie", apiId: 88, season: 2024, country: "Netherlands", name: "Eredivisie", type: "league", isLatam: false },
-  { slug: "primeira-liga", apiId: 94, season: 2024, country: "Portugal", name: "Primeira Liga", type: "league", isLatam: false },
+  { slug: "brasileirao-serie-a", apiId: 71, season: 2026, country: "Brazil", name: "Brasileirão Série A", type: "league", isLatam: true },
+  { slug: "premier-league", apiId: 39, season: 2025, country: "England", name: "Premier League", type: "league", isLatam: false },
+  { slug: "la-liga", apiId: 140, season: 2025, country: "Spain", name: "La Liga", type: "league", isLatam: false },
+  { slug: "bundesliga", apiId: 78, season: 2025, country: "Germany", name: "Bundesliga", type: "league", isLatam: false },
+  { slug: "serie-a", apiId: 135, season: 2025, country: "Italy", name: "Serie A", type: "league", isLatam: false },
+  { slug: "ligue-1", apiId: 61, season: 2025, country: "France", name: "Ligue 1", type: "league", isLatam: false },
+  { slug: "eredivisie", apiId: 88, season: 2025, country: "Netherlands", name: "Eredivisie", type: "league", isLatam: false },
+  { slug: "primeira-liga", apiId: 94, season: 2025, country: "Portugal", name: "Primeira Liga", type: "league", isLatam: false },
 ];
 
 // ============================================================
@@ -380,6 +382,52 @@ async function upsertTeam(
   apiTeam: any,
   country: string
 ): Promise<typeof schema.teams.$inferSelect> {
+  // Identity-first: the external_ids mapping table is the steady-state
+  // path (one entity can hold both fd- and af- IDs; the single
+  // external_id column can't). On mapping hit, refresh data fields and
+  // return. On miss, run the legacy cascade once and record the mapping
+  // so the next sync resolves by ID.
+  const [mapped] = await db
+    .select({ team: schema.teams })
+    .from(schema.externalIds)
+    .innerJoin(schema.teams, eq(schema.teams.id, schema.externalIds.entityId))
+    .where(
+      and(
+        eq(schema.externalIds.provider, "af"),
+        eq(schema.externalIds.providerId, String(apiTeam.id)),
+        eq(schema.externalIds.entityType, "team")
+      )
+    )
+    .limit(1);
+
+  if (mapped) {
+    const [updated] = await db
+      .update(schema.teams)
+      .set({
+        name: apiTeam.name,
+        shortName: apiTeam.code || mapped.team.shortName,
+        country,
+        logoUrl: apiTeam.logo || mapped.team.logoUrl,
+        foundedYear: apiTeam.founded || mapped.team.foundedYear,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.teams.id, mapped.team.id))
+      .returning();
+    return updated;
+  }
+
+  const row = await upsertTeamLegacy(apiTeam, country);
+  await db
+    .insert(schema.externalIds)
+    .values({ entityType: "team", entityId: row.id, provider: "af", providerId: String(apiTeam.id) })
+    .onConflictDoNothing();
+  return row;
+}
+
+async function upsertTeamLegacy(
+  apiTeam: any,
+  country: string
+): Promise<typeof schema.teams.$inferSelect> {
   const extId = afId(apiTeam.id);
   const teamSlug = slugify(apiTeam.name);
 
@@ -524,6 +572,55 @@ async function upsertVenue(venue: any, country: string): Promise<string | null> 
 // ============================================================
 
 async function upsertPlayer(
+  apiPlayer: any,
+  teamId: string
+): Promise<typeof schema.players.$inferSelect | null> {
+  // Identity-first via the external_ids mapping table; see upsertTeam.
+  const [mapped] = await db
+    .select({ player: schema.players })
+    .from(schema.externalIds)
+    .innerJoin(schema.players, eq(schema.players.id, schema.externalIds.entityId))
+    .where(
+      and(
+        eq(schema.externalIds.provider, "af"),
+        eq(schema.externalIds.providerId, String(apiPlayer.id)),
+        eq(schema.externalIds.entityType, "player")
+      )
+    )
+    .limit(1);
+
+  if (mapped) {
+    const updates: any = {
+      imageUrl: apiPlayer.photo || mapped.player.imageUrl,
+      position: mapPosition(apiPlayer.position) || mapped.player.position,
+      updatedAt: new Date(),
+    };
+    if (apiPlayer.age && !mapped.player.dateOfBirth) {
+      const approxYear = new Date().getFullYear() - apiPlayer.age;
+      updates.dateOfBirth = `${approxYear}-01-01`;
+    }
+    const [updated] = await db
+      .update(schema.players)
+      .set(updates)
+      .where(eq(schema.players.id, mapped.player.id))
+      .returning();
+    if (apiPlayer.number) {
+      await upsertPlayerTeamLink(updated.id, teamId, apiPlayer.number);
+    }
+    return updated;
+  }
+
+  const row = await upsertPlayerLegacy(apiPlayer, teamId);
+  if (row) {
+    await db
+      .insert(schema.externalIds)
+      .values({ entityType: "player", entityId: row.id, provider: "af", providerId: String(apiPlayer.id) })
+      .onConflictDoNothing();
+  }
+  return row;
+}
+
+async function upsertPlayerLegacy(
   apiPlayer: any,
   teamId: string
 ): Promise<typeof schema.players.$inferSelect | null> {

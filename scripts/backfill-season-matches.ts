@@ -122,8 +122,8 @@ async function main() {
     for (const m of apiMatches) {
       // Identity-first: resolve by provider team ID, stamping the
       // external_id on the one-time name-match fallback.
-      const homeRow = await resolveTeam(sql, m.homeTeam.id, m.homeTeam.name);
-      const awayRow = await resolveTeam(sql, m.awayTeam.id, m.awayTeam.name);
+      const homeRow = await resolveTeam(sql, "fd", m.homeTeam.id, m.homeTeam.name);
+      const awayRow = await resolveTeam(sql, "fd", m.awayTeam.id, m.awayTeam.name);
       if (!homeRow || !awayRow) {
         teamMisses++;
         continue;
