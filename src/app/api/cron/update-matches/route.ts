@@ -9,9 +9,11 @@ import {
   seasons,
 } from "@/lib/db/schema";
 import { eq, and, ne } from "drizzle-orm";
+import { neon } from "@neondatabase/serverless";
 import { scorePredictionsForMatch } from "@/lib/queries/predictions";
 import { scorePickemsForMatch } from "@/lib/queries/pickem";
 import { buildMatchSlugWithFallback } from "@/lib/utils/match-slug";
+import { findTeamByName } from "@/lib/seo/team-matcher";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -79,18 +81,16 @@ async function getOrCreateTeam(
   team: ApiMatch["homeTeam"],
   country: string
 ): Promise<{ id: string; slug: string } | null> {
+  // Try the full matcher cascade first (exact, year-suffix strip, dot
+  // normalization, slugify, aliases). The previous naive slugify-only
+  // lookup created a duplicate team whenever the API name didn't slugify
+  // to exactly our slug — those duplicates were the "garbage teams" the
+  // SEO cleanup scripts later had to delete (taking their matches along).
+  const sql = neon(process.env.DATABASE_URL!);
+  const matched = await findTeamByName(sql, team.name);
+  if (matched) return matched;
+
   const slug = slugify(team.name);
-
-  const existing = await db
-    .select({ id: teams.id, slug: teams.slug })
-    .from(teams)
-    .where(eq(teams.slug, slug))
-    .limit(1);
-
-  if (existing.length > 0) {
-    return { id: existing[0].id, slug: existing[0].slug };
-  }
-
   const result = await db
     .insert(teams)
     .values({
@@ -100,9 +100,18 @@ async function getOrCreateTeam(
       country,
       logoUrl: team.crest,
     })
+    .onConflictDoNothing({ target: teams.slug })
     .returning({ id: teams.id, slug: teams.slug });
 
-  if (!result[0]) return null;
+  if (!result[0]) {
+    // Conflict raced with another insert — fetch the winner.
+    const existing = await db
+      .select({ id: teams.id, slug: teams.slug })
+      .from(teams)
+      .where(eq(teams.slug, slug))
+      .limit(1);
+    return existing[0] ?? null;
+  }
   return { id: result[0].id, slug: result[0].slug };
 }
 

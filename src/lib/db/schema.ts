@@ -210,6 +210,10 @@ export const playerTeamHistory = pgTable(
     // and historical squad queries scan (team_id, valid_to, valid_from).
     index("idx_pth_player_temporal").on(table.playerId, table.validTo, table.validFrom),
     index("idx_pth_team_temporal").on(table.teamId, table.validTo, table.validFrom),
+    // Same player+team+start date is by definition the same stint. Without
+    // this, double-ingestion creates duplicate stints and "current team"
+    // becomes ambiguous.
+    uniqueIndex("uq_pth_player_team_start").on(table.playerId, table.teamId, table.validFrom),
   ]
 );
 

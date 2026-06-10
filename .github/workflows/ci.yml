@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # tsc catches the deploy-breaking class of errors: unresolved imports
+      # (e.g. a page importing a file that was never committed), type
+      # mismatches, bad schema references. Vercel builds main directly, so
+      # this is the only pre-deploy check.
+      - run: npx tsc --noEmit -p .
+
+  lint:
+    name: Lint (advisory)
+    runs-on: ubuntu-latest
+    # Non-blocking until the existing ~125 lint errors are paid down.
+    # Flip to blocking by deleting continue-on-error once `npx eslint src`
+    # exits clean.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx eslint src
