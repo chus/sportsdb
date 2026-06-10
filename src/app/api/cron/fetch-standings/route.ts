@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
-import { findTeamByName } from "@/lib/seo/team-matcher";
+import { resolveTeam } from "@/lib/ingestion/resolve";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -118,7 +118,10 @@ export async function GET(request: NextRequest) {
     let notFound = 0;
 
     for (const entry of standings) {
-      const team = await findTeamByName(sql, entry.team.name);
+      // Identity-first: provider team ID is authoritative; name matching
+      // only links once and stamps the ID. No creation here — an unknown
+      // team in standings means our team set has a gap worth surfacing.
+      const team = await resolveTeam(sql, entry.team.id, entry.team.name);
       if (!team) {
         notFound++;
         continue;

@@ -13,7 +13,7 @@ config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
 import { buildMatchSlugWithFallback } from "../src/lib/utils/match-slug";
-import { findTeamByName } from "../src/lib/seo/team-matcher";
+import { resolveTeam } from "../src/lib/ingestion/resolve";
 
 const API_KEY = process.env.FOOTBALL_DATA_API_KEY;
 if (!API_KEY) {
@@ -120,10 +120,10 @@ async function main() {
     let teamMisses = 0;
 
     for (const m of apiMatches) {
-      // Use the smart matcher (year-suffix strip, punctuation normalize,
-      // diacritics, manual aliases) — beats the naive slugify approach.
-      const homeRow = await findTeamByName(sql, m.homeTeam.name);
-      const awayRow = await findTeamByName(sql, m.awayTeam.name);
+      // Identity-first: resolve by provider team ID, stamping the
+      // external_id on the one-time name-match fallback.
+      const homeRow = await resolveTeam(sql, m.homeTeam.id, m.homeTeam.name);
+      const awayRow = await resolveTeam(sql, m.awayTeam.id, m.awayTeam.name);
       if (!homeRow || !awayRow) {
         teamMisses++;
         continue;

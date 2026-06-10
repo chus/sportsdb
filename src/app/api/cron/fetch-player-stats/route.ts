@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { neon } from "@neondatabase/serverless";
-import { findTeamByName } from "@/lib/seo/team-matcher";
+import { resolveTeam, resolvePlayer } from "@/lib/ingestion/resolve";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -51,15 +51,6 @@ interface ScorersResponse {
   scorers: ApiScorer[];
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 async function verifyCronSecret() {
   const headersList = await headers();
   const authHeader = headersList.get("authorization");
@@ -93,11 +84,12 @@ export async function GET(request: NextRequest) {
 
   const sql = neon(DATABASE_URL);
 
-  // Pre-load lookups once. Two thousand-row scans beat thousands of
-  // per-scorer round trips.
-  const [allPlayers, allTeams, compSeasons] = await Promise.all([
-    sql`SELECT id, name, slug FROM players`,
-    sql`SELECT id, name, short_name, slug FROM teams`,
+  // Pre-load the external_id fast path once: most entities resolve from
+  // these maps with zero round trips. Misses fall through to resolveTeam/
+  // resolvePlayer which link by name once and stamp the ID.
+  const [playerIds, teamIds, compSeasons] = await Promise.all([
+    sql`SELECT id, slug, external_id FROM players WHERE external_id IS NOT NULL`,
+    sql`SELECT id, slug, external_id FROM teams WHERE external_id IS NOT NULL`,
     sql`
       SELECT cs.id, c.slug as comp_slug
       FROM competition_seasons cs
@@ -107,17 +99,13 @@ export async function GET(request: NextRequest) {
     `,
   ]);
 
-  const playerSlugMap = new Map<string, { id: string; name: string }>();
-  for (const p of allPlayers as Array<{ id: string; name: string; slug: string }>) {
-    playerSlugMap.set(p.slug, { id: p.id, name: p.name });
+  const playerByExternalId = new Map<string, { id: string; slug: string }>();
+  for (const p of playerIds as Array<{ id: string; slug: string; external_id: string }>) {
+    playerByExternalId.set(p.external_id, { id: p.id, slug: p.slug });
   }
-
-  const teamSlugMap = new Map<string, { id: string; name: string }>();
-  const teamNameSlugMap = new Map<string, { id: string; name: string }>();
-  for (const t of allTeams as Array<{ id: string; name: string; short_name: string | null; slug: string }>) {
-    teamSlugMap.set(t.slug, { id: t.id, name: t.name });
-    teamNameSlugMap.set(slugify(t.name), { id: t.id, name: t.name });
-    if (t.short_name) teamNameSlugMap.set(slugify(t.short_name), { id: t.id, name: t.name });
+  const teamByExternalId = new Map<string, { id: string; slug: string }>();
+  for (const t of teamIds as Array<{ id: string; slug: string; external_id: string }>) {
+    teamByExternalId.set(t.external_id, { id: t.id, slug: t.slug });
   }
 
   const compSeasonMap = new Map<string, string>();
@@ -160,29 +148,19 @@ export async function GET(request: NextRequest) {
     let missingTeam = 0;
 
     for (const scorer of data.scorers ?? []) {
-      const playerSlug = slugify(scorer.player.name);
-      const dbPlayer = playerSlugMap.get(playerSlug);
+      // Identity-first: external_id map (zero round trips), then the
+      // resolver (links by name once + stamps the provider ID).
+      const dbPlayer =
+        playerByExternalId.get(`fd-player-${scorer.player.id}`) ??
+        (await resolvePlayer(sql, scorer.player.id, scorer.player.name));
       if (!dbPlayer) {
         missingPlayer++;
         continue;
       }
 
-      // First try the pre-loaded in-memory slug maps (fast path for the
-      // common case), then fall back to the shared findTeamByName matcher
-      // which handles year suffixes, punctuation, diacritics, and aliases.
-      const teamSlug = slugify(scorer.team.name);
-      const teamShortSlug = slugify(scorer.team.shortName);
-      let dbTeam:
-        | { id: string; name?: string; slug?: string }
-        | undefined =
-        teamSlugMap.get(teamSlug) ||
-        teamSlugMap.get(teamShortSlug) ||
-        teamNameSlugMap.get(teamSlug) ||
-        teamNameSlugMap.get(teamShortSlug);
-      if (!dbTeam) {
-        const hit = await findTeamByName(sql, scorer.team.name);
-        if (hit) dbTeam = { id: hit.id, slug: hit.slug };
-      }
+      const dbTeam =
+        teamByExternalId.get(`fd-team-${scorer.team.id}`) ??
+        (await resolveTeam(sql, scorer.team.id, scorer.team.name));
       if (!dbTeam) {
         missingTeam++;
         continue;
