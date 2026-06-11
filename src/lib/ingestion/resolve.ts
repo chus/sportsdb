@@ -155,3 +155,53 @@ export async function resolvePlayer(
   await writeMapping(sql, "player", row.id, provider, providerPlayerId);
   return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
 }
+
+/**
+ * Resolve a match by provider fixture ID.
+ *
+ * Matches are special: the same real-world fixture arrives from both
+ * providers with unrelated IDs (fd-12345 vs af-998877). Keying inserts
+ * on external_id alone therefore creates duplicate match rows — the
+ * fallback here identifies a fixture by its natural key instead:
+ * same home team, same away team, kickoff within ±1 day (timezone
+ * differences shift the calendar date across providers).
+ *
+ * Returns the match row id. Never creates — fixture creation stays in
+ * the dedicated sync paths which carry slug/matchday/season context.
+ */
+export async function resolveMatch(
+  sql: Sql,
+  provider: Provider,
+  providerFixtureId: number,
+  homeTeamId: string,
+  awayTeamId: string,
+  kickoff: Date,
+): Promise<{ id: string } | null> {
+  const rows = await sql.query(
+    `SELECT m.id
+     FROM external_ids x
+     JOIN matches m ON m.id = x.entity_id
+     WHERE x.entity_type = 'match' AND x.provider = $1 AND x.provider_id = $2
+     LIMIT 1`,
+    [provider, String(providerFixtureId)],
+  );
+  if (rows[0]) return rows[0];
+
+  const natural = await sql`
+    SELECT id FROM matches
+    WHERE home_team_id = ${homeTeamId}
+      AND away_team_id = ${awayTeamId}
+      AND scheduled_at BETWEEN ${new Date(kickoff.getTime() - 86400000).toISOString()}
+                           AND ${new Date(kickoff.getTime() + 86400000).toISOString()}
+    ORDER BY abs(extract(epoch FROM scheduled_at - ${kickoff.toISOString()}::timestamptz))
+    LIMIT 1
+  `;
+  if (!natural[0]) return null;
+
+  await sql`
+    INSERT INTO external_ids (entity_type, entity_id, provider, provider_id)
+    VALUES ('match', ${natural[0].id}, ${provider}, ${String(providerFixtureId)})
+    ON CONFLICT (provider, provider_id, entity_type) DO NOTHING
+  `;
+  return natural[0];
+}

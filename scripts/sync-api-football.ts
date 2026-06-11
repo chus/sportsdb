@@ -19,6 +19,7 @@ import { config } from "dotenv";
 import { eq, sql as drizzleSql, and, isNull, inArray } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
 import { buildMatchSlug } from "../src/lib/utils/match-slug";
+import { resolveMatch, resolvePlayer, resolveTeam } from "../src/lib/ingestion/resolve";
 
 config({ path: ".env.local" });
 
@@ -38,7 +39,7 @@ const db = drizzle(sql, { schema });
 // REQUEST BUDGET
 // ============================================================
 
-const MAX_REQUESTS = 95; // Hard cap (free tier = 100/day)
+const MAX_REQUESTS = 7000; // Hard cap (Pro tier = 7,500/day)
 let requestCount = 0;
 
 function canMakeRequest(): boolean {
@@ -49,7 +50,7 @@ function canMakeRequest(): boolean {
 // RATE LIMITING
 // ============================================================
 
-const RATE_LIMIT_MS = 6500; // 10 req/min
+const RATE_LIMIT_MS = 250; // Pro tier: 300 req/min — 250ms keeps headroom
 let lastRequestTime = 0;
 
 async function apiFetch(endpoint: string): Promise<any> {
@@ -416,122 +417,29 @@ async function upsertTeam(
     return updated;
   }
 
-  const row = await upsertTeamLegacy(apiTeam, country);
-  await db
-    .insert(schema.externalIds)
-    .values({ entityType: "team", entityId: row.id, provider: "af", providerId: String(apiTeam.id) })
-    .onConflictDoNothing();
-  return row;
-}
+  // First contact: resolveTeam runs the smart matcher (exact name,
+  // year-suffix strip, dot normalization, slugify, aliases) so
+  // API-Football's short names ("Liverpool") land on the canonical row
+  // ("Liverpool FC") instead of spawning a duplicate — the old
+  // slug/exact-name cascade here created 28 duplicate teams that had to
+  // be merged back. resolveTeam also records the af mapping.
+  const resolved = await resolveTeam(sql, "af", apiTeam.id, apiTeam.name, {
+    shortName: apiTeam.code || null,
+    country,
+    logoUrl: apiTeam.logo || null,
+  });
+  if (!resolved) throw new Error(`unresolvable team: ${apiTeam.name}`);
 
-async function upsertTeamLegacy(
-  apiTeam: any,
-  country: string
-): Promise<typeof schema.teams.$inferSelect> {
-  const extId = afId(apiTeam.id);
-  const teamSlug = slugify(apiTeam.name);
-
-  // 1. Find by af- externalId
-  const [byExtId] = await db
-    .select()
-    .from(schema.teams)
-    .where(eq(schema.teams.externalId, extId))
-    .limit(1);
-
-  if (byExtId) {
-    const [updated] = await db
-      .update(schema.teams)
-      .set({
-        name: apiTeam.name,
-        shortName: apiTeam.code || null,
-        country,
-        logoUrl: apiTeam.logo || byExtId.logoUrl,
-        foundedYear: apiTeam.founded || byExtId.foundedYear,
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.teams.id, byExtId.id))
-      .returning();
-    return updated;
-  }
-
-  // 2. Find by slug (legacy data)
-  const [bySlug] = await db
-    .select()
-    .from(schema.teams)
-    .where(eq(schema.teams.slug, teamSlug))
-    .limit(1);
-
-  if (bySlug) {
-    // Only set af- externalId if no existing externalId
-    const updates: any = {
-      name: apiTeam.name,
-      shortName: apiTeam.code || bySlug.shortName,
-      country,
-      logoUrl: apiTeam.logo || bySlug.logoUrl,
-      foundedYear: apiTeam.founded || bySlug.foundedYear,
+  const [row] = await db
+    .update(schema.teams)
+    .set({
+      logoUrl: apiTeam.logo || undefined,
+      foundedYear: apiTeam.founded || undefined,
       updatedAt: new Date(),
-    };
-    if (!bySlug.externalId) {
-      updates.externalId = extId;
-    }
-    const [updated] = await db
-      .update(schema.teams)
-      .set(updates)
-      .where(eq(schema.teams.id, bySlug.id))
-      .returning();
-    return updated;
-  }
-
-  // 3. Try fuzzy name match before creating new (API names differ from Wikipedia names)
-  const [byName] = await db
-    .select()
-    .from(schema.teams)
-    .where(eq(schema.teams.name, apiTeam.name))
-    .limit(1);
-
-  if (byName) {
-    const updates: any = {
-      logoUrl: apiTeam.logo || byName.logoUrl,
-      foundedYear: apiTeam.founded || byName.foundedYear,
-      updatedAt: new Date(),
-    };
-    if (!byName.externalId) {
-      updates.externalId = extId;
-    }
-    const [updated] = await db
-      .update(schema.teams)
-      .set(updates)
-      .where(eq(schema.teams.id, byName.id))
-      .returning();
-    return updated;
-  }
-
-  // 4. Brand new team — insert
-  const [result] = await db
-    .insert(schema.teams)
-    .values({
-      externalId: extId,
-      name: apiTeam.name,
-      shortName: apiTeam.code || null,
-      slug: teamSlug,
-      country,
-      logoUrl: apiTeam.logo || null,
-      foundedYear: apiTeam.founded || null,
     })
-    .onConflictDoUpdate({
-      target: schema.teams.externalId,
-      set: {
-        name: apiTeam.name,
-        shortName: apiTeam.code || null,
-        country,
-        logoUrl: apiTeam.logo || null,
-        foundedYear: apiTeam.founded || null,
-        updatedAt: new Date(),
-      },
-    })
+    .where(eq(schema.teams.id, resolved.id))
     .returning();
-
-  return result;
+  return row;
 }
 
 // ============================================================
@@ -987,17 +895,44 @@ async function syncMatches(
     const awayTeamId = teamIdMap.get(teams.away.id);
     if (!homeTeamId || !awayTeamId) continue;
 
-    const extId = afId(fixture.id);
     const scheduledAt = new Date(fixture.date);
+
+    // Identity-first: the same real-world fixture also arrives from
+    // football-data with an unrelated ID. resolveMatch finds it via the
+    // af mapping or the natural key (home, away, kickoff ±1d) and
+    // records the mapping; keying inserts on external_id alone created
+    // duplicate match rows for every fixture both providers covered.
+    const existing = await resolveMatch(
+      sql, "af", fixture.id, homeTeamId, awayTeamId, scheduledAt,
+    );
+
+    if (existing) {
+      await db
+        .update(schema.matches)
+        .set({
+          scheduledAt,
+          status: mapMatchStatus(fixture.status.short),
+          homeScore: goals.home ?? null,
+          awayScore: goals.away ?? null,
+          referee: fixture.referee || null,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.matches.id, existing.id));
+      count++;
+      continue;
+    }
+
+    // Genuinely new fixture (e.g. league only covered by API-Football).
+    // matches.slug is NOT NULL — skip rather than insert a slug-less row.
     const homeSlug = slugById.get(homeTeamId);
     const awaySlug = slugById.get(awayTeamId);
-    const matchSlug =
-      homeSlug && awaySlug ? buildMatchSlug(homeSlug, awaySlug, scheduledAt) : null;
+    if (!homeSlug || !awaySlug) continue;
+    const matchSlug = buildMatchSlug(homeSlug, awaySlug, scheduledAt);
 
-    await db
+    const [inserted] = await db
       .insert(schema.matches)
       .values({
-        externalId: extId,
+        externalId: afId(fixture.id),
         slug: matchSlug,
         competitionSeasonId: compSeasonId,
         homeTeamId,
@@ -1009,17 +944,15 @@ async function syncMatches(
         awayScore: goals.away ?? null,
         referee: fixture.referee || null,
       })
-      .onConflictDoUpdate({
-        target: schema.matches.externalId,
-        set: {
-          scheduledAt,
-          status: mapMatchStatus(fixture.status.short),
-          homeScore: goals.home ?? null,
-          awayScore: goals.away ?? null,
-          referee: fixture.referee || null,
-          updatedAt: new Date(),
-        },
-      });
+      .onConflictDoNothing({ target: schema.matches.slug })
+      .returning({ id: schema.matches.id });
+
+    if (inserted) {
+      await db
+        .insert(schema.externalIds)
+        .values({ entityType: "match", entityId: inserted.id, provider: "af", providerId: String(fixture.id) })
+        .onConflictDoNothing();
+    }
 
     count++;
   }
@@ -1479,6 +1412,190 @@ async function refreshSearchIndex() {
 }
 
 // ============================================================
+// SYNC: FULL PER-PLAYER SEASON STATS (Pro tier)
+// ============================================================
+// /players?league&season returns EVERY player with a full stat line
+// (appearances, minutes, goals, assists, cards, rating) — versus the
+// top-100 scorers that football-data.org caps us at. ~30-60 pages per
+// league at 20 players/page.
+
+async function getCurrentCompSeasonId(slug: string): Promise<string | null> {
+  const rows = await sql`
+    SELECT cs.id FROM competition_seasons cs
+    JOIN competitions c ON c.id = cs.competition_id
+    JOIN seasons s ON s.id = cs.season_id
+    WHERE c.slug = ${slug} AND s.is_current = true
+    LIMIT 1
+  `;
+  return (rows[0] as { id: string } | undefined)?.id ?? null;
+}
+
+async function syncPlayerStats(league: LeagueConfig) {
+  console.log(`\n=== Player stats: ${league.name} ===`);
+  const compSeasonId = await getCurrentCompSeasonId(league.slug);
+  if (!compSeasonId) {
+    console.warn(`   no current competition_season for ${league.slug}, skipping`);
+    return;
+  }
+
+  let page = 1;
+  let totalPages = 1;
+  let upserted = 0;
+  let missed = 0;
+
+  do {
+    const data = await apiFetch(`/players?league=${league.apiId}&season=${league.season}&page=${page}`);
+    totalPages = data.paging?.total ?? 1;
+
+    for (const entry of data.response || []) {
+      const ap = entry.player;
+      const stats = (entry.statistics || []).find((st: any) => st?.league?.id === league.apiId) ?? entry.statistics?.[0];
+      if (!ap?.id || !stats?.team?.id) continue;
+
+      const team = await resolveTeam(sql, "af", stats.team.id, stats.team.name);
+      if (!team) { missed++; continue; }
+
+      const player = await resolvePlayer(sql, "af", ap.id, ap.name, {
+        position: mapPosition(stats.games?.position) || "Unknown",
+        nationality: ap.nationality ?? null,
+        imageUrl: ap.photo ?? null,
+      });
+      if (!player) { missed++; continue; }
+
+      // Backfill photo for existing players that lack one.
+      if (ap.photo) {
+        await sql`UPDATE players SET image_url = ${ap.photo}, updated_at = NOW() WHERE id = ${player.id} AND image_url IS NULL`;
+      }
+
+      await sql`
+        INSERT INTO player_season_stats (
+          player_id, team_id, competition_season_id,
+          appearances, goals, assists, yellow_cards, red_cards, minutes_played, clean_sheets,
+          updated_at
+        ) VALUES (
+          ${player.id}, ${team.id}, ${compSeasonId},
+          ${stats.games?.appearences ?? 0}, ${stats.goals?.total ?? 0}, ${stats.goals?.assists ?? 0},
+          ${stats.cards?.yellow ?? 0}, ${stats.cards?.red ?? 0}, ${stats.games?.minutes ?? 0}, 0,
+          NOW()
+        )
+        ON CONFLICT (player_id, team_id, competition_season_id)
+        DO UPDATE SET
+          appearances = EXCLUDED.appearances,
+          goals = EXCLUDED.goals,
+          assists = EXCLUDED.assists,
+          yellow_cards = EXCLUDED.yellow_cards,
+          red_cards = EXCLUDED.red_cards,
+          minutes_played = EXCLUDED.minutes_played,
+          updated_at = NOW()
+      `;
+      upserted++;
+    }
+    page++;
+  } while (page <= totalPages);
+
+  console.log(`   stats upserted: ${upserted}, missed: ${missed}`);
+}
+
+// ============================================================
+// SYNC: LINEUPS + EVENTS PER FIXTURE (Pro tier)
+// ============================================================
+// Fills the match-page slots that have never had data: formations,
+// starting XIs, substitutions, goal/card timelines. 2 requests per
+// finished fixture; fixtures that already have lineups are skipped so
+// the daily incremental run only pays for new matches.
+
+const EVENT_TYPE_MAP: Record<string, string> = {
+  "Normal Goal": "goal",
+  "Own Goal": "own_goal",
+  "Penalty": "penalty",
+  "Missed Penalty": "penalty_missed",
+  "Yellow Card": "yellow_card",
+  "Red Card": "red_card",
+};
+
+async function syncMatchDetails(league: LeagueConfig, force = false) {
+  console.log(`\n=== Match details: ${league.name} ===`);
+
+  const fixtures = (await sql`
+    SELECT m.id, x.provider_id AS af_id,
+      (SELECT count(*) FROM match_lineups ml WHERE ml.match_id = m.id) AS lineup_count
+    FROM matches m
+    JOIN external_ids x ON x.entity_id = m.id AND x.entity_type = 'match' AND x.provider = 'af'
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    JOIN seasons s ON s.id = cs.season_id
+    WHERE c.slug = ${league.slug} AND s.is_current = true AND m.status = 'finished'
+    ORDER BY m.scheduled_at
+  `) as Array<{ id: string; af_id: string; lineup_count: string }>;
+
+  const pending = force ? fixtures : fixtures.filter((f) => Number(f.lineup_count) === 0);
+  console.log(`   ${fixtures.length} finished fixtures with af mapping, ${pending.length} to process`);
+
+  let lineupsDone = 0;
+  let eventsDone = 0;
+
+  for (const fx of pending) {
+    // --- Lineups ---
+    const lu = await apiFetch(`/fixtures/lineups?fixture=${fx.af_id}`);
+    for (const side of lu.response || []) {
+      const team = await resolveTeam(sql, "af", side.team.id, side.team.name);
+      if (!team) continue;
+      const everyone = [
+        ...(side.startXI || []).map((x: any) => ({ ...x.player, starter: true })),
+        ...(side.substitutes || []).map((x: any) => ({ ...x.player, starter: false })),
+      ];
+      for (const lp of everyone) {
+        if (!lp?.id || !lp?.name) continue;
+        const player = await resolvePlayer(sql, "af", lp.id, lp.name, {
+          position: mapPosition(lp.pos) || "Unknown",
+        });
+        if (!player) continue;
+        await sql`
+          INSERT INTO match_lineups (match_id, team_id, player_id, shirt_number, position, is_starter)
+          VALUES (${fx.id}, ${team.id}, ${player.id}, ${lp.number ?? null}, ${lp.pos ?? null}, ${lp.starter})
+          ON CONFLICT (match_id, player_id) DO UPDATE SET
+            shirt_number = EXCLUDED.shirt_number,
+            position = EXCLUDED.position,
+            is_starter = EXCLUDED.is_starter
+        `;
+      }
+      lineupsDone++;
+    }
+
+    // --- Events (delete-then-insert: the feed is a full snapshot) ---
+    const ev = await apiFetch(`/fixtures/events?fixture=${fx.af_id}`);
+    const rows = ev.response || [];
+    if (rows.length > 0) {
+      await sql`DELETE FROM match_events WHERE match_id = ${fx.id}`;
+      for (const e of rows) {
+        let type: string | null = null;
+        if (e.type === "Goal") type = EVENT_TYPE_MAP[e.detail] ?? "goal";
+        else if (e.type === "Card") type = EVENT_TYPE_MAP[e.detail] ?? null;
+        else if (e.type === "subst") type = "substitution";
+        if (!type) continue; // VAR etc.
+
+        const team = await resolveTeam(sql, "af", e.team.id, e.team.name);
+        if (!team) continue;
+        const player = e.player?.id
+          ? await resolvePlayer(sql, "af", e.player.id, e.player.name ?? "Unknown")
+          : null;
+        const secondary = e.assist?.id
+          ? await resolvePlayer(sql, "af", e.assist.id, e.assist.name ?? "Unknown")
+          : null;
+
+        await sql`
+          INSERT INTO match_events (match_id, type, minute, added_time, team_id, player_id, secondary_player_id, description)
+          VALUES (${fx.id}, ${type}, ${e.time?.elapsed ?? 0}, ${e.time?.extra ?? null}, ${team.id}, ${player?.id ?? null}, ${secondary?.id ?? null}, ${e.detail ?? null})
+        `;
+      }
+      eventsDone++;
+    }
+  }
+
+  console.log(`   lineups for ${lineupsDone} team-sides, events for ${eventsDone} fixtures`);
+}
+
+// ============================================================
 // CLI
 // ============================================================
 
@@ -1487,6 +1604,22 @@ async function main() {
 
   console.log("API-Football Sync");
   console.log("=".repeat(50));
+
+  const slugArg = args.find((a) => a.startsWith("--slug="))?.split("=")[1];
+
+  if (args.includes("--player-stats")) {
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) await syncPlayerStats(league);
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
+
+  if (args.includes("--match-details")) {
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) await syncMatchDetails(league, args.includes("--force"));
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
 
   if (args.includes("--standings")) {
     // LATAM leagues only

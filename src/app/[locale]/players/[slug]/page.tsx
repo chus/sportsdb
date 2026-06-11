@@ -711,6 +711,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 <th scope="col" className="px-3 py-2.5 font-medium text-center">Goals</th>
                                 <th scope="col" className="px-3 py-2.5 font-medium text-center">Assists</th>
                                 <th scope="col" className="px-3 py-2.5 font-medium text-center hidden sm:table-cell">Mins</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center hidden md:table-cell" title="Yellow cards">🟨</th>
+                                <th scope="col" className="px-3 py-2.5 font-medium text-center hidden md:table-cell" title="Red cards">🟥</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-100">
@@ -731,6 +733,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                   <td className="px-3 py-2.5 text-center font-medium text-neutral-900">{stat.goals}</td>
                                   <td className="px-3 py-2.5 text-center text-neutral-600">{stat.assists}</td>
                                   <td className="px-3 py-2.5 text-center text-neutral-500 hidden sm:table-cell">{stat.minutesPlayed.toLocaleString()}</td>
+                                  <td className="px-3 py-2.5 text-center text-neutral-500 hidden md:table-cell">{stat.yellowCards || "–"}</td>
+                                  <td className="px-3 py-2.5 text-center text-neutral-500 hidden md:table-cell">{stat.redCards || "–"}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -742,6 +746,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 <td className="px-3 py-2.5 text-center">{totalGoals}</td>
                                 <td className="px-3 py-2.5 text-center">{totalAssists}</td>
                                 <td className="px-3 py-2.5 text-center hidden sm:table-cell">{totalMins.toLocaleString()}</td>
+                                <td className="px-3 py-2.5 hidden md:table-cell" colSpan={2} />
                               </tr>
                             </tfoot>
                           </table>

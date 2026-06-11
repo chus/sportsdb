@@ -22,12 +22,20 @@
 // Hand-maintained map for API names that no normalization rule can
 // reconcile. Map shape: `{ "API name": "DB slug" }`. Add entries when
 // a cron log shows persistent missingTeam counts.
-const TEAM_NAME_ALIASES: Record<string, string> = {
+export const TEAM_NAME_ALIASES: Record<string, string> = {
   "FC Bayern München": "fc-bayern-munich",
   "Sport Lisboa e Benfica": "s-l-benfica",
   "Sporting Clube de Portugal": "sporting-cp",
   "Sporting Clube de Braga": "s-c-braga",
   "GD Estoril Praia": "g-d-estoril-praia",
+  // Nicknames that aren't substrings of the official name — no
+  // normalization rule can bridge these.
+  "Wolves": "wolverhampton-wanderers-f-c",
+  "Spurs": "tottenham-hotspur-f-c",
+  "Man City": "manchester-city-f-c",
+  "Man United": "manchester-united-f-c",
+  "PSG": "paris-saint-germain-f-c",
+  "Inter": "fc-internazionale-milano",
 };
 
 // Loose Sql type — neon()'s generic type parameters make a strict alias
