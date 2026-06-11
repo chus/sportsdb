@@ -200,6 +200,7 @@ function PositionGroup({
       nationality: string | null;
       position: string;
       isIndexable: boolean | null;
+      imageUrl: string | null;
     };
     shirtNumber: number | null;
   }[];
@@ -219,12 +220,22 @@ function PositionGroup({
             isLinkWorthy={player.isIndexable ?? false}
             className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-100 hover:shadow-md hover:border-blue-200 transition-all group"
           >
-            <div className="w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-700 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-              {shirtNumber || "—"}
-            </div>
+            {player.imageUrl ? (
+              <ImageWithFallback
+                src={player.imageUrl}
+                alt={player.name}
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover bg-neutral-100"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-700 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                {shirtNumber || "—"}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
-                {player.name}
+                {shirtNumber ? `${shirtNumber} · ` : ""}{player.name}
               </div>
               <div className="text-sm text-neutral-500 truncate">
                 {player.nationality || player.position}

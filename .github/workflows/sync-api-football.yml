@@ -18,6 +18,9 @@ on:
           - enrich-all
           - standings
           - full
+          - player-stats
+          - match-details
+          - full-data
 
       slug:
         description: 'League slug (for full/enrich single league)'
@@ -69,6 +72,9 @@ jobs:
           elif [ "$MODE" = "full" ]; then
             echo "mode=full" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
+          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "full-data" ]; then
+            echo "mode=$MODE" >> $GITHUB_OUTPUT
+            echo "slug=$SLUG" >> $GITHUB_OUTPUT
           fi
 
       - name: Sync standings (LATAM)
@@ -90,6 +96,25 @@ jobs:
             echo "--- Enriching $LEAGUE ---"
             npx tsx scripts/sync-api-football.ts --enrich --slug=$LEAGUE || true
           done
+
+      - name: Full player season stats
+        if: steps.target.outputs.mode == 'player-stats'
+        run: npx tsx scripts/sync-api-football.ts --player-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
+
+      - name: Match details (lineups + events)
+        if: steps.target.outputs.mode == 'match-details'
+        run: npx tsx scripts/sync-api-football.ts --match-details ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
+
+      # One-shot full data pass: every league's fixtures get lineups +
+      # events, then every player gets a full stat line. Run from CI on
+      # purpose — datacenter-to-Neon latency makes the per-entity DB
+      # round-trips ~50x faster than a laptop.
+      - name: Full data (stats + match details, all leagues)
+        if: steps.target.outputs.mode == 'full-data'
+        timeout-minutes: 300
+        run: |
+          npx tsx scripts/sync-api-football.ts --player-stats || true
+          npx tsx scripts/sync-api-football.ts --match-details
 
       - name: Log completion
         run: echo "Sync completed at $(date). Mode=${{ steps.target.outputs.mode }} Slug=${{ steps.target.outputs.slug }}"
