@@ -21,6 +21,7 @@ on:
           - player-stats
           - match-details
           - full-data
+          - restore
 
       slug:
         description: 'League slug (for full/enrich single league)'
@@ -72,7 +73,7 @@ jobs:
           elif [ "$MODE" = "full" ]; then
             echo "mode=full" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
-          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "full-data" ]; then
+          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "full-data" ] || [ "$MODE" = "restore" ]; then
             echo "mode=$MODE" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
           fi
@@ -115,6 +116,23 @@ jobs:
         run: |
           npx tsx scripts/sync-api-football.ts --player-stats || true
           npx tsx scripts/sync-api-football.ts --match-details
+
+      # Full disaster-recovery rebuild: restore missing club rows, then
+      # full-sync every league (teams, squads, standings, fixtures via
+      # API-Football), then per-player stats and per-fixture
+      # lineups/events. Assumes season-rollover has set the current
+      # season. Run after a wipe.
+      - name: Restore all data (post-wipe rebuild)
+        if: steps.target.outputs.mode == 'restore'
+        timeout-minutes: 350
+        run: |
+          npx tsx scripts/restore-league-teams.ts || true
+          for LEAGUE in premier-league la-liga bundesliga serie-a ligue-1 eredivisie primeira-liga brasileirao-serie-a liga-profesional-argentina liga-mx mls; do
+            echo "--- Full sync $LEAGUE ---"
+            npx tsx scripts/sync-api-football.ts --full --slug=$LEAGUE || true
+          done
+          npx tsx scripts/sync-api-football.ts --player-stats || true
+          npx tsx scripts/sync-api-football.ts --match-details || true
 
       - name: Log completion
         run: echo "Sync completed at $(date). Mode=${{ steps.target.outputs.mode }} Slug=${{ steps.target.outputs.slug }}"
