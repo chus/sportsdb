@@ -631,6 +631,25 @@ async function main() {
   console.log("This will scrape football data from Wikipedia.");
   console.log("Respecting rate limits (1 request/second).\n");
 
+  // SAFETY GUARD — DO NOT REMOVE.
+  // clearDatabase() does a full TRUNCATE CASCADE of every data table
+  // (matches, standings, player_season_stats, lineups, events, seasons,
+  // competitions...). This script is a one-time bootstrap, NOT a
+  // maintenance job. It was previously wired to a weekly cron and wiped
+  // the entire database every Sunday — the root cause of months of
+  // "data keeps disappearing" incidents. It refuses to run unless you
+  // explicitly opt into the wipe AND confirm the season you expect to
+  // rebuild, so an accidental cron/manual trigger is a no-op.
+  if (!process.argv.includes("--force-wipe")) {
+    console.error(
+      "✋ Refusing to run: ingest-wikipedia performs a FULL DATABASE WIPE.\n" +
+      "   This is a bootstrap-only script. Steady-state data is maintained by\n" +
+      "   the API-Football sync (scripts/sync-api-football.ts) + season-rollover.\n" +
+      "   If you really intend to wipe and rebuild from Wikipedia, re-run with --force-wipe.",
+    );
+    process.exit(1);
+  }
+
   await clearDatabase();
 
   // Create seasons
