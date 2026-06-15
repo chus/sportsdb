@@ -190,44 +190,55 @@ function mapMatchStatus(statusShort: string): string {
 // UPSERT: SEASON
 // ============================================================
 
-async function ensureSeason(year: number): Promise<typeof schema.seasons.$inferSelect> {
-  // For most leagues, the "season" param in API-Football is the start year.
-  // European leagues: 2025 → 2025/26. Calendar-year leagues: 2025 → 2025.
-  const label = `${year}/${String(year + 1).slice(2)}`;
-  const altLabel = `${year}`;
+async function ensureSeason(
+  year: number,
+  isCalendarYear = false,
+): Promise<typeof schema.seasons.$inferSelect> {
+  // The "season" param in API-Football is the start year. European
+  // leagues span two calendar years (2025 → "2025/26", Jul–Jun);
+  // LATAM/MLS run a single calendar year (2026 → "2026", Jan–Dec).
+  //
+  // Getting this wrong is what created a bogus "2026/27" season marked
+  // current with a *future* start date — the data-health canary caught
+  // it. Label, bounds, and the is_current flag must all match the
+  // league's real calendar.
+  const europeanLabel = `${year}/${String(year + 1).slice(2)}`;
+  const calendarLabel = `${year}`;
+  const label = isCalendarYear ? calendarLabel : europeanLabel;
+  const startDate = isCalendarYear ? `${year}-01-01` : `${year}-07-01`;
+  const endDate = isCalendarYear ? `${year}-12-31` : `${year + 1}-06-30`;
 
-  // Try the 2025/26 format first
+  // Try the canonical label, then the other format (in case a prior run
+  // created it under the wrong convention).
+  const altLabel = isCalendarYear ? europeanLabel : calendarLabel;
   let [existing] = await db
     .select()
     .from(schema.seasons)
     .where(eq(schema.seasons.label, label))
     .limit(1);
-
   if (existing) return existing;
 
-  // Try the single-year format (2025)
   [existing] = await db
     .select()
     .from(schema.seasons)
     .where(eq(schema.seasons.label, altLabel))
     .limit(1);
-
   if (existing) return existing;
 
-  // Create new season
+  // Only mark the new season current if today actually falls inside it.
+  // Never blindly set is_current on a freshly created (possibly future)
+  // season — that was the original bug.
+  const today = new Date().toISOString().slice(0, 10);
+  const isCurrent = startDate <= today && today <= endDate;
+
   const [inserted] = await db
     .insert(schema.seasons)
-    .values({
-      label,
-      startDate: `${year}-07-01`,
-      endDate: `${year + 1}-06-30`,
-      isCurrent: true,
-    })
+    .values({ label, startDate, endDate, isCurrent })
     .onConflictDoNothing()
     .returning();
 
   if (inserted) {
-    console.log(`   + Season: ${label}`);
+    console.log(`   + Season: ${label}${isCurrent ? " (current)" : ""}`);
     return inserted;
   }
 
@@ -1112,7 +1123,7 @@ async function syncLeagueFull(league: LeagueConfig) {
   console.log(`\n== ${league.name} (af-${league.apiId}) ==`);
 
   // 1. Ensure season
-  const season = await ensureSeason(league.season);
+  const season = await ensureSeason(league.season, league.isLatam);
 
   // 2. Upsert competition
   const competition = await upsertCompetition(league);
@@ -1174,7 +1185,7 @@ async function syncStandingsOnly(leagues: LeagueConfig[]) {
 
     console.log(`\n== ${league.name} (standings only) ==`);
 
-    const season = await ensureSeason(league.season);
+    const season = await ensureSeason(league.season, league.isLatam);
     const competition = await upsertCompetition(league);
     const compSeason = await upsertCompetitionSeason(competition.id, season.id);
 
