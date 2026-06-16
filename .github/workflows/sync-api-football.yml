@@ -20,6 +20,7 @@ on:
           - full
           - player-stats
           - match-details
+          - match-stats
           - full-data
           - restore
 
@@ -73,7 +74,7 @@ jobs:
           elif [ "$MODE" = "full" ]; then
             echo "mode=full" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
-          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "full-data" ] || [ "$MODE" = "restore" ]; then
+          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "match-stats" ] || [ "$MODE" = "full-data" ] || [ "$MODE" = "restore" ]; then
             echo "mode=$MODE" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
           fi
@@ -114,16 +115,21 @@ jobs:
         if: steps.target.outputs.mode == 'match-details'
         run: npx tsx scripts/sync-api-football.ts --match-details ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
 
+      - name: Match statistics (possession, shots, passes, xG)
+        if: steps.target.outputs.mode == 'match-stats'
+        run: npx tsx scripts/sync-api-football.ts --match-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
+
       # One-shot full data pass: every league's fixtures get lineups +
-      # events, then every player gets a full stat line. Run from CI on
-      # purpose — datacenter-to-Neon latency makes the per-entity DB
-      # round-trips ~50x faster than a laptop.
+      # events + team statistics, then every player gets a full stat line.
+      # Run from CI on purpose — datacenter-to-Neon latency makes the
+      # per-entity DB round-trips ~50x faster than a laptop.
       - name: Full data (stats + match details, all leagues)
         if: steps.target.outputs.mode == 'full-data'
         timeout-minutes: 300
         run: |
           npx tsx scripts/sync-api-football.ts --player-stats || true
-          npx tsx scripts/sync-api-football.ts --match-details
+          npx tsx scripts/sync-api-football.ts --match-details || true
+          npx tsx scripts/sync-api-football.ts --match-stats
 
       # Full disaster-recovery rebuild: restore missing club rows, then
       # full-sync every league (teams, squads, standings, fixtures via
@@ -141,6 +147,7 @@ jobs:
           done
           npx tsx scripts/sync-api-football.ts --player-stats || true
           npx tsx scripts/sync-api-football.ts --match-details || true
+          npx tsx scripts/sync-api-football.ts --match-stats || true
 
       - name: Log completion
         run: echo "Sync completed at $(date). Mode=${{ steps.target.outputs.mode }} Slug=${{ steps.target.outputs.slug }}"

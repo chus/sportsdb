@@ -22,6 +22,7 @@ import {
   getMatchWithDetailsBySlug,
   getMatchEventsWithPlayers,
   getMatchLineupsGrouped,
+  getMatchStatistics,
 } from "@/lib/queries/matches";
 import { getTeamStats } from "@/lib/queries/teams";
 import { getArticlesForMatch } from "@/lib/queries/articles";
@@ -32,6 +33,7 @@ import { FormationView } from "@/components/match/formation-view";
 import { MatchSummary } from "@/components/match/match-summary";
 import { MatchTimeline } from "@/components/match/match-timeline";
 import { MatchStatBars } from "@/components/match/match-stat-bars";
+import { MatchStatistics } from "@/components/match/match-statistics";
 import { MatchInternalLinks } from "@/components/seo/internal-links";
 import { SidebarAd } from "@/components/ads/sidebar-ad";
 import { MatchPredictionWidget } from "@/components/games/match-prediction-widget";
@@ -385,10 +387,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const matchId = match.id;
   const matchUrl = `${BASE_URL}/matches/${slug}`;
 
-  const [events, lineups, matchArticles] = await Promise.all([
+  const [events, lineups, matchArticles, matchStats] = await Promise.all([
     getMatchEventsWithPlayers(matchId),
     getMatchLineupsGrouped(matchId),
     getArticlesForMatch(matchId, 5),
+    getMatchStatistics(matchId),
   ]);
 
   const { homeTeam, awayTeam, venue, competition, season } = match;
@@ -771,6 +774,17 @@ export default async function MatchPage({ params }: MatchPageProps) {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Rich fixture statistics (possession, shots, passes, xG) */}
+            {matchStats?.get(homeTeam.id) && matchStats?.get(awayTeam.id) && (
+              <MatchStatistics
+                homeTeamName={homeTeam.shortName || homeTeam.name}
+                awayTeamName={awayTeam.shortName || awayTeam.name}
+                homeTeamLogo={homeTeam.logoUrl}
+                awayTeamLogo={awayTeam.logoUrl}
+                home={matchStats.get(homeTeam.id)!}
+                away={matchStats.get(awayTeam.id)!}
+              />
+            )}
             {/* Match Stats (moved up) */}
             {events.length > 0 ? (
               <>

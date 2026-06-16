@@ -418,6 +418,45 @@ export const matchLineups = pgTable(
   ]
 );
 
+// Per-team team statistics for a single fixture (possession, shots,
+// passes, xG …) from API-Football /fixtures/statistics. One row per side.
+// Feeds the match page's stat-comparison bars — the substantive on-page
+// content that lifts match pages out of Google's "crawled, not indexed".
+export const matchStatistics = pgTable(
+  "match_statistics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id),
+    possession: integer("possession"), // percent 0–100
+    shotsTotal: integer("shots_total"),
+    shotsOnTarget: integer("shots_on_target"),
+    shotsOffTarget: integer("shots_off_target"),
+    blockedShots: integer("blocked_shots"),
+    shotsInsideBox: integer("shots_inside_box"),
+    shotsOutsideBox: integer("shots_outside_box"),
+    corners: integer("corners"),
+    fouls: integer("fouls"),
+    offsides: integer("offsides"),
+    yellowCards: integer("yellow_cards"),
+    redCards: integer("red_cards"),
+    goalkeeperSaves: integer("goalkeeper_saves"),
+    passesTotal: integer("passes_total"),
+    passesAccurate: integer("passes_accurate"),
+    passAccuracy: integer("pass_accuracy"), // percent 0–100
+    expectedGoals: decimal("expected_goals", { precision: 4, scale: 2 }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_match_statistics").on(table.matchId, table.teamId),
+    index("idx_match_statistics_match").on(table.matchId),
+  ]
+);
+
 // ============================================================
 // PLAYER SEASON STATS
 // ============================================================

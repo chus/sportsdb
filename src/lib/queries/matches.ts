@@ -4,6 +4,7 @@ import {
   matches,
   matchEvents,
   matchLineups,
+  matchStatistics,
   teams,
   players,
   venues,
@@ -141,6 +142,19 @@ export async function getMatchEventsWithPlayers(matchId: string) {
       : null,
   }));
 }
+
+/**
+ * Get per-team fixture statistics (possession, shots, passes, xG …)
+ * keyed by team id. Returns null when the match has no statistics yet.
+ */
+export const getMatchStatistics = cache(async (matchId: string) => {
+  const rows = await db
+    .select()
+    .from(matchStatistics)
+    .where(eq(matchStatistics.matchId, matchId));
+  if (rows.length === 0) return null;
+  return new Map(rows.map((r) => [r.teamId, r]));
+});
 
 /**
  * Get lineups for a match grouped by team.

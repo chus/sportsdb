@@ -1630,6 +1630,82 @@ async function syncMatchDetails(league: LeagueConfig, force = false) {
 }
 
 // ============================================================
+// MATCH STATISTICS (possession, shots, passes, xG)
+// ============================================================
+
+// API-Football reports values as numbers, percent strings ("55%"), or
+// null. Normalize to a number (drops the %); xG arrives as "1.50".
+function parseStat(stats: Array<{ type: string; value: unknown }>, type: string): number | null {
+  const s = stats.find((x) => x.type === type);
+  if (!s || s.value == null) return null;
+  if (typeof s.value === "number") return s.value;
+  const n = parseFloat(String(s.value).replace("%", "").trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+async function syncMatchStats(league: LeagueConfig, force = false) {
+  console.log(`\n=== Match statistics: ${league.name} ===`);
+
+  const fixtures = (await sql`
+    SELECT m.id, x.provider_id AS af_id,
+      (SELECT count(*) FROM match_statistics ms WHERE ms.match_id = m.id) AS stat_count
+    FROM matches m
+    JOIN external_ids x ON x.entity_id = m.id AND x.entity_type = 'match' AND x.provider = 'af'
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    JOIN seasons s ON s.id = cs.season_id
+    WHERE c.slug = ${league.slug} AND s.is_current = true AND m.status = 'finished'
+    ORDER BY m.scheduled_at
+  `) as Array<{ id: string; af_id: string; stat_count: string }>;
+
+  const pending = force ? fixtures : fixtures.filter((f) => Number(f.stat_count) === 0);
+  console.log(`   ${fixtures.length} finished fixtures with af mapping, ${pending.length} to process`);
+
+  let done = 0;
+  for (const fx of pending) {
+    if (!canMakeRequest()) {
+      console.log(`   Budget exhausted — stopping`);
+      break;
+    }
+    const res = await apiFetch(`/fixtures/statistics?fixture=${fx.af_id}`);
+    for (const side of res.response || []) {
+      const team = await resolveTeam(sql, "af", side.team.id, side.team.name);
+      if (!team) continue;
+      const st = (side.statistics || []) as Array<{ type: string; value: unknown }>;
+      await sql`
+        INSERT INTO match_statistics (
+          match_id, team_id, possession, shots_total, shots_on_target, shots_off_target,
+          blocked_shots, shots_inside_box, shots_outside_box, corners, fouls, offsides,
+          yellow_cards, red_cards, goalkeeper_saves, passes_total, passes_accurate,
+          pass_accuracy, expected_goals
+        ) VALUES (
+          ${fx.id}, ${team.id}, ${parseStat(st, "Ball Possession")}, ${parseStat(st, "Total Shots")},
+          ${parseStat(st, "Shots on Goal")}, ${parseStat(st, "Shots off Goal")},
+          ${parseStat(st, "Blocked Shots")}, ${parseStat(st, "Shots insidebox")},
+          ${parseStat(st, "Shots outsidebox")}, ${parseStat(st, "Corner Kicks")},
+          ${parseStat(st, "Fouls")}, ${parseStat(st, "Offsides")}, ${parseStat(st, "Yellow Cards")},
+          ${parseStat(st, "Red Cards")}, ${parseStat(st, "Goalkeeper Saves")},
+          ${parseStat(st, "Total passes")}, ${parseStat(st, "Passes accurate")},
+          ${parseStat(st, "Passes %")}, ${parseStat(st, "expected_goals")}
+        )
+        ON CONFLICT (match_id, team_id) DO UPDATE SET
+          possession = EXCLUDED.possession, shots_total = EXCLUDED.shots_total,
+          shots_on_target = EXCLUDED.shots_on_target, shots_off_target = EXCLUDED.shots_off_target,
+          blocked_shots = EXCLUDED.blocked_shots, shots_inside_box = EXCLUDED.shots_inside_box,
+          shots_outside_box = EXCLUDED.shots_outside_box, corners = EXCLUDED.corners,
+          fouls = EXCLUDED.fouls, offsides = EXCLUDED.offsides, yellow_cards = EXCLUDED.yellow_cards,
+          red_cards = EXCLUDED.red_cards, goalkeeper_saves = EXCLUDED.goalkeeper_saves,
+          passes_total = EXCLUDED.passes_total, passes_accurate = EXCLUDED.passes_accurate,
+          pass_accuracy = EXCLUDED.pass_accuracy, expected_goals = EXCLUDED.expected_goals,
+          updated_at = now()
+      `;
+    }
+    done++;
+  }
+  console.log(`   statistics for ${done} fixtures`);
+}
+
+// ============================================================
 // CLI
 // ============================================================
 
@@ -1651,6 +1727,13 @@ async function main() {
   if (args.includes("--match-details")) {
     const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
     for (const league of targets) await syncMatchDetails(league, args.includes("--force"));
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
+
+  if (args.includes("--match-stats")) {
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) await syncMatchStats(league, args.includes("--force"));
     console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
     return;
   }
