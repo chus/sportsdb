@@ -36,6 +36,17 @@ export const TEAM_NAME_ALIASES: Record<string, string> = {
   "Man United": "manchester-united-f-c",
   "PSG": "paris-saint-germain-f-c",
   "Inter": "fc-internazionale-milano",
+  // API-Football short names that the matcher cascade couldn't reconcile
+  // to the fd canonical — each spawned a duplicate club row until merged
+  // (scripts/merge-known-duplicates.ts). Mapped here so a lost external_id
+  // mapping never re-splits them.
+  "Bayern München": "fc-bayern-munich",
+  "Bayer Leverkusen": "bayer-04-leverkusen",
+  "Rennes": "stade-rennais-fc",
+  "Famalicao": "f-c-famalicao",
+  "Celta Vigo": "rc-celta-de-vigo",
+  "Alaves": "deportivo-alaves",
+  "Paris Saint Germain": "paris-saint-germain-fc",
 };
 
 // Loose Sql type — neon()'s generic type parameters make a strict alias
@@ -112,19 +123,31 @@ export async function findTeamByName(sql: Sql, apiName: string): Promise<TeamHit
     if (result[0]) return result[0] as TeamHit;
   }
 
-  // 6. ILIKE partial + cleaned ILIKE — last resort
-  result = await sql`
-    SELECT id, slug FROM teams
-    WHERE name ILIKE ${`%${stripped}%`} OR short_name ILIKE ${`%${stripped}%`}
-    LIMIT 1
-  `;
-  if (result[0]) return result[0] as TeamHit;
+  // 6. ILIKE partial + cleaned ILIKE — last resort, and the most
+  //    dangerous step: substring matching can link two genuinely
+  //    different clubs ("Paris FC" → "Paris Saint-Germain FC"), which
+  //    then stamps the wrong external_id and fuses them. Guard it:
+  //      - skip very short needles (≥6 chars) — "Paris", "Inter", "Real"
+  //        match too many clubs
+  //      - require a UNIQUE hit — if two teams match, we can't safely
+  //        pick one, so return null and let the caller create a new row
+  async function uniqueIlike(needle: string): Promise<TeamHit | null> {
+    if (needle.length < 6) return null;
+    const hits = (await sql`
+      SELECT id, slug FROM teams
+      WHERE name ILIKE ${`%${needle}%`} OR short_name ILIKE ${`%${needle}%`}
+      LIMIT 2
+    `) as TeamHit[];
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  const partial = await uniqueIlike(stripped);
+  if (partial) return partial;
 
   const cleanName = stripped.replace(/ FC$| CF$| SC$/i, "").trim();
-  result = await sql`
-    SELECT id, slug FROM teams
-    WHERE name ILIKE ${`%${cleanName}%`} OR short_name ILIKE ${`%${cleanName}%`}
-    LIMIT 1
-  `;
-  return (result[0] as TeamHit) ?? null;
+  if (cleanName !== stripped) {
+    const cleanHit = await uniqueIlike(cleanName);
+    if (cleanHit) return cleanHit;
+  }
+  return null;
 }

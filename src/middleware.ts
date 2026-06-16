@@ -49,6 +49,21 @@ const COMPETITION_SLUG_ALIASES: Record<string, string> = {
   "world-cup": "fifa-world-cup",
 };
 
+// Deleted duplicate-club slugs → surviving canonical slug. These rows were
+// merged (scripts/merge-known-duplicates.ts) after API-Football short names
+// spawned a second team entity. 301-redirect the old slug so any indexed
+// URL / inbound link passes its equity to the canonical page instead of
+// 308-ing to the /teams hub (which loses the specific-page ranking).
+const TEAM_SLUG_ALIASES: Record<string, string> = {
+  "bayern-munchen": "fc-bayern-munich",
+  "bayer-leverkusen": "bayer-04-leverkusen",
+  "rennes": "stade-rennais-fc",
+  "famalicao": "f-c-famalicao",
+  "celta-vigo": "rc-celta-de-vigo",
+  "alaves": "deportivo-alaves",
+  "paris-saint-germain": "paris-saint-germain-fc",
+};
+
 const CANONICAL_HOST = "datasports.co";
 
 export async function middleware(request: NextRequest) {
@@ -100,6 +115,21 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       const prefix = localePrefix ? `/${localePrefix}` : "";
       url.pathname = [prefix, "competitions", canonical, ...tail].join("/").replace(/\/+/g, "/");
+      return NextResponse.redirect(url, 301);
+    }
+  }
+
+  // Legacy team slug: /teams/{alias}(/...) → 301 canonical slug. Runs
+  // before the entity-existence 308 so merged-duplicate URLs land on the
+  // surviving team page rather than the section index.
+  if (stripped.startsWith("/teams/")) {
+    const rest = stripped.slice("/teams/".length);
+    const [firstSegment, ...tail] = rest.split("/");
+    const canonical = TEAM_SLUG_ALIASES[firstSegment];
+    if (canonical) {
+      const url = request.nextUrl.clone();
+      const prefix = localePrefix ? `/${localePrefix}` : "";
+      url.pathname = [prefix, "teams", canonical, ...tail].join("/").replace(/\/+/g, "/");
       return NextResponse.redirect(url, 301);
     }
   }
