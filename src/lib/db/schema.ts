@@ -494,6 +494,55 @@ export const playerSeasonStats = pgTable(
   ]
 );
 
+// Per-player, per-match performance line from API-Football
+// /fixtures/players (rating, shots, passes, dribbles, duels …). One row
+// per player per fixture. This is the data that turns thin player pages —
+// our largest and most-often "crawled, not indexed" URL set — into rich
+// profiles with real recent-form evidence.
+export const playerMatchStats = pgTable(
+  "player_match_stats",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    matchId: uuid("match_id")
+      .notNull()
+      .references(() => matches.id),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+    minutes: integer("minutes"),
+    position: text("position"), // G/D/M/F
+    rating: decimal("rating", { precision: 3, scale: 1 }),
+    captain: boolean("captain").notNull().default(false),
+    substitute: boolean("substitute").notNull().default(false),
+    goals: integer("goals"),
+    assists: integer("assists"),
+    shotsTotal: integer("shots_total"),
+    shotsOnTarget: integer("shots_on_target"),
+    passesTotal: integer("passes_total"),
+    keyPasses: integer("key_passes"),
+    passAccuracy: integer("pass_accuracy"), // percent 0–100
+    tacklesTotal: integer("tackles_total"),
+    interceptions: integer("interceptions"),
+    duelsTotal: integer("duels_total"),
+    duelsWon: integer("duels_won"),
+    dribblesAttempts: integer("dribbles_attempts"),
+    dribblesSuccess: integer("dribbles_success"),
+    foulsDrawn: integer("fouls_drawn"),
+    foulsCommitted: integer("fouls_committed"),
+    yellowCards: integer("yellow_cards"),
+    redCards: integer("red_cards"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_player_match_stat").on(table.matchId, table.playerId),
+    index("idx_pms_player").on(table.playerId),
+    index("idx_pms_match").on(table.matchId),
+  ]
+);
+
 // ============================================================
 // AUTHENTICATION
 // ============================================================

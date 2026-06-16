@@ -8,7 +8,7 @@ import {
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/lib/seo/hreflang";
-import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
+import { getPlayerBySlug, getPlayerCurrentTeam, getPlayerCareer, getPlayerStatsHistory, getPlayerRankings, getPlayerRecentMatches, getPlayerRecentPerformances, getPlayerQuality, getPlayerTransfers } from "@/lib/queries/players";
 import { getCurrentSeasonLabel } from "@/lib/queries/leaderboards";
 import { getTeamMatches } from "@/lib/queries/matches";
 import { format, differenceInYears, formatDistanceToNowStrict } from "date-fns";
@@ -16,6 +16,7 @@ import { PlayerJsonLd, BreadcrumbJsonLd, FAQJsonLd } from "@/components/seo/json
 import { FollowButton } from "@/components/follow-button";
 import { RelatedPlayers } from "@/components/entity/related-entities";
 import { PlayerProfileSummary } from "@/components/player/player-profile-summary";
+import { PlayerPerformances } from "@/components/player/player-performances";
 import { PlayerInternalLinks } from "@/components/seo/internal-links";
 import { ExternalLinks } from "@/components/entity/external-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
@@ -162,13 +163,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
 
-  const [currentTeamData, career, statsHistory, rankings, recentMatches, transferHistory] = await Promise.all([
+  const [currentTeamData, career, statsHistory, rankings, recentMatches, transferHistory, recentPerformances] = await Promise.all([
     getPlayerCurrentTeam(player.id),
     getPlayerCareer(player.id),
     getPlayerStatsHistory(player.id),
     getPlayerRankings(player.id),
     getPlayerRecentMatches(player.id, 5),
     getPlayerTransfers(player.id),
+    getPlayerRecentPerformances(player.id, 8),
   ]);
 
   const currentTeam = currentTeamData?.team;
@@ -549,6 +551,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         </div>
                       </div>
                     )}
+
+                    {/* Detailed per-match performances (real stats) */}
+                    <PlayerPerformances performances={recentPerformances} />
 
                     {/* Upcoming Match */}
                     {nextMatch && currentTeam && (

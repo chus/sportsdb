@@ -1706,6 +1706,100 @@ async function syncMatchStats(league: LeagueConfig, force = false) {
 }
 
 // ============================================================
+// PLAYER MATCH STATS (per-player performance line per fixture)
+// ============================================================
+
+function numStat(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "number") return v;
+  const n = parseFloat(String(v).replace("%", "").trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+async function syncPlayerMatchStats(league: LeagueConfig, force = false) {
+  console.log(`\n=== Player match stats: ${league.name} ===`);
+
+  const fixtures = (await sql`
+    SELECT m.id, x.provider_id AS af_id,
+      (SELECT count(*) FROM player_match_stats pms WHERE pms.match_id = m.id) AS stat_count
+    FROM matches m
+    JOIN external_ids x ON x.entity_id = m.id AND x.entity_type = 'match' AND x.provider = 'af'
+    JOIN competition_seasons cs ON cs.id = m.competition_season_id
+    JOIN competitions c ON c.id = cs.competition_id
+    JOIN seasons s ON s.id = cs.season_id
+    WHERE c.slug = ${league.slug} AND s.is_current = true AND m.status = 'finished'
+    ORDER BY m.scheduled_at
+  `) as Array<{ id: string; af_id: string; stat_count: string }>;
+
+  const pending = force ? fixtures : fixtures.filter((f) => Number(f.stat_count) === 0);
+  console.log(`   ${fixtures.length} finished fixtures with af mapping, ${pending.length} to process`);
+
+  let done = 0;
+  let playerRows = 0;
+  for (const fx of pending) {
+    if (!canMakeRequest()) {
+      console.log(`   Budget exhausted — stopping`);
+      break;
+    }
+    // One request returns every player's full line for both teams.
+    const res = await apiFetch(`/fixtures/players?fixture=${fx.af_id}`);
+    for (const side of res.response || []) {
+      const team = await resolveTeam(sql, "af", side.team.id, side.team.name);
+      if (!team) continue;
+      for (const entry of side.players || []) {
+        const ap = entry.player;
+        const st = entry.statistics?.[0];
+        if (!ap?.id || !st) continue;
+        // Stats-only: never create a player here (an unknown player would
+        // become a thin, un-indexable page). Record only known players.
+        const player = await resolvePlayer(sql, "af", ap.id, ap.name ?? "Unknown");
+        if (!player) continue;
+        const g = st.games || {};
+        // passes.accuracy is the COUNT of accurate passes (not a %).
+        // Convert to a true percentage for display.
+        const passTotal = numStat(st.passes?.total);
+        const passAccurate = numStat(st.passes?.accuracy);
+        const passAccPct =
+          passTotal && passTotal > 0 && passAccurate != null
+            ? Math.round((passAccurate / passTotal) * 100)
+            : null;
+        await sql`
+          INSERT INTO player_match_stats (
+            match_id, team_id, player_id, minutes, position, rating, captain, substitute,
+            goals, assists, shots_total, shots_on_target, passes_total, key_passes, pass_accuracy,
+            tackles_total, interceptions, duels_total, duels_won, dribbles_attempts, dribbles_success,
+            fouls_drawn, fouls_committed, yellow_cards, red_cards
+          ) VALUES (
+            ${fx.id}, ${team.id}, ${player.id}, ${numStat(g.minutes)}, ${g.position ?? null},
+            ${numStat(g.rating)}, ${!!g.captain}, ${!!g.substitute}, ${numStat(st.goals?.total)},
+            ${numStat(st.goals?.assists)}, ${numStat(st.shots?.total)}, ${numStat(st.shots?.on)},
+            ${passTotal}, ${numStat(st.passes?.key)}, ${passAccPct},
+            ${numStat(st.tackles?.total)}, ${numStat(st.tackles?.interceptions)}, ${numStat(st.duels?.total)},
+            ${numStat(st.duels?.won)}, ${numStat(st.dribbles?.attempts)}, ${numStat(st.dribbles?.success)},
+            ${numStat(st.fouls?.drawn)}, ${numStat(st.fouls?.committed)}, ${numStat(st.cards?.yellow)},
+            ${numStat(st.cards?.red)}
+          )
+          ON CONFLICT (match_id, player_id) DO UPDATE SET
+            minutes = EXCLUDED.minutes, position = EXCLUDED.position, rating = EXCLUDED.rating,
+            captain = EXCLUDED.captain, substitute = EXCLUDED.substitute, goals = EXCLUDED.goals,
+            assists = EXCLUDED.assists, shots_total = EXCLUDED.shots_total,
+            shots_on_target = EXCLUDED.shots_on_target, passes_total = EXCLUDED.passes_total,
+            key_passes = EXCLUDED.key_passes, pass_accuracy = EXCLUDED.pass_accuracy,
+            tackles_total = EXCLUDED.tackles_total, interceptions = EXCLUDED.interceptions,
+            duels_total = EXCLUDED.duels_total, duels_won = EXCLUDED.duels_won,
+            dribbles_attempts = EXCLUDED.dribbles_attempts, dribbles_success = EXCLUDED.dribbles_success,
+            fouls_drawn = EXCLUDED.fouls_drawn, fouls_committed = EXCLUDED.fouls_committed,
+            yellow_cards = EXCLUDED.yellow_cards, red_cards = EXCLUDED.red_cards, updated_at = now()
+        `;
+        playerRows++;
+      }
+    }
+    done++;
+  }
+  console.log(`   player stats for ${done} fixtures, ${playerRows} player-rows`);
+}
+
+// ============================================================
 // CLI
 // ============================================================
 
@@ -1734,6 +1828,13 @@ async function main() {
   if (args.includes("--match-stats")) {
     const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
     for (const league of targets) await syncMatchStats(league, args.includes("--force"));
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
+
+  if (args.includes("--player-match-stats")) {
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) await syncPlayerMatchStats(league, args.includes("--force"));
     console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
     return;
   }

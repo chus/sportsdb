@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { players, playerTeamHistory, playerSeasonStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers, transfers } from "@/lib/db/schema";
+import { players, playerTeamHistory, playerSeasonStats, playerMatchStats, teams, competitionSeasons, competitions, seasons, matches, matchLineups, articlePlayers, transfers } from "@/lib/db/schema";
 import { eq, and, isNull, desc, or, sql } from "drizzle-orm";
 
 /**
@@ -207,6 +207,55 @@ export async function getPlayerRecentMatches(playerId: string, limit = 5) {
     .orderBy(desc(matches.scheduledAt))
     .limit(limit);
 }
+
+/**
+ * Recent per-match performances with real stats (rating, goals, shots,
+ * passes, dribbles …). Joined to the fixture for opponent + result. This
+ * is the substantive recent-form block on the player page.
+ */
+export const getPlayerRecentPerformances = cache(async (playerId: string, limit = 8) => {
+  return db
+    .select({
+      matchSlug: matches.slug,
+      scheduledAt: matches.scheduledAt,
+      homeTeamId: matches.homeTeamId,
+      awayTeamId: matches.awayTeamId,
+      homeScore: matches.homeScore,
+      awayScore: matches.awayScore,
+      teamId: playerMatchStats.teamId,
+      opponentName: sql<string>`opp.name`,
+      opponentSlug: sql<string>`opp.slug`,
+      opponentLogo: sql<string>`opp.logo_url`,
+      competitionName: competitions.name,
+      minutes: playerMatchStats.minutes,
+      rating: playerMatchStats.rating,
+      goals: playerMatchStats.goals,
+      assists: playerMatchStats.assists,
+      shotsTotal: playerMatchStats.shotsTotal,
+      shotsOnTarget: playerMatchStats.shotsOnTarget,
+      passesTotal: playerMatchStats.passesTotal,
+      keyPasses: playerMatchStats.keyPasses,
+      passAccuracy: playerMatchStats.passAccuracy,
+      dribblesSuccess: playerMatchStats.dribblesSuccess,
+      dribblesAttempts: playerMatchStats.dribblesAttempts,
+      duelsWon: playerMatchStats.duelsWon,
+      duelsTotal: playerMatchStats.duelsTotal,
+      yellowCards: playerMatchStats.yellowCards,
+      redCards: playerMatchStats.redCards,
+    })
+    .from(playerMatchStats)
+    .innerJoin(matches, eq(matches.id, playerMatchStats.matchId))
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, matches.competitionSeasonId))
+    .innerJoin(competitions, eq(competitions.id, competitionSeasons.competitionId))
+    // Opponent = whichever side the player's team is NOT.
+    .innerJoin(
+      sql`teams opp`,
+      sql`opp.id = CASE WHEN ${playerMatchStats.teamId} = ${matches.homeTeamId} THEN ${matches.awayTeamId} ELSE ${matches.homeTeamId} END`,
+    )
+    .where(eq(playerMatchStats.playerId, playerId))
+    .orderBy(desc(matches.scheduledAt))
+    .limit(limit);
+});
 
 /**
  * Compute the quality score for a player page.
