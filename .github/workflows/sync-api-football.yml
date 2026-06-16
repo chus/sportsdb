@@ -98,6 +98,14 @@ jobs:
             npx tsx scripts/sync-api-football.ts --enrich --slug=$LEAGUE || true
           done
 
+      # Refresh standings from API-Football (primary) every day. fd's
+      # fetch-standings cron used to own this but rolls to the next season
+      # early and zeroed our tables; af returns the correct season and the
+      # sync now drops stale rows. Cheap (~11 requests).
+      - name: Refresh all standings
+        if: steps.target.outputs.mode == 'enrich-all'
+        run: npx tsx scripts/sync-api-football.ts --all-standings || true
+
       - name: Full player season stats
         if: steps.target.outputs.mode == 'player-stats'
         run: npx tsx scripts/sync-api-football.ts --player-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}

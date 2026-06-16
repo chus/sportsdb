@@ -24,6 +24,15 @@ export const maxDuration = 30;
 
 const TOP_LEAGUES = ["premier-league", "la-liga", "bundesliga", "serie-a", "ligue-1"];
 
+// Single-table leagues: each position is unique, so two teams sharing a
+// position means a duplicate club entity or a stale standings row. (MLS
+// and the Argentine league run conferences/zonas that legitimately repeat
+// positions, so they're excluded — the schema has no group column yet.)
+const SINGLE_TABLE_LEAGUES = [
+  "premier-league", "la-liga", "bundesliga", "serie-a", "ligue-1",
+  "eredivisie", "primeira-liga",
+];
+
 interface Check {
   name: string;
   ok: boolean;
@@ -84,11 +93,14 @@ export async function GET() {
   checks.push({ name: "player_stats_present", ok: pssCount > 100, detail: `${pssCount} player_season_stats` });
 
   // 4. Every top-5 league has a populated current-season standings table.
+  // Restrict the competition_season join to current seasons up front —
+  // putting is_current on a LEFT JOIN of seasons leaves stale-season
+  // competition_seasons in the result and double-counts their standings.
   const standings = await sql`
     SELECT c.slug, count(st.*)::int AS rows
     FROM competitions c
     LEFT JOIN competition_seasons cs ON cs.competition_id = c.id
-    LEFT JOIN seasons se ON se.id = cs.season_id AND se.is_current = true
+      AND cs.season_id IN (SELECT id FROM seasons WHERE is_current = true)
     LEFT JOIN standings st ON st.competition_season_id = cs.id
     WHERE c.slug = ANY(${TOP_LEAGUES})
     GROUP BY c.slug
@@ -100,6 +112,27 @@ export async function GET() {
     const rows = standingsBySlug.get(slug) ?? 0;
     checks.push({ name: `standings:${slug}`, ok: rows >= 18, detail: `${rows} rows` });
   }
+
+  // 4b. No duplicate standings positions in single-table leagues — the
+  //     signature of a duplicate club entity (two rows for one real club)
+  //     or a stale row left by an upsert-only sync.
+  const [{ c: posCollisions }] = await sql`
+    SELECT count(*)::int AS c FROM (
+      SELECT 1
+      FROM standings st
+      JOIN competition_seasons cs ON cs.id = st.competition_season_id
+      JOIN competitions co ON co.id = cs.competition_id
+      JOIN seasons se ON se.id = cs.season_id AND se.is_current = true
+      WHERE co.slug = ANY(${SINGLE_TABLE_LEAGUES})
+      GROUP BY cs.id, st.position
+      HAVING count(*) > 1
+    ) d
+  `;
+  checks.push({
+    name: "no_standings_collisions",
+    ok: posCollisions === 0,
+    detail: `${posCollisions} duplicate standings positions`,
+  });
 
   // 5. No dangling external_id mappings (point to deleted entities).
   const [{ c: dangling }] = await sql`

@@ -16,7 +16,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { config } from "dotenv";
-import { eq, sql as drizzleSql, and, isNull, inArray } from "drizzle-orm";
+import { eq, sql as drizzleSql, and, isNull, inArray, notInArray } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
 import { buildMatchSlug } from "../src/lib/utils/match-slug";
 import { resolveMatch, resolvePlayer, resolveTeam } from "../src/lib/ingestion/resolve";
@@ -822,6 +822,7 @@ async function syncStandings(
   const allStandings = data.response[0].league.standings.flat();
 
   let count = 0;
+  const freshTeamIds = new Set<string>();
   for (const row of allStandings) {
     let teamId = teamIdMap.get(row.team.id);
 
@@ -835,6 +836,7 @@ async function syncStandings(
       teamIdMap.set(row.team.id, team.id);
       await linkTeamSeason(team.id, compSeasonId);
     }
+    freshTeamIds.add(teamId);
 
     await db
       .insert(schema.standings)
@@ -870,6 +872,27 @@ async function syncStandings(
       });
 
     count++;
+  }
+
+  // Drop stale rows: any standings row for this competition_season whose
+  // team isn't in the fresh payload. Without this, upsert-only writes let
+  // old-provider rows and wrong-league contamination accumulate forever
+  // (e.g. a relegated team's row, or two providers' rows at conflicting
+  // positions after an identity change). This is what left SS Lazio /
+  // Club Necaxa sitting in the Eredivisie table and produced duplicate
+  // standings positions the data-health canary flags.
+  if (freshTeamIds.size > 0) {
+    const keep = [...freshTeamIds];
+    const deleted = await db
+      .delete(schema.standings)
+      .where(
+        and(
+          eq(schema.standings.competitionSeasonId, compSeasonId),
+          notInArray(schema.standings.teamId, keep),
+        ),
+      )
+      .returning({ id: schema.standings.id });
+    if (deleted.length > 0) console.log(`   Standings: dropped ${deleted.length} stale rows`);
   }
 
   console.log(`   Standings: ${count} rows`);

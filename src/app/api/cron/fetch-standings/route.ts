@@ -114,6 +114,21 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
     const standings: StandingEntry[] = data.standings?.[0]?.table || [];
+
+    // Guard: football-data.org rolls its "current season" to the upcoming
+    // campaign before ours does, returning a pre-season table where every
+    // team sits at position 1 with 0 played / 0 points. Upserting that over
+    // our real (just-completed) season wipes the standings to zeros — this
+    // is exactly what corrupted the Eredivisie table. API-Football (Pro,
+    // primary) owns standings now; only let fd refresh a league when it
+    // actually returns a played table.
+    const hasPlayedGames = standings.some((s) => s.playedGames > 0);
+    if (standings.length === 0 || !hasPlayedGames) {
+      summary[slug] = { fetched: standings.length, upserted: 0, notFound: 0 };
+      await new Promise((r) => setTimeout(r, 7000));
+      continue;
+    }
+
     let upserted = 0;
     let notFound = 0;
 
