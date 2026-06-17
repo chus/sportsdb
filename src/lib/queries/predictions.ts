@@ -7,7 +7,7 @@ import {
   competitionSeasons,
   competitions,
 } from "@/lib/db/schema";
-import { eq, and, desc, gte, lte, count, sum, sql } from "drizzle-orm";
+import { eq, and, desc, gte, count, sum, sql } from "drizzle-orm";
 
 export interface Prediction {
   id: string;
@@ -110,8 +110,12 @@ export async function getUserPredictions(
 // Get upcoming matches available for predictions
 export async function getAvailableMatches(limit = 20) {
   const now = new Date();
-  const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+  // The soonest `limit` scheduled fixtures — NOT a fixed 7-day window.
+  // Mid-season breaks and the staggered European/LATAM calendars regularly
+  // leave the next 7 days empty (the nearest fixture can be a month out),
+  // which made the games section show nothing to predict. Always surface
+  // the next matches that exist.
   const results = await db
     .select({
       match: matches,
@@ -126,8 +130,7 @@ export async function getAvailableMatches(limit = 20) {
     .where(
       and(
         eq(matches.status, "scheduled"),
-        gte(matches.scheduledAt, now),
-        lte(matches.scheduledAt, oneWeekFromNow)
+        gte(matches.scheduledAt, now)
       )
     )
     .orderBy(matches.scheduledAt)

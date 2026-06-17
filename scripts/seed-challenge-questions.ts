@@ -7,6 +7,9 @@
  *   OPENAI_API_KEY=xxx DATABASE_URL=xxx npx tsx scripts/seed-challenge-questions.ts --pool-only
  */
 
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { neon } from "@neondatabase/serverless";
 import OpenAI from "openai";
 

@@ -51,6 +51,10 @@
     {
       "path": "/api/cron/data-health",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/assign-daily-challenge",
+      "schedule": "0 2 * * *"
     }
   ]
 }
