@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
           ORDER BY published_at DESC LIMIT 100
         `;
         paths = [
+          "/injuries",
           ...competitions.map((c) => `/competitions/${c.slug}`),
           ...recentArticles.map((a) => `/news/${a.slug}`),
         ];
@@ -77,13 +78,21 @@ export async function GET(request: NextRequest) {
         break;
       }
       case 3: {
-        // Recent match pages
-        category = "recent matches";
+        // Current-season finished matches, rotating through the whole
+        // season week by week so every (now data-rich) match page gets
+        // re-crawled — "last 7 days" submits nothing in the off-season.
+        category = "current-season matches";
+        const now = new Date();
+        const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+        const weekIndex = Math.floor(dayOfYear / 7) % 12; // cycle ~12 weeks
+        const offset = weekIndex * 200;
         const matches = await sql`
-          SELECT slug FROM matches
-          WHERE status = 'finished' AND slug IS NOT NULL
-            AND scheduled_at >= NOW() - INTERVAL '7 days'
-          ORDER BY scheduled_at DESC LIMIT 150
+          SELECT m.slug FROM matches m
+          JOIN competition_seasons cs ON cs.id = m.competition_season_id
+          JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+          WHERE m.status = 'finished' AND m.slug IS NOT NULL
+          ORDER BY m.scheduled_at DESC
+          OFFSET ${offset} LIMIT 200
         `;
         paths = matches.map((m) => `/matches/${m.slug}`);
         break;
