@@ -36,10 +36,10 @@ export async function HeadToHead({
   const drawPct = 100 - team1WinPct - team2WinPct;
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-neutral-100">
-        <h3 className="font-semibold text-neutral-900">Head to Head</h3>
-        <p className="text-xs text-neutral-500">Last {stats.totalMatches} meetings</p>
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-4 py-3 border-b border-line">
+        <h3 className="font-semibold text-ink">Head to Head</h3>
+        <p className="text-xs text-muted">Last {stats.totalMatches} meetings</p>
       </div>
 
       {/* Stats Summary */}
@@ -65,38 +65,38 @@ export async function HeadToHead({
           </div>
           <div className="flex justify-between text-xs mt-1">
             <span className="text-blue-600 font-medium">{stats.team1Wins} wins</span>
-            <span className="text-neutral-500">{stats.draws} draws</span>
+            <span className="text-muted">{stats.draws} draws</span>
             <span className="text-red-600 font-medium">{stats.team2Wins} wins</span>
           </div>
         </div>
 
         {/* Goals */}
-        <div className="flex items-center justify-center gap-8 py-3 border-y border-neutral-100">
+        <div className="flex items-center justify-center gap-8 py-3 border-y border-line">
           <div className="text-center">
             {team1Logo ? (
               <ImageWithFallback src={team1Logo} alt={team1Name} width={32} height={32} className="w-8 h-8 mx-auto mb-1 object-contain" />
             ) : (
-              <div className="w-8 h-8 bg-neutral-100 rounded mx-auto mb-1" />
+              <div className="w-8 h-8 bg-surface-2 rounded mx-auto mb-1" />
             )}
-            <div className="text-2xl font-bold text-neutral-900">{stats.team1Goals}</div>
-            <div className="text-xs text-neutral-500">Goals</div>
+            <div className="text-2xl font-bold text-ink">{stats.team1Goals}</div>
+            <div className="text-xs text-muted">Goals</div>
           </div>
-          <Minus className="w-4 h-4 text-neutral-300" />
+          <Minus className="w-4 h-4 text-faint" />
           <div className="text-center">
             {team2Logo ? (
               <ImageWithFallback src={team2Logo} alt={team2Name} width={32} height={32} className="w-8 h-8 mx-auto mb-1 object-contain" />
             ) : (
-              <div className="w-8 h-8 bg-neutral-100 rounded mx-auto mb-1" />
+              <div className="w-8 h-8 bg-surface-2 rounded mx-auto mb-1" />
             )}
-            <div className="text-2xl font-bold text-neutral-900">{stats.team2Goals}</div>
-            <div className="text-xs text-neutral-500">Goals</div>
+            <div className="text-2xl font-bold text-ink">{stats.team2Goals}</div>
+            <div className="text-xs text-muted">Goals</div>
           </div>
         </div>
 
         {/* Recent Matches */}
         {stats.recentMatches.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
               Recent Matches
             </h4>
             <div className="space-y-2">
@@ -111,10 +111,10 @@ export async function HeadToHead({
                   <Link
                     key={match.id}
                     href={`/matches/${match.slug ?? match.id}`}
-                    className="flex items-center justify-between p-2 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors text-sm"
+                    className="flex items-center justify-between p-2 bg-surface-2 rounded-lg hover:bg-surface-2 transition-colors text-sm"
                   >
                     <div className="flex items-center gap-2 flex-1">
-                      <span className={team1Won ? "font-medium" : "text-neutral-600"}>
+                      <span className={team1Won ? "font-medium" : "text-muted"}>
                         {team1Name}
                       </span>
                     </div>
@@ -122,13 +122,13 @@ export async function HeadToHead({
                       <span className={`font-mono font-medium ${team1Won ? "text-green-600" : ""}`}>
                         {team1Score}
                       </span>
-                      <span className="text-neutral-400">-</span>
+                      <span className="text-faint">-</span>
                       <span className={`font-mono font-medium ${team2Won ? "text-green-600" : ""}`}>
                         {team2Score}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 flex-1 justify-end">
-                      <span className={team2Won ? "font-medium" : "text-neutral-600"}>
+                      <span className={team2Won ? "font-medium" : "text-muted"}>
                         {team2Name}
                       </span>
                     </div>

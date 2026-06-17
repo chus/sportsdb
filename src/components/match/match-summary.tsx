@@ -12,11 +12,11 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
   if (!summary) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200 flex items-center gap-2">
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line flex items-center gap-2">
         <Sparkles className="w-5 h-5 text-purple-500" />
-        <h2 className="text-lg font-bold text-neutral-900">Match Report</h2>
-        <span className="ml-auto text-xs text-neutral-400 flex items-center gap-1">
+        <h2 className="text-lg font-bold text-ink">Match Report</h2>
+        <span className="ml-auto text-xs text-faint flex items-center gap-1">
           <span className="inline-block w-2 h-2 bg-purple-400 rounded-full" />
           AI Generated
         </span>
@@ -24,14 +24,14 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
 
       <div className="p-6">
         {/* Headline */}
-        <h3 className="text-xl font-bold text-neutral-900 mb-4">
+        <h3 className="text-xl font-bold text-ink mb-4">
           {summary.headline}
         </h3>
 
         {/* Summary paragraphs */}
         <div className="prose prose-neutral prose-sm max-w-none mb-6">
           {summary.summary.split("\n\n").map((paragraph, idx) => (
-            <p key={idx} className="text-neutral-700 leading-relaxed">
+            <p key={idx} className="text-ink leading-relaxed">
               {paragraph}
             </p>
           ))}
@@ -40,7 +40,7 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
         {/* Key Moments */}
         {summary.keyMoments.length > 0 && (
           <div className="mb-6">
-            <h4 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
+            <h4 className="text-sm font-medium text-muted uppercase tracking-wide mb-3">
               Key Moments
             </h4>
             <div className="space-y-2">
@@ -50,11 +50,11 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
                     key={idx}
                     className="flex items-start gap-3 text-sm"
                   >
-                    <span className="flex-shrink-0 w-12 text-neutral-500 font-medium flex items-center gap-1">
+                    <span className="flex-shrink-0 w-12 text-muted font-medium flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {moment.minute}&apos;
                     </span>
-                    <span className="text-neutral-700">{moment.description}</span>
+                    <span className="text-ink">{moment.description}</span>
                   </div>
                 )
               )}
@@ -78,11 +78,11 @@ export async function MatchSummary({ matchId }: MatchSummaryProps) {
                 <PlayerLink
                   slug={summary.manOfTheMatch.slug}
                   isLinkWorthy={summary.manOfTheMatch.isIndexable ?? false}
-                  className="font-semibold text-neutral-900 hover:text-blue-600 transition-colors"
+                  className="font-semibold text-ink hover:text-blue-600 transition-colors"
                 >
                   {summary.manOfTheMatch.name}
                 </PlayerLink>
-                <span className="text-sm text-neutral-500 ml-2">
+                <span className="text-sm text-muted ml-2">
                   {summary.manOfTheMatch.position}
                 </span>
               </div>

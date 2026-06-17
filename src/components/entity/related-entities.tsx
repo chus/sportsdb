@@ -21,8 +21,8 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6">
-      <h3 className="text-sm font-medium text-neutral-500 mb-4">
+    <div className="bg-surface rounded-xl border border-line p-6">
+      <h3 className="text-sm font-medium text-muted mb-4">
         Similar Players
       </h3>
       <div className="space-y-3">
@@ -34,7 +34,7 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
             className="flex items-center gap-3 group"
           >
             {player.imageUrl ? (
-              <div className="w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
+              <div className="w-10 h-10 bg-surface-2 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
                 <img
                   src={player.imageUrl}
                   alt={player.name}
@@ -47,10 +47,10 @@ export async function RelatedPlayers({ playerId, limit = 6 }: RelatedPlayersProp
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+              <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
                 {player.name}
               </div>
-              <div className="text-xs text-neutral-500 truncate">
+              <div className="text-xs text-muted truncate">
                 {player.position}
                 {player.nationality && ` · ${player.nationality}`}
               </div>
@@ -75,8 +75,8 @@ export async function RelatedTeams({ teamId, limit = 6 }: RelatedTeamsProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6">
-      <h3 className="text-sm font-medium text-neutral-500 mb-4">
+    <div className="bg-surface rounded-xl border border-line p-6">
+      <h3 className="text-sm font-medium text-muted mb-4">
         Teams in Same League
       </h3>
       <div className="space-y-3">
@@ -87,7 +87,7 @@ export async function RelatedTeams({ teamId, limit = 6 }: RelatedTeamsProps) {
             className="flex items-center gap-3 group"
           >
             {team.logoUrl ? (
-              <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors p-1">
+              <div className="w-10 h-10 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors p-1">
                 <img
                   src={team.logoUrl}
                   alt={team.name}
@@ -100,11 +100,11 @@ export async function RelatedTeams({ teamId, limit = 6 }: RelatedTeamsProps) {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+              <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
                 {team.name}
               </div>
               {team.country && (
-                <div className="text-xs text-neutral-500">{team.country}</div>
+                <div className="text-xs text-muted">{team.country}</div>
               )}
             </div>
           </Link>
@@ -127,8 +127,8 @@ export async function RelatedMatches({ matchId, limit = 4 }: RelatedMatchesProps
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6">
-      <h3 className="text-sm font-medium text-neutral-500 mb-4">
+    <div className="bg-surface rounded-xl border border-line p-6">
+      <h3 className="text-sm font-medium text-muted mb-4">
         Other Matches
       </h3>
       <div className="space-y-3">
@@ -136,7 +136,7 @@ export async function RelatedMatches({ matchId, limit = 4 }: RelatedMatchesProps
           <Link
             key={match.id}
             href={`/matches/${match.slug ?? match.id}`}
-            className="block p-3 bg-neutral-50 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="block p-3 bg-surface-2 rounded-lg hover:bg-surface-2 transition-colors"
           >
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -147,7 +147,7 @@ export async function RelatedMatches({ matchId, limit = 4 }: RelatedMatchesProps
                     className="w-5 h-5 object-contain"
                   />
                 ) : (
-                  <Shield className="w-5 h-5 text-neutral-300" />
+                  <Shield className="w-5 h-5 text-faint" />
                 )}
                 <span className="truncate">{match.homeTeam.name}</span>
               </div>
@@ -167,11 +167,11 @@ export async function RelatedMatches({ matchId, limit = 4 }: RelatedMatchesProps
                     className="w-5 h-5 object-contain"
                   />
                 ) : (
-                  <Shield className="w-5 h-5 text-neutral-300" />
+                  <Shield className="w-5 h-5 text-faint" />
                 )}
               </div>
             </div>
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-neutral-500">
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-xs text-muted">
               <Calendar className="w-3 h-3" />
               {format(new Date(match.scheduledAt), "MMM d, HH:mm")}
             </div>

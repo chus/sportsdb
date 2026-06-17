@@ -56,26 +56,26 @@ function ComparisonBar({
   return (
     <div className="py-2.5">
       <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className={`w-12 text-left tabular-nums ${homeLeads ? "font-bold text-neutral-900" : "font-medium text-neutral-500"}`}>
+        <span className={`w-12 text-left tabular-nums ${homeLeads ? "font-bold text-ink" : "font-medium text-muted"}`}>
           {fmt(homeValue)}
         </span>
-        <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">
           {label}
         </span>
-        <span className={`w-12 text-right tabular-nums ${awayLeads ? "font-bold text-neutral-900" : "font-medium text-neutral-500"}`}>
+        <span className={`w-12 text-right tabular-nums ${awayLeads ? "font-bold text-ink" : "font-medium text-muted"}`}>
           {fmt(awayValue)}
         </span>
       </div>
       <div className="flex gap-1 h-2">
-        <div className="flex-1 bg-neutral-100 rounded-l-full overflow-hidden flex justify-end">
+        <div className="flex-1 bg-surface-2 rounded-l-full overflow-hidden flex justify-end">
           <div
             className="bg-blue-600 rounded-l-full transition-all duration-500"
             style={{ width: `${homePercent}%` }}
           />
         </div>
-        <div className="flex-1 bg-neutral-100 rounded-r-full overflow-hidden">
+        <div className="flex-1 bg-surface-2 rounded-r-full overflow-hidden">
           <div
-            className="bg-neutral-400 rounded-r-full transition-all duration-500"
+            className="bg-faint rounded-r-full transition-all duration-500"
             style={{ width: `${awayPercent}%` }}
           />
         </div>
@@ -106,27 +106,27 @@ export function MatchStatistics({
   if (!hasAny) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200">
-        <h2 className="text-lg font-bold text-neutral-900">Match Statistics</h2>
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line">
+        <h2 className="text-lg font-bold text-ink">Match Statistics</h2>
       </div>
       <div className="px-6 py-4">
-        <div className="flex items-center justify-between mb-3 pb-3 border-b border-neutral-100">
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-line">
           <div className="flex items-center gap-2">
             {homeTeamLogo && (
               <img src={homeTeamLogo} alt={homeTeamName} className="w-5 h-5 object-contain" />
             )}
-            <span className="text-sm font-semibold text-blue-700">{homeTeamName}</span>
+            <span className="text-sm font-semibold text-brand">{homeTeamName}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-neutral-600">{awayTeamName}</span>
+            <span className="text-sm font-semibold text-muted">{awayTeamName}</span>
             {awayTeamLogo && (
               <img src={awayTeamLogo} alt={awayTeamName} className="w-5 h-5 object-contain" />
             )}
           </div>
         </div>
 
-        <div className="divide-y divide-neutral-50">
+        <div className="divide-y divide-line">
           <ComparisonBar label="Possession" homeValue={home.possession} awayValue={away.possession} suffix="%" />
           <ComparisonBar label="Total Shots" homeValue={home.shotsTotal} awayValue={away.shotsTotal} />
           <ComparisonBar label="Shots on Target" homeValue={home.shotsOnTarget} awayValue={away.shotsOnTarget} />

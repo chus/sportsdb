@@ -63,12 +63,12 @@ export function Footer() {
               </div>
               <div>
                 <div className="font-bold text-lg">DataSports</div>
-                <div className="text-xs text-neutral-400">
+                <div className="text-xs text-faint">
                   {t("home.heroTagline")}
                 </div>
               </div>
             </div>
-            <p className="text-sm text-neutral-400 leading-relaxed">
+            <p className="text-sm text-faint leading-relaxed">
               {t("footer.tagline")}
             </p>
             <p className="text-xs text-blue-400 mt-2">Pro from €8/year</p>
@@ -86,14 +86,14 @@ export function Footer() {
                     {"onClick" in link && link.onClick ? (
                       <button
                         onClick={link.onClick}
-                        className="text-sm text-neutral-400 hover:text-white transition-colors"
+                        className="text-sm text-faint hover:text-white transition-colors"
                       >
                         {link.label}
                       </button>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm text-neutral-400 hover:text-white transition-colors"
+                        className="text-sm text-faint hover:text-white transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -107,7 +107,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-neutral-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted">
             {t("footer.copyright", { year: new Date().getFullYear() })}
           </p>
         </div>

@@ -112,10 +112,10 @@ export function MatchPredictionWidget({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <div className="flex items-center gap-2 mb-4">
         <Vote className="w-5 h-5 text-indigo-600" />
-        <h3 className="text-sm font-medium text-neutral-500">
+        <h3 className="text-sm font-medium text-muted">
           {isUpcoming ? "Predict This Match" : "Community Prediction"}
         </h3>
       </div>
@@ -123,7 +123,7 @@ export function MatchPredictionWidget({
       {/* Pick'em buttons — upcoming matches */}
       {isUpcoming && (
         <div className="space-y-3 mb-4">
-          <p className="text-xs text-neutral-500">Who wins?</p>
+          <p className="text-xs text-muted">Who wins?</p>
           <div className="grid grid-cols-3 gap-2">
             {(["home", "draw", "away"] as const).map((outcome) => {
               const isSelected = pickemOutcome === outcome;
@@ -143,8 +143,8 @@ export function MatchPredictionWidget({
                     isSelected
                       ? "bg-indigo-600 text-white ring-2 ring-indigo-300"
                       : !isPro && !user
-                      ? "bg-neutral-100 text-neutral-400"
-                      : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                      ? "bg-surface-2 text-faint"
+                      : "bg-surface-2 text-ink hover:bg-surface-2"
                   }`}
                 >
                   {!isPro && !isSelected && (
@@ -166,9 +166,9 @@ export function MatchPredictionWidget({
 
       {/* Finished match — show result */}
       {matchStatus === "finished" && pickemOutcome && (
-        <div className="mb-4 p-3 bg-neutral-50 rounded-lg">
-          <p className="text-xs text-neutral-500 mb-1">Your pick</p>
-          <p className="text-sm font-semibold text-neutral-900">
+        <div className="mb-4 p-3 bg-surface-2 rounded-lg">
+          <p className="text-xs text-muted mb-1">Your pick</p>
+          <p className="text-sm font-semibold text-ink">
             {pickemOutcome === "home"
               ? homeTeamName
               : pickemOutcome === "away"
@@ -181,7 +181,7 @@ export function MatchPredictionWidget({
       {/* Community percentage bars */}
       {community && community.total > 0 && (
         <div>
-          <p className="text-xs text-neutral-500 mb-2">
+          <p className="text-xs text-muted mb-2">
             Community ({community.total} votes)
           </p>
           <div className="space-y-1.5">
@@ -202,16 +202,16 @@ export function MatchPredictionWidget({
 
               return (
                 <div key={outcome} className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-600 w-16 truncate">
+                  <span className="text-xs text-muted w-16 truncate">
                     {label}
                   </span>
-                  <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${barColor} rounded-full transition-all`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-xs font-medium text-neutral-700 w-8 text-right">
+                  <span className="text-xs font-medium text-ink w-8 text-right">
                     {pct}%
                   </span>
                 </div>
@@ -222,7 +222,7 @@ export function MatchPredictionWidget({
       )}
 
       {/* CTA */}
-      <div className="mt-4 pt-4 border-t border-neutral-100">
+      <div className="mt-4 pt-4 border-t border-line">
         <Link
           href="/games/pickem"
           className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"

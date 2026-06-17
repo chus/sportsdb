@@ -54,7 +54,7 @@ function getEventAccentClass(type: string): string {
     case "substitution":
       return "border-blue-400 bg-blue-50";
     default:
-      return "border-neutral-300 bg-neutral-50";
+      return "border-line bg-surface-2";
   }
 }
 
@@ -66,7 +66,7 @@ function EventDetail({ event }: { event: TimelineEvent }) {
   if (event.type === "goal" || event.type === "own_goal" || event.type === "penalty") {
     return (
       <span className="text-sm">
-        <span className="font-semibold text-neutral-900">
+        <span className="font-semibold text-ink">
           {event.player ? (
             <PlayerLink
               slug={event.player.slug}
@@ -83,16 +83,16 @@ function EventDetail({ event }: { event: TimelineEvent }) {
           <span className="text-red-500 ml-1">(OG)</span>
         )}
         {event.type === "penalty" && (
-          <span className="text-neutral-500 ml-1">(pen.)</span>
+          <span className="text-muted ml-1">(pen.)</span>
         )}
         {event.secondaryPlayer && (
-          <span className="text-neutral-500">
+          <span className="text-muted">
             {" "}
             (assist:{" "}
             <PlayerLink
               slug={event.secondaryPlayer.slug}
               isLinkWorthy={event.secondaryPlayer.isIndexable ?? false}
-              className="text-neutral-600 hover:text-blue-600 transition-colors"
+              className="text-muted hover:text-blue-600 transition-colors"
             >
               {event.secondaryPlayer.name}
             </PlayerLink>
@@ -106,7 +106,7 @@ function EventDetail({ event }: { event: TimelineEvent }) {
   if (event.type === "penalty_missed") {
     return (
       <span className="text-sm">
-        <span className="font-semibold text-neutral-900">
+        <span className="font-semibold text-ink">
           {event.player ? (
             <PlayerLink
               slug={event.player.slug}
@@ -126,7 +126,7 @@ function EventDetail({ event }: { event: TimelineEvent }) {
 
   if (event.type === "yellow_card" || event.type === "red_card") {
     return (
-      <span className="text-sm font-semibold text-neutral-900">
+      <span className="text-sm font-semibold text-ink">
         {event.player ? (
           <PlayerLink
             slug={event.player.slug}
@@ -158,7 +158,7 @@ function EventDetail({ event }: { event: TimelineEvent }) {
             "Unknown"
           )}{" "}
         </span>
-        <span className="text-neutral-400">{"\u2194"}</span>{" "}
+        <span className="text-faint">{"\u2194"}</span>{" "}
         <span className="text-red-500 font-medium">
           {event.secondaryPlayer ? (
             <PlayerLink
@@ -177,7 +177,7 @@ function EventDetail({ event }: { event: TimelineEvent }) {
   }
 
   return (
-    <span className="text-sm text-neutral-700">
+    <span className="text-sm text-ink">
       {event.player?.name || "Event"}
     </span>
   );
@@ -214,34 +214,34 @@ export function MatchTimeline({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200">
-        <h2 className="text-lg font-bold text-neutral-900">Match Timeline</h2>
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line">
+        <h2 className="text-lg font-bold text-ink">Match Timeline</h2>
       </div>
 
       {/* Desktop: center-line layout */}
       <div className="hidden md:block px-6 py-4">
         {/* Team headers */}
-        <div className="flex items-center mb-4 pb-2 border-b border-neutral-100">
-          <div className="flex-1 text-sm font-semibold text-neutral-700 text-right pr-6">
+        <div className="flex items-center mb-4 pb-2 border-b border-line">
+          <div className="flex-1 text-sm font-semibold text-ink text-right pr-6">
             {homeTeamName}
           </div>
           <div className="w-12" />
-          <div className="flex-1 text-sm font-semibold text-neutral-700 text-left pl-6">
+          <div className="flex-1 text-sm font-semibold text-ink text-left pl-6">
             {awayTeamName}
           </div>
         </div>
 
         <div className="relative">
           {/* Center line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-neutral-200 -translate-x-1/2" />
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-surface-2 -translate-x-1/2" />
 
           {items.map((item, idx) => {
             if (item.kind === "halftime") {
               return (
                 <div key="ht" className="flex items-center py-3">
                   <div className="flex-1 h-px bg-neutral-300" />
-                  <div className="mx-3 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-300 text-xs font-semibold text-neutral-500">
+                  <div className="mx-3 px-3 py-1 rounded-full bg-surface-2 border border-line text-xs font-semibold text-muted">
                     HT
                   </div>
                   <div className="flex-1 h-px bg-neutral-300" />
@@ -273,8 +273,8 @@ export function MatchTimeline({
 
                 {/* Center minute circle */}
                 <div className="w-12 flex items-center justify-center z-10">
-                  <div className="w-10 h-7 rounded-full bg-white border-2 border-neutral-300 flex items-center justify-center">
-                    <span className="text-xs font-bold text-neutral-600">
+                  <div className="w-10 h-7 rounded-full bg-surface border-2 border-line flex items-center justify-center">
+                    <span className="text-xs font-bold text-muted">
                       {minuteStr}
                     </span>
                   </div>
@@ -301,15 +301,15 @@ export function MatchTimeline({
       <div className="md:hidden px-4 py-4">
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-5 top-0 bottom-0 w-px bg-neutral-200" />
+          <div className="absolute left-5 top-0 bottom-0 w-px bg-surface-2" />
 
           <div className="space-y-0">
             {items.map((item, idx) => {
               if (item.kind === "halftime") {
                 return (
                   <div key="ht" className="flex items-center gap-3 py-3 pl-1">
-                    <div className="w-8 h-8 rounded-full bg-neutral-100 border border-neutral-300 flex items-center justify-center z-10">
-                      <span className="text-xs font-semibold text-neutral-500">
+                    <div className="w-8 h-8 rounded-full bg-surface-2 border border-line flex items-center justify-center z-10">
+                      <span className="text-xs font-semibold text-muted">
                         HT
                       </span>
                     </div>
@@ -335,10 +335,10 @@ export function MatchTimeline({
                   </div>
                   <div className="flex-1 pt-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-neutral-500 w-10">
+                      <span className="text-xs font-bold text-muted w-10">
                         {minuteStr}
                       </span>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-faint">
                         {isHome ? homeTeamName : awayTeamName}
                       </span>
                     </div>

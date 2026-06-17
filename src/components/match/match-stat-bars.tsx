@@ -29,24 +29,24 @@ function StatBar({
   return (
     <div className="py-2">
       <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="font-bold text-neutral-900 w-8 text-center">
+        <span className="font-bold text-ink w-8 text-center">
           {homeValue}
         </span>
-        <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+        <span className="text-xs font-medium text-muted uppercase tracking-wide">
           {label}
         </span>
-        <span className="font-bold text-neutral-900 w-8 text-center">
+        <span className="font-bold text-ink w-8 text-center">
           {awayValue}
         </span>
       </div>
       <div className="flex gap-1 h-2.5">
-        <div className="flex-1 bg-neutral-100 rounded-l-full overflow-hidden flex justify-end">
+        <div className="flex-1 bg-surface-2 rounded-l-full overflow-hidden flex justify-end">
           <div
             className={`${accentColor} rounded-l-full transition-all duration-500`}
             style={{ width: `${homePercent}%` }}
           />
         </div>
-        <div className="flex-1 bg-neutral-100 rounded-r-full overflow-hidden">
+        <div className="flex-1 bg-surface-2 rounded-r-full overflow-hidden">
           <div
             className={`${accentColor} rounded-r-full transition-all duration-500`}
             style={{ width: `${awayPercent}%` }}
@@ -102,13 +102,13 @@ export function MatchStatBars({
   const totalCards = homeYellows + awayYellows + homeReds + awayReds;
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200">
-        <h2 className="text-lg font-bold text-neutral-900">Match Summary</h2>
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line">
+        <h2 className="text-lg font-bold text-ink">Match Summary</h2>
       </div>
       <div className="px-6 py-4">
         {/* Team headers */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
           <div className="flex items-center gap-2">
             {homeTeamLogo && (
               <img
@@ -117,12 +117,12 @@ export function MatchStatBars({
                 className="w-5 h-5 object-contain"
               />
             )}
-            <span className="text-sm font-semibold text-neutral-900">
+            <span className="text-sm font-semibold text-ink">
               {homeTeamName}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-neutral-900">
+            <span className="text-sm font-semibold text-ink">
               {awayTeamName}
             </span>
             {awayTeamLogo && (

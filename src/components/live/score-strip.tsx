@@ -28,14 +28,14 @@ export function ScoreStrip() {
         {/* Scroll buttons */}
         <button
           onClick={() => scroll("left")}
-          className="absolute left-0 top-0 bottom-0 z-10 px-1 bg-gradient-to-r from-neutral-900 to-transparent text-neutral-400 hover:text-white"
+          className="absolute left-0 top-0 bottom-0 z-10 px-1 bg-gradient-to-r from-neutral-900 to-transparent text-faint hover:text-white"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => scroll("right")}
-          className="absolute right-0 top-0 bottom-0 z-10 px-1 bg-gradient-to-l from-neutral-900 to-transparent text-neutral-400 hover:text-white"
+          className="absolute right-0 top-0 bottom-0 z-10 px-1 bg-gradient-to-l from-neutral-900 to-transparent text-faint hover:text-white"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-4 h-4" />
@@ -72,7 +72,7 @@ export function ScoreStrip() {
               className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800/60 hover:bg-neutral-700/60 rounded transition-colors flex-shrink-0"
             >
               {/* Home */}
-              <span className="text-xs text-neutral-300 font-medium truncate max-w-[60px]">
+              <span className="text-xs text-faint font-medium truncate max-w-[60px]">
                 {match.homeTeam?.shortName || match.homeTeam?.name?.slice(0, 3).toUpperCase() || "---"}
               </span>
 
@@ -80,21 +80,21 @@ export function ScoreStrip() {
               <div className="flex items-center gap-1">
                 <span className={cn(
                   "text-sm font-bold min-w-[18px] text-center",
-                  match.status === "live" ? "text-white" : "text-neutral-300"
+                  match.status === "live" ? "text-white" : "text-faint"
                 )}>
                   {match.homeScore ?? "-"}
                 </span>
-                <span className="text-neutral-600 text-xs">-</span>
+                <span className="text-muted text-xs">-</span>
                 <span className={cn(
                   "text-sm font-bold min-w-[18px] text-center",
-                  match.status === "live" ? "text-white" : "text-neutral-300"
+                  match.status === "live" ? "text-white" : "text-faint"
                 )}>
                   {match.awayScore ?? "-"}
                 </span>
               </div>
 
               {/* Away */}
-              <span className="text-xs text-neutral-300 font-medium truncate max-w-[60px]">
+              <span className="text-xs text-faint font-medium truncate max-w-[60px]">
                 {match.awayTeam?.shortName || match.awayTeam?.name?.slice(0, 3).toUpperCase() || "---"}
               </span>
 

@@ -183,9 +183,9 @@ export function FormationView({ homeTeam, awayTeam }: FormationViewProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-4 py-3 border-b border-neutral-100">
-        <h3 className="font-semibold text-neutral-900">Formations</h3>
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-4 py-3 border-b border-line">
+        <h3 className="font-semibold text-ink">Formations</h3>
       </div>
 
       <div className="relative">
@@ -201,9 +201,9 @@ export function FormationView({ homeTeam, awayTeam }: FormationViewProps) {
             {/* Center circle */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-32 md:h-32 border-2 border-white/30 rounded-full" />
             {/* Center line */}
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/30" />
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-surface/30" />
             {/* Center spot */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/40 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-surface/40 rounded-full" />
 
             {/* Goal areas - Home (top) */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 md:w-40 h-12 md:h-16 border-2 border-t-0 border-white/30" />

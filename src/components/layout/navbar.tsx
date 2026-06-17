@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/search/search-bar";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAuthModal } from "@/components/auth/auth-modal";
 import { useSubscription } from "@/components/subscription/subscription-provider";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function Navbar() {
   const t = useTranslations();
@@ -90,6 +91,9 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* Mobile search icon */}
             <Link
               href="/search"

@@ -218,7 +218,7 @@ function MatchEventItem({
           </PlayerLink>
         )}
         {event.type === "substitution" && event.secondaryPlayer && (
-          <span className="text-neutral-500 text-sm">
+          <span className="text-muted text-sm">
             {" "}
             for{" "}
             <PlayerLink
@@ -231,7 +231,7 @@ function MatchEventItem({
           </span>
         )}
         {event.type === "goal" && event.secondaryPlayer && (
-          <span className="text-neutral-500 text-sm">
+          <span className="text-muted text-sm">
             {" "}
             (assist:{" "}
             <PlayerLink
@@ -247,7 +247,7 @@ function MatchEventItem({
       </div>
       <div className="flex items-center gap-2">
         <span className="text-lg">{getEventIcon(event.type)}</span>
-        <span className="text-sm font-medium text-neutral-600 w-12 text-center">
+        <span className="text-sm font-medium text-muted w-12 text-center">
           {minuteDisplay}
         </span>
       </div>
@@ -273,16 +273,16 @@ function LineupPlayer({
     <PlayerLink
       slug={player.slug}
       isLinkWorthy={player.isIndexable ?? false}
-      className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-lg transition-colors group"
+      className="flex items-center gap-3 p-2 hover:bg-surface-2 rounded-lg transition-colors group"
     >
-      <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-sm font-medium text-neutral-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+      <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center text-sm font-medium text-muted group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
         {shirtNumber || "—"}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+        <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
           {player.name}
         </div>
-        <div className="text-xs text-neutral-500">
+        <div className="text-xs text-muted">
           {position || player.position}
         </div>
       </div>
@@ -464,12 +464,12 @@ export default async function MatchPage({ params }: MatchPageProps) {
           .filter(Boolean) as string[],
       })} />
       <PageTracker entityType="match" entityId={matchId} />
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Scoreboard Header */}
       <div className="bg-neutral-900 text-white">
         <div className="max-w-7xl mx-auto px-4">
           {/* Breadcrumb row */}
-          <nav className="flex items-center gap-2 pt-4 pb-2 text-xs text-neutral-400">
+          <nav className="flex items-center gap-2 pt-4 pb-2 text-xs text-faint">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             {competition && (
               <>
@@ -480,11 +480,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
               </>
             )}
             <span>/</span>
-            <span className="text-neutral-300">{homeTeam.shortName || homeTeam.name} vs {awayTeam.shortName || awayTeam.name}</span>
+            <span className="text-faint">{homeTeam.shortName || homeTeam.name} vs {awayTeam.shortName || awayTeam.name}</span>
           </nav>
 
           {/* Scoreboard */}
-          <h1 className="text-center text-sm text-neutral-400 pt-2 font-medium">
+          <h1 className="text-center text-sm text-faint pt-2 font-medium">
             {homeTeam.name} vs {awayTeam.name}
             {match.homeScore != null && match.awayScore != null ? ` – ${match.homeScore}-${match.awayScore}` : ""}
             {competition ? ` | ${competition.name}` : ""}
@@ -498,11 +498,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
               <span className="text-right font-semibold text-sm md:text-lg group-hover:text-blue-400 transition-colors">
                 {homeTeam.shortName || homeTeam.name}
               </span>
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-surface rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
                 {homeTeam.logoUrl ? (
                   <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={48} height={48} className="w-full h-full object-contain" priority />
                 ) : (
-                  <Shield className="w-8 h-8 text-neutral-300" />
+                  <Shield className="w-8 h-8 text-faint" />
                 )}
               </div>
             </Link>
@@ -513,7 +513,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 <span className="text-4xl md:text-5xl font-bold tabular-nums">
                   {match.homeScore ?? "-"}
                 </span>
-                <span className="text-xl md:text-2xl text-neutral-500">-</span>
+                <span className="text-xl md:text-2xl text-muted">-</span>
                 <span className="text-4xl md:text-5xl font-bold tabular-nums">
                   {match.awayScore ?? "-"}
                 </span>
@@ -528,11 +528,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
               href={`/teams/${awayTeam.slug}`}
               className="flex items-center gap-3 md:gap-4 flex-1 group"
             >
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-surface rounded-xl flex items-center justify-center p-1.5 flex-shrink-0">
                 {awayTeam.logoUrl ? (
                   <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={48} height={48} className="w-full h-full object-contain" />
                 ) : (
-                  <Shield className="w-8 h-8 text-neutral-300" />
+                  <Shield className="w-8 h-8 text-faint" />
                 )}
               </div>
               <span className="font-semibold text-sm md:text-lg group-hover:text-blue-400 transition-colors">
@@ -542,7 +542,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
           </div>
 
           {/* Match Info Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 pb-4 text-xs text-neutral-400">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 pb-4 text-xs text-faint">
             {competition && (
               <Link href={`/competitions/${competition.slug}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
                 <Trophy className="w-3.5 h-3.5" />
@@ -574,7 +574,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
           </div>
         </div>
         {match.updatedAt && (
-          <p className="text-xs text-neutral-500 text-center pb-2">
+          <p className="text-xs text-muted text-center pb-2">
             Updated {formatDistanceToNowStrict(new Date(match.updatedAt), { addSuffix: true })}
           </p>
         )}
@@ -587,10 +587,10 @@ export default async function MatchPage({ params }: MatchPageProps) {
         <div className="max-w-7xl mx-auto px-4 pt-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Goal Scorers */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="bg-surface rounded-xl border border-line p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-sm">⚽</span>
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Goals</h3>
+                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Goals</h3>
               </div>
               {homeEvents.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty").length > 0 ||
                awayEvents.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty").length > 0 ? (
@@ -601,25 +601,25 @@ export default async function MatchPage({ params }: MatchPageProps) {
                     .slice(0, 4)
                     .map((e) => (
                       <div key={e.id} className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-neutral-900 truncate">
+                        <span className="font-medium text-ink truncate">
                           {e.player?.name ?? "Unknown"}
                           {e.type === "own_goal" && " (OG)"}
                           {e.type === "penalty" && " (P)"}
                         </span>
-                        <span className="text-neutral-500 flex-shrink-0 ml-1">{e.minute}&apos;</span>
+                        <span className="text-muted flex-shrink-0 ml-1">{e.minute}&apos;</span>
                       </div>
                     ))}
                 </div>
               ) : (
-                <p className="text-sm text-neutral-400">No goals</p>
+                <p className="text-sm text-faint">No goals</p>
               )}
             </div>
 
             {/* Cards */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="bg-surface rounded-xl border border-line p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-sm">🟨</span>
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Cards</h3>
+                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Cards</h3>
               </div>
               {(() => {
                 const homeYellows = homeEvents.filter((e) => e.type === "yellow_card").length;
@@ -630,16 +630,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 return total > 0 ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-700 font-medium">{homeTeam.shortName || homeTeam.name}</span>
-                      <span className="text-neutral-500">{homeYellows > 0 ? `🟨${homeYellows}` : ""} {homeReds > 0 ? `🟥${homeReds}` : ""}</span>
+                      <span className="text-ink font-medium">{homeTeam.shortName || homeTeam.name}</span>
+                      <span className="text-muted">{homeYellows > 0 ? `🟨${homeYellows}` : ""} {homeReds > 0 ? `🟥${homeReds}` : ""}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-700 font-medium">{awayTeam.shortName || awayTeam.name}</span>
-                      <span className="text-neutral-500">{awayYellows > 0 ? `🟨${awayYellows}` : ""} {awayReds > 0 ? `🟥${awayReds}` : ""}</span>
+                      <span className="text-ink font-medium">{awayTeam.shortName || awayTeam.name}</span>
+                      <span className="text-muted">{awayYellows > 0 ? `🟨${awayYellows}` : ""} {awayReds > 0 ? `🟥${awayReds}` : ""}</span>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-neutral-400">No cards</p>
+                  <p className="text-sm text-faint">No cards</p>
                 );
               })()}
             </div>
@@ -648,42 +648,42 @@ export default async function MatchPage({ params }: MatchPageProps) {
             {competition ? (
               <Link
                 href={`/competitions/${competition.slug}`}
-                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Competition</h3>
                 </div>
-                <div className="text-sm font-bold text-neutral-900 truncate">{competition.name}</div>
-                <p className="text-xs text-neutral-500">
+                <div className="text-sm font-bold text-ink truncate">{competition.name}</div>
+                <p className="text-xs text-muted">
                   {season ? season.label : ""}{match.matchday ? ` · Matchday ${match.matchday}` : ""}
                 </p>
               </Link>
             ) : (
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Trophy className="w-3.5 h-3.5 text-neutral-400" />
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                  <Trophy className="w-3.5 h-3.5 text-faint" />
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Competition</h3>
                 </div>
-                <p className="text-sm text-neutral-400">Unknown</p>
+                <p className="text-sm text-faint">Unknown</p>
               </div>
             )}
 
             {/* Venue */}
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div className="bg-surface rounded-xl border border-line p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <MapPin className="w-3.5 h-3.5 text-blue-500" />
-                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Venue</h3>
+                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Venue</h3>
               </div>
               {venue ? (
                 <>
-                  <div className="text-sm font-bold text-neutral-900 truncate">{venue.name}</div>
-                  <p className="text-xs text-neutral-500">
+                  <div className="text-sm font-bold text-ink truncate">{venue.name}</div>
+                  <p className="text-xs text-muted">
                     {[venue.city, match.attendance ? `${match.attendance.toLocaleString()} att.` : null].filter(Boolean).join(" · ")}
                   </p>
                 </>
               ) : (
-                <p className="text-sm text-neutral-400">Not available</p>
+                <p className="text-sm text-faint">Not available</p>
               )}
             </div>
           </div>
@@ -696,10 +696,10 @@ export default async function MatchPage({ params }: MatchPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Standings */}
             {homeStanding && awayStanding && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-3">
                   <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Position</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League Position</h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -707,13 +707,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
                       {homeTeam.logoUrl ? (
                         <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                       ) : (
-                        <Shield className="w-5 h-5 text-neutral-300" />
+                        <Shield className="w-5 h-5 text-faint" />
                       )}
-                      <span className="text-xs font-medium text-neutral-900">{homeTeam.shortName || homeTeam.name}</span>
+                      <span className="text-xs font-medium text-ink">{homeTeam.shortName || homeTeam.name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-neutral-900">{ordinal(homeStanding.position)}</span>
-                      <span className="text-xs text-neutral-500 ml-1.5">{homeStanding.points}pts · {homeStanding.won}W {homeStanding.drawn}D {homeStanding.lost}L</span>
+                      <span className="text-sm font-bold text-ink">{ordinal(homeStanding.position)}</span>
+                      <span className="text-xs text-muted ml-1.5">{homeStanding.points}pts · {homeStanding.won}W {homeStanding.drawn}D {homeStanding.lost}L</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
@@ -721,13 +721,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
                       {awayTeam.logoUrl ? (
                         <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                       ) : (
-                        <Shield className="w-5 h-5 text-neutral-300" />
+                        <Shield className="w-5 h-5 text-faint" />
                       )}
-                      <span className="text-xs font-medium text-neutral-900">{awayTeam.shortName || awayTeam.name}</span>
+                      <span className="text-xs font-medium text-ink">{awayTeam.shortName || awayTeam.name}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-neutral-900">{ordinal(awayStanding.position)}</span>
-                      <span className="text-xs text-neutral-500 ml-1.5">{awayStanding.points}pts · {awayStanding.won}W {awayStanding.drawn}D {awayStanding.lost}L</span>
+                      <span className="text-sm font-bold text-ink">{ordinal(awayStanding.position)}</span>
+                      <span className="text-xs text-muted ml-1.5">{awayStanding.points}pts · {awayStanding.won}W {awayStanding.drawn}D {awayStanding.lost}L</span>
                     </div>
                   </div>
                 </div>
@@ -736,15 +736,15 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* Form */}
             {(homeStanding?.form || awayStanding?.form) && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-3">
                   <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Recent Form</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Recent Form</h3>
                 </div>
                 <div className="space-y-2.5">
                   {homeStanding?.form && (
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-neutral-700 w-20 truncate">{homeTeam.shortName || homeTeam.name}</span>
+                      <span className="text-xs font-medium text-ink w-20 truncate">{homeTeam.shortName || homeTeam.name}</span>
                       <div className="flex gap-1">
                         {homeStanding.form.split("").slice(-5).map((r, i) => (
                           <span key={i} className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
@@ -754,7 +754,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   )}
                   {awayStanding?.form && (
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-neutral-700 w-20 truncate">{awayTeam.shortName || awayTeam.name}</span>
+                      <span className="text-xs font-medium text-ink w-20 truncate">{awayTeam.shortName || awayTeam.name}</span>
                       <div className="flex gap-1">
                         {awayStanding.form.split("").slice(-5).map((r, i) => (
                           <span key={i} className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold text-white ${r === "W" ? "bg-green-500" : r === "D" ? "bg-neutral-400" : "bg-red-500"}`}>{r}</span>
@@ -806,14 +806,14 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 />
               </>
             ) : (
-              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-bold text-neutral-900">
+              <section className="bg-surface rounded-xl border border-line overflow-hidden">
+                <div className="px-6 py-4 border-b border-line">
+                  <h2 className="text-lg font-bold text-ink">
                     Match Events
                   </h2>
                 </div>
-                <div className="p-8 text-center text-neutral-500">
-                  <Clock className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
+                <div className="p-8 text-center text-muted">
+                  <Clock className="w-12 h-12 mx-auto mb-4 text-faint" />
                   <p>
                     No events recorded
                   </p>
@@ -862,27 +862,27 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* Lineups */}
             {(homeLineups || awayLineups) && (
-              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-neutral-200">
-                  <h2 className="text-lg font-bold text-neutral-900">Lineups</h2>
+              <section className="bg-surface rounded-xl border border-line overflow-hidden">
+                <div className="px-6 py-4 border-b border-line">
+                  <h2 className="text-lg font-bold text-ink">Lineups</h2>
                 </div>
-                <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-200">
+                <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-line">
                   {/* Home Team Lineup */}
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-4">
                       {homeTeam.logoUrl ? (
                         <ImageWithFallback src={homeTeam.logoUrl} alt={homeTeam.name} width={32} height={32} className="w-8 h-8 object-contain" />
                       ) : (
-                        <Shield className="w-8 h-8 text-neutral-300" />
+                        <Shield className="w-8 h-8 text-faint" />
                       )}
-                      <h3 className="font-semibold text-neutral-900">
+                      <h3 className="font-semibold text-ink">
                         {homeTeam.shortName || homeTeam.name}
                       </h3>
                     </div>
                     {homeLineups ? (
                       <div className="space-y-4">
                         <div>
-                          <h4 className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+                          <h4 className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
                             Starting XI
                           </h4>
                           <div className="space-y-1">
@@ -900,7 +900,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                         </div>
                         {homeLineups.substitutes.length > 0 && (
                           <div>
-                            <h4 className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+                            <h4 className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
                               Substitutes
                             </h4>
                             <div className="space-y-1">
@@ -921,7 +921,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                         )}
                       </div>
                     ) : (
-                      <p className="text-neutral-500 text-sm">
+                      <p className="text-muted text-sm">
                         Lineup not available
                       </p>
                     )}
@@ -933,16 +933,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
                       {awayTeam.logoUrl ? (
                         <ImageWithFallback src={awayTeam.logoUrl} alt={awayTeam.name} width={32} height={32} className="w-8 h-8 object-contain" />
                       ) : (
-                        <Shield className="w-8 h-8 text-neutral-300" />
+                        <Shield className="w-8 h-8 text-faint" />
                       )}
-                      <h3 className="font-semibold text-neutral-900">
+                      <h3 className="font-semibold text-ink">
                         {awayTeam.shortName || awayTeam.name}
                       </h3>
                     </div>
                     {awayLineups ? (
                       <div className="space-y-4">
                         <div>
-                          <h4 className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+                          <h4 className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
                             Starting XI
                           </h4>
                           <div className="space-y-1">
@@ -960,7 +960,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                         </div>
                         {awayLineups.substitutes.length > 0 && (
                           <div>
-                            <h4 className="text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
+                            <h4 className="text-xs font-medium text-muted uppercase tracking-wide mb-2">
                               Substitutes
                             </h4>
                             <div className="space-y-1">
@@ -981,7 +981,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                         )}
                       </div>
                     ) : (
-                      <p className="text-neutral-500 text-sm">
+                      <p className="text-muted text-sm">
                         Lineup not available
                       </p>
                     )}
@@ -1020,17 +1020,17 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
             {/* Related Articles */}
             {matchArticles.length > 0 && (
-              <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-neutral-200 flex items-center gap-2">
+              <section className="bg-surface rounded-xl border border-line overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-line flex items-center gap-2">
                   <Newspaper className="w-4 h-4 text-blue-500" />
-                  <h2 className="text-sm font-bold text-neutral-900">Match Coverage</h2>
+                  <h2 className="text-sm font-bold text-ink">Match Coverage</h2>
                 </div>
-                <div className="divide-y divide-neutral-100">
+                <div className="divide-y divide-line">
                   {matchArticles.map(({ article }) => (
                     <Link
                       key={article.id}
                       href={`/news/${article.slug}`}
-                      className="flex gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors"
+                      className="flex gap-3 px-5 py-3 hover:bg-surface-2 transition-colors"
                     >
                       {article.imageUrl && (
                         <ImageWithFallback
@@ -1042,10 +1042,10 @@ export default async function MatchPage({ params }: MatchPageProps) {
                         />
                       )}
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-medium text-neutral-900 line-clamp-2 leading-snug">
+                        <h3 className="text-sm font-medium text-ink line-clamp-2 leading-snug">
                           {article.title}
                         </h3>
-                        <p className="text-xs text-neutral-500 mt-1 capitalize">
+                        <p className="text-xs text-muted mt-1 capitalize">
                           {article.type.replace(/_/g, " ")}
                         </p>
                       </div>

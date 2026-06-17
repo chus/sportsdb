@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` utilities apply when an ancestor has the
+   `.dark` class (toggled by ThemeProvider). Dark is the default theme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,15 +16,43 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Semantic surface palette for the data-dense sports-app look. Utilities
+   (bg-surface, text-ink, border-line, …) reference these vars, so the
+   `.dark` overrides below flip the whole UI without paired dark: classes.
+   Light values live here; dark values override under `.dark`. */
+@theme {
+  --color-canvas: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f3f5;
+  --color-line: #e5e7eb;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-faint: #94a3b8;
+  --color-brand: #2563eb;
+  --color-brand-soft: #dbeafe;
+}
+
+.dark {
+  --background: #0b0f17;
+  --foreground: #e8edf4;
+  --color-canvas: #0b0f17;
+  --color-surface: #151c28;
+  --color-surface-2: #1e2735;
+  --color-line: #1f2937;
+  --color-ink: #e8edf4;
+  --color-muted: #94a3b8;
+  --color-faint: #64748b;
+  --color-brand: #3b82f6;
+  --color-brand-soft: #1e293b;
+  color-scheme: dark;
+}
+
+:root {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

@@ -120,8 +120,8 @@ export async function PlayerInternalLinks({
 
       {/* Players from same country */}
       {countryPlayers.length > 0 && nationality && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-4">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+        <div className="bg-surface rounded-xl border border-line p-4">
+          <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
             <Users className="w-4 h-4" />
             More players from {nationality}
           </h3>
@@ -130,9 +130,9 @@ export async function PlayerInternalLinks({
               <Link
                 key={player.id}
                 href={`/players/${player.slug}`}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
               >
-                <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center">
                   {player.imageUrl ? (
                     <ImageWithFallback
                       src={player.imageUrl}
@@ -142,14 +142,14 @@ export async function PlayerInternalLinks({
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <Users className="w-4 h-4 text-neutral-400" />
+                    <Users className="w-4 h-4 text-faint" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-neutral-900 truncate">
+                  <p className="text-sm font-medium text-ink truncate">
                     {player.name}
                   </p>
-                  <p className="text-xs text-neutral-500">{player.position}</p>
+                  <p className="text-xs text-muted">{player.position}</p>
                 </div>
               </Link>
             ))}
@@ -165,8 +165,8 @@ export async function PlayerInternalLinks({
 
       {/* Players in same position */}
       {positionPlayers.length > 0 && position && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-4">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+        <div className="bg-surface rounded-xl border border-line p-4">
+          <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             Top {position}s
           </h3>
@@ -175,9 +175,9 @@ export async function PlayerInternalLinks({
               <Link
                 key={player.id}
                 href={`/players/${player.slug}`}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
               >
-                <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center">
                   {player.imageUrl ? (
                     <ImageWithFallback
                       src={player.imageUrl}
@@ -187,11 +187,11 @@ export async function PlayerInternalLinks({
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <Users className="w-4 h-4 text-neutral-400" />
+                    <Users className="w-4 h-4 text-faint" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-neutral-900 truncate">
+                  <p className="text-sm font-medium text-ink truncate">
                     {player.name}
                   </p>
                 </div>
@@ -226,8 +226,8 @@ export async function TeamInternalLinks({
     <div className="space-y-6">
       {/* Teams from same country */}
       {countryTeams.length > 0 && country && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-4">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+        <div className="bg-surface rounded-xl border border-line p-4">
+          <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
             <Shield className="w-4 h-4" />
             More teams from {country}
           </h3>
@@ -236,9 +236,9 @@ export async function TeamInternalLinks({
               <Link
                 key={team.id}
                 href={`/teams/${team.slug}`}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
               >
-                <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center">
                   {team.logoUrl ? (
                     <ImageWithFallback
                       src={team.logoUrl}
@@ -248,10 +248,10 @@ export async function TeamInternalLinks({
                       className="w-6 h-6 object-contain"
                     />
                   ) : (
-                    <Shield className="w-4 h-4 text-neutral-400" />
+                    <Shield className="w-4 h-4 text-faint" />
                   )}
                 </div>
-                <span className="text-sm font-medium text-neutral-900">
+                <span className="text-sm font-medium text-ink">
                   {team.name}
                 </span>
               </Link>
@@ -267,8 +267,8 @@ export async function TeamInternalLinks({
       )}
 
       {/* Popular players */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-4">
-        <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+      <div className="bg-surface rounded-xl border border-line p-4">
+        <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" />
           Popular Players
         </h3>
@@ -277,9 +277,9 @@ export async function TeamInternalLinks({
             <Link
               key={player.id}
               href={`/players/${player.slug}`}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
             >
-              <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center">
                 {player.imageUrl ? (
                   <ImageWithFallback
                     src={player.imageUrl}
@@ -289,14 +289,14 @@ export async function TeamInternalLinks({
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <Users className="w-4 h-4 text-neutral-400" />
+                  <Users className="w-4 h-4 text-faint" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 truncate">
+                <p className="text-sm font-medium text-ink truncate">
                   {player.name}
                 </p>
-                <p className="text-xs text-neutral-500">{player.position}</p>
+                <p className="text-xs text-muted">{player.position}</p>
               </div>
             </Link>
           ))}
@@ -336,21 +336,21 @@ export async function MatchInternalLinks({
     <div className="space-y-6">
       {/* Competition link */}
       {competitionSlug && competitionName && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-4">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+        <div className="bg-surface rounded-xl border border-line p-4">
+          <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
             <Trophy className="w-4 h-4" />
             Competition
           </h3>
           <Link
             href={`/competitions/${competitionSlug}`}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
           >
             <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
               <Trophy className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="font-medium text-neutral-900">{competitionName}</p>
-              <p className="text-xs text-neutral-500">View standings & fixtures</p>
+              <p className="font-medium text-ink">{competitionName}</p>
+              <p className="text-xs text-muted">View standings & fixtures</p>
             </div>
           </Link>
           <div className="flex gap-2 mt-3">
@@ -371,8 +371,8 @@ export async function MatchInternalLinks({
       )}
 
       {/* Popular players */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-4">
-        <h3 className="text-sm font-medium text-neutral-500 mb-3 flex items-center gap-2">
+      <div className="bg-surface rounded-xl border border-line p-4">
+        <h3 className="text-sm font-medium text-muted mb-3 flex items-center gap-2">
           <TrendingUp className="w-4 h-4" />
           Popular Players
         </h3>
@@ -381,9 +381,9 @@ export async function MatchInternalLinks({
             <Link
               key={player.id}
               href={`/players/${player.slug}`}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
             >
-              <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center">
                 {player.imageUrl ? (
                   <ImageWithFallback
                     src={player.imageUrl}
@@ -393,14 +393,14 @@ export async function MatchInternalLinks({
                     className="w-8 h-8 rounded-full object-cover"
                   />
                 ) : (
-                  <Users className="w-4 h-4 text-neutral-400" />
+                  <Users className="w-4 h-4 text-faint" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-900 truncate">
+                <p className="text-sm font-medium text-ink truncate">
                   {player.name}
                 </p>
-                <p className="text-xs text-neutral-500">{player.position}</p>
+                <p className="text-xs text-muted">{player.position}</p>
               </div>
             </Link>
           ))}

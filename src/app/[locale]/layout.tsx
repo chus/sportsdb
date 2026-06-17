@@ -16,6 +16,7 @@ import { OnboardingProvider } from "@/components/onboarding/onboarding-provider"
 import { UpgradeModalProvider } from "@/components/subscription/upgrade-modal";
 import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consent-provider";
 import { CookieConsentBanner } from "@/components/cookie-consent/cookie-consent-banner";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { routing } from "@/i18n/routing";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -109,8 +110,16 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
+        {/* Theme is opt-in (toggle) during the phased dark rollout so
+            not-yet-converted pages don't ship a half-dark look. Flip the
+            default to 'dark' here once every surface is converted. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+          }}
+        />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
@@ -121,6 +130,7 @@ export default async function LocaleLayout({
       </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
+          <ThemeProvider>
           <CookieConsentProvider>
             <AuthProvider>
               <SubscriptionProvider>
@@ -153,6 +163,7 @@ export default async function LocaleLayout({
               </SubscriptionProvider>
             </AuthProvider>
           </CookieConsentProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

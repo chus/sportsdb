@@ -56,17 +56,17 @@ export function PlayerPerformances({ performances }: { performances: Performance
   if (performances.length === 0) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200">
-        <h2 className="text-lg font-bold text-neutral-900">Recent Performances</h2>
-        <p className="text-sm text-neutral-500 mt-0.5">
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line">
+        <h2 className="text-lg font-bold text-ink">Recent Performances</h2>
+        <p className="text-sm text-muted mt-0.5">
           Match-by-match ratings and stats from the current season
         </p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-xs uppercase tracking-wide text-neutral-500 border-b border-neutral-100">
+            <tr className="text-xs uppercase tracking-wide text-muted border-b border-line">
               <th className="text-left font-medium px-4 py-2.5">Opponent</th>
               <th className="text-center font-medium px-2 py-2.5">Rating</th>
               <th className="text-center font-medium px-2 py-2.5">Min</th>
@@ -79,12 +79,12 @@ export function PlayerPerformances({ performances }: { performances: Performance
               <th className="text-center font-medium px-2 py-2.5" title="Duels won / total">Duels</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-50">
+          <tbody className="divide-y divide-line">
             {performances.map((p, i) => {
               const r = p.rating != null ? parseFloat(p.rating) : null;
               const res = resultBadge(p);
               return (
-                <tr key={i} className="hover:bg-neutral-50">
+                <tr key={i} className="hover:bg-surface-2">
                   <td className="px-4 py-2.5 whitespace-nowrap">
                     <Link href={`/matches/${p.matchSlug}`} className="flex items-center gap-2 group">
                       <span className={`inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold shrink-0 ${res.cls}`}>
@@ -93,10 +93,10 @@ export function PlayerPerformances({ performances }: { performances: Performance
                       {p.opponentLogo && (
                         <img src={p.opponentLogo} alt="" className="w-5 h-5 object-contain shrink-0" />
                       )}
-                      <span className="font-medium text-neutral-800 group-hover:text-blue-600">
+                      <span className="font-medium text-ink group-hover:text-brand">
                         {p.opponentName}
                       </span>
-                      <span className="text-xs text-neutral-400 hidden sm:inline">
+                      <span className="text-xs text-faint hidden sm:inline">
                         {format(new Date(p.scheduledAt), "d MMM")}
                       </span>
                     </Link>
@@ -107,23 +107,23 @@ export function PlayerPerformances({ performances }: { performances: Performance
                         {r.toFixed(1)}
                       </span>
                     ) : (
-                      <span className="text-neutral-300">–</span>
+                      <span className="text-faint">–</span>
                     )}
                   </td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">{n(p.minutes)}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums font-medium text-neutral-900">{n(p.goals)}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums font-medium text-neutral-900">{n(p.assists)}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">{n(p.minutes)}</td>
+                  <td className="px-2 py-2.5 text-center tabular-nums font-medium text-ink">{n(p.goals)}</td>
+                  <td className="px-2 py-2.5 text-center tabular-nums font-medium text-ink">{n(p.assists)}</td>
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">
                     {p.shotsTotal == null ? "–" : `${p.shotsOnTarget ?? 0}/${p.shotsTotal}`}
                   </td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">{n(p.keyPasses)}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">{n(p.keyPasses)}</td>
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">
                     {p.passAccuracy == null ? "–" : `${p.passAccuracy}%`}
                   </td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">
                     {p.dribblesAttempts == null ? "–" : `${p.dribblesSuccess ?? 0}/${p.dribblesAttempts}`}
                   </td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-neutral-600">
+                  <td className="px-2 py-2.5 text-center tabular-nums text-muted">
                     {p.duelsTotal == null ? "–" : `${p.duelsWon ?? 0}/${p.duelsTotal}`}
                   </td>
                 </tr>
