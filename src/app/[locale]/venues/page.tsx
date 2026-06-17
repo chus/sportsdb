@@ -68,7 +68,7 @@ export default async function VenuesPage() {
         }))}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Stadiums & Venues"
           subtitle="Explore football stadiums worldwide"
@@ -77,31 +77,31 @@ export default async function VenuesPage() {
             { label: "Home", href: "/" },
             { label: "Venues" },
           ]}
-          icon={<Building className="w-7 h-7 text-neutral-300" />}
+          icon={<Building className="w-7 h-7 text-faint" />}
         />
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Summary Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Venues</div>
-              <div className="text-2xl font-bold text-neutral-900">{totalVenues}</div>
-              <div className="text-xs text-neutral-500">stadiums tracked</div>
+            <div className="bg-surface rounded-xl border border-line p-4">
+              <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Total Venues</div>
+              <div className="text-2xl font-bold text-ink">{totalVenues}</div>
+              <div className="text-xs text-muted">stadiums tracked</div>
             </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Capacity</div>
-              <div className="text-2xl font-bold text-neutral-900">{(totalCapacity / 1000000).toFixed(1)}M</div>
-              <div className="text-xs text-neutral-500">combined seats</div>
+            <div className="bg-surface rounded-xl border border-line p-4">
+              <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Total Capacity</div>
+              <div className="text-2xl font-bold text-ink">{(totalCapacity / 1000000).toFixed(1)}M</div>
+              <div className="text-xs text-muted">combined seats</div>
             </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Countries</div>
-              <div className="text-2xl font-bold text-neutral-900">{countriesCount}</div>
-              <div className="text-xs text-neutral-500">worldwide</div>
+            <div className="bg-surface rounded-xl border border-line p-4">
+              <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Countries</div>
+              <div className="text-2xl font-bold text-ink">{countriesCount}</div>
+              <div className="text-xs text-muted">worldwide</div>
             </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Oldest Venue</div>
-              <div className="text-2xl font-bold text-neutral-900">{oldestVenue?.openedYear ?? "N/A"}</div>
-              <div className="text-xs text-neutral-500">{oldestVenue?.name.split(" ").slice(0, 2).join(" ")}</div>
+            <div className="bg-surface rounded-xl border border-line p-4">
+              <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Oldest Venue</div>
+              <div className="text-2xl font-bold text-ink">{oldestVenue?.openedYear ?? "N/A"}</div>
+              <div className="text-xs text-muted">{oldestVenue?.name.split(" ").slice(0, 2).join(" ")}</div>
             </div>
           </div>
 
@@ -112,8 +112,8 @@ export default async function VenuesPage() {
               return (
                 <section key={country}>
                   <div className="flex items-center gap-3 mb-4">
-                    <h2 className="text-xl font-bold text-neutral-900">{country}</h2>
-                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">
+                    <h2 className="text-xl font-bold text-ink">{country}</h2>
+                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-2 text-ink">
                       {countryVenues.length}
                     </span>
                   </div>
@@ -122,24 +122,24 @@ export default async function VenuesPage() {
                       <Link
                         key={venue.id}
                         href={`/venues/${venue.slug}`}
-                        className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow"
+                        className="bg-surface rounded-xl border border-line p-4 hover:shadow-md transition-shadow"
                       >
-                        <div className="font-medium text-neutral-900 mb-2">{venue.name}</div>
+                        <div className="font-medium text-ink mb-2">{venue.name}</div>
                         <div className="space-y-1">
                           {venue.city && (
-                            <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                            <div className="flex items-center gap-1.5 text-xs text-muted">
                               <MapPin className="w-3.5 h-3.5" />
                               {venue.city}
                             </div>
                           )}
                           {venue.capacity && (
-                            <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                            <div className="flex items-center gap-1.5 text-xs text-muted">
                               <Users className="w-3.5 h-3.5" />
                               {venue.capacity.toLocaleString()} capacity
                             </div>
                           )}
                           {venue.openedYear && (
-                            <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                            <div className="flex items-center gap-1.5 text-xs text-muted">
                               <Calendar className="w-3.5 h-3.5" />
                               Opened {venue.openedYear}
                             </div>

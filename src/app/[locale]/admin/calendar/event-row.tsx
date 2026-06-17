@@ -25,7 +25,7 @@ const TYPE_BADGE: Record<string, string> = {
   derby: "bg-orange-50 text-orange-700",
   final: "bg-purple-50 text-purple-700",
   tournament_start: "bg-indigo-50 text-indigo-700",
-  international_break: "bg-neutral-100 text-neutral-600",
+  international_break: "bg-surface-2 text-muted",
 };
 
 function formatEventType(type: string): string {
@@ -140,12 +140,12 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
             <span
               className={cn(
                 "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                TYPE_BADGE[event.type] ?? "bg-neutral-100 text-neutral-700"
+                TYPE_BADGE[event.type] ?? "bg-surface-2 text-ink"
               )}
             >
               {formatEventType(event.type)}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs font-medium text-ink">
               <Star className="h-3 w-3" />
               {event.importance}/5
             </span>
@@ -155,7 +155,7 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
               </span>
             )}
             {event.competitionName && (
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-muted">
                 {event.competitionName}
               </span>
             )}
@@ -168,17 +168,17 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
                 value={draftTitle}
                 onChange={(e) => setDraftTitle(e.target.value)}
                 placeholder="Event title"
-                className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-blue-500 focus:outline-none"
               />
               <textarea
                 value={draftDescription}
                 onChange={(e) => setDraftDescription(e.target.value)}
                 rows={2}
                 placeholder="Optional description"
-                className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-blue-500 focus:outline-none"
               />
               <div className="flex flex-wrap items-center gap-4">
-                <label className="flex items-center gap-2 text-xs font-medium text-neutral-600">
+                <label className="flex items-center gap-2 text-xs font-medium text-muted">
                   Importance: {draftImportance}
                   <input
                     type="range"
@@ -189,7 +189,7 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
                     className="w-32"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-neutral-600">
+                <label className="flex items-center gap-2 text-xs font-medium text-muted">
                   <input
                     type="checkbox"
                     checked={draftFeatured}
@@ -201,13 +201,13 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
             </div>
           ) : (
             <>
-              <h3 className="mt-2 text-base font-semibold text-neutral-900">
+              <h3 className="mt-2 text-base font-semibold text-ink">
                 {event.title}
               </h3>
               {event.description && (
-                <p className="mt-1 text-sm text-neutral-600">{event.description}</p>
+                <p className="mt-1 text-sm text-muted">{event.description}</p>
               )}
-              <p className="mt-1 text-xs text-neutral-400">
+              <p className="mt-1 text-xs text-faint">
                 {event.matchIds.length} linked match
                 {event.matchIds.length === 1 ? "" : "es"}
               </p>
@@ -237,7 +237,7 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
               <button
                 onClick={cancelEdit}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-2 disabled:opacity-50"
               >
                 <X className="h-3.5 w-3.5" />
                 Cancel
@@ -248,7 +248,7 @@ export function EventRow({ event: initial }: { event: EventRowData }) {
               <button
                 onClick={beginEdit}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-2 disabled:opacity-50"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 Edit

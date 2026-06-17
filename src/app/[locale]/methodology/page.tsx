@@ -58,7 +58,7 @@ export default function MethodologyPage() {
         ]}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Methodology"
           subtitle="How we source, process, and present football data"
@@ -77,9 +77,9 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-blue-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Data Sources</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Data Sources</h2>
               </div>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 DataSports aggregates football data from multiple trusted providers to build a
                 comprehensive and accurate picture of competitions worldwide. Our primary data
                 sources include Football-Data.org for match results, standings, and competition
@@ -88,7 +88,7 @@ export default function MethodologyPage() {
                 multiple sources, we reduce the risk of incomplete or inaccurate data reaching
                 our pages.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 We currently cover the top-tier leagues in England, Spain, Germany, Italy, France,
                 Portugal, the Netherlands, Brazil, and Argentina, as well as major international
                 tournaments including the UEFA Champions League, UEFA Europa League, Copa Libertadores, and
@@ -101,16 +101,16 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
                   <RefreshCw className="w-5 h-5 text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Update Frequency</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Update Frequency</h2>
               </div>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Match results and standings are updated automatically after each matchday,
                 typically within a few hours of the final whistle. Squad rosters and player
                 profiles are refreshed weekly to capture new signings, loan moves, and contract
                 changes. Transfer records are updated daily during active transfer windows and
                 weekly during the off-season.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Season-level statistics — including goals, assists, appearances, and clean
                 sheets — are recalculated with each data sync. Historical data for past
                 seasons is preserved and remains accessible for comparison and analysis.
@@ -122,9 +122,9 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-purple-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Data Quality</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Data Quality</h2>
               </div>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 We employ a multi-signal quality scoring system to evaluate every entity page
                 on the site. Teams are scored based on the completeness of their data — including
                 location, founding year, logo, squad size, and current standings. Players are
@@ -132,7 +132,7 @@ export default function MethodologyPage() {
                 Pages that fall below our quality threshold are excluded from search engine
                 indexing until their data is enriched to meet our standards.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Our data pipeline uses time-aware modeling with valid_from and valid_to
                 timestamps for player careers, ensuring that squad membership and transfer
                 history accurately reflect real-world timelines. Deduplication is enforced
@@ -146,9 +146,9 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
                   <PenTool className="w-5 h-5 text-orange-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Editorial Standards</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Editorial Standards</h2>
               </div>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Our editorial pieces — match reports, round recaps, player spotlights,
                 match previews, and season reviews — are produced directly from the verified
                 database. Each article is built around a specific source row: a finished
@@ -157,7 +157,7 @@ export default function MethodologyPage() {
                 is pulled from our pipeline at write time and is reproducible against the
                 same data points anywhere on the site.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Language models are used as a writing tool — the way a journalist uses a word
                 processor — to render structured data into readable English and Spanish at
                 the scale our coverage requires. We do not invent results, we do not
@@ -165,7 +165,7 @@ export default function MethodologyPage() {
                 fixtures that haven&apos;t happened. If the data isn&apos;t in the database,
                 it doesn&apos;t make it into an article.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Entity descriptions for teams, players, competitions, and venues are
                 generated procedurally from database records — current season context,
                 career statistics, competitive standings — and refresh automatically as
@@ -180,9 +180,9 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-yellow-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Corrections & Errors</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Corrections & Errors</h2>
               </div>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 Sports data is imperfect — provider feeds occasionally lag, transfers get
                 misattributed, lineups are revised after kickoff. When we find an error, we
                 correct it at the source: the database row is updated, and on the next ISR
@@ -191,7 +191,7 @@ export default function MethodologyPage() {
                 There is no manual chain of edits to keep in sync — the canonical record
                 is the database.
               </p>
-              <p className="text-neutral-700 leading-relaxed">
+              <p className="text-ink leading-relaxed">
                 If you spot an inaccuracy in a player&apos;s career history, a missing
                 match result, or a stat that doesn&apos;t match the official record, please
                 let us know via the{" "}
@@ -209,9 +209,9 @@ export default function MethodologyPage() {
                 <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-red-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-900 m-0">Competitions Covered</h2>
+                <h2 className="text-2xl font-bold text-ink m-0">Competitions Covered</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-neutral-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-ink">
                 <div className="flex items-center gap-2 py-1">
                   <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
                   Premier League (England)
@@ -268,7 +268,7 @@ export default function MethodologyPage() {
             </section>
 
             <section>
-              <p className="text-neutral-500 text-sm">
+              <p className="text-muted text-sm">
                 Questions about our data or methodology? Contact us at{" "}
                 <a
                   href="mailto:hello@datasports.co"

@@ -136,12 +136,12 @@ export function ComparePageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
+      <nav className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-line shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900"
+              className="flex items-center gap-2 text-ink hover:text-ink"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="text-sm font-medium">Back</span>
@@ -158,16 +158,16 @@ export function ComparePageContent() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+          <h2 className="text-3xl font-bold text-ink mb-2">
             Compare Players Side-by-Side
           </h2>
-          <p className="text-neutral-600">
+          <p className="text-muted">
             Add up to 4 players to compare their statistics
           </p>
           {!isPro && (
             <div className="mt-4 max-w-xs mx-auto">
               <div className="flex items-center justify-between text-sm mb-1.5">
-                <span className="text-neutral-600">
+                <span className="text-muted">
                   {comparisonsToday}/{comparisonLimit} comparisons used
                 </span>
                 <Link
@@ -177,7 +177,7 @@ export function ComparePageContent() {
                   Upgrade
                 </Link>
               </div>
-              <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all duration-500",
@@ -199,26 +199,26 @@ export function ComparePageContent() {
         {/* Search Bar */}
         {selectedPlayers.length < 4 && canCompare && (
           <div className="relative max-w-md mx-auto mb-8">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-faint" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for players to compare..."
-              className="w-full pl-10 pr-4 py-3 border-2 border-neutral-200 rounded-lg focus:border-blue-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-3 border-2 border-line rounded-lg focus:border-blue-500 focus:outline-none"
             />
             {loading && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 animate-spin" />
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-faint animate-spin" />
             )}
 
             {/* Search Results */}
             {searchResults.length > 0 && (
-              <div className="absolute top-full mt-2 left-0 right-0 bg-white rounded-lg shadow-xl border overflow-hidden z-10">
+              <div className="absolute top-full mt-2 left-0 right-0 bg-surface rounded-lg shadow-xl border overflow-hidden z-10">
                 {searchResults.map((player) => (
                   <button
                     key={player.id}
                     onClick={() => addPlayer(player)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-neutral-50 text-left"
+                    className="w-full flex items-center gap-3 p-3 hover:bg-surface-2 text-left"
                   >
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full overflow-hidden flex-shrink-0">
                       {player.imageUrl && (
@@ -232,10 +232,10 @@ export function ComparePageContent() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-neutral-900 truncate">
+                      <div className="font-medium text-ink truncate">
                         {player.name}
                       </div>
-                      <div className="text-sm text-neutral-500 truncate">
+                      <div className="text-sm text-muted truncate">
                         {player.teamName || "Free Agent"} • {player.position}
                       </div>
                     </div>
@@ -252,7 +252,7 @@ export function ComparePageContent() {
           {selectedPlayers.map((player) => (
             <div
               key={player.id}
-              className="bg-white rounded-2xl p-6 border-2 border-blue-500 shadow-lg relative"
+              className="bg-surface rounded-2xl p-6 border-2 border-blue-500 shadow-lg relative"
             >
               <button
                 onClick={() => removePlayer(player.id)}
@@ -279,14 +279,14 @@ export function ComparePageContent() {
                 </div>
                 <Link
                   href={`/players/${player.slug}`}
-                  className="font-bold text-lg text-neutral-900 hover:text-blue-600 transition-colors"
+                  className="font-bold text-lg text-ink hover:text-blue-600 transition-colors"
                 >
                   {player.name}
                 </Link>
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-muted">
                   {player.teamName || "Free Agent"}
                 </p>
-                <p className="text-xs text-neutral-500">{player.position}</p>
+                <p className="text-xs text-muted">{player.position}</p>
               </div>
             </div>
           ))}
@@ -297,13 +297,13 @@ export function ComparePageContent() {
               <div
                 key={`empty-${i}`}
                 className={cn(
-                  "bg-neutral-100 rounded-2xl p-6 border-2 border-dashed border-neutral-300 flex items-center justify-center min-h-[250px]",
+                  "bg-surface-2 rounded-2xl p-6 border-2 border-dashed border-line flex items-center justify-center min-h-[250px]",
                   !canCompare && "opacity-50"
                 )}
               >
                 <div className="text-center">
-                  <Plus className="w-12 h-12 text-neutral-400 mx-auto mb-2" />
-                  <p className="text-sm text-neutral-600">
+                  <Plus className="w-12 h-12 text-faint mx-auto mb-2" />
+                  <p className="text-sm text-muted">
                     {canCompare
                       ? "Search to add player"
                       : "Upgrade for more comparisons"}
@@ -315,7 +315,7 @@ export function ComparePageContent() {
 
         {/* Stats Comparison */}
         {selectedPlayers.length >= 2 && (
-          <div className="bg-white rounded-2xl p-8 border border-neutral-200 shadow-sm">
+          <div className="bg-surface rounded-2xl p-8 border border-line shadow-sm">
             <h3 className="text-2xl font-bold mb-6">
               Season Statistics Comparison
             </h3>
@@ -361,10 +361,10 @@ export function ComparePageContent() {
             <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-neutral-900 mb-2">
+            <h3 className="text-xl font-bold text-ink mb-2">
               Daily Limit Reached
             </h3>
-            <p className="text-neutral-600 mb-6">
+            <p className="text-muted mb-6">
               You&apos;ve used all {comparisonLimit} free comparisons for today.
               Upgrade to Pro for unlimited player comparisons, advanced stats, and more.
             </p>
@@ -379,7 +379,7 @@ export function ComparePageContent() {
         )}
 
         {selectedPlayers.length < 2 && canCompare && (
-          <div className="text-center py-12 text-neutral-500">
+          <div className="text-center py-12 text-muted">
             Add at least 2 players to compare their statistics
           </div>
         )}
@@ -402,8 +402,8 @@ function StatComparisonBar({
   return (
     <div>
       <div className="flex justify-between items-center mb-2">
-        <span className="font-medium text-neutral-700">{label}</span>
-        <span className="text-sm text-neutral-500">Higher is better</span>
+        <span className="font-medium text-ink">{label}</span>
+        <span className="text-sm text-muted">Higher is better</span>
       </div>
       <div className="space-y-2">
         {players.map((player) => {
@@ -413,10 +413,10 @@ function StatComparisonBar({
 
           return (
             <div key={player.id} className="flex items-center gap-3">
-              <span className="text-sm font-medium text-neutral-700 w-32 truncate">
+              <span className="text-sm font-medium text-ink w-32 truncate">
                 {player.name}
               </span>
-              <div className="flex-1 h-10 bg-neutral-100 rounded-lg overflow-hidden relative">
+              <div className="flex-1 h-10 bg-surface-2 rounded-lg overflow-hidden relative">
                 <div
                   className={cn(
                     "h-full transition-all duration-500 flex items-center justify-end pr-3",

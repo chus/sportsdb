@@ -58,10 +58,10 @@ export default async function GamesPage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-ink mb-4">
           Football Games
         </h1>
-        <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <p className="text-lg text-muted max-w-2xl mx-auto">
           Predict scores, pick winners, and test your football knowledge.
           Compete with the community and climb the leaderboard.
         </p>
@@ -79,7 +79,7 @@ export default async function GamesPage() {
           </div>
           <Link
             href="/pricing"
-            className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:shadow-lg transition-all"
+            className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-surface text-blue-600 font-semibold rounded-lg hover:shadow-lg transition-all"
           >
             <Zap className="w-5 h-5" />
             Go Pro
@@ -102,10 +102,10 @@ export default async function GamesPage() {
               >
                 <Icon className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-neutral-900 mb-2">
+              <h2 className="text-xl font-bold text-ink mb-2">
                 {game.title}
               </h2>
-              <p className="text-neutral-600 text-sm mb-4">
+              <p className="text-muted text-sm mb-4">
                 {game.description}
               </p>
               <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 group-hover:gap-2 transition-all">
@@ -117,23 +117,23 @@ export default async function GamesPage() {
       </div>
 
       {/* Combined leaderboard */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+      <div className="bg-surface rounded-xl border border-line p-6">
         <div className="flex items-center gap-3 mb-6">
           <Trophy className="w-6 h-6 text-yellow-500" />
-          <h2 className="text-2xl font-bold text-neutral-900">
+          <h2 className="text-2xl font-bold text-ink">
             Global Leaderboard
           </h2>
         </div>
 
         {leaderboard.length === 0 ? (
-          <p className="text-neutral-500 text-center py-8">
+          <p className="text-muted text-center py-8">
             No scores yet. Be the first to play!
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-200 text-neutral-500">
+                <tr className="border-b border-line text-muted">
                   <th className="text-left py-3 px-2 font-medium">#</th>
                   <th className="text-left py-3 px-2 font-medium">Player</th>
                   <th className="text-right py-3 px-2 font-medium">Prode</th>
@@ -148,24 +148,24 @@ export default async function GamesPage() {
                 {leaderboard.map((entry) => (
                   <tr
                     key={entry.userId}
-                    className="border-b border-neutral-100 hover:bg-neutral-50"
+                    className="border-b border-line hover:bg-surface-2"
                   >
-                    <td className="py-3 px-2 font-semibold text-neutral-400">
+                    <td className="py-3 px-2 font-semibold text-faint">
                       {entry.rank}
                     </td>
-                    <td className="py-3 px-2 font-medium text-neutral-900">
+                    <td className="py-3 px-2 font-medium text-ink">
                       {entry.userName}
                     </td>
-                    <td className="py-3 px-2 text-right text-neutral-600">
+                    <td className="py-3 px-2 text-right text-muted">
                       {entry.prodePoints}
                     </td>
-                    <td className="py-3 px-2 text-right text-neutral-600">
+                    <td className="py-3 px-2 text-right text-muted">
                       {entry.pickemPoints}
                     </td>
-                    <td className="py-3 px-2 text-right text-neutral-600">
+                    <td className="py-3 px-2 text-right text-muted">
                       {entry.challengePoints}
                     </td>
-                    <td className="py-3 px-2 text-right font-bold text-neutral-900">
+                    <td className="py-3 px-2 text-right font-bold text-ink">
                       {entry.totalPoints}
                     </td>
                   </tr>

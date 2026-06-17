@@ -83,44 +83,44 @@ export default function AdminContentPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Content</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-bold text-ink">Content</h1>
+        <p className="mt-1 text-sm text-muted">
           Manage articles and publication status
         </p>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-neutral-100 bg-neutral-50">
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+              <tr className="border-b border-line bg-surface-2">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Title
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Type
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Competition
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Status
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Created At
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-line">
               {loading ? (
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-12 text-center text-neutral-400"
+                    className="px-6 py-12 text-center text-faint"
                   >
                     Loading...
                   </td>
@@ -129,7 +129,7 @@ export default function AdminContentPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-12 text-center text-neutral-400"
+                    className="px-6 py-12 text-center text-faint"
                   >
                     No articles found
                   </td>
@@ -139,22 +139,22 @@ export default function AdminContentPage() {
                   <tr
                     key={article.id}
                     className={cn(
-                      "transition-colors hover:bg-neutral-50",
+                      "transition-colors hover:bg-surface-2",
                       updatingId === article.id && "opacity-50"
                     )}
                   >
                     <td
-                      className="max-w-xs px-6 py-4 font-medium text-neutral-900"
+                      className="max-w-xs px-6 py-4 font-medium text-ink"
                       title={article.title}
                     >
                       {truncateTitle(article.title)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">
+                      <span className="inline-flex items-center rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink">
                         {formatType(article.type)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-neutral-600">
+                    <td className="px-6 py-4 text-muted">
                       {article.competitionName || "—"}
                     </td>
                     <td className="px-6 py-4">
@@ -170,7 +170,7 @@ export default function AdminContentPage() {
                           article.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-neutral-500">
+                    <td className="px-6 py-4 text-muted">
                       {article.createdAt
                         ? new Date(article.createdAt).toLocaleDateString(
                             "en-US",
@@ -209,8 +209,8 @@ export default function AdminContentPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-neutral-100 px-6 py-4">
-            <p className="text-sm text-neutral-500">
+          <div className="flex items-center justify-between border-t border-line px-6 py-4">
+            <p className="text-sm text-muted">
               Showing {(page - 1) * limit + 1} to{" "}
               {Math.min(page * limit, total)} of {total} articles
             </p>
@@ -218,18 +218,18 @@ export default function AdminContentPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Prev
               </button>
-              <span className="px-2 text-sm text-neutral-500">
+              <span className="px-2 text-sm text-muted">
                 {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />

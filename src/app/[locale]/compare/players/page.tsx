@@ -136,20 +136,20 @@ function StatComparison({
   const equal = value1 === value2;
 
   return (
-    <div className="flex items-center py-3 border-b border-neutral-100 last:border-0">
+    <div className="flex items-center py-3 border-b border-line last:border-0">
       <div className="flex-1 text-right">
-        <span className={`text-lg font-semibold ${p1Better ? "text-green-600" : equal ? "text-neutral-700" : "text-neutral-500"}`}>
+        <span className={`text-lg font-semibold ${p1Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
           {value1.toLocaleString()}
         </span>
       </div>
       <div className="w-32 text-center">
-        <div className="flex items-center justify-center gap-2 text-neutral-500">
+        <div className="flex items-center justify-center gap-2 text-muted">
           <Icon className="w-4 h-4" />
           <span className="text-sm">{label}</span>
         </div>
       </div>
       <div className="flex-1 text-left">
-        <span className={`text-lg font-semibold ${p2Better ? "text-green-600" : equal ? "text-neutral-700" : "text-neutral-500"}`}>
+        <span className={`text-lg font-semibold ${p2Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
           {value2.toLocaleString()}
         </span>
       </div>
@@ -160,24 +160,24 @@ function StatComparison({
 function PlayerCard({ player }: { player: PlayerWithStats }) {
   return (
     <PlayerLink slug={player.slug} isLinkWorthy={player.isIndexable} className="block">
-      <div className="text-center p-6 hover:bg-neutral-50 transition-colors rounded-xl">
-        <div className="w-24 h-24 bg-neutral-100 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+      <div className="text-center p-6 hover:bg-surface-2 transition-colors rounded-xl">
+        <div className="w-24 h-24 bg-surface-2 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
           {player.imageUrl ? (
             <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" width={96} height={96} />
           ) : (
-            <Users className="w-12 h-12 text-neutral-300" />
+            <Users className="w-12 h-12 text-faint" />
           )}
         </div>
-        <h2 className="text-xl font-bold text-neutral-900 hover:text-blue-600 transition-colors">
+        <h2 className="text-xl font-bold text-ink hover:text-blue-600 transition-colors">
           {player.name}
         </h2>
-        <p className="text-neutral-500">{player.position}</p>
+        <p className="text-muted">{player.position}</p>
         {player.team && (
           <div className="flex items-center justify-center gap-2 mt-2">
             {player.team.logoUrl && (
               <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-5 h-5 object-contain" width={20} height={20} />
             )}
-            <span className="text-sm text-neutral-600">{player.team.name}</span>
+            <span className="text-sm text-muted">{player.team.name}</span>
           </div>
         )}
       </div>
@@ -188,10 +188,10 @@ function PlayerCard({ player }: { player: PlayerWithStats }) {
 function EmptySlot({ position }: { position: 1 | 2 }) {
   return (
     <div className="text-center p-6">
-      <div className="w-24 h-24 bg-neutral-100 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-dashed border-neutral-300">
-        <Users className="w-12 h-12 text-neutral-300" />
+      <div className="w-24 h-24 bg-surface-2 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-dashed border-line">
+        <Users className="w-12 h-12 text-faint" />
       </div>
-      <p className="text-neutral-500">
+      <p className="text-muted">
         Search for Player {position}
       </p>
     </div>
@@ -218,27 +218,27 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         ]}
       />
       <PageTracker />
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/players"
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-4"
+            className="inline-flex items-center gap-2 text-muted hover:text-ink mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Search
           </Link>
-          <h1 className="text-3xl font-bold text-neutral-900">Compare Players</h1>
-          <p className="text-neutral-500 mt-1">
+          <h1 className="text-3xl font-bold text-ink">Compare Players</h1>
+          <p className="text-muted mt-1">
             Select two players to compare their statistics side by side
           </p>
         </div>
 
         {/* Player Selection */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-3">
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <label className="block text-sm font-medium text-ink mb-3">
               Player 1
             </label>
             <PlayerSearchSelector
@@ -248,8 +248,8 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
               placeholder="Search for first player..."
             />
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-3">
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <label className="block text-sm font-medium text-ink mb-3">
               Player 2
             </label>
             <PlayerSearchSelector
@@ -262,16 +262,16 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         </div>
 
         {/* Comparison View */}
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+        <div className="bg-surface rounded-xl border border-line overflow-hidden">
           {/* Player Headers */}
-          <div className="grid grid-cols-3 border-b border-neutral-200">
-            <div className="border-r border-neutral-200">
+          <div className="grid grid-cols-3 border-b border-line">
+            <div className="border-r border-line">
               {player1 ? <PlayerCard player={player1} /> : <EmptySlot position={1} />}
             </div>
-            <div className="flex items-center justify-center bg-neutral-50">
-              <span className="text-2xl font-bold text-neutral-300">VS</span>
+            <div className="flex items-center justify-center bg-surface-2">
+              <span className="text-2xl font-bold text-faint">VS</span>
             </div>
-            <div className="border-l border-neutral-200">
+            <div className="border-l border-line">
               {player2 ? <PlayerCard player={player2} /> : <EmptySlot position={2} />}
             </div>
           </div>
@@ -279,7 +279,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           {/* Stats Comparison */}
           {player1 && player2 ? (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 text-center">
+              <h3 className="text-lg font-semibold text-ink mb-4 text-center">
                 Career Statistics
               </h3>
               <StatComparison
@@ -323,8 +323,8 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
 
               {/* Goals per game ratio */}
               {player1.totalStats.appearances > 0 && player2.totalStats.appearances > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-200">
-                  <h4 className="text-sm font-medium text-neutral-500 text-center mb-4">
+                <div className="mt-6 pt-4 border-t border-line">
+                  <h4 className="text-sm font-medium text-muted text-center mb-4">
                     Ratios
                   </h4>
                   <StatComparison
@@ -345,10 +345,10 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           ) : (
             <div className="p-12 text-center">
               <Users className="w-16 h-16 text-neutral-200 mx-auto mb-4" />
-              <p className="text-neutral-500">
+              <p className="text-muted">
                 Select two players above to compare their statistics
               </p>
-              <p className="text-sm text-neutral-400 mt-2">
+              <p className="text-sm text-faint mt-2">
                 Try: erling-haaland vs mohamed-salah
               </p>
             </div>
@@ -356,7 +356,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
 
           {/* External Links */}
           {player1 && player2 && (player1.wikipediaUrl || player1.websiteUrl || player1.instagramHandle || player1.twitterHandle || player2.wikipediaUrl || player2.websiteUrl || player2.instagramHandle || player2.twitterHandle) && (
-            <div className="grid grid-cols-2 gap-6 p-6 border-t border-neutral-200">
+            <div className="grid grid-cols-2 gap-6 p-6 border-t border-line">
               <ExternalLinks
                 wikipediaUrl={player1.wikipediaUrl}
                 websiteUrl={player1.websiteUrl}

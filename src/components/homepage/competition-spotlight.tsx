@@ -9,7 +9,7 @@ function resultDot(r: {
 }): { letter: string; className: string } {
   const h = r.homeScore ?? 0;
   const a = r.awayScore ?? 0;
-  if (h === a) return { letter: "D", className: "bg-neutral-300 text-neutral-700" };
+  if (h === a) return { letter: "D", className: "bg-neutral-300 text-ink" };
   return { letter: "W", className: "bg-green-500 text-white" };
 }
 
@@ -31,15 +31,15 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900">Competition Spotlight</h2>
-          <p className="text-sm text-neutral-500 mt-1">Featured league today</p>
+          <h2 className="text-2xl font-bold text-ink">Competition Spotlight</h2>
+          <p className="text-sm text-muted mt-1">Featured league today</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 rounded-xl bg-surface/20 flex items-center justify-center flex-shrink-0">
               {competition.logoUrl ? (
                 <ImageWithFallback
                   src={competition.logoUrl}
@@ -71,7 +71,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
           <div className="p-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {leader && (
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
                   <TrendingUp className="w-3 h-3" />
                   LEAGUE LEADER
                 </div>
@@ -79,7 +79,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
                   href={`/teams/${leader.slug}`}
                   className="flex items-center gap-3 group"
                 >
-                  <div className="w-10 h-10 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-surface-2 border border-line flex items-center justify-center flex-shrink-0">
                     {leader.logoUrl ? (
                       <ImageWithFallback
                         src={leader.logoUrl}
@@ -89,14 +89,14 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
                         className="w-8 h-8 object-contain"
                       />
                     ) : (
-                      <Shield className="w-5 h-5 text-neutral-400" />
+                      <Shield className="w-5 h-5 text-faint" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                    <div className="font-semibold text-sm text-ink truncate group-hover:text-blue-600 transition-colors">
                       {leader.name}
                     </div>
-                    <div className="text-xs text-neutral-500">
+                    <div className="text-xs text-muted">
                       {leader.points} pts · {leader.played} played
                     </div>
                   </div>
@@ -106,7 +106,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
 
             {topScorer && (
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
                   <Target className="w-3 h-3" />
                   TOP SCORER
                 </div>
@@ -114,10 +114,10 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
                   href={`/players/${topScorer.slug}`}
                   className="group block"
                 >
-                  <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                  <div className="font-semibold text-sm text-ink truncate group-hover:text-blue-600 transition-colors">
                     {topScorer.name}
                   </div>
-                  <div className="text-xs text-neutral-500 truncate">
+                  <div className="text-xs text-muted truncate">
                     {topScorer.teamName} · {topScorer.goals} goals
                   </div>
                 </Link>
@@ -126,17 +126,17 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
 
             {nextFixture && (
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted mb-2">
                   NEXT FIXTURE
                 </div>
                 <Link
                   href={`/matches/${nextFixture.slug ?? nextFixture.id}`}
                   className="group block"
                 >
-                  <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                  <div className="font-semibold text-sm text-ink truncate group-hover:text-blue-600 transition-colors">
                     {nextFixture.homeTeam.name} vs {nextFixture.awayTeam.name}
                   </div>
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-xs text-muted">
                     {new Date(nextFixture.scheduledAt).toLocaleDateString("en-US", {
                       weekday: "short",
                       day: "numeric",
@@ -149,7 +149,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
 
             {recentForm.length > 0 && (
               <div>
-                <div className="text-xs font-medium text-neutral-500 mb-2">
+                <div className="text-xs font-medium text-muted mb-2">
                   RECENT RESULTS
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -173,11 +173,11 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
           <div className="p-6 grid md:grid-cols-2 gap-6">
             {teamCount > 0 && (
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-3">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted mb-3">
                   <Users className="w-3 h-3" />
                   TEAMS
                 </div>
-                <p className="text-sm font-semibold text-neutral-900 mb-3">
+                <p className="text-sm font-semibold text-ink mb-3">
                   {teamCount} teams compete
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -185,7 +185,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
                     <Link
                       key={t.slug}
                       href={`/teams/${t.slug}`}
-                      className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-50 border border-neutral-200 rounded-full text-xs font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-2 border border-line rounded-full text-xs font-medium text-ink hover:bg-surface-2 transition-colors"
                     >
                       {t.logoUrl ? (
                         <ImageWithFallback
@@ -196,7 +196,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
                           className="w-3.5 h-3.5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-3 h-3 text-neutral-400" />
+                        <Shield className="w-3 h-3 text-faint" />
                       )}
                       {t.name}
                     </Link>
@@ -205,11 +205,11 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
               </div>
             )}
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 mb-3">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-muted mb-3">
                 <Globe className="w-3 h-3" />
                 ABOUT
               </div>
-              <p className="text-sm text-neutral-700">
+              <p className="text-sm text-ink">
                 {competition.country && (
                   <span className="font-semibold">{competition.country}</span>
                 )}
@@ -220,7 +220,7 @@ export function CompetitionSpotlight({ data }: { data: Spotlight }) {
           </div>
         )}
 
-        <div className="border-t border-neutral-100 px-6 py-3 bg-neutral-50">
+        <div className="border-t border-line px-6 py-3 bg-surface-2">
           <Link
             href={`/competitions/${competition.slug}`}
             className="text-sm font-medium text-blue-600 hover:text-blue-700"

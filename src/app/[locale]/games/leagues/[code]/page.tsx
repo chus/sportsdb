@@ -39,20 +39,20 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Link
         href="/games/leagues"
-        className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-700 mb-6 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Leagues
       </Link>
 
       {/* Header */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-6">
+      <div className="bg-surface rounded-xl border border-line p-6 mb-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 mb-1">
+            <h1 className="text-2xl font-bold text-ink mb-1">
               {league.name}
             </h1>
-            <div className="flex items-center gap-4 text-sm text-neutral-500">
+            <div className="flex items-center gap-4 text-sm text-muted">
               <div className="flex items-center gap-1.5">
                 <Users className="w-4 h-4" />
                 {members.length} members
@@ -66,22 +66,22 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
       <div className="grid md:grid-cols-3 gap-6">
         {/* Leaderboard */}
         <div className="md:col-span-2">
-          <div className="bg-white rounded-xl border border-neutral-200 p-6">
+          <div className="bg-surface rounded-xl border border-line p-6">
             <div className="flex items-center gap-2 mb-6">
               <Trophy className="w-5 h-5 text-yellow-500" />
-              <h2 className="text-lg font-bold text-neutral-900">
+              <h2 className="text-lg font-bold text-ink">
                 League Leaderboard
               </h2>
             </div>
 
             {leaderboard.length === 0 ? (
-              <p className="text-neutral-500 text-center py-8">
+              <p className="text-muted text-center py-8">
                 No scores yet. Start playing to see rankings!
               </p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-200 text-neutral-500">
+                  <tr className="border-b border-line text-muted">
                     <th className="text-left py-3 px-2 font-medium">#</th>
                     <th className="text-left py-3 px-2 font-medium">Player</th>
                     <th className="text-right py-3 px-2 font-medium">Prode</th>
@@ -98,24 +98,24 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                   {leaderboard.map((entry) => (
                     <tr
                       key={entry.userId}
-                      className="border-b border-neutral-100 hover:bg-neutral-50"
+                      className="border-b border-line hover:bg-surface-2"
                     >
-                      <td className="py-3 px-2 font-semibold text-neutral-400">
+                      <td className="py-3 px-2 font-semibold text-faint">
                         {entry.rank}
                       </td>
-                      <td className="py-3 px-2 font-medium text-neutral-900">
+                      <td className="py-3 px-2 font-medium text-ink">
                         {entry.userName}
                       </td>
-                      <td className="py-3 px-2 text-right text-neutral-600">
+                      <td className="py-3 px-2 text-right text-muted">
                         {entry.prodePoints}
                       </td>
-                      <td className="py-3 px-2 text-right text-neutral-600">
+                      <td className="py-3 px-2 text-right text-muted">
                         {entry.pickemPoints}
                       </td>
-                      <td className="py-3 px-2 text-right text-neutral-600">
+                      <td className="py-3 px-2 text-right text-muted">
                         {entry.challengePoints}
                       </td>
-                      <td className="py-3 px-2 text-right font-bold text-neutral-900">
+                      <td className="py-3 px-2 text-right font-bold text-ink">
                         {entry.totalPoints}
                       </td>
                     </tr>
@@ -128,18 +128,18 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
 
         {/* Members sidebar */}
         <div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5">
-            <h3 className="font-bold text-neutral-900 mb-4">Members</h3>
+          <div className="bg-surface rounded-xl border border-line p-5">
+            <h3 className="font-bold text-ink mb-4">Members</h3>
             <div className="space-y-3">
               {members.map((m) => (
                 <div
                   key={m.userId}
                   className="flex items-center gap-3 text-sm"
                 >
-                  <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-semibold text-neutral-600">
+                  <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center text-xs font-semibold text-muted">
                     {(m.userName?.[0] || "?").toUpperCase()}
                   </div>
-                  <span className="font-medium text-neutral-900 truncate">
+                  <span className="font-medium text-ink truncate">
                     {m.userName || "Anonymous"}
                   </span>
                 </div>

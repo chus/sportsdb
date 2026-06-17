@@ -79,7 +79,7 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
         />
       )}
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title={`${competition.name} Top Assists`}
           subtitle={`Leading assist providers in the ${competition.name} this season`}
@@ -102,7 +102,7 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
                 <Link
                   key={s}
                   href={`/top-assists/${slug}/${s.replace("/", "-")}`}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-white border border-neutral-200 text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-surface border border-line text-ink hover:border-indigo-300 hover:text-indigo-600 transition-colors"
                 >
                   {s}
                 </Link>
@@ -111,19 +111,19 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
           )}
 
           {leaders.length === 0 ? (
-            <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
-              <Handshake className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-neutral-900 mb-2">No stats available yet</h2>
-              <p className="text-neutral-500">
+            <div className="bg-surface rounded-xl border border-line p-12 text-center">
+              <Handshake className="w-16 h-16 text-faint mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-ink mb-2">No stats available yet</h2>
+              <p className="text-muted">
                 Assist data will appear once the current season is underway.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="bg-surface rounded-xl border border-line overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
+                    <tr className="bg-surface-2 text-left text-sm text-muted">
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">#</th>
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Player</th>
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Team</th>
@@ -132,26 +132,26 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-100">
+                  <tbody className="divide-y divide-line">
                     {leaders.map(({ stat, player, team }, index) => (
-                      <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
-                        <td className="px-2 sm:px-4 py-3 font-medium text-neutral-400">{index + 1}</td>
+                      <tr key={stat.id} className="hover:bg-surface-2 transition-colors">
+                        <td className="px-2 sm:px-4 py-3 font-medium text-faint">{index + 1}</td>
                         <td className="px-2 sm:px-4 py-3">
                           <PlayerLink
                             slug={player.slug}
                             isLinkWorthy={player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
-                            <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
                               {player.imageUrl ? (
                                 <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" width={32} height={32} />
                               ) : (
-                                <User className="w-4 h-4 text-neutral-400" />
+                                <User className="w-4 h-4 text-faint" />
                               )}
                             </div>
                             <div>
                               <div className="font-medium">{player.name}</div>
-                              <div className="text-xs text-neutral-500">{player.nationality}</div>
+                              <div className="text-xs text-muted">{player.nationality}</div>
                             </div>
                           </PlayerLink>
                         </td>
@@ -163,15 +163,15 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
                             {team.logoUrl ? (
                               <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" width={20} height={20} />
                             ) : (
-                              <Shield className="w-4 h-4 text-neutral-300" />
+                              <Shield className="w-4 h-4 text-faint" />
                             )}
                             <span className="text-sm hidden md:inline">{team.name}</span>
                             <span className="text-sm md:hidden">{team.shortName || team.name}</span>
                           </Link>
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600 hidden sm:table-cell">{stat.appearances}</td>
-                        <td className="px-2 sm:px-4 py-3 text-center font-bold text-neutral-900">{stat.assists}</td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">{stat.goals}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-muted hidden sm:table-cell">{stat.appearances}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center font-bold text-ink">{stat.assists}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-muted">{stat.goals}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -184,14 +184,14 @@ export default async function CompetitionTopAssistsPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-3 mt-6">
             <Link
               href={`/competitions/${slug}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-blue-300 hover:text-blue-600 transition-colors"
             >
               <Trophy className="w-4 h-4" />
               {competition.name} Standings
             </Link>
             <Link
               href={`/top-scorers/${slug}`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-blue-300 hover:text-blue-600 transition-colors"
             >
               Top Scorers →
             </Link>

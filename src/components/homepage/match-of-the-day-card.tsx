@@ -13,7 +13,7 @@ export function MatchOfTheDayCard({ data }: { data: MatchOfTheDay }) {
   return (
     <Link
       href={`/matches/${data.slug ?? data.id}`}
-      className="group block bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl transition-shadow"
+      className="group block bg-surface rounded-xl border border-line overflow-hidden hover:shadow-xl transition-shadow"
     >
       <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-white flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -34,14 +34,14 @@ export function MatchOfTheDayCard({ data }: { data: MatchOfTheDay }) {
               className="w-4 h-4 object-contain"
             />
           )}
-          <span className="text-xs font-medium text-neutral-500">
+          <span className="text-xs font-medium text-muted">
             {data.competition.name}
           </span>
         </div>
 
         <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-4">
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-2">
+            <div className="w-16 h-16 rounded-full bg-surface-2 border border-line flex items-center justify-center mb-2">
               {data.homeTeam.logoUrl ? (
                 <ImageWithFallback
                   src={data.homeTeam.logoUrl}
@@ -51,26 +51,26 @@ export function MatchOfTheDayCard({ data }: { data: MatchOfTheDay }) {
                   className="w-12 h-12 object-contain"
                 />
               ) : (
-                <Shield className="w-8 h-8 text-neutral-400" />
+                <Shield className="w-8 h-8 text-faint" />
               )}
             </div>
-            <span className="text-sm font-semibold text-neutral-900 line-clamp-2">
+            <span className="text-sm font-semibold text-ink line-clamp-2">
               {data.homeTeam.name}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-4xl font-bold text-neutral-900 tabular-nums">
+            <span className="text-4xl font-bold text-ink tabular-nums">
               {data.homeScore}
             </span>
-            <span className="text-neutral-300 text-2xl">–</span>
-            <span className="text-4xl font-bold text-neutral-900 tabular-nums">
+            <span className="text-faint text-2xl">–</span>
+            <span className="text-4xl font-bold text-ink tabular-nums">
               {data.awayScore}
             </span>
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-2">
+            <div className="w-16 h-16 rounded-full bg-surface-2 border border-line flex items-center justify-center mb-2">
               {data.awayTeam.logoUrl ? (
                 <ImageWithFallback
                   src={data.awayTeam.logoUrl}
@@ -80,22 +80,22 @@ export function MatchOfTheDayCard({ data }: { data: MatchOfTheDay }) {
                   className="w-12 h-12 object-contain"
                 />
               ) : (
-                <Shield className="w-8 h-8 text-neutral-400" />
+                <Shield className="w-8 h-8 text-faint" />
               )}
             </div>
-            <span className="text-sm font-semibold text-neutral-900 line-clamp-2">
+            <span className="text-sm font-semibold text-ink line-clamp-2">
               {data.awayTeam.name}
             </span>
           </div>
         </div>
 
         {data.linkedArticle && (
-          <div className="border-t border-neutral-100 pt-4 mt-4">
+          <div className="border-t border-line pt-4 mt-4">
             <p className="text-xs font-medium text-orange-600 mb-1">Read the story</p>
-            <p className="text-sm font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+            <p className="text-sm font-semibold text-ink group-hover:text-blue-600 transition-colors line-clamp-1">
               {data.linkedArticle.title}
             </p>
-            <p className="text-xs text-neutral-500 line-clamp-2 mt-1">
+            <p className="text-xs text-muted line-clamp-2 mt-1">
               {data.linkedArticle.excerpt}
             </p>
           </div>

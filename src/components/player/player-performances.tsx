@@ -41,7 +41,7 @@ function ratingClasses(rating: number): string {
 }
 
 function resultBadge(p: Performance): { label: string; cls: string } {
-  if (p.homeScore == null || p.awayScore == null) return { label: "–", cls: "text-neutral-400" };
+  if (p.homeScore == null || p.awayScore == null) return { label: "–", cls: "text-faint" };
   const isHome = p.teamId === p.homeTeamId;
   const gf = isHome ? p.homeScore : p.awayScore;
   const ga = isHome ? p.awayScore : p.homeScore;

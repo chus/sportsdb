@@ -30,7 +30,7 @@ export function LiveMatchesSection({ competitionFilter }: LiveMatchesSectionProp
           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
         </span>
         <h2 className="text-lg font-bold text-red-600 uppercase tracking-wide">Live Now</h2>
-        <span className="text-xs text-neutral-400 ml-auto">
+        <span className="text-xs text-faint ml-auto">
           {lastUpdated ? `Updated ${formatDistanceToNowStrict(lastUpdated)} ago` : ""}
         </span>
       </div>
@@ -41,10 +41,10 @@ export function LiveMatchesSection({ competitionFilter }: LiveMatchesSectionProp
           <Link
             key={match.id}
             href={`/matches/${match.slug ?? match.id}`}
-            className="min-w-[280px] snap-start flex-shrink-0 bg-white border border-red-200 rounded-xl p-4 hover:shadow-lg hover:border-red-300 transition-all"
+            className="min-w-[280px] snap-start flex-shrink-0 bg-surface border border-red-200 rounded-xl p-4 hover:shadow-lg hover:border-red-300 transition-all"
           >
             {/* Competition badge */}
-            <div className="text-xs text-neutral-500 mb-2 truncate">
+            <div className="text-xs text-muted mb-2 truncate">
               {match.competition?.name}
             </div>
 
@@ -70,7 +70,7 @@ export function LiveMatchesSection({ competitionFilter }: LiveMatchesSectionProp
 
               {/* Score */}
               <div className="flex flex-col items-center min-w-[50px]">
-                <span className="text-xl font-bold text-neutral-900">
+                <span className="text-xl font-bold text-ink">
                   {match.homeScore ?? 0} - {match.awayScore ?? 0}
                 </span>
                 <span className="text-xs font-semibold text-red-600 flex items-center gap-1">

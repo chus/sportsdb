@@ -177,11 +177,11 @@ export function PlayerSearchSelector({
           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
             <Users className="w-4 h-4 text-blue-600" />
           </div>
-          <span className="flex-1 font-medium text-neutral-900">{selectedName}</span>
+          <span className="flex-1 font-medium text-ink">{selectedName}</span>
           <button
             type="button"
             onClick={handleClear}
-            className="p-1 text-neutral-400 hover:text-neutral-600 transition-colors"
+            className="p-1 text-faint hover:text-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -192,7 +192,7 @@ export function PlayerSearchSelector({
           {isLoading ? (
             <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
           ) : (
-            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${isFocused ? 'text-blue-500' : 'text-neutral-400'}`} />
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${isFocused ? 'text-blue-500' : 'text-faint'}`} />
           )}
           <input
             ref={inputRef}
@@ -202,7 +202,7 @@ export function PlayerSearchSelector({
             onFocus={() => setIsFocused(true)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full pl-12 pr-4 py-3 border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 font-medium placeholder:text-neutral-500 placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400 transition-all"
+            className="w-full pl-12 pr-4 py-3 border-2 border-line rounded-xl bg-surface text-ink font-medium placeholder:text-muted placeholder:font-normal focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400 transition-all"
           />
         </div>
       )}
@@ -219,16 +219,16 @@ export function PlayerSearchSelector({
           />
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-20 max-h-[320px] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-surface border border-line rounded-xl shadow-xl overflow-hidden z-20 max-h-[320px] overflow-y-auto"
           >
             {isLoading && results.length === 0 && (
               <div className="p-2">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center gap-3 px-3 py-3 animate-pulse">
-                    <div className="w-10 h-10 bg-neutral-100 rounded-full" />
+                    <div className="w-10 h-10 bg-surface-2 rounded-full" />
                     <div className="flex-1">
-                      <div className="h-4 bg-neutral-100 rounded w-2/3 mb-2" />
-                      <div className="h-3 bg-neutral-50 rounded w-1/2" />
+                      <div className="h-4 bg-surface-2 rounded w-2/3 mb-2" />
+                      <div className="h-3 bg-surface-2 rounded w-1/2" />
                     </div>
                   </div>
                 ))}
@@ -237,8 +237,8 @@ export function PlayerSearchSelector({
 
             {!isLoading && results.length === 0 && query.length >= 2 && (
               <div className="px-4 py-6 text-center">
-                <Users className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                <p className="text-neutral-500 text-sm">
+                <Users className="w-8 h-8 text-faint mx-auto mb-2" />
+                <p className="text-muted text-sm">
                   No players found for "{query}"
                 </p>
               </div>
@@ -254,11 +254,11 @@ export function PlayerSearchSelector({
                     className={`w-full px-3 py-2.5 text-left flex items-center gap-3 rounded-lg transition-colors ${
                       highlightedIndex === index
                         ? "bg-blue-50"
-                        : "hover:bg-neutral-50"
+                        : "hover:bg-surface-2"
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${
-                      highlightedIndex === index ? "bg-blue-100" : "bg-neutral-100"
+                      highlightedIndex === index ? "bg-blue-100" : "bg-surface-2"
                     }`}>
                       {(result as any).imageUrl ? (
                         <img
@@ -268,18 +268,18 @@ export function PlayerSearchSelector({
                         />
                       ) : (
                         <Users className={`w-5 h-5 ${
-                          highlightedIndex === index ? "text-blue-600" : "text-neutral-500"
+                          highlightedIndex === index ? "text-blue-600" : "text-muted"
                         }`} />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`font-semibold truncate ${
-                        highlightedIndex === index ? "text-blue-900" : "text-neutral-900"
+                        highlightedIndex === index ? "text-blue-900" : "text-ink"
                       }`}>
                         {result.name}
                       </div>
                       {result.subtitle && (
-                        <div className="text-sm text-neutral-500 truncate">
+                        <div className="text-sm text-muted truncate">
                           {result.subtitle}
                         </div>
                       )}

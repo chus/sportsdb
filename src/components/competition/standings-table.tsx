@@ -81,7 +81,7 @@ export function StandingsTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-xs text-neutral-500 uppercase tracking-wide border-b border-neutral-200">
+          <tr className="text-xs text-muted uppercase tracking-wide border-b border-line">
             <th scope="col" className="text-left py-2 pl-3 pr-1 w-8">#</th>
             <th scope="col" className="text-left py-2 px-2">Team</th>
             <th scope="col" className="text-center py-2 px-1.5 w-8">P</th>
@@ -105,12 +105,12 @@ export function StandingsTable({
               <tr
                 key={team.id}
                 className={cn(
-                  "border-b border-neutral-100 border-l-3 transition-colors",
+                  "border-b border-line border-l-3 transition-colors",
                   zone ? ZONE_COLORS[zone] : "border-l-transparent",
-                  isHighlighted ? "bg-blue-50" : "hover:bg-neutral-50"
+                  isHighlighted ? "bg-blue-50" : "hover:bg-surface-2"
                 )}
               >
-                <td className="py-2 pl-3 pr-1 text-neutral-500 font-medium text-xs">
+                <td className="py-2 pl-3 pr-1 text-muted font-medium text-xs">
                   {standing.position}
                 </td>
                 <td className="py-2 px-2">
@@ -128,32 +128,32 @@ export function StandingsTable({
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-5 h-5 text-neutral-300" />
+                        <Shield className="w-5 h-5 text-faint" />
                       )}
                     </div>
                     <span className={cn(
                       "font-medium truncate",
-                      isHighlighted ? "text-blue-700" : "text-neutral-900"
+                      isHighlighted ? "text-blue-700" : "text-ink"
                     )}>
                       {compact ? (team.shortName || team.name) : team.name}
                     </span>
                   </Link>
                 </td>
-                <td className="text-center py-2 px-1.5 text-neutral-600">{standing.played}</td>
+                <td className="text-center py-2 px-1.5 text-muted">{standing.played}</td>
                 {!compact && (
                   <>
-                    <td className="text-center py-2 px-1.5 text-neutral-600">{standing.won}</td>
-                    <td className="text-center py-2 px-1.5 text-neutral-600">{standing.drawn}</td>
-                    <td className="text-center py-2 px-1.5 text-neutral-600">{standing.lost}</td>
+                    <td className="text-center py-2 px-1.5 text-muted">{standing.won}</td>
+                    <td className="text-center py-2 px-1.5 text-muted">{standing.drawn}</td>
+                    <td className="text-center py-2 px-1.5 text-muted">{standing.lost}</td>
                   </>
                 )}
                 <td className={cn(
                   "text-center py-2 px-1.5 font-medium",
-                  standing.goalDifference > 0 ? "text-green-600" : standing.goalDifference < 0 ? "text-red-600" : "text-neutral-500"
+                  standing.goalDifference > 0 ? "text-green-600" : standing.goalDifference < 0 ? "text-red-600" : "text-muted"
                 )}>
                   {standing.goalDifference > 0 ? `+${standing.goalDifference}` : standing.goalDifference}
                 </td>
-                <td className="text-center py-2 px-2 font-bold text-neutral-900">
+                <td className="text-center py-2 px-2 font-bold text-ink">
                   {standing.points}
                 </td>
               </tr>
@@ -164,7 +164,7 @@ export function StandingsTable({
 
       {/* Zone legend */}
       {!compact && !limit && (
-        <div className="flex items-center gap-4 px-3 py-2 text-xs text-neutral-400">
+        <div className="flex items-center gap-4 px-3 py-2 text-xs text-faint">
           <span className="flex items-center gap-1">
             <span className="w-2.5 h-2.5 rounded-sm bg-blue-600" /> Champions League
           </span>

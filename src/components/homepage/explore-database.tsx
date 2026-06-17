@@ -60,7 +60,7 @@ export function ExploreDatabase({ stats }: { stats: HomepageStats }) {
       <div className="max-w-7xl mx-auto px-4 py-14">
         <div className="mb-8">
           <h2 className="text-2xl font-bold">Explore the Database</h2>
-          <p className="text-sm text-neutral-400 mt-1">
+          <p className="text-sm text-faint mt-1">
             Browse our comprehensive football data
           </p>
         </div>
@@ -69,7 +69,7 @@ export function ExploreDatabase({ stats }: { stats: HomepageStats }) {
           {sections.map((s) => (
             <div
               key={s.label}
-              className="bg-white/5 border border-white/10 rounded-xl p-5"
+              className="bg-surface/5 border border-white/10 rounded-xl p-5"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div
@@ -80,12 +80,12 @@ export function ExploreDatabase({ stats }: { stats: HomepageStats }) {
                 <div>
                   <div className="font-semibold text-sm">{s.label}</div>
                   {s.statKey && (
-                    <div className="text-xs text-neutral-400">
+                    <div className="text-xs text-faint">
                       {stats[s.statKey].toLocaleString()} {s.suffix}
                     </div>
                   )}
                   {!s.statKey && (
-                    <div className="text-xs text-neutral-400">
+                    <div className="text-xs text-faint">
                       Browse by location
                     </div>
                   )}
@@ -97,7 +97,7 @@ export function ExploreDatabase({ stats }: { stats: HomepageStats }) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="flex items-center gap-1 text-xs text-neutral-400 hover:text-white transition-colors py-0.5"
+                    className="flex items-center gap-1 text-xs text-faint hover:text-white transition-colors py-0.5"
                   >
                     <ChevronRight className="w-3 h-3" />
                     {link.label}

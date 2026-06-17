@@ -38,7 +38,7 @@ export function LandingBenefits() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-4xl font-bold text-neutral-900 mb-6">
+            <h2 className="text-4xl font-bold text-ink mb-6">
               Why DataSports?
             </h2>
             <div className="space-y-4">
@@ -48,27 +48,27 @@ export function LandingBenefits() {
                     <Check className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-neutral-900 mb-1">
+                    <h3 className="font-bold text-lg text-ink mb-1">
                       {benefit.title}
                     </h3>
-                    <p className="text-neutral-700">{benefit.description}</p>
+                    <p className="text-ink">{benefit.description}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-8">
+          <div className="bg-surface rounded-2xl shadow-xl border border-line p-8">
             {!isLoading && user ? (
               // Logged in user - show upgrade CTA or exploration prompt
               isPro ? (
                 <>
                   <div className="text-center mb-6">
                     <div className="text-6xl mb-4">⭐</div>
-                    <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+                    <h3 className="text-2xl font-bold text-ink mb-2">
                       Welcome back, {user.name || "Champion"}!
                     </h3>
-                    <p className="text-neutral-600">
+                    <p className="text-muted">
                       You have full access to all DataSports features
                     </p>
                   </div>
@@ -80,7 +80,7 @@ export function LandingBenefits() {
                   </Link>
                   <Link
                     href="/world-cup-2026"
-                    className="block w-full px-8 py-4 mt-3 bg-white border-2 border-neutral-200 text-neutral-900 text-lg font-semibold rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-center"
+                    className="block w-full px-8 py-4 mt-3 bg-surface border-2 border-line text-ink text-lg font-semibold rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-center"
                   >
                     World Cup 2026
                   </Link>
@@ -91,10 +91,10 @@ export function LandingBenefits() {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mb-4">
                       <Sparkles className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+                    <h3 className="text-2xl font-bold text-ink mb-2">
                       Unlock Pro Features
                     </h3>
-                    <p className="text-neutral-600">
+                    <p className="text-muted">
                       Advanced stats, unlimited follows, and more
                     </p>
                   </div>
@@ -105,7 +105,7 @@ export function LandingBenefits() {
                     Upgrade to Pro
                     <ArrowRight className="w-5 h-5" />
                   </Link>
-                  <p className="text-center text-sm text-neutral-500 mt-4">
+                  <p className="text-center text-sm text-muted mt-4">
                     Starting at $4.99/month
                   </p>
                 </>
@@ -115,10 +115,10 @@ export function LandingBenefits() {
               <>
                 <div className="text-center mb-6">
                   <div className="text-6xl mb-4">🏆</div>
-                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+                  <h3 className="text-2xl font-bold text-ink mb-2">
                     Ready to get started?
                   </h3>
-                  <p className="text-neutral-600">
+                  <p className="text-muted">
                     Join thousands of sports fans already using DataSports
                   </p>
                 </div>
@@ -128,7 +128,7 @@ export function LandingBenefits() {
                 >
                   Create Free Account
                 </Link>
-                <p className="text-center text-sm text-neutral-500 mt-4">
+                <p className="text-center text-sm text-muted mt-4">
                   Free forever. No credit card required.
                 </p>
               </>

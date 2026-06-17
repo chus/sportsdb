@@ -62,12 +62,12 @@ function SearchResultCard({ result }: { result: SearchResult }) {
 
   const content = (
     <div className="flex items-start gap-4">
-      <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
-        <Icon className="w-6 h-6 text-neutral-500 group-hover:text-blue-600" />
+      <div className="w-12 h-12 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-50 transition-colors">
+        <Icon className="w-6 h-6 text-muted group-hover:text-blue-600" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+          <h3 className="font-semibold text-ink group-hover:text-blue-600 transition-colors truncate">
             {result.name}
           </h3>
           <span
@@ -77,10 +77,10 @@ function SearchResultCard({ result }: { result: SearchResult }) {
           </span>
         </div>
         {result.subtitle && (
-          <p className="text-sm text-neutral-600 truncate">{result.subtitle}</p>
+          <p className="text-sm text-muted truncate">{result.subtitle}</p>
         )}
         {result.meta && (
-          <p className="text-xs text-neutral-500 mt-1">{result.meta}</p>
+          <p className="text-xs text-muted mt-1">{result.meta}</p>
         )}
       </div>
     </div>
@@ -91,7 +91,7 @@ function SearchResultCard({ result }: { result: SearchResult }) {
       <PlayerLink
         slug={result.slug}
         isLinkWorthy={true}
-        className="block p-4 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
+        className="block p-4 bg-surface border border-line rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
       >
         {content}
       </PlayerLink>
@@ -101,7 +101,7 @@ function SearchResultCard({ result }: { result: SearchResult }) {
   return (
     <Link
       href={href}
-      className="block p-4 bg-white border border-neutral-200 rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
+      className="block p-4 bg-surface border border-line rounded-xl hover:shadow-lg hover:border-blue-200 transition-all group"
     >
       {content}
     </Link>
@@ -122,7 +122,7 @@ async function SearchResults({
         <Suspense fallback={null}>
           <PopularSearches />
         </Suspense>
-        <Suspense fallback={<div className="animate-pulse h-96 bg-neutral-100 rounded-xl" />}>
+        <Suspense fallback={<div className="animate-pulse h-96 bg-surface-2 rounded-xl" />}>
           <FeaturedEntities />
         </Suspense>
       </div>
@@ -140,13 +140,13 @@ async function SearchResults({
   if (results.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Users className="w-8 h-8 text-neutral-400" />
+        <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Users className="w-8 h-8 text-faint" />
         </div>
-        <h2 className="text-xl font-semibold text-neutral-700 mb-2">
+        <h2 className="text-xl font-semibold text-ink mb-2">
           No results found
         </h2>
-        <p className="text-neutral-500">
+        <p className="text-muted">
           {query
             ? `No matches for "${query}"${type ? ` in ${TYPE_LABELS[type] || type}s` : ""}. Try adjusting your search.`
             : `No ${type ? (TYPE_LABELS[type] || type) : "result"}s found.`}
@@ -157,7 +157,7 @@ async function SearchResults({
 
   return (
     <div>
-      <p className="text-sm text-neutral-500 mb-4">
+      <p className="text-sm text-muted mb-4">
         {query
           ? `${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"${type ? ` in ${TYPE_LABELS[type] || type}s` : ""}`
           : `${results.length} ${type ? (TYPE_LABELS[type] || type) : "result"}${results.length !== 1 ? "s" : ""}`}
@@ -177,13 +177,13 @@ function SearchResultsSkeleton() {
       {[1, 2, 3, 4, 5].map((i) => (
         <div
           key={i}
-          className="p-4 bg-white border border-neutral-200 rounded-xl animate-pulse"
+          className="p-4 bg-surface border border-line rounded-xl animate-pulse"
         >
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-neutral-200 rounded-lg" />
+            <div className="w-12 h-12 bg-surface-2 rounded-lg" />
             <div className="flex-1">
-              <div className="h-5 bg-neutral-200 rounded w-1/3 mb-2" />
-              <div className="h-4 bg-neutral-100 rounded w-1/2" />
+              <div className="h-5 bg-surface-2 rounded w-1/3 mb-2" />
+              <div className="h-4 bg-surface-2 rounded w-1/2" />
             </div>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <PageTracker />
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-6">Search</h1>
+        <h1 className="text-3xl font-bold text-ink mb-6">Search</h1>
         <SearchBar
           initialQuery={query}
           autoFocus={!query}

@@ -29,7 +29,7 @@ export function ImageWithFallback({
       <div
         aria-hidden="true"
         className={cn(
-          "flex items-center justify-center bg-neutral-100 text-neutral-400",
+          "flex items-center justify-center bg-surface-2 text-faint",
           className,
           fallbackClassName
         )}

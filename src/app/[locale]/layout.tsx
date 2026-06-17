@@ -111,14 +111,13 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <head>
-        {/* Theme is opt-in (toggle) during the phased dark rollout so
-            not-yet-converted pages don't ship a half-dark look. Flip the
-            default to 'dark' here once every surface is converted. */}
+        {/* Dark by default (the whole site is tokenized); the no-flash
+            script honors a stored 'light' choice before paint. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.classList.toggle('dark',t!=='light');}catch(e){document.documentElement.classList.add('dark');}})();`,
           }}
         />
         <link rel="preconnect" href="https://www.googletagmanager.com" />

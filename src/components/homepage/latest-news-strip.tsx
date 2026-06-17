@@ -28,7 +28,7 @@ export function LatestNewsStrip({
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Newspaper className="w-5 h-5 text-blue-600" />
-          <h2 className="text-2xl font-bold text-neutral-900">Latest News</h2>
+          <h2 className="text-2xl font-bold text-ink">Latest News</h2>
         </div>
         <Link
           href="/news"
@@ -41,7 +41,7 @@ export function LatestNewsStrip({
       <div className="grid lg:grid-cols-2 gap-6">
         <Link
           href={`/news/${featured.article.slug}`}
-          className="block bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl transition-shadow group"
+          className="block bg-surface rounded-xl border border-line overflow-hidden hover:shadow-xl transition-shadow group"
         >
           <div className="p-6">
             <div className="flex items-center gap-2 mb-3">
@@ -50,27 +50,27 @@ export function LatestNewsStrip({
                   {featured.competition.name}
                 </span>
               )}
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-faint">
                 {formatArticleDate(featured.article.publishedAt)}
               </span>
             </div>
-            <h3 className="text-xl font-bold text-neutral-900 group-hover:text-blue-600 transition-colors mb-2">
+            <h3 className="text-xl font-bold text-ink group-hover:text-blue-600 transition-colors mb-2">
               {featured.article.title}
             </h3>
             {featured.article.excerpt && (
-              <p className="text-sm text-neutral-600 line-clamp-3">
+              <p className="text-sm text-muted line-clamp-3">
                 {featured.article.excerpt}
               </p>
             )}
           </div>
         </Link>
 
-        <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
+        <div className="bg-surface rounded-xl border border-line divide-y divide-line">
           {rest.slice(0, 5).map(({ article, competition }) => (
             <Link
               key={article.id}
               href={`/news/${article.slug}`}
-              className="flex items-start gap-4 p-4 hover:bg-neutral-50 transition-colors group"
+              className="flex items-start gap-4 p-4 hover:bg-surface-2 transition-colors group"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
@@ -79,11 +79,11 @@ export function LatestNewsStrip({
                       {competition.name}
                     </span>
                   )}
-                  <span className="text-xs text-neutral-400">
+                  <span className="text-xs text-faint">
                     {formatArticleDate(article.publishedAt)}
                   </span>
                 </div>
-                <h4 className="font-semibold text-sm text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                <h4 className="font-semibold text-sm text-ink group-hover:text-blue-600 transition-colors line-clamp-2">
                   {article.title}
                 </h4>
               </div>

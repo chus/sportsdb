@@ -77,7 +77,7 @@ function filterByComp(matches: HubMatch[], compId: string | null) {
 function MatchStatusBadge({ match }: { match: HubMatch }) {
   switch (match.status) {
     case "finished":
-      return <span className="text-xs font-medium text-neutral-500">FT</span>;
+      return <span className="text-xs font-medium text-muted">FT</span>;
     case "live":
     case "half_time":
       return (
@@ -87,33 +87,33 @@ function MatchStatusBadge({ match }: { match: HubMatch }) {
         </span>
       );
     case "scheduled":
-      return <span className="text-xs text-neutral-600">{format(parseISO(match.scheduledAt), "HH:mm")}</span>;
+      return <span className="text-xs text-muted">{format(parseISO(match.scheduledAt), "HH:mm")}</span>;
     case "postponed":
       return <span className="text-xs text-orange-500">PP</span>;
     case "cancelled":
-      return <span className="text-xs text-neutral-400">CAN</span>;
+      return <span className="text-xs text-faint">CAN</span>;
     default:
-      return <span className="text-xs text-neutral-400">-</span>;
+      return <span className="text-xs text-faint">-</span>;
   }
 }
 
 function MatchRow({ match }: { match: HubMatch }) {
   const showScore = match.status === "finished" || match.status === "live" || match.status === "half_time";
   return (
-    <Link href={`/matches/${match.slug ?? match.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 rounded-lg transition-colors group">
+    <Link href={`/matches/${match.slug ?? match.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-surface-2 rounded-lg transition-colors group">
       <div className="w-16 flex-shrink-0 text-center"><MatchStatusBadge match={match} /></div>
       <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
-        <span className="truncate text-sm text-neutral-900 text-right">{match.homeTeamName}</span>
+        <span className="truncate text-sm text-ink text-right">{match.homeTeamName}</span>
         <ImageWithFallback src={match.homeTeamLogoUrl} alt={match.homeTeamName} width={20} height={20} className="w-5 h-5 flex-shrink-0 rounded-sm object-contain" />
       </div>
       <div className="w-16 flex-shrink-0 text-center">
         {showScore
-          ? <span className="text-sm font-semibold text-neutral-900">{match.homeScore ?? 0} - {match.awayScore ?? 0}</span>
-          : <span className="text-sm text-neutral-400">vs</span>}
+          ? <span className="text-sm font-semibold text-ink">{match.homeScore ?? 0} - {match.awayScore ?? 0}</span>
+          : <span className="text-sm text-faint">vs</span>}
       </div>
       <div className="flex-1 flex items-center gap-2 min-w-0">
         <ImageWithFallback src={match.awayTeamLogoUrl} alt={match.awayTeamName} width={20} height={20} className="w-5 h-5 flex-shrink-0 rounded-sm object-contain" />
-        <span className="truncate text-sm text-neutral-900">{match.awayTeamName}</span>
+        <span className="truncate text-sm text-ink">{match.awayTeamName}</span>
       </div>
     </Link>
   );
@@ -121,9 +121,9 @@ function MatchRow({ match }: { match: HubMatch }) {
 
 function CompetitionGroupHeader({ competition }: { competition: { name: string; logoUrl: string | null } }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 bg-neutral-50 rounded-lg">
+    <div className="flex items-center gap-2 px-3 py-2 bg-surface-2 rounded-lg">
       <ImageWithFallback src={competition.logoUrl} alt={competition.name} width={24} height={24} className="w-6 h-6 flex-shrink-0 rounded-sm object-contain" />
-      <span className="text-sm font-semibold text-neutral-700">{competition.name}</span>
+      <span className="text-sm font-semibold text-ink">{competition.name}</span>
     </div>
   );
 }
@@ -138,29 +138,29 @@ function MatchDaySection({
   if (matches.length === 0 && !emptyMessage) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
       <button
         type="button"
         onClick={() => collapsibleMobile && setCollapsed((p) => !p)}
-        className={`w-full flex items-center justify-between px-4 py-3 bg-neutral-50 border-b border-neutral-200 ${collapsibleMobile ? "cursor-pointer" : "cursor-default"}`}
+        className={`w-full flex items-center justify-between px-4 py-3 bg-surface-2 border-b border-line ${collapsibleMobile ? "cursor-pointer" : "cursor-default"}`}
       >
-        <h2 className="font-semibold text-neutral-900 flex items-center gap-2">
+        <h2 className="font-semibold text-ink flex items-center gap-2">
           <Trophy className="w-4 h-4 text-blue-600" />
           {title}
-          <span className="text-xs font-normal text-neutral-500">{matches.length} match{matches.length !== 1 ? "es" : ""}</span>
+          <span className="text-xs font-normal text-muted">{matches.length} match{matches.length !== 1 ? "es" : ""}</span>
         </h2>
         {collapsibleMobile && (collapsed
-          ? <ChevronDown className="w-4 h-4 text-neutral-400" />
-          : <ChevronUp className="w-4 h-4 text-neutral-400" />)}
+          ? <ChevronDown className="w-4 h-4 text-faint" />
+          : <ChevronUp className="w-4 h-4 text-faint" />)}
       </button>
 
       {!collapsed && (
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-line">
           {matches.length === 0 && emptyMessage ? (
             <div className="py-8 text-center">
-              <Calendar className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-              <p className="text-sm text-neutral-500">{emptyMessage}</p>
-              <p className="text-xs text-neutral-400 mt-1">Try navigating to another day</p>
+              <Calendar className="w-10 h-10 text-faint mx-auto mb-3" />
+              <p className="text-sm text-muted">{emptyMessage}</p>
+              <p className="text-xs text-faint mt-1">Try navigating to another day</p>
             </div>
           ) : (
             Array.from(grouped.entries()).map(([compId, group]) => (
@@ -179,8 +179,8 @@ function MatchDaySection({
 function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
-      <p className="text-2xl font-bold text-neutral-900">{value}</p>
-      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="text-2xl font-bold text-ink">{value}</p>
+      <p className="text-xs text-muted">{label}</p>
     </div>
   );
 }
@@ -241,12 +241,12 @@ export function MatchesContent({
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Competition Filter Bar */}
-      <div className="sticky top-[65px] z-30 bg-white/95 backdrop-blur-md border-b border-neutral-200 -mx-4 px-4 py-3">
+      <div className="sticky top-[65px] z-30 bg-surface/95 backdrop-blur-md border-b border-line -mx-4 px-4 py-3">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <button
             type="button"
             onClick={() => setSelectedCompetition(null)}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCompetition === null ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"}`}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCompetition === null ? "bg-blue-600 text-white" : "bg-surface-2 text-ink hover:bg-surface-2"}`}
           >
             All <span className="text-xs opacity-75">({competitionCount})</span>
           </button>
@@ -255,7 +255,7 @@ export function MatchesContent({
               key={comp.id}
               type="button"
               onClick={() => setSelectedCompetition(selectedCompetition === comp.id ? null : comp.id)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCompetition === comp.id ? "bg-blue-600 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"}`}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${selectedCompetition === comp.id ? "bg-blue-600 text-white" : "bg-surface-2 text-ink hover:bg-surface-2"}`}
             >
               <ImageWithFallback src={comp.logoUrl} alt={comp.name} width={20} height={20} className="w-5 h-5 flex-shrink-0 rounded-sm object-contain" />
               <span className="whitespace-nowrap">{comp.name}</span>
@@ -265,15 +265,15 @@ export function MatchesContent({
       </div>
 
       {/* Date Navigation */}
-      <div className="sticky top-[121px] z-20 bg-white/95 backdrop-blur-md border-b border-neutral-200 -mx-4 px-4 py-3 flex items-center justify-between">
-        <button type="button" onClick={() => navigateDate(prevDateStr)} className="flex items-center gap-1 text-sm font-medium text-neutral-600 hover:text-blue-600 transition-colors">
+      <div className="sticky top-[121px] z-20 bg-surface/95 backdrop-blur-md border-b border-line -mx-4 px-4 py-3 flex items-center justify-between">
+        <button type="button" onClick={() => navigateDate(prevDateStr)} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-blue-600 transition-colors">
           <ChevronLeft className="w-4 h-4" /><span className="hidden sm:inline">Prev</span>
         </button>
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-neutral-900">{format(parsedDate, "EEEE, MMMM d, yyyy")}</span>
+          <span className="font-semibold text-ink">{format(parsedDate, "EEEE, MMMM d, yyyy")}</span>
           {isToday && <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">Today</span>}
         </div>
-        <button type="button" onClick={() => navigateDate(nextDateStr)} className="flex items-center gap-1 text-sm font-medium text-neutral-600 hover:text-blue-600 transition-colors">
+        <button type="button" onClick={() => navigateDate(nextDateStr)} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-blue-600 transition-colors">
           <span className="hidden sm:inline">Next</span><ChevronRight className="w-4 h-4" />
         </button>
       </div>
@@ -292,23 +292,23 @@ export function MatchesContent({
 
           {/* Upcoming This Week */}
           {upcomingByDate.size > 0 && (
-            <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-200">
-                <h2 className="font-semibold text-neutral-900 flex items-center gap-2">
+            <section className="bg-surface rounded-xl border border-line overflow-hidden">
+              <div className="px-4 py-3 bg-surface-2 border-b border-line">
+                <h2 className="font-semibold text-ink flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-600" />Upcoming This Week
                 </h2>
               </div>
-              <div className="divide-y divide-neutral-100">
+              <div className="divide-y divide-line">
                 {Array.from(upcomingByDate.entries()).map(([dateKey, dateMatches]) => {
                   const isExpanded = expandedDates.has(dateKey);
                   const grouped = groupByCompetition(dateMatches);
                   return (
                     <div key={dateKey}>
-                      <button type="button" onClick={() => toggleDate(dateKey)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-50 transition-colors">
-                        <span className="text-sm font-medium text-neutral-700 flex items-center gap-2">
-                          {isExpanded ? <ChevronDown className="w-4 h-4 text-neutral-400" /> : <ChevronRight className="w-4 h-4 text-neutral-400" />}
+                      <button type="button" onClick={() => toggleDate(dateKey)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-2 transition-colors">
+                        <span className="text-sm font-medium text-ink flex items-center gap-2">
+                          {isExpanded ? <ChevronDown className="w-4 h-4 text-faint" /> : <ChevronRight className="w-4 h-4 text-faint" />}
                           {format(parseISO(dateKey), "EEEE, MMMM d")}
-                          <span className="text-xs text-neutral-500">{dateMatches.length} match{dateMatches.length !== 1 ? "es" : ""}</span>
+                          <span className="text-xs text-muted">{dateMatches.length} match{dateMatches.length !== 1 ? "es" : ""}</span>
                         </span>
                       </button>
                       {isExpanded && (
@@ -330,20 +330,20 @@ export function MatchesContent({
 
           {/* Recent Results */}
           {filteredRecentResults.length > 0 && (
-            <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-              <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-200">
-                <h2 className="font-semibold text-neutral-900 flex items-center gap-2">
+            <section className="bg-surface rounded-xl border border-line overflow-hidden">
+              <div className="px-4 py-3 bg-surface-2 border-b border-line">
+                <h2 className="font-semibold text-ink flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-blue-600" />Recent Results
                 </h2>
               </div>
-              <div className="divide-y divide-neutral-100">
+              <div className="divide-y divide-line">
                 {filteredRecentResults.map((m) => (
-                  <Link key={m.id} href={`/matches/${m.slug ?? m.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-neutral-50 transition-colors">
-                    <span className="w-14 flex-shrink-0 text-xs text-neutral-500 text-center">{format(parseISO(m.scheduledAt), "MMM d")}</span>
+                  <Link key={m.id} href={`/matches/${m.slug ?? m.id}`} className="flex items-center gap-3 py-2.5 px-3 hover:bg-surface-2 transition-colors">
+                    <span className="w-14 flex-shrink-0 text-xs text-muted text-center">{format(parseISO(m.scheduledAt), "MMM d")}</span>
                     <ImageWithFallback src={m.competitionLogoUrl} alt={m.competitionName} width={16} height={16} className="w-4 h-4 flex-shrink-0 rounded-sm object-contain" />
-                    <span className="flex-1 text-sm text-neutral-900 text-right truncate">{m.homeTeamName}</span>
-                    <span className="w-12 text-center text-sm font-semibold text-neutral-900">{m.homeScore ?? 0} - {m.awayScore ?? 0}</span>
-                    <span className="flex-1 text-sm text-neutral-900 truncate">{m.awayTeamName}</span>
+                    <span className="flex-1 text-sm text-ink text-right truncate">{m.homeTeamName}</span>
+                    <span className="w-12 text-center text-sm font-semibold text-ink">{m.homeScore ?? 0} - {m.awayScore ?? 0}</span>
+                    <span className="flex-1 text-sm text-ink truncate">{m.awayTeamName}</span>
                   </Link>
                 ))}
               </div>
@@ -353,8 +353,8 @@ export function MatchesContent({
 
         {/* Sidebar -- desktop only */}
         <div className="hidden lg:block w-80 flex-shrink-0 space-y-6">
-          <div className="bg-white rounded-xl border border-neutral-200 p-5">
-            <h3 className="font-semibold text-neutral-900 mb-4">Match Day Summary</h3>
+          <div className="bg-surface rounded-xl border border-line p-5">
+            <h3 className="font-semibold text-ink mb-4">Match Day Summary</h3>
             <div className="grid grid-cols-2 gap-4">
               <StatItem label="Matches" value={summary.totalMatches} />
               <StatItem label="Goals" value={summary.totalGoals} />
@@ -362,8 +362,8 @@ export function MatchesContent({
               <StatItem label="Red Cards" value={summary.redCards} />
             </div>
             {summary.biggestWin && (
-              <div className="mt-4 pt-4 border-t border-neutral-100">
-                <p className="text-xs text-neutral-500 mb-1">Biggest Win</p>
+              <div className="mt-4 pt-4 border-t border-line">
+                <p className="text-xs text-muted mb-1">Biggest Win</p>
                 <Link href={`/matches/${summary.biggestWin.matchSlug ?? summary.biggestWin.matchId}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                   {summary.biggestWin.homeTeam} {summary.biggestWin.homeScore} - {summary.biggestWin.awayScore} {summary.biggestWin.awayTeam}
                 </Link>
@@ -375,7 +375,7 @@ export function MatchesContent({
             <Zap className="w-8 h-8 mb-3 text-white/90" />
             <h3 className="font-semibold text-lg">Predict Today&apos;s Matches</h3>
             <p className="text-blue-100 text-sm mt-1">Test your football knowledge</p>
-            <Link href="/games/prode" className="mt-3 inline-flex items-center bg-white text-blue-600 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-blue-50 transition-colors">
+            <Link href="/games/prode" className="mt-3 inline-flex items-center bg-surface text-blue-600 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-blue-50 transition-colors">
               Play Now
             </Link>
           </div>

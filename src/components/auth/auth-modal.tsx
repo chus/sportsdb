@@ -140,23 +140,23 @@ function AuthModal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="relative bg-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
       >
         {/* Close button */}
         <button
           onClick={onClose}
           aria-label="Close authentication dialog"
-          className="absolute top-4 right-4 p-1 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors z-10"
+          className="absolute top-4 right-4 p-1 text-faint hover:text-muted rounded-lg hover:bg-surface-2 transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
         <div className="px-8 pt-8 pb-4">
-          <h2 id={titleId} className="text-2xl font-bold text-neutral-900 mb-1">
+          <h2 id={titleId} className="text-2xl font-bold text-ink mb-1">
             {tab === "signin" ? "Welcome back" : "Create an account"}
           </h2>
-          <p id={descriptionId} className="text-sm text-neutral-500">
+          <p id={descriptionId} className="text-sm text-muted">
             {tab === "signin"
               ? "Sign in to your DataSports account"
               : "Join DataSports to follow your favorite teams and players"}
@@ -164,14 +164,14 @@ function AuthModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex mx-8 border-b border-neutral-200">
+        <div className="flex mx-8 border-b border-line">
           <button
             onClick={() => onTabChange("signin")}
             className={cn(
               "flex-1 pb-3 text-sm font-medium border-b-2 transition-colors",
               tab === "signin"
                 ? "border-blue-600 text-blue-600"
-                : "border-transparent text-neutral-500 hover:text-neutral-700"
+                : "border-transparent text-muted hover:text-ink"
             )}
           >
             Sign In
@@ -182,7 +182,7 @@ function AuthModal({
               "flex-1 pb-3 text-sm font-medium border-b-2 transition-colors",
               tab === "signup"
                 ? "border-blue-600 text-blue-600"
-                : "border-transparent text-neutral-500 hover:text-neutral-700"
+                : "border-transparent text-muted hover:text-ink"
             )}
           >
             Sign Up
@@ -235,7 +235,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
       <AuthDivider />
       <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="signin-email" className="block text-sm font-medium text-neutral-700 mb-1">
+        <label htmlFor="signin-email" className="block text-sm font-medium text-ink mb-1">
           Email
         </label>
         <input
@@ -244,12 +244,12 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+          className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           placeholder="you@example.com"
         />
       </div>
       <div>
-        <label htmlFor="signin-password" className="block text-sm font-medium text-neutral-700 mb-1">
+        <label htmlFor="signin-password" className="block text-sm font-medium text-ink mb-1">
           Password
         </label>
         <input
@@ -258,7 +258,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+          className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           placeholder="Enter your password"
         />
       </div>
@@ -311,20 +311,20 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
       <AuthDivider />
       <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="signup-name" className="block text-sm font-medium text-neutral-700 mb-1">
-          Name <span className="text-neutral-400">(optional)</span>
+        <label htmlFor="signup-name" className="block text-sm font-medium text-ink mb-1">
+          Name <span className="text-faint">(optional)</span>
         </label>
         <input
           id="signup-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+          className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           placeholder="Your name"
         />
       </div>
       <div>
-        <label htmlFor="signup-email" className="block text-sm font-medium text-neutral-700 mb-1">
+        <label htmlFor="signup-email" className="block text-sm font-medium text-ink mb-1">
           Email
         </label>
         <input
@@ -333,12 +333,12 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+          className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           placeholder="you@example.com"
         />
       </div>
       <div>
-        <label htmlFor="signup-password" className="block text-sm font-medium text-neutral-700 mb-1">
+        <label htmlFor="signup-password" className="block text-sm font-medium text-ink mb-1">
           Password
         </label>
         <input
@@ -348,7 +348,7 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+          className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           placeholder="At least 8 characters"
         />
       </div>
@@ -358,9 +358,9 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           type="checkbox"
           checked={agreedToTerms}
           onChange={(e) => setAgreedToTerms(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+          className="mt-1 h-4 w-4 rounded border-line text-blue-600 focus:ring-blue-500"
         />
-        <label htmlFor="signup-terms" className="text-xs text-neutral-500 leading-relaxed">
+        <label htmlFor="signup-terms" className="text-xs text-muted leading-relaxed">
           I agree to the{" "}
           <a href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</a>
           {" "}and{" "}
@@ -373,9 +373,9 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           type="checkbox"
           checked={marketingConsent}
           onChange={(e) => setMarketingConsent(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+          className="mt-1 h-4 w-4 rounded border-line text-blue-600 focus:ring-blue-500"
         />
-        <label htmlFor="signup-marketing" className="text-xs text-neutral-500 leading-relaxed">
+        <label htmlFor="signup-marketing" className="text-xs text-muted leading-relaxed">
           Send me football news and product updates
         </label>
       </div>

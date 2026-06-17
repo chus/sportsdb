@@ -7,20 +7,20 @@ export function StandoutPerformers({ data }: { data: StandoutPerformer[] }) {
   if (!data.length) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-2">
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-5 py-3 border-b border-line flex items-center gap-2">
         <Star className="w-4 h-4 text-amber-500" />
-        <h3 className="font-bold text-sm text-neutral-900">Standout Performers</h3>
-        <span className="text-xs text-neutral-400 ml-auto">Top Performers</span>
+        <h3 className="font-bold text-sm text-ink">Standout Performers</h3>
+        <span className="text-xs text-faint ml-auto">Top Performers</span>
       </div>
-      <ul className="divide-y divide-neutral-100">
+      <ul className="divide-y divide-line">
         {data.map((p) => (
           <li key={p.playerId} className="p-4">
             <Link
               href={`/players/${p.slug}`}
               className="flex items-center gap-3 group"
             >
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral-100 flex-shrink-0 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-2 flex-shrink-0 flex items-center justify-center">
                 {p.imageUrl ? (
                   <ImageWithFallback
                     src={p.imageUrl}
@@ -30,16 +30,16 @@ export function StandoutPerformers({ data }: { data: StandoutPerformer[] }) {
                     className="w-10 h-10 object-cover"
                   />
                 ) : (
-                  <span className="text-xs font-bold text-neutral-500">
+                  <span className="text-xs font-bold text-muted">
                     {p.name.substring(0, 2).toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                <div className="font-semibold text-sm text-ink truncate group-hover:text-blue-600 transition-colors">
                   {p.name}
                 </div>
-                <div className="text-xs text-neutral-500 truncate">{p.teamName}</div>
+                <div className="text-xs text-muted truncate">{p.teamName}</div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 {p.goals > 0 && (

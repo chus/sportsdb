@@ -99,20 +99,20 @@ function StatRow({
   const equal = value1 === value2;
 
   return (
-    <div className="flex items-center py-3 border-b border-neutral-100 last:border-0">
+    <div className="flex items-center py-3 border-b border-line last:border-0">
       <div className="flex-1 text-right">
-        <span className={`text-lg font-semibold ${p1Better ? "text-green-600" : equal ? "text-neutral-700" : "text-neutral-500"}`}>
+        <span className={`text-lg font-semibold ${p1Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
           {value1.toLocaleString()}
         </span>
       </div>
       <div className="w-32 text-center">
-        <div className="flex items-center justify-center gap-2 text-neutral-500">
+        <div className="flex items-center justify-center gap-2 text-muted">
           <Icon className="w-4 h-4" />
           <span className="text-sm">{label}</span>
         </div>
       </div>
       <div className="flex-1 text-left">
-        <span className={`text-lg font-semibold ${p2Better ? "text-green-600" : equal ? "text-neutral-700" : "text-neutral-500"}`}>
+        <span className={`text-lg font-semibold ${p2Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
           {value2.toLocaleString()}
         </span>
       </div>
@@ -131,24 +131,24 @@ function PlayerHeader({ player }: {
 }) {
   return (
     <Link href={`/players/${player.slug}`} className="block">
-      <div className="text-center p-6 hover:bg-neutral-50 transition-colors rounded-xl">
-        <div className="w-24 h-24 bg-neutral-100 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+      <div className="text-center p-6 hover:bg-surface-2 transition-colors rounded-xl">
+        <div className="w-24 h-24 bg-surface-2 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
           {player.imageUrl ? (
             <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-full h-full object-cover" width={96} height={96} />
           ) : (
-            <Users className="w-12 h-12 text-neutral-300" />
+            <Users className="w-12 h-12 text-faint" />
           )}
         </div>
-        <h2 className="text-xl font-bold text-neutral-900 hover:text-blue-600 transition-colors">
+        <h2 className="text-xl font-bold text-ink hover:text-blue-600 transition-colors">
           {player.name}
         </h2>
-        <p className="text-neutral-500">{player.position}</p>
+        <p className="text-muted">{player.position}</p>
         {player.team && (
           <div className="flex items-center justify-center gap-2 mt-2">
             {player.team.logoUrl && (
               <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-5 h-5 object-contain" width={20} height={20} />
             )}
-            <span className="text-sm text-neutral-600">{player.team.name}</span>
+            <span className="text-sm text-muted">{player.team.name}</span>
           </div>
         )}
       </div>
@@ -201,36 +201,36 @@ export default async function CompareMatchupPage({ params }: PageProps) {
       }} />
       <PageTracker />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="mb-8">
             <Link
               href="/compare"
-              className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-4"
+              className="inline-flex items-center gap-2 text-muted hover:text-ink mb-4"
             >
               &larr; Compare Players
             </Link>
-            <h1 className="text-3xl font-bold text-neutral-900">
+            <h1 className="text-3xl font-bold text-ink">
               {player1.name} vs {player2.name}
             </h1>
-            <p className="text-neutral-500 mt-1">Career statistics comparison</p>
+            <p className="text-muted mt-1">Career statistics comparison</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-            <div className="grid grid-cols-3 border-b border-neutral-200">
-              <div className="border-r border-neutral-200">
+          <div className="bg-surface rounded-xl border border-line overflow-hidden">
+            <div className="grid grid-cols-3 border-b border-line">
+              <div className="border-r border-line">
                 <PlayerHeader player={player1} />
               </div>
-              <div className="flex items-center justify-center bg-neutral-50">
-                <span className="text-2xl font-bold text-neutral-300">VS</span>
+              <div className="flex items-center justify-center bg-surface-2">
+                <span className="text-2xl font-bold text-faint">VS</span>
               </div>
-              <div className="border-l border-neutral-200">
+              <div className="border-l border-line">
                 <PlayerHeader player={player2} />
               </div>
             </div>
 
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4 text-center">
+              <h3 className="text-lg font-semibold text-ink mb-4 text-center">
                 Career Statistics
               </h3>
               <StatRow
@@ -273,8 +273,8 @@ export default async function CompareMatchupPage({ params }: PageProps) {
               />
 
               {player1.totalStats.appearances > 0 && player2.totalStats.appearances > 0 && (
-                <div className="mt-6 pt-4 border-t border-neutral-200">
-                  <h4 className="text-sm font-medium text-neutral-500 text-center mb-4">
+                <div className="mt-6 pt-4 border-t border-line">
+                  <h4 className="text-sm font-medium text-muted text-center mb-4">
                     Ratios
                   </h4>
                   <StatRow

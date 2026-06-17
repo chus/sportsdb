@@ -4,7 +4,7 @@ export function GoogleButton({ label = "Continue with Google" }: { label?: strin
   return (
     <a
       href="/api/auth/google"
-      className="w-full px-4 py-2.5 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all flex items-center justify-center gap-3"
+      className="w-full px-4 py-2.5 text-sm font-medium text-ink bg-surface border border-line rounded-lg hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all flex items-center justify-center gap-3"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path
@@ -33,10 +33,10 @@ export function AuthDivider() {
   return (
     <div className="relative my-4">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-neutral-200" />
+        <div className="w-full border-t border-line" />
       </div>
       <div className="relative flex justify-center text-xs">
-        <span className="bg-white px-3 text-neutral-400">or</span>
+        <span className="bg-surface px-3 text-faint">or</span>
       </div>
     </div>
   );

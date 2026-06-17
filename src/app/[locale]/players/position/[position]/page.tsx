@@ -80,7 +80,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
         }))}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-600 text-white">
           <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
             <div className="flex items-center gap-3 mb-2">
@@ -106,23 +106,23 @@ export default async function PositionPlayersPage({ params }: PageProps) {
                 key={player.id}
                 slug={player.slug}
                 isLinkWorthy={player.isIndexable ?? false}
-                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-xl transition-shadow group"
+                className="bg-surface rounded-xl border border-line p-4 hover:shadow-xl transition-shadow group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
                     {player.imageUrl ? (
                       <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" width={48} height={48} />
                     ) : (
-                      <User className="w-6 h-6 text-neutral-400" />
+                      <User className="w-6 h-6 text-faint" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                       {player.name}
                     </div>
-                    <div className="text-sm text-neutral-500">{player.nationality}</div>
+                    <div className="text-sm text-muted">{player.nationality}</div>
                     {player.team && (
-                      <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                      <div className="flex items-center gap-1 text-xs text-faint mt-0.5">
                         {player.team.logoUrl ? (
                           <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-3 h-3 object-contain" width={12} height={12} />
                         ) : (
@@ -141,19 +141,19 @@ export default async function PositionPlayersPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-3 mt-8">
             <Link
               href="/players"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-blue-300 hover:text-blue-600 transition-colors"
             >
               All Players
             </Link>
             <Link
               href="/players/position"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-indigo-300 hover:text-indigo-600 transition-colors"
             >
               All Positions
             </Link>
             <Link
               href="/players/nationality"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-teal-300 hover:text-teal-600 transition-colors"
             >
               Browse by Nationality →
             </Link>
@@ -161,7 +161,7 @@ export default async function PositionPlayersPage({ params }: PageProps) {
               <Link
                 key={p}
                 href={`/players/position/${p}`}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-purple-300 hover:text-purple-600 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-purple-300 hover:text-purple-600 transition-colors"
               >
                 {capitalize(p)}s
               </Link>

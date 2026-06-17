@@ -31,8 +31,8 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900">This Week in Football</h2>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h2 className="text-2xl font-bold text-ink">This Week in Football</h2>
+          <p className="text-sm text-muted mt-1">
             Fixtures, derbies and finals for the next 7 days
           </p>
         </div>
@@ -44,14 +44,14 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
           return (
             <div
               key={day.date}
-              className="bg-white rounded-xl border border-neutral-200 overflow-hidden"
+              className="bg-surface rounded-xl border border-line overflow-hidden"
             >
-              <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100 bg-neutral-50">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-line bg-surface-2">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-bold text-sm text-neutral-900">
+                  <h3 className="font-bold text-sm text-ink">
                     {formatDayHeader(day.date)}
                   </h3>
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-muted">
                     {day.matches.length} match{day.matches.length !== 1 ? "es" : ""}
                   </span>
                 </div>
@@ -61,7 +61,7 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
               </div>
 
               {featured.length > 0 && (
-                <div className="px-5 py-3 border-b border-neutral-100 space-y-2">
+                <div className="px-5 py-3 border-b border-line space-y-2">
                   {featured.map((e) => {
                     const Icon = eventIcon(e.type);
                     return (
@@ -78,19 +78,19 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
                                 : "text-blue-500"
                           }`}
                         />
-                        <span className="font-semibold text-neutral-900">{e.title}</span>
+                        <span className="font-semibold text-ink">{e.title}</span>
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              <div className="divide-y divide-neutral-50">
+              <div className="divide-y divide-line">
                 {day.matches.slice(0, 4).map((m) => (
                   <Link
                     key={m.id}
                     href={`/matches/${m.slug ?? m.id}`}
-                    className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors"
+                    className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-3 px-5 py-3 hover:bg-surface-2 transition-colors"
                   >
                     <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                       {m.homeTeam.logoUrl ? (
@@ -102,14 +102,14 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-4 h-4 text-neutral-300" />
+                        <Shield className="w-4 h-4 text-faint" />
                       )}
                     </div>
-                    <span className="text-sm font-medium text-neutral-900 truncate text-right">
+                    <span className="text-sm font-medium text-ink truncate text-right">
                       {m.homeTeam.name}
                     </span>
-                    <span className="text-xs text-neutral-400 mx-2">vs</span>
-                    <span className="text-sm font-medium text-neutral-900 truncate">
+                    <span className="text-xs text-faint mx-2">vs</span>
+                    <span className="text-sm font-medium text-ink truncate">
                       {m.awayTeam.name}
                     </span>
                     <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
@@ -122,7 +122,7 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-4 h-4 text-neutral-300" />
+                        <Shield className="w-4 h-4 text-faint" />
                       )}
                     </div>
                   </Link>
@@ -130,7 +130,7 @@ export function WeekPreview({ data }: { data: WeekPreviewDay[] }) {
                 {day.matches.length > 4 && (
                   <Link
                     href="/matches"
-                    className="block px-5 py-3 text-xs font-medium text-blue-600 hover:bg-neutral-50 text-center transition-colors"
+                    className="block px-5 py-3 text-xs font-medium text-blue-600 hover:bg-surface-2 text-center transition-colors"
                   >
                     + {day.matches.length - 4} more fixtures
                   </Link>

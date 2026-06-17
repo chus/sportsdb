@@ -60,7 +60,7 @@ export default function AdminGamesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-faint" />
       </div>
     );
   }
@@ -82,10 +82,10 @@ export default function AdminGamesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 mb-1">
+        <h1 className="text-2xl font-bold text-ink mb-1">
           Games Analytics
         </h1>
-        <p className="text-neutral-500 text-sm">Last 30 days</p>
+        <p className="text-muted text-sm">Last 30 days</p>
       </div>
 
       {/* Engagement cards */}
@@ -117,10 +117,10 @@ export default function AdminGamesPage() {
       </div>
 
       {/* Daily engagement chart */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+      <div className="bg-surface rounded-xl border border-line p-6">
         <div className="flex items-center gap-2 mb-6">
-          <BarChart3 className="w-5 h-5 text-neutral-500" />
-          <h2 className="font-bold text-neutral-900">
+          <BarChart3 className="w-5 h-5 text-muted" />
+          <h2 className="font-bold text-ink">
             Daily Engagement (14 days)
           </h2>
         </div>
@@ -134,7 +134,7 @@ export default function AdminGamesPage() {
                 key={day.day}
                 className="flex-1 flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] text-neutral-400 font-mono">
+                <span className="text-[10px] text-faint font-mono">
                   {total}
                 </span>
                 <div className="w-full flex flex-col gap-0.5" style={{ height: `${heightPct}%` }}>
@@ -157,14 +157,14 @@ export default function AdminGamesPage() {
                     />
                   )}
                 </div>
-                <span className="text-[9px] text-neutral-400">
+                <span className="text-[9px] text-faint">
                   {date.getDate()}/{date.getMonth() + 1}
                 </span>
               </div>
             );
           })}
         </div>
-        <div className="flex items-center gap-4 mt-4 text-xs text-neutral-500">
+        <div className="flex items-center gap-4 mt-4 text-xs text-muted">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 bg-blue-500 rounded-sm" />
             Prode
@@ -182,10 +182,10 @@ export default function AdminGamesPage() {
 
       {/* Conversion funnel */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
+        <div className="bg-surface rounded-xl border border-line p-6">
           <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="w-5 h-5 text-neutral-500" />
-            <h2 className="font-bold text-neutral-900">Conversion Funnel</h2>
+            <TrendingUp className="w-5 h-5 text-muted" />
+            <h2 className="font-bold text-ink">Conversion Funnel</h2>
           </div>
           <div className="space-y-4">
             {Object.entries(conversionFunnel).map(([gameType, funnel]) => {
@@ -195,34 +195,34 @@ export default function AdminGamesPage() {
                   : "0";
               return (
                 <div key={gameType} className="space-y-2">
-                  <h3 className="text-sm font-semibold text-neutral-700">
+                  <h3 className="text-sm font-semibold text-ink">
                     {gameType.replace("games_", "").replace("_", " ")}
                   </h3>
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-neutral-50 rounded-lg p-2">
-                      <p className="text-lg font-bold text-neutral-900">
+                    <div className="bg-surface-2 rounded-lg p-2">
+                      <p className="text-lg font-bold text-ink">
                         {funnel.shown}
                       </p>
-                      <p className="text-[10px] text-neutral-500">Shown</p>
+                      <p className="text-[10px] text-muted">Shown</p>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-2">
                       <p className="text-lg font-bold text-blue-700">
                         {funnel.clicked}
                       </p>
-                      <p className="text-[10px] text-neutral-500">Clicked</p>
+                      <p className="text-[10px] text-muted">Clicked</p>
                     </div>
                     <div className="bg-green-50 rounded-lg p-2">
                       <p className="text-lg font-bold text-green-700">
                         {clickRate}%
                       </p>
-                      <p className="text-[10px] text-neutral-500">CTR</p>
+                      <p className="text-[10px] text-muted">CTR</p>
                     </div>
                   </div>
                 </div>
               );
             })}
             {Object.keys(conversionFunnel).length === 0 && (
-              <p className="text-neutral-500 text-sm text-center py-4">
+              <p className="text-muted text-sm text-center py-4">
                 No conversion data yet
               </p>
             )}
@@ -230,20 +230,20 @@ export default function AdminGamesPage() {
         </div>
 
         {/* Pick'em trial effectiveness */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
+        <div className="bg-surface rounded-xl border border-line p-6">
           <div className="flex items-center gap-2 mb-6">
-            <Zap className="w-5 h-5 text-neutral-500" />
-            <h2 className="font-bold text-neutral-900">
+            <Zap className="w-5 h-5 text-muted" />
+            <h2 className="font-bold text-ink">
               Pick&apos;em Trial
             </h2>
           </div>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-neutral-50 rounded-lg p-4 text-center">
-                <p className="text-3xl font-bold text-neutral-900">
+              <div className="bg-surface-2 rounded-lg p-4 text-center">
+                <p className="text-3xl font-bold text-ink">
                   {pickemTrial.freePickers}
                 </p>
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   Free pick users
                 </p>
               </div>
@@ -251,7 +251,7 @@ export default function AdminGamesPage() {
                 <p className="text-3xl font-bold text-green-700">
                   {pickemTrial.converted}
                 </p>
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   Converted to Pro
                 </p>
               </div>
@@ -266,7 +266,7 @@ export default function AdminGamesPage() {
                   : "0"}
                 %
               </p>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-muted mt-1">
                 Trial → Pro conversion rate
               </p>
             </div>
@@ -293,23 +293,23 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-5">
+    <div className="bg-surface rounded-xl border border-line p-5">
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h3 className="font-semibold text-neutral-900 text-sm">{title}</h3>
+        <h3 className="font-semibold text-ink text-sm">{title}</h3>
       </div>
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-neutral-500">30-day total</span>
-          <span className="font-bold text-neutral-900">{total}</span>
+          <span className="text-muted">30-day total</span>
+          <span className="font-bold text-ink">{total}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-neutral-500">Last 7 days</span>
-          <span className="font-bold text-neutral-900">{last7d}</span>
+          <span className="text-muted">Last 7 days</span>
+          <span className="font-bold text-ink">{last7d}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-neutral-500">Unique players</span>
-          <span className="font-bold text-neutral-900">{uniquePlayers}</span>
+          <span className="text-muted">Unique players</span>
+          <span className="font-bold text-ink">{uniquePlayers}</span>
         </div>
       </div>
     </div>

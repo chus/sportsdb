@@ -138,7 +138,7 @@ export function NotificationSettings() {
 
   if (!settings) {
     return (
-      <div className="text-center py-12 text-neutral-500">
+      <div className="text-center py-12 text-muted">
         Failed to load notification settings
       </div>
     );
@@ -147,11 +147,11 @@ export function NotificationSettings() {
   return (
     <div className="space-y-8">
       {/* Global Settings */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 bg-neutral-50">
-          <h3 className="font-semibold text-neutral-900">Global Settings</h3>
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
+        <div className="px-6 py-4 border-b border-line bg-surface-2">
+          <h3 className="font-semibold text-ink">Global Settings</h3>
         </div>
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-line">
           <ToggleRow
             icon={Bell}
             label="Push Notifications"
@@ -172,14 +172,14 @@ export function NotificationSettings() {
       </div>
 
       {/* Notification Types */}
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 bg-neutral-50">
-          <h3 className="font-semibold text-neutral-900">Notification Types</h3>
-          <p className="text-sm text-neutral-500 mt-1">
+      <div className="bg-surface rounded-xl border border-line overflow-hidden">
+        <div className="px-6 py-4 border-b border-line bg-surface-2">
+          <h3 className="font-semibold text-ink">Notification Types</h3>
+          <p className="text-sm text-muted mt-1">
             Choose which notifications you want to receive
           </p>
         </div>
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-line">
           {NOTIFICATION_TYPES.map((type) => (
             <ToggleRow
               key={type.key}
@@ -220,26 +220,26 @@ function ToggleRow({
       className={`flex items-center justify-between px-6 py-4 ${disabled ? "opacity-50" : ""}`}
     >
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
-          <Icon className="w-5 h-5 text-neutral-600" />
+        <div className="w-10 h-10 bg-surface-2 rounded-lg flex items-center justify-center">
+          <Icon className="w-5 h-5 text-muted" />
         </div>
         <div>
-          <div className="font-medium text-neutral-900">{label}</div>
-          <div className="text-sm text-neutral-500">{description}</div>
+          <div className="font-medium text-ink">{label}</div>
+          <div className="text-sm text-muted">{description}</div>
         </div>
       </div>
       <button
         onClick={() => onChange(!checked)}
         disabled={saving || disabled}
         className={`relative w-12 h-7 rounded-full transition-colors ${
-          checked ? "bg-blue-600" : "bg-neutral-200"
+          checked ? "bg-blue-600" : "bg-surface-2"
         } ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
       >
         {saving ? (
           <Loader2 className="absolute top-1 left-1 w-5 h-5 animate-spin text-white" />
         ) : (
           <span
-            className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+            className={`absolute top-1 w-5 h-5 rounded-full bg-surface shadow transition-transform ${
               checked ? "translate-x-6" : "translate-x-1"
             }`}
           />

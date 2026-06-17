@@ -45,7 +45,7 @@ export default function AdminLayout({
             </h1>
             <Link
               href="/"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm text-neutral-400 transition-colors hover:text-white"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm text-faint transition-colors hover:text-white"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to site
@@ -67,8 +67,8 @@ export default function AdminLayout({
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-white/10 text-white"
-                      : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                      ? "bg-surface/10 text-white"
+                      : "text-faint hover:bg-surface/5 hover:text-white"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -81,7 +81,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main content */}
-      <main className="ml-64 min-h-screen bg-neutral-50 p-8">{children}</main>
+      <main className="ml-64 min-h-screen bg-surface-2 p-8">{children}</main>
     </div>
   );
 }

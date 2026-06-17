@@ -19,7 +19,7 @@ export function LiveMatchesSection() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1 bg-surface/20 rounded-full">
               <Circle className="w-2 h-2 fill-white animate-pulse" />
               <span className="text-white text-sm font-semibold">LIVE NOW</span>
             </div>
@@ -54,17 +54,17 @@ export function LiveMatchesSection() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-72 bg-white/10 rounded-xl p-4 animate-pulse"
+                className="flex-shrink-0 w-72 bg-surface/10 rounded-xl p-4 animate-pulse"
               >
-                <div className="h-4 bg-white/20 rounded w-24 mb-4" />
+                <div className="h-4 bg-surface/20 rounded w-24 mb-4" />
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg" />
-                    <div className="h-4 bg-white/20 rounded w-32" />
+                    <div className="w-8 h-8 bg-surface/20 rounded-lg" />
+                    <div className="h-4 bg-surface/20 rounded w-32" />
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg" />
-                    <div className="h-4 bg-white/20 rounded w-32" />
+                    <div className="w-8 h-8 bg-surface/20 rounded-lg" />
+                    <div className="h-4 bg-surface/20 rounded w-32" />
                   </div>
                 </div>
               </div>
@@ -79,11 +79,11 @@ export function LiveMatchesSection() {
               <Link
                 key={match.id}
                 href={`/matches/${match.slug ?? match.id}`}
-                className="flex-shrink-0 w-72 bg-white rounded-xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                className="flex-shrink-0 w-72 bg-surface rounded-xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
               >
                 {/* Competition & Status */}
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-muted">
                     {match.competition?.name || "Competition"}
                   </span>
                   <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-100 text-red-600 rounded-full">
@@ -99,7 +99,7 @@ export function LiveMatchesSection() {
                   {/* Home Team */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                         {match.homeTeam?.logoUrl ? (
                           <img
                             src={match.homeTeam.logoUrl}
@@ -107,14 +107,14 @@ export function LiveMatchesSection() {
                             className="w-6 h-6 object-contain"
                           />
                         ) : (
-                          <Shield className="w-4 h-4 text-neutral-400" />
+                          <Shield className="w-4 h-4 text-faint" />
                         )}
                       </div>
-                      <span className="font-semibold text-neutral-900 truncate">
+                      <span className="font-semibold text-ink truncate">
                         {match.homeTeam?.shortName || match.homeTeam?.name || "Home"}
                       </span>
                     </div>
-                    <span className="text-2xl font-bold text-neutral-900 ml-2">
+                    <span className="text-2xl font-bold text-ink ml-2">
                       {match.homeScore ?? 0}
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export function LiveMatchesSection() {
                   {/* Away Team */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                         {match.awayTeam?.logoUrl ? (
                           <img
                             src={match.awayTeam.logoUrl}
@@ -130,14 +130,14 @@ export function LiveMatchesSection() {
                             className="w-6 h-6 object-contain"
                           />
                         ) : (
-                          <Shield className="w-4 h-4 text-neutral-400" />
+                          <Shield className="w-4 h-4 text-faint" />
                         )}
                       </div>
-                      <span className="font-semibold text-neutral-900 truncate">
+                      <span className="font-semibold text-ink truncate">
                         {match.awayTeam?.shortName || match.awayTeam?.name || "Away"}
                       </span>
                     </div>
-                    <span className="text-2xl font-bold text-neutral-900 ml-2">
+                    <span className="text-2xl font-bold text-ink ml-2">
                       {match.awayScore ?? 0}
                     </span>
                   </div>

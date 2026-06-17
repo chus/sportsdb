@@ -24,15 +24,15 @@ const TIER_COLORS: Record<
   { border: string; bg: string; button: string; badge: string }
 > = {
   free: {
-    border: "border-neutral-200",
-    bg: "bg-white",
+    border: "border-line",
+    bg: "bg-surface",
     button:
-      "bg-neutral-100 text-neutral-700 hover:bg-neutral-200",
+      "bg-surface-2 text-ink hover:bg-surface-2",
     badge: "",
   },
   pro: {
     border: "border-blue-600 ring-2 ring-blue-100",
-    bg: "bg-white",
+    bg: "bg-surface",
     button:
       "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg",
     badge: "bg-blue-600 text-white",
@@ -91,7 +91,7 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-surface rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
@@ -129,35 +129,35 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
                     <div
                       className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${
                         tierKey === "free"
-                          ? "bg-neutral-100"
+                          ? "bg-surface-2"
                           : "bg-blue-100"
                       }`}
                     >
                       <Icon
                         className={`w-6 h-6 ${
                           tierKey === "free"
-                            ? "text-neutral-600"
+                            ? "text-muted"
                             : "text-blue-600"
                         }`}
                       />
                     </div>
-                    <h3 className="text-xl font-bold text-neutral-900">
+                    <h3 className="text-xl font-bold text-ink">
                       {config.name}
                     </h3>
-                    <p className="text-sm text-neutral-500 mt-1">
+                    <p className="text-sm text-muted mt-1">
                       {config.description}
                     </p>
                     <div className="mt-4">
                       {config.price === 0 ? (
-                        <span className="text-4xl font-bold text-neutral-900">
+                        <span className="text-4xl font-bold text-ink">
                           Free
                         </span>
                       ) : (
                         <>
-                          <span className="text-4xl font-bold text-neutral-900">
+                          <span className="text-4xl font-bold text-ink">
                             &euro;{config.annualPrice}
                           </span>
-                          <span className="text-neutral-500 text-sm">/year</span>
+                          <span className="text-muted text-sm">/year</span>
                         </>
                       )}
                     </div>
@@ -171,24 +171,24 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
                         <li
                           key={key}
                           className={`flex items-start gap-2 text-sm ${
-                            available ? "text-neutral-700" : "text-neutral-400"
+                            available ? "text-ink" : "text-faint"
                           }`}
                         >
                           <Check
                             className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                              available ? "text-green-500" : "text-neutral-300"
+                              available ? "text-green-500" : "text-faint"
                             }`}
                           />
                           <span>
                             {label}
                             {typeof value === "string" && (
-                              <span className="font-medium text-neutral-900">
+                              <span className="font-medium text-ink">
                                 {" "}
                                 ({value})
                               </span>
                             )}
                             {comingSoon && available && (
-                              <span className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded">
+                              <span className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-muted bg-surface-2 rounded">
                                 <Clock className="w-3 h-3" />
                                 Soon
                               </span>
@@ -219,11 +219,11 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-neutral-50 border-t text-center">
+        <div className="p-6 bg-surface-2 border-t text-center">
           <button
             onClick={onContinue}
             disabled={upgrading !== null}
-            className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
+            className="text-muted hover:text-ink text-sm transition-colors"
           >
             Skip for now — you can always upgrade later
           </button>

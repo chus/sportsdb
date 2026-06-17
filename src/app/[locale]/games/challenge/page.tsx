@@ -31,8 +31,8 @@ export default async function ChallengePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Daily Challenge</h1>
-        <p className="text-neutral-600">
+        <h1 className="text-3xl font-bold text-ink mb-2">Daily Challenge</h1>
+        <p className="text-muted">
           5 new football trivia questions every day. Earn points based on difficulty: 1 for easy, 2 for medium, 3 for hard.
         </p>
       </div>

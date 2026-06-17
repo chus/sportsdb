@@ -15,14 +15,14 @@ export async function LatestNews({ limit = 4 }: LatestNewsProps) {
   }
 
   return (
-    <section className="py-12 bg-neutral-50">
+    <section className="py-12 bg-surface-2">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 rounded-lg">
               <Newspaper className="w-5 h-5 text-red-600" />
             </div>
-            <h2 className="text-2xl font-bold text-neutral-900">Latest News</h2>
+            <h2 className="text-2xl font-bold text-ink">Latest News</h2>
           </div>
           <Link
             href="/news"

@@ -77,7 +77,7 @@ export default async function CompetitionsPage() {
       />
       <PageTracker />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Competitions"
           subtitle={`Covering ${totalCount} leagues and tournaments worldwide`}
@@ -99,7 +99,7 @@ export default async function CompetitionsPage() {
           {/* Major Leagues */}
           {majorLeagues.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Major Leagues
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -112,7 +112,7 @@ export default async function CompetitionsPage() {
                     <Link
                       key={comp.id}
                       href={`/competitions/${comp.slug}`}
-                      className="bg-white rounded-xl border border-neutral-200 p-6 min-h-[180px] hover:shadow-xl transition-all group flex flex-col"
+                      className="bg-surface rounded-xl border border-line p-6 min-h-[180px] hover:shadow-xl transition-all group flex flex-col"
                     >
                       {/* Logo + Name */}
                       <div className="flex items-start gap-4 mb-3">
@@ -126,7 +126,7 @@ export default async function CompetitionsPage() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                          <h3 className="text-lg font-bold text-ink group-hover:text-blue-600 transition-colors truncate">
                             {comp.name}
                           </h3>
                           {comp.country && (
@@ -141,7 +141,7 @@ export default async function CompetitionsPage() {
                                   unoptimized
                                 />
                               )}
-                              <span className="text-sm text-neutral-500">
+                              <span className="text-sm text-muted">
                                 {comp.country}
                               </span>
                             </div>
@@ -151,9 +151,9 @@ export default async function CompetitionsPage() {
 
                       {/* Leader */}
                       {comp.leader && (
-                        <div className="text-sm text-neutral-600 mb-2">
+                        <div className="text-sm text-muted mb-2">
                           Led by{" "}
-                          <span className="font-semibold text-neutral-800">
+                          <span className="font-semibold text-ink">
                             {comp.leader.teamName}
                           </span>{" "}
                           &mdash; {comp.leader.points} pts
@@ -161,7 +161,7 @@ export default async function CompetitionsPage() {
                       )}
 
                       {/* Stats row */}
-                      <div className="mt-auto flex items-center gap-3 text-xs text-neutral-500">
+                      <div className="mt-auto flex items-center gap-3 text-xs text-muted">
                         {comp.teamCount > 0 && (
                           <span>{comp.teamCount} teams</span>
                         )}
@@ -179,17 +179,17 @@ export default async function CompetitionsPage() {
           {/* By Region */}
           {sortedRegions.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 By Region
               </h2>
               <div className="space-y-6">
                 {sortedRegions.map(([region, comps]) => (
                   <div key={region}>
-                    <h3 className="text-lg font-semibold text-neutral-800 mb-3 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-ink mb-3 flex items-center gap-2">
                       <Globe className="w-5 h-5 text-purple-500" />
                       {region}
                     </h3>
-                    <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
+                    <div className="bg-surface rounded-xl border border-line divide-y divide-line">
                       {comps.map((comp) => {
                         const flagUrl = comp.country
                           ? getCountryFlagUrl(comp.country)
@@ -199,7 +199,7 @@ export default async function CompetitionsPage() {
                           <Link
                             key={comp.id}
                             href={`/competitions/${comp.slug}`}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors group"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors group"
                           >
                             <ImageWithFallback
                               src={comp.logoUrl}
@@ -208,7 +208,7 @@ export default async function CompetitionsPage() {
                               height={24}
                               className="w-6 h-6 object-contain flex-shrink-0"
                             />
-                            <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors flex-1 min-w-0 truncate">
+                            <span className="font-medium text-ink group-hover:text-blue-600 transition-colors flex-1 min-w-0 truncate">
                               {comp.name}
                             </span>
                             {comp.country && (
@@ -223,12 +223,12 @@ export default async function CompetitionsPage() {
                                     unoptimized
                                   />
                                 )}
-                                <span className="text-sm text-neutral-500 hidden sm:inline">
+                                <span className="text-sm text-muted hidden sm:inline">
                                   {comp.country}
                                 </span>
                               </div>
                             )}
-                            <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                            <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-600 transition-colors flex-shrink-0" />
                           </Link>
                         );
                       })}
@@ -242,10 +242,10 @@ export default async function CompetitionsPage() {
           {/* Cup Competitions */}
           {cupCompetitions.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Cup Competitions
               </h2>
-              <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
+              <div className="bg-surface rounded-xl border border-line divide-y divide-line">
                 {cupCompetitions.map((comp) => {
                   const flagUrl = comp.country
                     ? getCountryFlagUrl(comp.country)
@@ -255,7 +255,7 @@ export default async function CompetitionsPage() {
                     <Link
                       key={comp.id}
                       href={`/competitions/${comp.slug}`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors group"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors group"
                     >
                       <ImageWithFallback
                         src={comp.logoUrl}
@@ -264,7 +264,7 @@ export default async function CompetitionsPage() {
                         height={24}
                         className="w-6 h-6 object-contain flex-shrink-0"
                       />
-                      <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors flex-1 min-w-0 truncate">
+                      <span className="font-medium text-ink group-hover:text-blue-600 transition-colors flex-1 min-w-0 truncate">
                         {comp.name}
                       </span>
                       {comp.country && (
@@ -279,12 +279,12 @@ export default async function CompetitionsPage() {
                               unoptimized
                             />
                           )}
-                          <span className="text-sm text-neutral-500 hidden sm:inline">
+                          <span className="text-sm text-muted hidden sm:inline">
                             {comp.country}
                           </span>
                         </div>
                       )}
-                      <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-600 transition-colors flex-shrink-0" />
                     </Link>
                   );
                 })}

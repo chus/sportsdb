@@ -40,7 +40,7 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
       {units.map((unit) => (
         <div
           key={unit.label}
-          className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]"
+          className="bg-surface/10 backdrop-blur-sm rounded-xl px-4 py-3 text-center min-w-[80px]"
         >
           <div className="text-3xl md:text-4xl font-bold tabular-nums">
             {String(unit.value).padStart(2, "0")}

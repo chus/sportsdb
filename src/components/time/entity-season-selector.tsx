@@ -64,7 +64,7 @@ export function EntitySeasonSelector({
 
   if (isLoading) {
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-lg text-sm text-neutral-400 animate-pulse">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-2 rounded-lg text-sm text-faint animate-pulse">
         <Calendar className="w-4 h-4" />
         <span>Loading...</span>
       </div>
@@ -81,37 +81,37 @@ export function EntitySeasonSelector({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center gap-2 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors ${
+        className={`inline-flex items-center gap-2 border border-line rounded-lg font-medium hover:bg-surface-2 transition-colors ${
           isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm"
         }`}
       >
-        <Calendar className={isCompact ? "w-3 h-3 text-neutral-500" : "w-4 h-4 text-neutral-500"} />
+        <Calendar className={isCompact ? "w-3 h-3 text-muted" : "w-4 h-4 text-muted"} />
         <span>{selectedSeason?.label || "All Time"}</span>
         {selectedSeason?.isCurrent && (
           <span className={`bg-green-100 text-green-700 rounded ${isCompact ? "px-1 py-0.5 text-[10px]" : "px-1.5 py-0.5 text-xs"}`}>
             Current
           </span>
         )}
-        <ChevronDown className={`text-neutral-400 transition-transform ${isOpen ? "rotate-180" : ""} ${isCompact ? "w-3 h-3" : "w-4 h-4"}`} />
+        <ChevronDown className={`text-faint transition-transform ${isOpen ? "rotate-180" : ""} ${isCompact ? "w-3 h-3" : "w-4 h-4"}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg z-30 py-1 max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 mt-1 w-48 bg-surface border border-line rounded-lg shadow-lg z-30 py-1 max-h-64 overflow-y-auto">
           <button
             onClick={() => handleSelect(seasons.find((s) => s.isCurrent) || null)}
-            className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-50 flex items-center justify-between ${
-              !selectedSeasonId || selectedSeason?.isCurrent ? "bg-blue-50 text-blue-700" : "text-neutral-700"
+            className={`w-full px-3 py-2 text-left text-sm hover:bg-surface-2 flex items-center justify-between ${
+              !selectedSeasonId || selectedSeason?.isCurrent ? "bg-blue-50 text-blue-700" : "text-ink"
             }`}
           >
             <span>Current Season</span>
           </button>
-          <div className="h-px bg-neutral-100 my-1" />
+          <div className="h-px bg-surface-2 my-1" />
           {seasons.map((season) => (
             <button
               key={season.id}
               onClick={() => handleSelect(season)}
-              className={`w-full px-3 py-2 text-left text-sm hover:bg-neutral-50 flex items-center justify-between ${
-                season.id === selectedSeasonId && !season.isCurrent ? "bg-blue-50 text-blue-700" : "text-neutral-700"
+              className={`w-full px-3 py-2 text-left text-sm hover:bg-surface-2 flex items-center justify-between ${
+                season.id === selectedSeasonId && !season.isCurrent ? "bg-blue-50 text-blue-700" : "text-ink"
               }`}
             >
               <span>{season.label}</span>

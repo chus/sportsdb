@@ -38,14 +38,14 @@ export default async function DashboardPage() {
   const firstName = user.name?.split(" ")[0] || "there";
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-surface-2">
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Welcome Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-ink">
             Welcome back, {firstName}
           </h1>
-          <p className="mt-1 text-gray-500">
+          <p className="mt-1 text-muted">
             Here is what is happening across your leagues.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             {/* Followed Leagues */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-blue-600" />
                   Your Leagues
                 </h2>
@@ -72,12 +72,12 @@ export default async function DashboardPage() {
               </div>
 
               {followedLeagues.length === 0 ? (
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                  <Trophy className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <h3 className="font-medium text-gray-900 mb-1">
+                <div className="rounded-xl border border-line bg-surface p-6 text-center">
+                  <Trophy className="h-10 w-10 text-faint mx-auto mb-3" />
+                  <h3 className="font-medium text-ink mb-1">
                     No leagues selected
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-muted mb-4">
                     Pick your favorite leagues to see fixtures, standings, and
                     news tailored to you.
                   </p>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                     <Link
                       key={competition.id}
                       href={`/competitions/${competition.slug}`}
-                      className="rounded-xl border border-neutral-200 bg-white p-4 hover:shadow-xl transition-shadow flex items-center gap-3"
+                      className="rounded-xl border border-line bg-surface p-4 hover:shadow-xl transition-shadow flex items-center gap-3"
                     >
                       {competition.logoUrl ? (
                         <img
@@ -104,14 +104,14 @@ export default async function DashboardPage() {
                           className="h-8 w-8 object-contain"
                         />
                       ) : (
-                        <Shield className="h-8 w-8 text-gray-300" />
+                        <Shield className="h-8 w-8 text-faint" />
                       )}
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-ink truncate">
                           {competition.name}
                         </p>
                         {competition.country && (
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-xs text-muted truncate">
                             {competition.country}
                           </p>
                         )}
@@ -125,16 +125,16 @@ export default async function DashboardPage() {
             {/* Upcoming Fixtures */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-blue-600" />
                   Upcoming Fixtures
                 </h2>
               </div>
 
               {upcomingFixtures.length === 0 ? (
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                  <Calendar className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">
+                <div className="rounded-xl border border-line bg-surface p-6 text-center">
+                  <Calendar className="h-10 w-10 text-faint mx-auto mb-3" />
+                  <p className="text-sm text-muted">
                     {followedLeagues.length === 0
                       ? "Follow leagues to see upcoming fixtures here."
                       : "No upcoming matches in the next 7 days."}
@@ -146,13 +146,13 @@ export default async function DashboardPage() {
                     <Link
                       key={fixture.id}
                       href={`/matches/${fixture.slug ?? fixture.id}`}
-                      className="block rounded-xl border border-neutral-200 bg-white p-4 hover:shadow-xl transition-shadow"
+                      className="block rounded-xl border border-line bg-surface p-4 hover:shadow-xl transition-shadow"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-blue-600">
                           {fixture.competition.name}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted">
                           {format(
                             new Date(fixture.scheduledAt),
                             "EEE, MMM d - HH:mm"
@@ -168,18 +168,18 @@ export default async function DashboardPage() {
                               className="h-6 w-6 object-contain flex-shrink-0"
                             />
                           ) : (
-                            <Shield className="h-6 w-6 text-gray-300 flex-shrink-0" />
+                            <Shield className="h-6 w-6 text-faint flex-shrink-0" />
                           )}
-                          <span className="text-sm font-medium text-gray-900 truncate">
+                          <span className="text-sm font-medium text-ink truncate">
                             {fixture.homeTeam.shortName ||
                               fixture.homeTeam.name}
                           </span>
                         </div>
-                        <span className="text-xs font-semibold text-gray-400 px-3">
+                        <span className="text-xs font-semibold text-faint px-3">
                           vs
                         </span>
                         <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                          <span className="text-sm font-medium text-gray-900 truncate text-right">
+                          <span className="text-sm font-medium text-ink truncate text-right">
                             {fixture.awayTeam?.shortName ||
                               fixture.awayTeam?.name ||
                               "TBD"}
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
                               className="h-6 w-6 object-contain flex-shrink-0"
                             />
                           ) : (
-                            <Shield className="h-6 w-6 text-gray-300 flex-shrink-0" />
+                            <Shield className="h-6 w-6 text-faint flex-shrink-0" />
                           )}
                         </div>
                       </div>
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
             {/* League Standings */}
             {leagueStandings.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <h2 className="text-lg font-semibold text-ink flex items-center gap-2 mb-4">
                   <Trophy className="h-5 w-5 text-blue-600" />
                   Standings
                 </h2>
@@ -212,10 +212,10 @@ export default async function DashboardPage() {
                   {leagueStandings.map((league) => (
                     <div
                       key={league.competitionSeasonId}
-                      className="rounded-xl border border-neutral-200 bg-white overflow-hidden"
+                      className="rounded-xl border border-line bg-surface overflow-hidden"
                     >
-                      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-neutral-200">
-                        <h3 className="text-sm font-semibold text-gray-900">
+                      <div className="flex items-center justify-between px-4 py-3 bg-surface-2 border-b border-line">
+                        <h3 className="text-sm font-semibold text-ink">
                           {league.competition.name}
                         </h3>
                         <Link
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
                       <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="text-xs text-gray-500 border-b border-neutral-100">
+                          <tr className="text-xs text-muted border-b border-line">
                             <th className="text-left py-2 px-2 sm:px-4 font-medium w-8">
                               #
                             </th>
@@ -260,9 +260,9 @@ export default async function DashboardPage() {
                           {league.standings.map(({ standing, team }) => (
                             <tr
                               key={standing.id}
-                              className="border-b border-neutral-50 last:border-0 hover:bg-gray-50"
+                              className="border-b border-neutral-50 last:border-0 hover:bg-surface-2"
                             >
-                              <td className="py-2 px-2 sm:px-4 text-gray-500 font-medium">
+                              <td className="py-2 px-2 sm:px-4 text-muted font-medium">
                                 {standing.position}
                               </td>
                               <td className="py-2 px-2">
@@ -277,34 +277,34 @@ export default async function DashboardPage() {
                                       className="h-5 w-5 object-contain"
                                     />
                                   ) : (
-                                    <Shield className="h-5 w-5 text-gray-300" />
+                                    <Shield className="h-5 w-5 text-faint" />
                                   )}
-                                  <span className="font-medium text-gray-900 truncate hidden md:inline">
+                                  <span className="font-medium text-ink truncate hidden md:inline">
                                     {team.name}
                                   </span>
-                                  <span className="font-medium text-gray-900 truncate md:hidden">
+                                  <span className="font-medium text-ink truncate md:hidden">
                                     {team.shortName || team.name}
                                   </span>
                                 </Link>
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600">
+                              <td className="py-2 px-2 text-center text-muted">
                                 {standing.played}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600">
+                              <td className="py-2 px-2 text-center text-muted">
                                 {standing.won}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600 hidden sm:table-cell">
+                              <td className="py-2 px-2 text-center text-muted hidden sm:table-cell">
                                 {standing.drawn}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600">
+                              <td className="py-2 px-2 text-center text-muted">
                                 {standing.lost}
                               </td>
-                              <td className="py-2 px-2 text-center text-gray-600 hidden sm:table-cell">
+                              <td className="py-2 px-2 text-center text-muted hidden sm:table-cell">
                                 {standing.goalDifference > 0
                                   ? `+${standing.goalDifference}`
                                   : standing.goalDifference}
                               </td>
-                              <td className="py-2 px-2 sm:px-4 text-center font-bold text-gray-900">
+                              <td className="py-2 px-2 sm:px-4 text-center font-bold text-ink">
                                 {standing.points}
                               </td>
                             </tr>
@@ -324,7 +324,7 @@ export default async function DashboardPage() {
             {/* Latest News */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                   <Newspaper className="h-5 w-5 text-blue-600" />
                   Latest News
                 </h2>
@@ -338,9 +338,9 @@ export default async function DashboardPage() {
               </div>
 
               {latestArticles.length === 0 ? (
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                  <Newspaper className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">
+                <div className="rounded-xl border border-line bg-surface p-6 text-center">
+                  <Newspaper className="h-10 w-10 text-faint mx-auto mb-3" />
+                  <p className="text-sm text-muted">
                     No articles published yet.
                   </p>
                 </div>
@@ -350,9 +350,9 @@ export default async function DashboardPage() {
                     <Link
                       key={article.id}
                       href={`/news/${article.slug}`}
-                      className="block rounded-xl border border-neutral-200 bg-white p-4 hover:shadow-xl transition-shadow"
+                      className="block rounded-xl border border-line bg-surface p-4 hover:shadow-xl transition-shadow"
                     >
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2 mb-2">
+                      <p className="text-sm font-medium text-ink line-clamp-2 mb-2">
                         {article.title}
                       </p>
                       <div className="flex items-center justify-between">
@@ -360,7 +360,7 @@ export default async function DashboardPage() {
                           {article.type.replace("_", " ")}
                         </span>
                         {article.publishedAt && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-faint">
                             {format(
                               new Date(article.publishedAt),
                               "MMM d, yyyy"
@@ -380,11 +380,11 @@ export default async function DashboardPage() {
                 <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="h-5 w-5 text-indigo-600" />
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-ink">
                       Upgrade to Pro
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-muted mb-4">
                     Unlock unlimited follows, advanced comparisons, and
                     exclusive insights.
                   </p>

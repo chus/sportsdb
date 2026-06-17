@@ -111,14 +111,14 @@ export function PickemForm({
         )}
 
         {Object.entries(grouped).length === 0 && (
-          <p className="text-neutral-500 text-center py-12">
+          <p className="text-muted text-center py-12">
             No upcoming matches available for Pick'em right now.
           </p>
         )}
 
         {Object.entries(grouped).map(([comp, compMatches]) => (
           <div key={comp}>
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">{comp}</h2>
+            <h2 className="text-lg font-bold text-ink mb-4">{comp}</h2>
             <div className="space-y-3">
               {compMatches.map((match) => {
                 const pct = communityPercentages[match.id];
@@ -128,14 +128,14 @@ export function PickemForm({
                 return (
                   <div
                     key={match.id}
-                    className="bg-white rounded-xl border border-neutral-200 p-4"
+                    className="bg-surface rounded-xl border border-line p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-neutral-900 text-sm flex-1 text-right pr-4">
+                      <span className="font-medium text-ink text-sm flex-1 text-right pr-4">
                         {match.homeTeam.name}
                       </span>
-                      <span className="text-xs text-neutral-400 px-2">vs</span>
-                      <span className="font-medium text-neutral-900 text-sm flex-1 pl-4">
+                      <span className="text-xs text-faint px-2">vs</span>
+                      <span className="font-medium text-ink text-sm flex-1 pl-4">
                         {match.awayTeam.name}
                       </span>
                     </div>
@@ -160,8 +160,8 @@ export function PickemForm({
                               isSelected
                                 ? "bg-blue-600 text-white ring-2 ring-blue-300"
                                 : isLocked
-                                ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
-                                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                                ? "bg-surface-2 text-faint cursor-not-allowed"
+                                : "bg-surface-2 text-ink hover:bg-surface-2"
                             }`}
                           >
                             {isLocked && !isSelected && (
@@ -175,7 +175,7 @@ export function PickemForm({
 
                     {/* Community percentage bars */}
                     {pct && pct.total > 0 && (
-                      <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-neutral-100">
+                      <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-surface-2">
                         <div
                           className="bg-blue-500 rounded-l-full transition-all"
                           style={{ width: `${pct.home}%` }}
@@ -194,14 +194,14 @@ export function PickemForm({
                       </div>
                     )}
                     {pct && pct.total > 0 && (
-                      <div className="flex justify-between mt-1 text-[10px] text-neutral-400">
+                      <div className="flex justify-between mt-1 text-[10px] text-faint">
                         <span>{pct.home}%</span>
                         <span>{pct.draw}%</span>
                         <span>{pct.away}%</span>
                       </div>
                     )}
 
-                    <div className="mt-2 text-xs text-neutral-400 text-center">
+                    <div className="mt-2 text-xs text-faint text-center">
                       {new Date(match.scheduledAt).toLocaleDateString("en-GB", {
                         weekday: "short",
                         day: "numeric",
@@ -220,14 +220,14 @@ export function PickemForm({
 
       {/* Sidebar: Leaderboard */}
       <div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-5 sticky top-24">
+        <div className="bg-surface rounded-xl border border-line p-5 sticky top-24">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            <h3 className="font-bold text-neutral-900">Pick'em Leaderboard</h3>
+            <h3 className="font-bold text-ink">Pick'em Leaderboard</h3>
           </div>
 
           {leaderboard.length === 0 ? (
-            <p className="text-neutral-500 text-sm text-center py-4">
+            <p className="text-muted text-sm text-center py-4">
               No picks yet.
             </p>
           ) : (
@@ -238,14 +238,14 @@ export function PickemForm({
                   className="flex items-center justify-between text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-6 text-neutral-400 font-mono text-xs">
+                    <span className="w-6 text-faint font-mono text-xs">
                       {entry.rank}
                     </span>
-                    <span className="font-medium text-neutral-900 truncate max-w-[140px]">
+                    <span className="font-medium text-ink truncate max-w-[140px]">
                       {entry.userName}
                     </span>
                   </div>
-                  <span className="font-bold text-neutral-900">
+                  <span className="font-bold text-ink">
                     {entry.totalPoints} pts
                   </span>
                 </div>

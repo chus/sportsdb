@@ -14,17 +14,17 @@ export function TeamSpotlightSection({ data }: { data: TeamSpotlight }) {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-neutral-900">
+        <h2 className="text-2xl font-bold text-ink">
           Team of the Day
         </h2>
-        <p className="text-sm text-neutral-500 mt-1">
+        <p className="text-sm text-muted mt-1">
           Discover a new squad every day
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+      <div className="bg-surface rounded-xl border border-line p-6">
         <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center flex-shrink-0">
+          <div className="w-14 h-14 rounded-xl bg-surface-2 border border-line flex items-center justify-center flex-shrink-0">
             {data.team.logoUrl ? (
               <ImageWithFallback
                 src={data.team.logoUrl}
@@ -34,17 +34,17 @@ export function TeamSpotlightSection({ data }: { data: TeamSpotlight }) {
                 className="w-12 h-12 object-contain"
               />
             ) : (
-              <Shield className="w-8 h-8 text-neutral-400" />
+              <Shield className="w-8 h-8 text-faint" />
             )}
           </div>
           <div className="min-w-0">
             <Link
               href={`/teams/${data.team.slug}`}
-              className="text-xl font-bold text-neutral-900 hover:text-blue-600 transition-colors truncate block"
+              className="text-xl font-bold text-ink hover:text-blue-600 transition-colors truncate block"
             >
               {data.team.name}
             </Link>
-            <div className="text-sm text-neutral-500">
+            <div className="text-sm text-muted">
               {data.team.country}
               {data.competition && (
                 <>
@@ -62,8 +62,8 @@ export function TeamSpotlightSection({ data }: { data: TeamSpotlight }) {
         </div>
 
         <div className="flex items-center gap-6 mb-4">
-          <div className="flex items-center gap-1.5 text-sm text-neutral-600">
-            <Users className="w-4 h-4 text-neutral-400" />
+          <div className="flex items-center gap-1.5 text-sm text-muted">
+            <Users className="w-4 h-4 text-faint" />
             <span className="font-semibold">{data.squadSize}</span> players
           </div>
         </div>
@@ -73,7 +73,7 @@ export function TeamSpotlightSection({ data }: { data: TeamSpotlight }) {
             {data.positions.map((p) => (
               <span
                 key={p.position}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${positionColors[p.position] ?? "bg-neutral-100 text-neutral-600"}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${positionColors[p.position] ?? "bg-surface-2 text-muted"}`}
               >
                 {p.position}
                 <span className="font-bold">{p.count}</span>

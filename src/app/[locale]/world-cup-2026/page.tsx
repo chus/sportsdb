@@ -217,19 +217,19 @@ export default async function WorldCup2026Page() {
             <CountdownTimer targetDate={WC_START_DATE} />
 
             <div className="flex flex-wrap gap-4 mt-8">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2 bg-surface/10 backdrop-blur-sm rounded-lg px-4 py-2">
                 <Users className="w-5 h-5" />
                 <span className="font-semibold">48 Teams</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2 bg-surface/10 backdrop-blur-sm rounded-lg px-4 py-2">
                 <Globe className="w-5 h-5" />
                 <span className="font-semibold">12 Groups</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2 bg-surface/10 backdrop-blur-sm rounded-lg px-4 py-2">
                 <MapPin className="w-5 h-5" />
                 <span className="font-semibold">16 Stadiums</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2 bg-surface/10 backdrop-blur-sm rounded-lg px-4 py-2">
                 <Calendar className="w-5 h-5" />
                 <span className="font-semibold">June 11 – July 19</span>
               </div>
@@ -240,16 +240,16 @@ export default async function WorldCup2026Page() {
         {/* Host Countries */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-neutral-900 mb-8">Host Countries</h2>
+            <h2 className="text-3xl font-bold text-ink mb-8">Host Countries</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {hostCountries.map((country) => (
                 <div
                   key={country.name}
-                  className="bg-white rounded-xl border border-neutral-200 p-8 text-center hover:shadow-xl transition-all"
+                  className="bg-surface rounded-xl border border-line p-8 text-center hover:shadow-xl transition-all"
                 >
                   <div className="text-6xl mb-4" role="img" aria-label={`Flag of ${country.name}`}>{country.flag}</div>
-                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">{country.name}</h3>
-                  <p className="text-neutral-600">
+                  <h3 className="text-2xl font-bold text-ink mb-2">{country.name}</h3>
+                  <p className="text-muted">
                     {country.stadiums} {country.stadiums === 1 ? "stadium" : "stadiums"}
                   </p>
                 </div>
@@ -260,27 +260,27 @@ export default async function WorldCup2026Page() {
 
         {/* Venues */}
         {data?.venues && data.venues.length > 0 && (
-          <section className="py-16 bg-white">
+          <section className="py-16 bg-surface">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center gap-3 mb-8">
                 <MapPin className="w-6 h-6 text-blue-600" />
-                <h2 className="text-3xl font-bold text-neutral-900">Stadiums & Venues</h2>
+                <h2 className="text-3xl font-bold text-ink">Stadiums & Venues</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {data.venues.map((venue) => (
                   <Link
                     key={venue.id}
                     href={`/venues/${venue.slug}`}
-                    className="bg-neutral-50 rounded-xl p-6 border border-neutral-200 hover:shadow-lg hover:border-blue-300 transition-all group"
+                    className="bg-surface-2 rounded-xl p-6 border border-line hover:shadow-lg hover:border-blue-300 transition-all group"
                   >
-                    <h3 className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors mb-1">
+                    <h3 className="font-bold text-ink group-hover:text-blue-600 transition-colors mb-1">
                       {venue.name}
                     </h3>
-                    <p className="text-sm text-neutral-600">
+                    <p className="text-sm text-muted">
                       {venue.city}, {venue.country}
                     </p>
                     {venue.capacity && (
-                      <p className="text-sm text-neutral-500 mt-2">
+                      <p className="text-sm text-muted mt-2">
                         Capacity: {venue.capacity.toLocaleString()}
                       </p>
                     )}
@@ -297,28 +297,28 @@ export default async function WorldCup2026Page() {
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center gap-3 mb-8">
                 <Trophy className="w-6 h-6 text-yellow-600" />
-                <h2 className="text-3xl font-bold text-neutral-900">Group Stage</h2>
+                <h2 className="text-3xl font-bold text-ink">Group Stage</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {data.groups.map((group) => (
                   <div
                     key={group.letter}
-                    className="bg-white rounded-xl border border-neutral-200 overflow-hidden"
+                    className="bg-surface rounded-xl border border-line overflow-hidden"
                   >
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3">
                       <h3 className="text-white font-bold text-lg">Group {group.letter}</h3>
                     </div>
-                    <div className="divide-y divide-neutral-100">
+                    <div className="divide-y divide-line">
                       {group.teams.map(({ team }) => (
                         <Link
                           key={team.id}
                           href={`/teams/${team.slug}`}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 transition-colors group"
                         >
-                          <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-600 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                          <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center text-xs font-bold text-muted group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                             {team.shortName?.substring(0, 3) || team.name.substring(0, 3).toUpperCase()}
                           </div>
-                          <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                          <span className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                             {team.name}
                           </span>
                         </Link>
@@ -333,31 +333,31 @@ export default async function WorldCup2026Page() {
 
         {/* Key Players to Watch — top current-season scorers, refreshed by ISR */}
         {keyPlayers.length > 0 && (
-          <section className="py-16 bg-white">
+          <section className="py-16 bg-surface">
             <div className="max-w-7xl mx-auto px-4">
               <div className="flex items-center gap-3 mb-8">
                 <Users className="w-6 h-6 text-orange-500" />
-                <h2 className="text-3xl font-bold text-neutral-900">Key Players to Watch</h2>
+                <h2 className="text-3xl font-bold text-ink">Key Players to Watch</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {keyPlayers.map((player) => (
                   <Link
                     key={player.slug}
                     href={`/players/${player.slug}`}
-                    className="flex items-center gap-4 p-4 bg-white rounded-xl border border-neutral-200 hover:shadow-xl hover:border-neutral-300 hover:-translate-y-1 transition-all duration-200 group"
+                    className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-line hover:shadow-xl hover:border-line hover:-translate-y-1 transition-all duration-200 group"
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
                       {player.name.split(" ").map((n) => n[0]).join("").slice(0, 3)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                      <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
                         {player.name}
                       </div>
-                      <div className="text-sm text-neutral-500 truncate">
+                      <div className="text-sm text-muted truncate">
                         {player.goals} goals this season{player.nationality ? ` · ${player.nationality}` : ""}
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-blue-500 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-500 transition-colors" />
                   </Link>
                 ))}
               </div>
@@ -377,13 +377,13 @@ export default async function WorldCup2026Page() {
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
                   href="/teams"
-                  className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:shadow-lg transition-all"
+                  className="px-8 py-3 bg-surface text-blue-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
                   Explore Teams
                 </Link>
                 <Link
                   href="/players"
-                  className="px-8 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
+                  className="px-8 py-3 bg-surface/20 text-white rounded-lg font-semibold hover:bg-surface/30 transition-all"
                 >
                   Explore Players
                 </Link>

@@ -88,11 +88,11 @@ export default async function AboutPage() {
         { name: "About", url: `${BASE_URL}/about` },
       ]}
     />
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-2xl mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-surface/20 rounded-2xl mb-6">
             <Trophy className="w-10 h-10" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -107,8 +107,8 @@ export default async function AboutPage() {
       {/* Mission Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-6">Our Mission</h2>
-          <div className="prose prose-lg max-w-none text-neutral-600">
+          <h2 className="text-3xl font-bold text-ink mb-6">Our Mission</h2>
+          <div className="prose prose-lg max-w-none text-muted">
             <p>
               DataSports was created with a simple goal: to provide the most accurate, well-structured, and comprehensive football database available. We believe that sports data should be accessible, reliable, and useful for everyone—from casual fans to professional analysts.
             </p>
@@ -123,21 +123,21 @@ export default async function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-surface">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-ink mb-8 text-center">
             By the Numbers
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="text-center p-6 bg-neutral-50 rounded-xl"
+                className="text-center p-6 bg-surface-2 rounded-xl"
               >
                 <div className="text-3xl font-bold text-blue-600 mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm text-neutral-500">{stat.label}</div>
+                <div className="text-sm text-muted">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -147,22 +147,22 @@ export default async function AboutPage() {
       {/* Features Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-ink mb-8 text-center">
             What Makes Us Different
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white rounded-xl border border-neutral-200 p-6"
+                className="bg-surface rounded-xl border border-line p-6"
               >
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                   <feature.icon className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                <h3 className="text-lg font-semibold text-ink mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-600">{feature.description}</p>
+                <p className="text-muted">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -170,12 +170,12 @@ export default async function AboutPage() {
       </section>
 
       {/* Competitions Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-surface">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-6">
+          <h2 className="text-3xl font-bold text-ink mb-6">
             Competitions We Cover
           </h2>
-          <div className="prose prose-lg max-w-none text-neutral-600">
+          <div className="prose prose-lg max-w-none text-muted">
             <p>
               DataSports tracks the world&apos;s most important football competitions, with full squad rosters, season statistics, match results, and standings for each. Our database currently covers:
             </p>
@@ -193,10 +193,10 @@ export default async function AboutPage() {
                 ["Liga Profesional", "Argentina"],
                 ["Brasileir\u00e3o S\u00e9rie A", "Brazil"],
               ].map(([name, country]) => (
-                <div key={name} className="flex items-center gap-2 py-2 text-neutral-700">
+                <div key={name} className="flex items-center gap-2 py-2 text-ink">
                   <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                   <span className="font-medium">{name}</span>
-                  <span className="text-neutral-400 text-sm">({country})</span>
+                  <span className="text-faint text-sm">({country})</span>
                 </div>
               ))}
             </div>
@@ -210,10 +210,10 @@ export default async function AboutPage() {
       {/* Editorial Content Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-6">
+          <h2 className="text-3xl font-bold text-ink mb-6">
             How We Write
           </h2>
-          <div className="prose prose-lg max-w-none text-neutral-600">
+          <div className="prose prose-lg max-w-none text-muted">
             <p>
               Every article on DataSports is written from verified database records. A match
               report cites the actual scoreline, the goal scorers in order with their minutes,
@@ -243,14 +243,14 @@ export default async function AboutPage() {
       </section>
 
       {/* Who Uses Us Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-surface">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-6">
+          <h2 className="text-3xl font-bold text-ink mb-6">
             Who DataSports Is For
           </h2>
-          <div className="prose prose-lg max-w-none text-neutral-600">
+          <div className="prose prose-lg max-w-none text-muted">
             <p>
-              <strong className="text-neutral-900">Fans</strong> who want to follow a player
+              <strong className="text-ink">Fans</strong> who want to follow a player
               across clubs and seasons without piecing together fragments from a dozen
               different sites. Our time-aware data model means you can see who was on
               Liverpool&apos;s bench in May 2025, what Lamine Yamal&apos;s stat line looked
@@ -258,20 +258,20 @@ export default async function AboutPage() {
               three years — all on one page, all consistent.
             </p>
             <p>
-              <strong className="text-neutral-900">Researchers and analysts</strong> who need
+              <strong className="text-ink">Researchers and analysts</strong> who need
               clean, structured football data without scraping or paying for an enterprise
               API. Our pages are designed to be machine-readable (Schema.org SportsEvent and
               SportsTeam markup throughout), with a public RSS feed for every major league
               and an extensive sitemap covering every indexable entity.
             </p>
             <p>
-              <strong className="text-neutral-900">Journalists and bloggers</strong> looking
+              <strong className="text-ink">Journalists and bloggers</strong> looking
               for a fast fact-check on a recent match, a quick lookup of a player&apos;s
               transfer history, or a snapshot of where a team currently sits in the table.
               Every entity page is a self-contained reference.
             </p>
             <p>
-              <strong className="text-neutral-900">Bettors and fantasy managers</strong> who
+              <strong className="text-ink">Bettors and fantasy managers</strong> who
               need reliable form data, head-to-head records, and current-season stats
               without the editorial bias of a betting site.
             </p>
@@ -282,10 +282,10 @@ export default async function AboutPage() {
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+          <h2 className="text-3xl font-bold text-ink mb-4">
             Start Exploring
           </h2>
-          <p className="text-lg text-neutral-600 mb-8">
+          <p className="text-lg text-muted mb-8">
             Dive into our comprehensive database of players, teams, and competitions.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -297,13 +297,13 @@ export default async function AboutPage() {
             </Link>
             <Link
               href="/teams"
-              className="px-6 py-3 bg-neutral-200 text-neutral-900 rounded-lg font-medium hover:bg-neutral-300 transition-colors"
+              className="px-6 py-3 bg-surface-2 text-ink rounded-lg font-medium hover:bg-neutral-300 transition-colors"
             >
               Browse Teams
             </Link>
             <Link
               href="/contact"
-              className="px-6 py-3 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
+              className="px-6 py-3 border border-line text-ink rounded-lg font-medium hover:bg-surface-2 transition-colors"
             >
               Contact Us
             </Link>

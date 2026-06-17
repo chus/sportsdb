@@ -22,14 +22,13 @@ function apply(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Light is the default during the phased dark rollout (see layout's
-  // no-flash script). Flip both to "dark" when every surface is converted.
-  const [theme, setThemeState] = useState<Theme>("light");
+  // Dark by default (matches the layout no-flash script + <html class="dark">).
+  const [theme, setThemeState] = useState<Theme>("dark");
 
   // Sync state from whatever the no-flash script already applied.
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null;
-    setThemeState(stored ?? "light");
+    setThemeState(stored ?? "dark");
   }, []);
 
   const setTheme = useCallback((t: Theme) => {

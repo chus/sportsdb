@@ -109,13 +109,13 @@ export function ProdeForm({
       {/* Match list */}
       <div className="lg:col-span-2 space-y-8">
         {Object.entries(grouped).length === 0 && (
-          <p className="text-neutral-500 text-center py-12">
+          <p className="text-muted text-center py-12">
             No upcoming matches available for predictions right now.
           </p>
         )}
         {Object.entries(grouped).map(([comp, compMatches]) => (
           <div key={comp}>
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">{comp}</h2>
+            <h2 className="text-lg font-bold text-ink mb-4">{comp}</h2>
             <div className="space-y-3">
               {compMatches.map((match) => {
                 const isSubmitted = submitted.has(match.id);
@@ -126,12 +126,12 @@ export function ProdeForm({
                 return (
                   <div
                     key={match.id}
-                    className="relative bg-white rounded-xl border border-neutral-200 p-4"
+                    className="relative bg-surface rounded-xl border border-line p-4"
                   >
                     {/* Frosted overlay for free users */}
                     {!isPro && !isSubmitted && (
                       <div
-                        className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                        className="absolute inset-0 bg-surface/60 backdrop-blur-[2px] rounded-xl z-10 flex items-center justify-center cursor-pointer"
                         onClick={() => {
                           track({ eventType: "upgrade_impression", metadata: { feature: "games_prode", context: "prode_overlay" } });
                           openUpgradeModal("games_prode", "prode_overlay");
@@ -146,7 +146,7 @@ export function ProdeForm({
 
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1 text-right">
-                        <span className="font-medium text-neutral-900 text-sm">
+                        <span className="font-medium text-ink text-sm">
                           {match.homeTeam.name}
                         </span>
                       </div>
@@ -166,9 +166,9 @@ export function ProdeForm({
                             onChange={(e) =>
                               handleScoreChange(match.id, "home", e.target.value)
                             }
-                            className="w-12 h-10 text-center border border-neutral-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-12 h-10 text-center border border-line rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
-                          <span className="text-neutral-400 font-bold">-</span>
+                          <span className="text-faint font-bold">-</span>
                           <input
                             type="number"
                             min="0"
@@ -178,7 +178,7 @@ export function ProdeForm({
                             onChange={(e) =>
                               handleScoreChange(match.id, "away", e.target.value)
                             }
-                            className="w-12 h-10 text-center border border-neutral-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-12 h-10 text-center border border-line rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                           <button
                             onClick={() => handleSubmit(match.id)}
@@ -195,13 +195,13 @@ export function ProdeForm({
                       )}
 
                       <div className="flex-1">
-                        <span className="font-medium text-neutral-900 text-sm">
+                        <span className="font-medium text-ink text-sm">
                           {match.awayTeam.name}
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-2 text-xs text-neutral-400 text-center">
+                    <div className="mt-2 text-xs text-faint text-center">
                       {new Date(match.scheduledAt).toLocaleDateString("en-GB", {
                         weekday: "short",
                         day: "numeric",
@@ -220,14 +220,14 @@ export function ProdeForm({
 
       {/* Sidebar: Leaderboard */}
       <div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-5 sticky top-24">
+        <div className="bg-surface rounded-xl border border-line p-5 sticky top-24">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            <h3 className="font-bold text-neutral-900">Prode Leaderboard</h3>
+            <h3 className="font-bold text-ink">Prode Leaderboard</h3>
           </div>
 
           {leaderboard.length === 0 ? (
-            <p className="text-neutral-500 text-sm text-center py-4">
+            <p className="text-muted text-sm text-center py-4">
               No predictions yet.
             </p>
           ) : (
@@ -238,14 +238,14 @@ export function ProdeForm({
                   className="flex items-center justify-between text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-6 text-neutral-400 font-mono text-xs">
+                    <span className="w-6 text-faint font-mono text-xs">
                       {entry.rank}
                     </span>
-                    <span className="font-medium text-neutral-900 truncate max-w-[140px]">
+                    <span className="font-medium text-ink truncate max-w-[140px]">
                       {entry.userName}
                     </span>
                   </div>
-                  <span className="font-bold text-neutral-900">
+                  <span className="font-bold text-ink">
                     {entry.totalPoints} pts
                   </span>
                 </div>

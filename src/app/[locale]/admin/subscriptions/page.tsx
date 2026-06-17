@@ -166,7 +166,7 @@ export default function AdminSubscriptionsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-neutral-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-faint" />
       </div>
     );
   }
@@ -174,8 +174,8 @@ export default function AdminSubscriptionsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-neutral-900">Subscriptions</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h2 className="text-2xl font-bold text-ink">Subscriptions</h2>
+        <p className="mt-1 text-sm text-muted">
           Manage paying subscribers and voucher codes.
         </p>
       </div>
@@ -189,8 +189,8 @@ export default function AdminSubscriptionsPage() {
       {/* ---- Active Subscribers ---- */}
       <section className="mb-12">
         <div className="mb-4 flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-neutral-600" />
-          <h3 className="text-lg font-semibold text-neutral-900">
+          <CreditCard className="h-5 w-5 text-muted" />
+          <h3 className="text-lg font-semibold text-ink">
             Active Subscribers
           </h3>
         </div>
@@ -199,32 +199,32 @@ export default function AdminSubscriptionsPage() {
         <div>
           <div className="mb-2 flex items-center gap-2">
             <Star className="h-4 w-4 text-blue-600" />
-            <h4 className="text-sm font-medium text-neutral-700">
+            <h4 className="text-sm font-medium text-ink">
               Pro ({proSubscribers.length})
             </h4>
           </div>
-          <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+          <div className="overflow-hidden rounded-xl border border-line bg-surface">
             {proSubscribers.length === 0 ? (
-              <div className="p-6 text-center text-sm text-neutral-400">
+              <div className="p-6 text-center text-sm text-faint">
                 No pro subscribers yet.
               </div>
             ) : (
               <table className="w-full text-left text-sm">
-                <thead className="border-b border-neutral-100 bg-neutral-50">
+                <thead className="border-b border-line bg-surface-2">
                   <tr>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Name</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Email</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Joined</th>
+                    <th className="px-4 py-3 font-medium text-muted">Name</th>
+                    <th className="px-4 py-3 font-medium text-muted">Email</th>
+                    <th className="px-4 py-3 font-medium text-muted">Joined</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-line">
                   {proSubscribers.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-neutral-50">
-                      <td className="px-4 py-3 font-medium text-neutral-900">
+                    <tr key={sub.id} className="hover:bg-surface-2">
+                      <td className="px-4 py-3 font-medium text-ink">
                         {sub.name || "--"}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600">{sub.email}</td>
-                      <td className="px-4 py-3 text-neutral-500">
+                      <td className="px-4 py-3 text-muted">{sub.email}</td>
+                      <td className="px-4 py-3 text-muted">
                         {formatDate(sub.createdAt)}
                       </td>
                     </tr>
@@ -239,8 +239,8 @@ export default function AdminSubscriptionsPage() {
       {/* ---- Voucher Codes ---- */}
       <section>
         <div className="mb-4 flex items-center gap-2">
-          <Ticket className="h-5 w-5 text-neutral-600" />
-          <h3 className="text-lg font-semibold text-neutral-900">
+          <Ticket className="h-5 w-5 text-muted" />
+          <h3 className="text-lg font-semibold text-ink">
             Voucher Codes
           </h3>
         </div>
@@ -248,14 +248,14 @@ export default function AdminSubscriptionsPage() {
         {/* Create voucher form */}
         <form
           onSubmit={handleCreateVoucher}
-          className="mb-6 rounded-xl border border-neutral-200 bg-white p-6"
+          className="mb-6 rounded-xl border border-line bg-surface p-6"
         >
-          <h4 className="mb-4 text-sm font-semibold text-neutral-900">
+          <h4 className="mb-4 text-sm font-semibold text-ink">
             Create New Voucher
           </h4>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Code
               </label>
               <input
@@ -264,24 +264,24 @@ export default function AdminSubscriptionsPage() {
                 value={form.code}
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
                 placeholder="e.g. LAUNCH50"
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Type
               </label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="promo">Promo</option>
                 <option value="referral">Referral</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Discount Type
               </label>
               <select
@@ -289,14 +289,14 @@ export default function AdminSubscriptionsPage() {
                 onChange={(e) =>
                   setForm({ ...form, discountType: e.target.value })
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="free_months">Free Months</option>
                 <option value="percent_off">Percent Off</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Discount Value
               </label>
               <input
@@ -312,11 +312,11 @@ export default function AdminSubscriptionsPage() {
                     ? "Number of months"
                     : "Percentage (1-100)"
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Max Uses (optional)
               </label>
               <input
@@ -325,18 +325,18 @@ export default function AdminSubscriptionsPage() {
                 value={form.maxUses}
                 onChange={(e) => setForm({ ...form, maxUses: e.target.value })}
                 placeholder="Unlimited"
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-neutral-500">
+              <label className="mb-1 block text-xs font-medium text-muted">
                 Valid Until (optional)
               </label>
               <input
                 type="date"
                 value={form.validTo}
                 onChange={(e) => setForm({ ...form, validTo: e.target.value })}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -359,56 +359,56 @@ export default function AdminSubscriptionsPage() {
         </form>
 
         {/* Existing vouchers table */}
-        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-line bg-surface">
           {vouchers.length === 0 ? (
-            <div className="p-6 text-center text-sm text-neutral-400">
+            <div className="p-6 text-center text-sm text-faint">
               No voucher codes created yet.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="border-b border-neutral-100 bg-neutral-50">
+                <thead className="border-b border-line bg-surface-2">
                   <tr>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Code</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Type</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Discount</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Uses</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Valid Until</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500">Created</th>
-                    <th className="px-4 py-3 font-medium text-neutral-500"></th>
+                    <th className="px-4 py-3 font-medium text-muted">Code</th>
+                    <th className="px-4 py-3 font-medium text-muted">Type</th>
+                    <th className="px-4 py-3 font-medium text-muted">Discount</th>
+                    <th className="px-4 py-3 font-medium text-muted">Uses</th>
+                    <th className="px-4 py-3 font-medium text-muted">Valid Until</th>
+                    <th className="px-4 py-3 font-medium text-muted">Created</th>
+                    <th className="px-4 py-3 font-medium text-muted"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-line">
                   {vouchers.map((v) => (
-                    <tr key={v.id} className="hover:bg-neutral-50">
+                    <tr key={v.id} className="hover:bg-surface-2">
                       <td className="px-4 py-3">
-                        <code className="rounded bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-800">
+                        <code className="rounded bg-surface-2 px-2 py-0.5 text-xs font-semibold text-ink">
                           {v.code}
                         </code>
                       </td>
-                      <td className="px-4 py-3 capitalize text-neutral-600">
+                      <td className="px-4 py-3 capitalize text-muted">
                         {v.type}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600">
+                      <td className="px-4 py-3 text-muted">
                         {v.discountType === "percent_off"
                           ? `${v.discountValue}% off`
                           : `${v.discountValue} free month${v.discountValue !== 1 ? "s" : ""}`}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600">
+                      <td className="px-4 py-3 text-muted">
                         {v.redemptionCount}
                         {v.maxUses ? ` / ${v.maxUses}` : ""}
                       </td>
-                      <td className="px-4 py-3 text-neutral-500">
+                      <td className="px-4 py-3 text-muted">
                         {formatDate(v.validTo)}
                       </td>
-                      <td className="px-4 py-3 text-neutral-500">
+                      <td className="px-4 py-3 text-muted">
                         {formatDate(v.createdAt)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => handleDeleteVoucher(v.id)}
                           disabled={deletingId === v.id}
-                          className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                          className="rounded-lg p-1.5 text-faint transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                           title="Delete voucher"
                         >
                           {deletingId === v.id ? (

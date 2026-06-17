@@ -43,7 +43,7 @@ export default async function NationalityIndexPage() {
         url={`${BASE_URL}/players/nationality`}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Players by Nationality"
           subtitle={`Browse football players from ${nationalities.length} countries around the world`}
@@ -62,7 +62,7 @@ export default async function NationalityIndexPage() {
               <Link
                 key={item.nationality}
                 href={`/players/nationality/${encodeURIComponent(item.nationality)}`}
-                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
+                className="bg-surface rounded-xl border border-line p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
                   {(() => {
@@ -74,16 +74,16 @@ export default async function NationalityIndexPage() {
                     );
                   })()}
                   <div>
-                    <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                    <span className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                       {item.nationality}
                     </span>
-                    <div className="flex items-center gap-1 text-xs text-neutral-500">
+                    <div className="flex items-center gap-1 text-xs text-muted">
                       <Users className="w-3 h-3" />
                       {item.count} players
                     </div>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-blue-600 transition-colors" />
+                <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-600 transition-colors" />
               </Link>
             ))}
           </div>

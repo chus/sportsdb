@@ -132,7 +132,7 @@ export default async function CompetitionSeasonPage({
           }))}
         />
       )}
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white">
           <div className="max-w-7xl mx-auto px-4 py-8">
@@ -154,7 +154,7 @@ export default async function CompetitionSeasonPage({
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-surface rounded-2xl flex items-center justify-center flex-shrink-0 p-4">
                 {competition.logoUrl ? (
                   <ImageWithFallback
                     src={competition.logoUrl}
@@ -177,7 +177,7 @@ export default async function CompetitionSeasonPage({
                 </p>
                 <div className="flex flex-wrap items-center gap-4">
                   {competition.country && (
-                    <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                    <span className="px-3 py-1 bg-surface/20 rounded-full text-sm">
                       {competition.country}
                     </span>
                   )}
@@ -216,22 +216,22 @@ export default async function CompetitionSeasonPage({
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Standings */}
             <div className="lg:col-span-2">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Standings
               </h2>
 
               {standingsData.length === 0 ? (
-                <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                  <Trophy className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500">
+                <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                  <Trophy className="w-12 h-12 text-faint mx-auto mb-4" />
+                  <p className="text-muted">
                     No standings data available for this season
                   </p>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden overflow-x-auto">
+                <div className="bg-surface rounded-xl border border-line overflow-hidden overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
+                      <tr className="bg-surface-2 text-left text-sm text-muted">
                         <th scope="col" className="px-2 sm:px-4 py-3 font-medium">#</th>
                         <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Team</th>
                         <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">P</th>
@@ -244,7 +244,7 @@ export default async function CompetitionSeasonPage({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-100">
+                    <tbody className="divide-y divide-line">
                       {standingsData.map(({ standing, team }) => {
                         const isChampion =
                           isCompleted &&
@@ -253,11 +253,11 @@ export default async function CompetitionSeasonPage({
                         return (
                           <tr
                             key={team.id}
-                            className={`hover:bg-neutral-50 transition-colors ${
+                            className={`hover:bg-surface-2 transition-colors ${
                               isChampion ? "bg-yellow-50" : ""
                             }`}
                           >
-                            <td className="px-2 sm:px-4 py-3 font-medium text-neutral-900">
+                            <td className="px-2 sm:px-4 py-3 font-medium text-ink">
                               <div className="flex items-center gap-2">
                                 {isChampion && (
                                   <Crown className="w-4 h-4 text-yellow-500" />
@@ -270,7 +270,7 @@ export default async function CompetitionSeasonPage({
                                 href={`/teams/${team.slug}`}
                                 className="flex items-center gap-2 sm:gap-3 hover:text-blue-600 transition-colors"
                               >
-                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-neutral-100 rounded flex items-center justify-center flex-shrink-0">
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-surface-2 rounded flex items-center justify-center flex-shrink-0">
                                   {team.logoUrl ? (
                                     <ImageWithFallback
                                       src={team.logoUrl}
@@ -280,7 +280,7 @@ export default async function CompetitionSeasonPage({
                                       className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                                     />
                                   ) : (
-                                    <Shield className="w-4 h-4 text-neutral-400" />
+                                    <Shield className="w-4 h-4 text-faint" />
                                   )}
                                 </div>
                                 <span
@@ -296,16 +296,16 @@ export default async function CompetitionSeasonPage({
                                 </span>
                               </Link>
                             </td>
-                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-muted">
                               {standing.played}
                             </td>
-                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-muted">
                               {standing.won}
                             </td>
-                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600 hidden sm:table-cell">
+                            <td className="px-2 sm:px-4 py-3 text-center text-muted hidden sm:table-cell">
                               {standing.drawn}
                             </td>
-                            <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">
+                            <td className="px-2 sm:px-4 py-3 text-center text-muted">
                               {standing.lost}
                             </td>
                             <td
@@ -314,13 +314,13 @@ export default async function CompetitionSeasonPage({
                                   ? "text-green-600"
                                   : standing.goalDifference < 0
                                     ? "text-red-600"
-                                    : "text-neutral-600"
+                                    : "text-muted"
                               }`}
                             >
                               {standing.goalDifference > 0 ? "+" : ""}
                               {standing.goalDifference}
                             </td>
-                            <td className="px-2 sm:px-4 py-3 text-center font-bold text-neutral-900">
+                            <td className="px-2 sm:px-4 py-3 text-center font-bold text-ink">
                               {standing.points}
                             </td>
                           </tr>
@@ -336,8 +336,8 @@ export default async function CompetitionSeasonPage({
             <div className="space-y-6">
               {/* Top Scorers */}
               {topScorers.length > 0 && (
-                <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h3 className="text-sm font-medium text-neutral-500 mb-4">
+                <div className="bg-surface rounded-xl border border-line p-6">
+                  <h3 className="text-sm font-medium text-muted mb-4">
                     Top Scorers
                   </h3>
                   <div className="space-y-3">
@@ -347,18 +347,18 @@ export default async function CompetitionSeasonPage({
                         href={`/players/${player.slug}`}
                         className="flex items-center gap-3 group"
                       >
-                        <span className="w-6 text-sm font-medium text-neutral-400">
+                        <span className="w-6 text-sm font-medium text-faint">
                           {index + 1}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+                          <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
                             {player.name}
                           </div>
-                          <div className="text-xs text-neutral-500 truncate">
+                          <div className="text-xs text-muted truncate">
                             {team.name}
                           </div>
                         </div>
-                        <span className="font-bold text-neutral-900">
+                        <span className="font-bold text-ink">
                           {stat.goals}
                         </span>
                       </Link>
@@ -368,52 +368,52 @@ export default async function CompetitionSeasonPage({
               )}
 
               {/* Season Info */}
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <h3 className="text-sm font-medium text-neutral-500 mb-4">
+              <div className="bg-surface rounded-xl border border-line p-6">
+                <h3 className="text-sm font-medium text-muted mb-4">
                   Season Info
                 </h3>
                 <dl className="space-y-3">
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">Competition</dt>
-                    <dd className="font-medium text-neutral-900">
+                    <dt className="text-muted">Competition</dt>
+                    <dd className="font-medium text-ink">
                       {competition.name}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">Season</dt>
-                    <dd className="font-medium text-neutral-900">
+                    <dt className="text-muted">Season</dt>
+                    <dd className="font-medium text-ink">
                       {seasonData.label}
                     </dd>
                   </div>
                   {competition.country && (
                     <div className="flex justify-between">
-                      <dt className="text-neutral-600">Country</dt>
-                      <dd className="font-medium text-neutral-900">
+                      <dt className="text-muted">Country</dt>
+                      <dd className="font-medium text-ink">
                         {competition.country}
                       </dd>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">Status</dt>
-                    <dd className="font-medium text-neutral-900 capitalize">
+                    <dt className="text-muted">Status</dt>
+                    <dd className="font-medium text-ink capitalize">
                       {competitionSeason.status.replace("_", " ")}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">Teams</dt>
-                    <dd className="font-medium text-neutral-900">
+                    <dt className="text-muted">Teams</dt>
+                    <dd className="font-medium text-ink">
                       {standingsData.length}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">Start Date</dt>
-                    <dd className="font-medium text-neutral-900">
+                    <dt className="text-muted">Start Date</dt>
+                    <dd className="font-medium text-ink">
                       {new Date(seasonData.startDate).toLocaleDateString()}
                     </dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-neutral-600">End Date</dt>
-                    <dd className="font-medium text-neutral-900">
+                    <dt className="text-muted">End Date</dt>
+                    <dd className="font-medium text-ink">
                       {new Date(seasonData.endDate).toLocaleDateString()}
                     </dd>
                   </div>
@@ -422,8 +422,8 @@ export default async function CompetitionSeasonPage({
 
               {/* Other Seasons */}
               {seasonsForSelector.length > 1 && (
-                <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                  <h3 className="text-sm font-medium text-neutral-500 mb-4">
+                <div className="bg-surface rounded-xl border border-line p-6">
+                  <h3 className="text-sm font-medium text-muted mb-4">
                     Other Seasons
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -433,7 +433,7 @@ export default async function CompetitionSeasonPage({
                         <Link
                           key={s.label}
                           href={`/competitions/${slug}/${s.urlLabel}`}
-                          className="px-3 py-1.5 text-sm bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors"
+                          className="px-3 py-1.5 text-sm bg-surface-2 hover:bg-surface-2 rounded-lg transition-colors"
                         >
                           {s.label}
                           {s.isCurrent && (

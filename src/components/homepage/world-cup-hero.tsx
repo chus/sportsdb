@@ -46,14 +46,14 @@ export function WorldCupHero() {
             <div className="flex items-center gap-4">
               <Link
                 href="/teams/country"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-emerald-700 font-bold rounded-full hover:shadow-lg transition-all text-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface text-emerald-700 font-bold rounded-full hover:shadow-lg transition-all text-sm"
               >
                 <Globe className="w-4 h-4" />
                 Explore Teams
               </Link>
               <Link
                 href="/players"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 border border-white/20 font-semibold rounded-full transition-all text-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface/15 hover:bg-surface/25 border border-white/20 font-semibold rounded-full transition-all text-sm"
               >
                 <Users className="w-4 h-4" />
                 Browse Players
@@ -69,7 +69,7 @@ export function WorldCupHero() {
               { value: time.seconds, label: "Sec" },
             ].map((unit) => (
               <div key={unit.label} className="text-center">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-surface/10 border border-white/20 flex items-center justify-center backdrop-blur-sm">
                   <span className="text-2xl md:text-3xl font-bold tabular-nums">
                     {String(unit.value).padStart(2, "0")}
                   </span>

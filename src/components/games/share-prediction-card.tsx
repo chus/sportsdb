@@ -58,22 +58,22 @@ export function SharePredictionCard({
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5">
       <div className="flex items-center gap-2 mb-3">
         <Share2 className="w-4 h-4 text-blue-600" />
-        <h4 className="text-sm font-semibold text-neutral-900">
+        <h4 className="text-sm font-semibold text-ink">
           Share Your Score
         </h4>
       </div>
 
-      <div className="bg-white rounded-lg p-4 mb-4">
+      <div className="bg-surface rounded-lg p-4 mb-4">
         <div className="text-center">
-          <p className="text-3xl font-bold text-neutral-900">{points}</p>
-          <p className="text-xs text-neutral-500">points</p>
+          <p className="text-3xl font-bold text-ink">{points}</p>
+          <p className="text-xs text-muted">points</p>
           {rank && (
             <p className="text-sm text-blue-600 font-semibold mt-1">
               Rank #{rank}
             </p>
           )}
           {correctCount !== undefined && totalCount !== undefined && (
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-muted mt-1">
               {correctCount}/{totalCount} correct
             </p>
           )}

@@ -51,7 +51,7 @@ export function SeasonSelector({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-surface/20 hover:bg-surface/30 rounded-lg text-sm font-medium transition-colors"
       >
         <Calendar className="w-4 h-4" />
         <span>{currentSeason}</span>
@@ -61,14 +61,14 @@ export function SeasonSelector({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 min-w-[160px] z-20">
+        <div className="absolute top-full left-0 mt-2 bg-surface rounded-lg shadow-lg border border-line py-1 min-w-[160px] z-20">
           {seasons.map((season) => (
             <button
               key={season.label}
               onClick={() => handleSeasonChange(season)}
-              className={`w-full px-4 py-2 text-left text-sm text-neutral-900 hover:bg-neutral-100 flex items-center justify-between ${
+              className={`w-full px-4 py-2 text-left text-sm text-ink hover:bg-surface-2 flex items-center justify-between ${
                 season.label === currentSeason
-                  ? "font-medium bg-neutral-50"
+                  ? "font-medium bg-surface-2"
                   : ""
               }`}
             >

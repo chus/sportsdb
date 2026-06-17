@@ -112,7 +112,7 @@ export default async function PlayersPage() {
       />
       <PageTracker />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         {/* Hero */}
         <PageHeader
           title="Players"
@@ -136,7 +136,7 @@ export default async function PlayersPage() {
         {/* Featured Players */}
         {featuredPlayers.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
-            <h2 className="text-xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-xl font-bold text-ink mb-4">
               Featured Players
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -145,7 +145,7 @@ export default async function PlayersPage() {
                   key={entry.player.id}
                   slug={entry.player.slug}
                   isLinkWorthy={entry.player.isIndexable ?? false}
-                  className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all text-center group"
+                  className="bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all text-center group"
                 >
                   <div className="flex justify-center mb-3">
                     <ImageWithFallback
@@ -156,10 +156,10 @@ export default async function PlayersPage() {
                       className="w-[120px] h-[120px] rounded-full object-cover"
                     />
                   </div>
-                  <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                  <div className="font-bold text-ink group-hover:text-blue-600 transition-colors truncate">
                     {entry.player.name}
                   </div>
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-neutral-500 mt-1">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted mt-1">
                     {entry.team.logoUrl && (
                       <ImageWithFallback
                         src={entry.team.logoUrl}
@@ -171,7 +171,7 @@ export default async function PlayersPage() {
                     )}
                     <span className="truncate">{entry.team.name}</span>
                   </div>
-                  <div className="text-sm font-semibold text-neutral-700 mt-2">
+                  <div className="text-sm font-semibold text-ink mt-2">
                     {entry.stat.goals} goals this season
                   </div>
                 </PlayerLink>
@@ -184,7 +184,7 @@ export default async function PlayersPage() {
         {topScorers.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-neutral-900">
+              <h2 className="text-xl font-bold text-ink">
                 Top Scorers
               </h2>
               <Link
@@ -200,12 +200,12 @@ export default async function PlayersPage() {
                   key={entry.player.id}
                   slug={entry.player.slug}
                   isLinkWorthy={entry.player.isIndexable ?? false}
-                  className="flex items-center gap-3 bg-white rounded-xl border border-neutral-200 px-4 py-3 hover:shadow-lg transition-all min-w-[260px] snap-start flex-shrink-0 group"
+                  className="flex items-center gap-3 bg-surface rounded-xl border border-line px-4 py-3 hover:shadow-lg transition-all min-w-[260px] snap-start flex-shrink-0 group"
                 >
-                  <span className="text-lg font-bold text-neutral-400 w-6 text-center flex-shrink-0">
+                  <span className="text-lg font-bold text-faint w-6 text-center flex-shrink-0">
                     {idx + 1}
                   </span>
-                  <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-neutral-100">
+                  <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-surface-2">
                     <ImageWithFallback
                       src={entry.player.imageUrl}
                       alt={entry.player.name}
@@ -215,14 +215,14 @@ export default async function PlayersPage() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-sm text-ink group-hover:text-blue-600 transition-colors truncate">
                       {entry.player.name}
                     </div>
-                    <div className="text-xs text-neutral-500 truncate">
+                    <div className="text-xs text-muted truncate">
                       {entry.team.shortName || entry.team.name}
                     </div>
                   </div>
-                  <div className="font-bold text-neutral-900 flex-shrink-0">
+                  <div className="font-bold text-ink flex-shrink-0">
                     {entry.stat.goals}
                   </div>
                 </PlayerLink>
@@ -235,7 +235,7 @@ export default async function PlayersPage() {
         {topAssists.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-neutral-900">
+              <h2 className="text-xl font-bold text-ink">
                 Top Assists
               </h2>
               <Link
@@ -251,12 +251,12 @@ export default async function PlayersPage() {
                   key={entry.player.id}
                   slug={entry.player.slug}
                   isLinkWorthy={entry.player.isIndexable ?? false}
-                  className="flex items-center gap-3 bg-white rounded-xl border border-neutral-200 px-4 py-3 hover:shadow-lg transition-all min-w-[260px] snap-start flex-shrink-0 group"
+                  className="flex items-center gap-3 bg-surface rounded-xl border border-line px-4 py-3 hover:shadow-lg transition-all min-w-[260px] snap-start flex-shrink-0 group"
                 >
-                  <span className="text-lg font-bold text-neutral-400 w-6 text-center flex-shrink-0">
+                  <span className="text-lg font-bold text-faint w-6 text-center flex-shrink-0">
                     {idx + 1}
                   </span>
-                  <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-neutral-100">
+                  <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-surface-2">
                     <ImageWithFallback
                       src={entry.player.imageUrl}
                       alt={entry.player.name}
@@ -266,14 +266,14 @@ export default async function PlayersPage() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-sm text-ink group-hover:text-blue-600 transition-colors truncate">
                       {entry.player.name}
                     </div>
-                    <div className="text-xs text-neutral-500 truncate">
+                    <div className="text-xs text-muted truncate">
                       {entry.team.shortName || entry.team.name}
                     </div>
                   </div>
-                  <div className="font-bold text-neutral-900 flex-shrink-0">
+                  <div className="font-bold text-ink flex-shrink-0">
                     {entry.stat.assists}
                   </div>
                 </PlayerLink>
@@ -285,7 +285,7 @@ export default async function PlayersPage() {
         {/* Browse by Position */}
         {positionCounts.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
-            <h2 className="text-xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-xl font-bold text-ink mb-4">
               Browse by Position
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -295,7 +295,7 @@ export default async function PlayersPage() {
                   <Link
                     key={p.position}
                     href={`/players/position/${positionSlug(p.position)}`}
-                    className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all group"
+                    className="bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       {meta ? (
@@ -303,11 +303,11 @@ export default async function PlayersPage() {
                       ) : (
                         <span className="w-3 h-3 rounded-full bg-neutral-300" />
                       )}
-                      <h3 className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-bold text-ink group-hover:text-blue-600 transition-colors">
                         {positionPlural(p.position)}
                       </h3>
                     </div>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-muted">
                       {p.count.toLocaleString()} players
                     </p>
                   </Link>
@@ -320,7 +320,7 @@ export default async function PlayersPage() {
         {/* Browse by Nationality */}
         {nationalities.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
-            <h2 className="text-xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-xl font-bold text-ink mb-4">
               Browse by Nationality
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -330,7 +330,7 @@ export default async function PlayersPage() {
                   <Link
                     key={n.nationality}
                     href={`/players/nationality/${encodeURIComponent(n.nationality)}`}
-                    className="flex items-center gap-3 bg-white rounded-xl border border-neutral-200 px-4 py-3 hover:shadow-lg transition-all group"
+                    className="flex items-center gap-3 bg-surface rounded-xl border border-line px-4 py-3 hover:shadow-lg transition-all group"
                   >
                     {flagUrl ? (
                       <Image
@@ -342,12 +342,12 @@ export default async function PlayersPage() {
                         unoptimized
                       />
                     ) : (
-                      <span className="w-5 h-3.5 rounded-sm bg-neutral-200 flex-shrink-0" />
+                      <span className="w-5 h-3.5 rounded-sm bg-surface-2 flex-shrink-0" />
                     )}
-                    <span className="text-sm font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate flex-1">
+                    <span className="text-sm font-medium text-ink group-hover:text-blue-600 transition-colors truncate flex-1">
                       {n.nationality}
                     </span>
-                    <span className="text-xs text-neutral-400 flex-shrink-0">
+                    <span className="text-xs text-faint flex-shrink-0">
                       {n.count.toLocaleString()}
                     </span>
                   </Link>
@@ -360,7 +360,7 @@ export default async function PlayersPage() {
         {/* Browse by Competition */}
         {competitions.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
-            <h2 className="text-xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-xl font-bold text-ink mb-4">
               Browse by Competition
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -368,7 +368,7 @@ export default async function PlayersPage() {
                 <Link
                   key={comp.id}
                   href={`/competitions/${comp.slug}`}
-                  className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all flex items-center gap-3 group"
+                  className="bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all flex items-center gap-3 group"
                 >
                   <ImageWithFallback
                     src={comp.logoUrl}
@@ -378,7 +378,7 @@ export default async function PlayersPage() {
                     className="w-6 h-6 object-contain flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                       {comp.name}
                     </div>
                   </div>
@@ -394,13 +394,13 @@ export default async function PlayersPage() {
         {/* Recently Updated */}
         {recentlyUpdated.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 pb-12">
-            <h2 className="text-xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-xl font-bold text-ink mb-4">
               Recently Updated Players
             </h2>
-            <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100">
+            <div className="bg-surface rounded-xl border border-line divide-y divide-line">
               {recentlyUpdated.map((p) => (
                 <div key={p.id} className="px-5 py-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-neutral-100">
+                  <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-surface-2">
                     <ImageWithFallback
                       src={p.imageUrl}
                       alt={p.name}
@@ -413,11 +413,11 @@ export default async function PlayersPage() {
                     <PlayerLink
                       slug={p.slug}
                       isLinkWorthy={p.isIndexable}
-                      className="font-medium text-sm text-neutral-900 hover:text-blue-600 transition-colors"
+                      className="font-medium text-sm text-ink hover:text-blue-600 transition-colors"
                     >
                       {p.name}
                     </PlayerLink>
-                    <div className="text-xs text-neutral-500">
+                    <div className="text-xs text-muted">
                       {p.position}
                       {p.team && <> &middot; {p.team.name}</>}
                     </div>

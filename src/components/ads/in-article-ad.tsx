@@ -17,9 +17,9 @@ export function InArticleAd() {
 
   return (
     <div className="flex justify-center my-8">
-      <div className="bg-white rounded-xl border border-neutral-200 p-4" style={{ maxWidth: 336 }}>
+      <div className="bg-surface rounded-xl border border-line p-4" style={{ maxWidth: 336 }}>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-neutral-400">Advertisement</span>
+          <span className="text-xs text-faint">Advertisement</span>
           <button
             onClick={() => openUpgradeModal("ad_free")}
             className="text-xs text-blue-600 hover:text-blue-700 transition-colors"

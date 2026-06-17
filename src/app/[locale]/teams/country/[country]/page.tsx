@@ -107,7 +107,7 @@ export default async function CountryTeamsPage({ params }: PageProps) {
         }))}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title={`${adjective} Football Teams`}
           subtitle={`${teamsList.length} football clubs from ${decodedCountry}`}
@@ -134,25 +134,25 @@ export default async function CountryTeamsPage({ params }: PageProps) {
               <Link
                 key={team.id}
                 href={`/teams/${team.slug}`}
-                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-xl transition-shadow group"
+                className="bg-surface rounded-xl border border-line p-4 hover:shadow-xl transition-shadow group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                     {team.logoUrl ? (
                       <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-8 h-8 object-contain" width={32} height={32} />
                     ) : (
-                      <Shield className="w-6 h-6 text-neutral-400" />
+                      <Shield className="w-6 h-6 text-faint" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                       {team.name}
                     </div>
                     {team.city && (
-                      <div className="text-sm text-neutral-500">{team.city}</div>
+                      <div className="text-sm text-muted">{team.city}</div>
                     )}
                     {team.foundedYear && (
-                      <div className="text-xs text-neutral-400">Est. {team.foundedYear}</div>
+                      <div className="text-xs text-faint">Est. {team.foundedYear}</div>
                     )}
                   </div>
                 </div>
@@ -162,23 +162,23 @@ export default async function CountryTeamsPage({ params }: PageProps) {
 
           {/* Cross-link back to hub */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">Browse More</h2>
+            <h2 className="text-lg font-bold text-ink mb-4">Browse More</h2>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/teams/country"
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-indigo-300 hover:text-indigo-600 transition-colors"
               >
                 All Countries
               </Link>
               <Link
                 href="/players/nationality"
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-teal-300 hover:text-teal-600 transition-colors"
               >
                 Players by Nationality
               </Link>
               <Link
                 href="/teams"
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-blue-300 hover:text-blue-600 transition-colors"
               >
                 All Teams
               </Link>

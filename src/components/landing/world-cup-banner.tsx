@@ -50,15 +50,15 @@ export function WorldCupBanner() {
 
             <div className="flex items-center gap-6">
               <div className="flex gap-3 text-center">
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
+                <div className="bg-surface/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
                   <div className="text-2xl font-bold tabular-nums">{timeLeft.days}</div>
                   <div className="text-[10px] text-white/70 uppercase">Days</div>
                 </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
+                <div className="bg-surface/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
                   <div className="text-2xl font-bold tabular-nums">{timeLeft.hours}</div>
                   <div className="text-[10px] text-white/70 uppercase">Hours</div>
                 </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
+                <div className="bg-surface/15 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px]">
                   <div className="text-2xl font-bold tabular-nums">{timeLeft.minutes}</div>
                   <div className="text-[10px] text-white/70 uppercase">Min</div>
                 </div>

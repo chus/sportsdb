@@ -26,11 +26,11 @@ export function LiveMatchCard({
   return (
     <button
       onClick={onClick}
-      className="flex-shrink-0 w-72 bg-white rounded-xl p-4 border border-neutral-200 hover:shadow-lg hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
+      className="flex-shrink-0 w-72 bg-surface rounded-xl p-4 border border-line hover:shadow-lg hover:border-line transition-all duration-200 hover:-translate-y-0.5"
     >
       {/* Status Badge */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-neutral-500">{competition}</span>
+        <span className="text-xs text-muted">{competition}</span>
         {status === "live" && (
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-100 text-red-600 rounded-full">
             <Circle className="w-2 h-2 fill-current animate-pulse" />
@@ -44,7 +44,7 @@ export function LiveMatchCard({
           </div>
         )}
         {status === "finished" && (
-          <span className="text-xs font-medium text-neutral-500">FT</span>
+          <span className="text-xs font-medium text-muted">FT</span>
         )}
       </div>
 
@@ -55,10 +55,10 @@ export function LiveMatchCard({
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
               {homeTeam.substring(0, 3).toUpperCase()}
             </div>
-            <span className="font-semibold text-neutral-900">{homeTeam}</span>
+            <span className="font-semibold text-ink">{homeTeam}</span>
           </div>
           {homeScore !== undefined && (
-            <span className="text-2xl font-bold text-neutral-900 ml-2">{homeScore}</span>
+            <span className="text-2xl font-bold text-ink ml-2">{homeScore}</span>
           )}
         </div>
 
@@ -67,10 +67,10 @@ export function LiveMatchCard({
             <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
               {awayTeam.substring(0, 3).toUpperCase()}
             </div>
-            <span className="font-semibold text-neutral-900">{awayTeam}</span>
+            <span className="font-semibold text-ink">{awayTeam}</span>
           </div>
           {awayScore !== undefined && (
-            <span className="text-2xl font-bold text-neutral-900 ml-2">{awayScore}</span>
+            <span className="text-2xl font-bold text-ink ml-2">{awayScore}</span>
           )}
         </div>
       </div>

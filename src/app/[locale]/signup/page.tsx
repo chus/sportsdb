@@ -46,13 +46,13 @@ export default function SignupPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Create your account</h1>
-          <p className="mt-2 text-neutral-500">
+          <h1 className="text-3xl font-bold text-ink">Create your account</h1>
+          <p className="mt-2 text-muted">
             Join DataSports to follow your favorite teams and players.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-lg p-8">
+        <div className="bg-surface rounded-2xl border border-line shadow-lg p-8">
           {error && (
             <div className="mb-4 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
               {error}
@@ -64,20 +64,20 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-1">
-                Name <span className="text-neutral-400">(optional)</span>
+              <label htmlFor="name" className="block text-sm font-medium text-ink mb-1">
+                Name <span className="text-faint">(optional)</span>
               </label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
                 placeholder="Your name"
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-ink mb-1">
                 Email
               </label>
               <input
@@ -86,12 +86,12 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-ink mb-1">
                 Password
               </label>
               <input
@@ -101,7 +101,7 @@ export default function SignupPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-2.5 text-sm border border-line rounded-lg bg-surface text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
                 placeholder="At least 8 characters"
               />
             </div>
@@ -111,9 +111,9 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-line text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="terms" className="text-xs text-neutral-500 leading-relaxed">
+              <label htmlFor="terms" className="text-xs text-muted leading-relaxed">
                 I agree to the{" "}
                 <Link href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</Link>
                 {" "}and{" "}
@@ -126,9 +126,9 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={marketingConsent}
                 onChange={(e) => setMarketingConsent(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-line text-blue-600 focus:ring-blue-500"
               />
-              <label htmlFor="marketing" className="text-xs text-neutral-500 leading-relaxed">
+              <label htmlFor="marketing" className="text-xs text-muted leading-relaxed">
                 Send me football news and product updates
               </label>
             </div>
@@ -143,7 +143,7 @@ export default function SignupPage() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-sm text-neutral-500">
+        <p className="mt-6 text-center text-sm text-muted">
           Already have an account?{" "}
           <Link href="/login" className="font-medium text-blue-600 hover:text-blue-700">
             Sign in

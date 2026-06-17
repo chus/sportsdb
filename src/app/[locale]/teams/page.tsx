@@ -64,7 +64,7 @@ export default async function TeamsPage() {
       />
       <PageTracker />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           compact
           title="Teams"
@@ -86,7 +86,7 @@ export default async function TeamsPage() {
           {/* Featured Competitions */}
           {competitionsWithTeams.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Competitions
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -94,7 +94,7 @@ export default async function TeamsPage() {
                   <Link
                     key={comp.id}
                     href={`/competitions/${comp.slug}`}
-                    className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all group flex items-center gap-3"
+                    className="bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all group flex items-center gap-3"
                   >
                     <ImageWithFallback
                       src={comp.logoUrl}
@@ -105,14 +105,14 @@ export default async function TeamsPage() {
                       fallbackClassName="w-10 h-10 rounded-lg"
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                      <div className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                         {comp.name}
                       </div>
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-muted">
                         {comp.teamCount} teams
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-500 transition-colors flex-shrink-0" />
                   </Link>
                 ))}
               </div>
@@ -122,7 +122,7 @@ export default async function TeamsPage() {
           {/* League Leaders */}
           {tableLeaders.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 League Leaders
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -130,7 +130,7 @@ export default async function TeamsPage() {
                   <Link
                     key={entry.team.id}
                     href={`/teams/${entry.team.slug}`}
-                    className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all group"
+                    className="bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center gap-4">
                       <ImageWithFallback
@@ -142,7 +142,7 @@ export default async function TeamsPage() {
                         fallbackClassName="w-12 h-12 rounded-lg"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                        <div className="font-bold text-ink group-hover:text-blue-600 transition-colors truncate">
                           {entry.team.name}
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
@@ -154,7 +154,7 @@ export default async function TeamsPage() {
                             className="w-4 h-4 object-contain flex-shrink-0"
                             fallbackClassName="w-4 h-4 rounded"
                           />
-                          <span className="text-xs text-neutral-500 truncate">
+                          <span className="text-xs text-muted truncate">
                             {entry.competition.name}
                           </span>
                         </div>
@@ -163,7 +163,7 @@ export default async function TeamsPage() {
                         <div className="text-sm font-semibold text-green-700">
                           1st
                         </div>
-                        <div className="text-xs text-neutral-500">
+                        <div className="text-xs text-muted">
                           {entry.points} pts
                         </div>
                       </div>
@@ -177,7 +177,7 @@ export default async function TeamsPage() {
           {/* Browse by Country */}
           {countryList.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Browse by Country
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -187,7 +187,7 @@ export default async function TeamsPage() {
                     <Link
                       key={item.country}
                       href={`/teams/country/${encodeURIComponent(item.country)}`}
-                      className="bg-white rounded-xl border border-neutral-200 px-4 py-3 hover:shadow-lg transition-all group flex items-center gap-2.5"
+                      className="bg-surface rounded-xl border border-line px-4 py-3 hover:shadow-lg transition-all group flex items-center gap-2.5"
                     >
                       {flagUrl ? (
                         <Image
@@ -199,13 +199,13 @@ export default async function TeamsPage() {
                           unoptimized
                         />
                       ) : (
-                        <MapPin className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                        <MapPin className="w-4 h-4 text-faint flex-shrink-0" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                        <div className="text-sm font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                           {item.country}
                         </div>
-                        <div className="text-xs text-neutral-500">
+                        <div className="text-xs text-muted">
                           {item.count} teams
                         </div>
                       </div>
@@ -219,19 +219,19 @@ export default async function TeamsPage() {
           {/* Recent Results */}
           {recentMatches.length > 0 && (
             <section className="mb-10">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="text-xl font-bold text-ink mb-4">
                 Recent Results
               </h2>
-              <div className="bg-white rounded-xl border border-neutral-200 divide-y divide-neutral-100 overflow-hidden">
+              <div className="bg-surface rounded-xl border border-line divide-y divide-line overflow-hidden">
                 {recentMatches.map((match) => (
                   <Link
                     key={match.id}
                     href={`/matches/${match.slug ?? match.id}`}
-                    className="flex items-center px-5 py-3.5 hover:bg-neutral-50 transition-colors group"
+                    className="flex items-center px-5 py-3.5 hover:bg-surface-2 transition-colors group"
                   >
                     {/* Home Team */}
                     <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-                      <span className="text-sm font-medium text-neutral-900 truncate text-right">
+                      <span className="text-sm font-medium text-ink truncate text-right">
                         {match.homeTeam.name}
                       </span>
                       <ImageWithFallback
@@ -246,7 +246,7 @@ export default async function TeamsPage() {
 
                     {/* Score */}
                     <div className="mx-4 flex-shrink-0 min-w-[56px] text-center">
-                      <span className="text-sm font-bold text-neutral-900 bg-neutral-100 px-2.5 py-1 rounded-md">
+                      <span className="text-sm font-bold text-ink bg-surface-2 px-2.5 py-1 rounded-md">
                         {match.homeScore ?? "-"} - {match.awayScore ?? "-"}
                       </span>
                     </div>
@@ -261,12 +261,12 @@ export default async function TeamsPage() {
                         className="w-6 h-6 object-contain flex-shrink-0"
                         fallbackClassName="w-6 h-6 rounded"
                       />
-                      <span className="text-sm font-medium text-neutral-900 truncate">
+                      <span className="text-sm font-medium text-ink truncate">
                         {match.awayTeam.name}
                       </span>
                     </div>
 
-                    <ChevronRight className="w-4 h-4 text-neutral-300 group-hover:text-blue-500 transition-colors flex-shrink-0 ml-2" />
+                    <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-500 transition-colors flex-shrink-0 ml-2" />
                   </Link>
                 ))}
               </div>

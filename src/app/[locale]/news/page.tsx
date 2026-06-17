@@ -119,7 +119,7 @@ export default async function NewsPage({ searchParams }: Props) {
         }))}
       />
     )}
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       <PageHeader
         title="News"
         subtitle="Latest match reports, analysis, and football coverage"
@@ -128,36 +128,36 @@ export default async function NewsPage({ searchParams }: Props) {
           { label: "Home", href: "/" },
           { label: "News" },
         ]}
-        icon={<Newspaper className="w-7 h-7 text-neutral-300" />}
+        icon={<Newspaper className="w-7 h-7 text-faint" />}
       />
       <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Summary Stats */}
       {page === 1 && !type && (
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Articles</div>
-            <div className="text-2xl font-bold text-neutral-900">{totalCount}</div>
-            <div className="text-xs text-neutral-500">published stories</div>
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Total Articles</div>
+            <div className="text-2xl font-bold text-ink">{totalCount}</div>
+            <div className="text-xs text-muted">published stories</div>
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Match Reports</div>
-            <div className="text-2xl font-bold text-neutral-900">{matchReportCount}</div>
-            <div className="text-xs text-neutral-500">post-match analysis</div>
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Match Reports</div>
+            <div className="text-2xl font-bold text-ink">{matchReportCount}</div>
+            <div className="text-xs text-muted">post-match analysis</div>
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Matchday Recaps</div>
-            <div className="text-2xl font-bold text-neutral-900">{recapCount}</div>
-            <div className="text-xs text-neutral-500">round summaries</div>
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Matchday Recaps</div>
+            <div className="text-2xl font-bold text-ink">{recapCount}</div>
+            <div className="text-xs text-muted">round summaries</div>
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Match Previews</div>
-            <div className="text-2xl font-bold text-neutral-900">{previewCount}</div>
-            <div className="text-xs text-neutral-500">upcoming fixtures</div>
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Match Previews</div>
+            <div className="text-2xl font-bold text-ink">{previewCount}</div>
+            <div className="text-xs text-muted">upcoming fixtures</div>
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Player Spotlights</div>
-            <div className="text-2xl font-bold text-neutral-900">{spotlightCount}</div>
-            <div className="text-xs text-neutral-500">player features</div>
+          <div className="bg-surface rounded-xl border border-line p-4">
+            <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Player Spotlights</div>
+            <div className="text-2xl font-bold text-ink">{spotlightCount}</div>
+            <div className="text-xs text-muted">player features</div>
           </div>
         </div>
       )}
@@ -174,7 +174,7 @@ export default async function NewsPage({ searchParams }: Props) {
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 isActive
                   ? "bg-blue-600 text-white"
-                  : "bg-white border border-neutral-200 text-neutral-700 hover:border-blue-300 hover:text-blue-600"
+                  : "bg-surface border border-line text-ink hover:border-blue-300 hover:text-blue-600"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -185,9 +185,9 @@ export default async function NewsPage({ searchParams }: Props) {
       </div>
 
       {articles.length === 0 ? (
-        <div className="text-center py-16 bg-neutral-50 rounded-xl">
-          <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <p className="text-neutral-500">No articles found</p>
+        <div className="text-center py-16 bg-surface-2 rounded-xl">
+          <Newspaper className="w-12 h-12 text-faint mx-auto mb-4" />
+          <p className="text-muted">No articles found</p>
         </div>
       ) : (
         <>
@@ -213,18 +213,18 @@ export default async function NewsPage({ searchParams }: Props) {
               {page > 1 && (
                 <Link
                   href={`/news?${type ? `type=${type}&` : ""}page=${page - 1}`}
-                  className="px-4 py-2 bg-white border border-neutral-200 rounded-lg text-sm hover:border-blue-300 transition-colors"
+                  className="px-4 py-2 bg-surface border border-line rounded-lg text-sm hover:border-blue-300 transition-colors"
                 >
                   Previous
                 </Link>
               )}
-              <span className="px-4 py-2 text-sm text-neutral-500">
+              <span className="px-4 py-2 text-sm text-muted">
                 Page {page} of {totalPages}
               </span>
               {page < totalPages && (
                 <Link
                   href={`/news?${type ? `type=${type}&` : ""}page=${page + 1}`}
-                  className="px-4 py-2 bg-white border border-neutral-200 rounded-lg text-sm hover:border-blue-300 transition-colors"
+                  className="px-4 py-2 bg-surface border border-line rounded-lg text-sm hover:border-blue-300 transition-colors"
                 >
                   Next
                 </Link>

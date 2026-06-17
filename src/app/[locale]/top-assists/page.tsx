@@ -55,7 +55,7 @@ export default async function TopAssistsPage() {
         }))}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Top Assists"
           subtitle="Leading assist providers across all major football competitions this season"
@@ -73,25 +73,25 @@ export default async function TopAssistsPage() {
             <div className="mb-8">
               {/* Summary Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Assist Leader</div>
-                  <div className="text-2xl font-bold text-neutral-900">{leaders[0].stat.assists} assists</div>
-                  <div className="text-xs text-neutral-500">{leaders[0].player.name}</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Assist Leader</div>
+                  <div className="text-2xl font-bold text-ink">{leaders[0].stat.assists} assists</div>
+                  <div className="text-xs text-muted">{leaders[0].player.name}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Assists</div>
-                  <div className="text-2xl font-bold text-neutral-900">{leaders.reduce((sum, s) => sum + (s.stat.assists ?? 0), 0)}</div>
-                  <div className="text-xs text-neutral-500">across {leaders.length} players</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Total Assists</div>
+                  <div className="text-2xl font-bold text-ink">{leaders.reduce((sum, s) => sum + (s.stat.assists ?? 0), 0)}</div>
+                  <div className="text-xs text-muted">across {leaders.length} players</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Avg Assists/Player</div>
-                  <div className="text-2xl font-bold text-neutral-900">{(leaders.reduce((sum, s) => sum + (s.stat.assists ?? 0), 0) / leaders.length).toFixed(1)}</div>
-                  <div className="text-xs text-neutral-500">this season</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Avg Assists/Player</div>
+                  <div className="text-2xl font-bold text-ink">{(leaders.reduce((sum, s) => sum + (s.stat.assists ?? 0), 0) / leaders.length).toFixed(1)}</div>
+                  <div className="text-xs text-muted">this season</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Competitions</div>
-                  <div className="text-2xl font-bold text-neutral-900">{new Set(leaders.map((s) => s.competition.slug)).size}</div>
-                  <div className="text-xs text-neutral-500">leagues tracked</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Competitions</div>
+                  <div className="text-2xl font-bold text-ink">{new Set(leaders.map((s) => s.competition.slug)).size}</div>
+                  <div className="text-xs text-muted">leagues tracked</div>
                 </div>
               </div>
 
@@ -101,19 +101,19 @@ export default async function TopAssistsPage() {
                   <Link
                     key={s.stat.id}
                     href={`/players/${s.player.slug}`}
-                    className={`bg-white rounded-xl border p-5 hover:shadow-lg transition-all group ${
-                      i === 0 ? "border-indigo-300 bg-gradient-to-br from-indigo-50 to-white sm:row-start-1" : "border-neutral-200"
+                    className={`bg-surface rounded-xl border p-5 hover:shadow-lg transition-all group ${
+                      i === 0 ? "border-indigo-300 bg-gradient-to-br from-indigo-50 to-white sm:row-start-1" : "border-line"
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          i === 0 ? "bg-indigo-100" : i === 1 ? "bg-neutral-100" : "bg-purple-50"
+                          i === 0 ? "bg-indigo-100" : i === 1 ? "bg-surface-2" : "bg-purple-50"
                         }`}>
                           {s.player.imageUrl ? (
                             <ImageWithFallback src={s.player.imageUrl} alt={s.player.name} width={56} height={56} className="w-14 h-14 rounded-full object-cover" />
                           ) : (
-                            <span className="text-lg font-bold text-neutral-400">{s.player.name.substring(0, 2).toUpperCase()}</span>
+                            <span className="text-lg font-bold text-faint">{s.player.name.substring(0, 2).toUpperCase()}</span>
                           )}
                         </div>
                         <span className={`absolute -top-1 -right-1 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${
@@ -123,15 +123,15 @@ export default async function TopAssistsPage() {
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">{s.player.name}</div>
-                        <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                        <div className="font-bold text-ink group-hover:text-blue-600 transition-colors truncate">{s.player.name}</div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted">
                           {s.team.logoUrl && <ImageWithFallback src={s.team.logoUrl} alt={s.team.name} width={14} height={14} className="w-3.5 h-3.5 object-contain" />}
                           {s.team.name}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className={`text-2xl font-bold ${i === 0 ? "text-indigo-600" : "text-neutral-900"}`}>{s.stat.assists}</div>
-                        <div className="text-[10px] text-neutral-500 uppercase">assists</div>
+                        <div className={`text-2xl font-bold ${i === 0 ? "text-indigo-600" : "text-ink"}`}>{s.stat.assists}</div>
+                        <div className="text-[10px] text-muted uppercase">assists</div>
                       </div>
                     </div>
                   </Link>
@@ -141,19 +141,19 @@ export default async function TopAssistsPage() {
           )}
 
           {leaders.length === 0 ? (
-            <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
-              <Handshake className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-neutral-900 mb-2">No stats available yet</h2>
-              <p className="text-neutral-500">
+            <div className="bg-surface rounded-xl border border-line p-12 text-center">
+              <Handshake className="w-16 h-16 text-faint mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-ink mb-2">No stats available yet</h2>
+              <p className="text-muted">
                 Assist data will appear once the current season is underway.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="bg-surface rounded-xl border border-line overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
+                    <tr className="bg-surface-2 text-left text-sm text-muted">
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">#</th>
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Player</th>
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium">Team</th>
@@ -163,26 +163,26 @@ export default async function TopAssistsPage() {
                       <th scope="col" className="px-2 sm:px-4 py-3 font-medium text-center">Goals</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-100">
+                  <tbody className="divide-y divide-line">
                     {leaders.map(({ stat, player, team, competition }, index) => (
-                      <tr key={stat.id} className="hover:bg-neutral-50 transition-colors">
-                        <td className="px-2 sm:px-4 py-3 font-medium text-neutral-400">{index + 1}</td>
+                      <tr key={stat.id} className="hover:bg-surface-2 transition-colors">
+                        <td className="px-2 sm:px-4 py-3 font-medium text-faint">{index + 1}</td>
                         <td className="px-2 sm:px-4 py-3">
                           <PlayerLink
                             slug={player.slug}
                             isLinkWorthy={player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
-                            <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
                               {player.imageUrl ? (
                                 <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-8 h-8 rounded-full object-cover" width={32} height={32} />
                               ) : (
-                                <User className="w-4 h-4 text-neutral-400" />
+                                <User className="w-4 h-4 text-faint" />
                               )}
                             </div>
                             <div>
                               <div className="font-medium">{player.name}</div>
-                              <div className="text-xs text-neutral-500">{player.nationality}</div>
+                              <div className="text-xs text-muted">{player.nationality}</div>
                             </div>
                           </PlayerLink>
                         </td>
@@ -194,13 +194,13 @@ export default async function TopAssistsPage() {
                             {team.logoUrl ? (
                               <ImageWithFallback src={team.logoUrl} alt={team.name} className="w-5 h-5 object-contain" width={20} height={20} />
                             ) : (
-                              <Shield className="w-4 h-4 text-neutral-300" />
+                              <Shield className="w-4 h-4 text-faint" />
                             )}
                             <span className="text-sm hidden md:inline">{team.name}</span>
                             <span className="text-sm md:hidden">{team.shortName || team.name}</span>
                           </Link>
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-sm text-neutral-600 hidden md:table-cell">
+                        <td className="px-2 sm:px-4 py-3 text-sm text-muted hidden md:table-cell">
                           <Link
                             href={`/competitions/${competition.slug}`}
                             className="hover:text-blue-600 transition-colors"
@@ -208,9 +208,9 @@ export default async function TopAssistsPage() {
                             {competition.name}
                           </Link>
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600 hidden sm:table-cell">{stat.appearances}</td>
-                        <td className="px-2 sm:px-4 py-3 text-center font-bold text-neutral-900">{stat.assists}</td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-neutral-600">{stat.goals}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-muted hidden sm:table-cell">{stat.appearances}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center font-bold text-ink">{stat.assists}</td>
+                        <td className="px-2 sm:px-4 py-3 text-center text-muted">{stat.goals}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -221,21 +221,21 @@ export default async function TopAssistsPage() {
 
           {validCompetitions.length > 0 && (
             <section className="mt-12">
-              <h2 className="text-xl font-bold text-neutral-900 mb-4">Top Assists by Competition</h2>
+              <h2 className="text-xl font-bold text-ink mb-4">Top Assists by Competition</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {validCompetitions.map((comp) => (
                   <Link
                     key={comp!.slug}
                     href={`/top-assists/${comp!.slug}`}
-                    className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
+                    className="bg-surface rounded-xl border border-line p-4 hover:shadow-md transition-shadow flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <Handshake className="w-5 h-5 text-indigo-500" />
-                      <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <span className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                         {comp!.name}
                       </span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-blue-600 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-faint group-hover:text-blue-600 transition-colors" />
                   </Link>
                 ))}
               </div>

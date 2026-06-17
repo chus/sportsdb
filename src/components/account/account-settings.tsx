@@ -29,9 +29,9 @@ export function AccountSettings({ user }: AccountSettingsProps) {
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
       {/* Tabs */}
-      <div className="border-b border-neutral-200">
+      <div className="border-b border-line">
         <nav className="flex">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -43,7 +43,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors border-b-2 -mb-px ${
                   isActive
                     ? "text-blue-600 border-blue-600"
-                    : "text-neutral-600 border-transparent hover:text-neutral-900 hover:border-neutral-300"
+                    : "text-muted border-transparent hover:text-ink hover:border-line"
                 } ${tab.id === "danger" ? "text-red-600 hover:text-red-700" : ""}`}
               >
                 <Icon className="w-4 h-4" />

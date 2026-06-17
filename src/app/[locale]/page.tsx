@@ -113,7 +113,7 @@ export default async function HomePage() {
         description="The structured, canonical database for football. Search across players, teams, and competitions with time-aware data."
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageTracker />
 
         {/* Compact search header */}
@@ -122,7 +122,7 @@ export default async function HomePage() {
             <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
               <HomepageGreeting fallback="The Sports Database" />
             </h1>
-            <p className="text-neutral-400 mb-6 text-sm">
+            <p className="text-faint mb-6 text-sm">
               {stats.players.toLocaleString()} players ·{" "}
               {stats.teams.toLocaleString()} teams ·{" "}
               {stats.matches > 0
@@ -180,9 +180,9 @@ export default async function HomePage() {
 
         {/* Competition quick links */}
         {topCompetitions.length > 0 && (
-          <section className="border-y border-neutral-200 bg-white">
+          <section className="border-y border-line bg-surface">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              <h2 className="text-lg font-bold text-neutral-900 mb-4">
+              <h2 className="text-lg font-bold text-ink mb-4">
                 Competitions
               </h2>
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
@@ -190,7 +190,7 @@ export default async function HomePage() {
                   <Link
                     key={comp.id}
                     href={`/competitions/${comp.slug}`}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors flex-shrink-0"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-surface-2 hover:bg-surface-2 border border-line rounded-lg transition-colors flex-shrink-0"
                   >
                     {comp.logoUrl ? (
                       <ImageWithFallback
@@ -201,9 +201,9 @@ export default async function HomePage() {
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
-                      <Shield className="w-4 h-4 text-neutral-400" />
+                      <Shield className="w-4 h-4 text-faint" />
                     )}
-                    <span className="text-sm font-medium text-neutral-700 whitespace-nowrap">
+                    <span className="text-sm font-medium text-ink whitespace-nowrap">
                       {comp.name}
                     </span>
                   </Link>
@@ -239,7 +239,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-surface text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
             >
               Go Pro — from &euro;8/year
             </Link>

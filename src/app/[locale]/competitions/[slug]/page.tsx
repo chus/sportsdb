@@ -195,7 +195,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
       )}
       <PageTracker entityType="competition" entityId={competition.id} />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         {/* Compact Header */}
         <PageHeader
           title={competition.name}
@@ -207,7 +207,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
             { label: competition.name },
           ]}
           icon={
-            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center flex-shrink-0 p-2">
+            <div className="w-14 h-14 bg-surface rounded-xl flex items-center justify-center flex-shrink-0 p-2">
               {competition.logoUrl ? (
                 <ImageWithFallback src={competition.logoUrl} alt={competition.name} width={40} height={40} className="w-10 h-10 object-contain" priority />
               ) : (
@@ -225,7 +225,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
           }
         />
         {competition.updatedAt && (
-          <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+          <p className="text-xs text-faint mt-2 max-w-7xl mx-auto px-4">
             Updated {formatDistanceToNowStrict(new Date(competition.updatedAt), { addSuffix: true })}
           </p>
         )}
@@ -244,21 +244,21 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                         {/* Leader */}
                         <Link
                           href={`/teams/${standingsData[0].team.slug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Leader</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Leader</h3>
                           </div>
                           <div className="flex items-center gap-2 mb-1">
                             {standingsData[0].team.logoUrl ? (
                               <ImageWithFallback src={standingsData[0].team.logoUrl} alt={standingsData[0].team.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
-                              <Shield className="w-6 h-6 text-neutral-300" />
+                              <Shield className="w-6 h-6 text-faint" />
                             )}
-                            <span className="text-sm font-bold text-neutral-900 truncate">{standingsData[0].team.shortName || standingsData[0].team.name}</span>
+                            <span className="text-sm font-bold text-ink truncate">{standingsData[0].team.shortName || standingsData[0].team.name}</span>
                           </div>
-                          <p className="text-xs text-neutral-500">{standingsData[0].standing.points} pts · {standingsData[0].standing.won}W {standingsData[0].standing.drawn}D {standingsData[0].standing.lost}L</p>
+                          <p className="text-xs text-muted">{standingsData[0].standing.points} pts · {standingsData[0].standing.won}W {standingsData[0].standing.drawn}D {standingsData[0].standing.lost}L</p>
                         </Link>
 
                         {/* Top Scorer */}
@@ -266,45 +266,45 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                           <PlayerLink
                             slug={topScorers[0].player.slug}
                             isLinkWorthy={topScorers[0].player.isIndexable ?? false}
-                            className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                            className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                           >
                             <div className="flex items-center gap-1.5 mb-2">
                               <Target className="w-3.5 h-3.5 text-red-500" />
-                              <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                              <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Top Scorer</h3>
                             </div>
-                            <div className="text-2xl font-black text-neutral-900">{topScorers[0].stat.goals}</div>
-                            <p className="text-xs text-neutral-500">goals</p>
-                            <p className="text-sm font-medium text-neutral-900 truncate mt-0.5">{topScorers[0].player.name}</p>
+                            <div className="text-2xl font-black text-ink">{topScorers[0].stat.goals}</div>
+                            <p className="text-xs text-muted">goals</p>
+                            <p className="text-sm font-medium text-ink truncate mt-0.5">{topScorers[0].player.name}</p>
                           </PlayerLink>
                         ) : (
-                          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                          <div className="bg-surface rounded-xl border border-line p-4">
                             <div className="flex items-center gap-1.5 mb-2">
-                              <Target className="w-3.5 h-3.5 text-neutral-400" />
-                              <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                              <Target className="w-3.5 h-3.5 text-faint" />
+                              <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Top Scorer</h3>
                             </div>
-                            <p className="text-sm text-neutral-400">No data</p>
+                            <p className="text-sm text-faint">No data</p>
                           </div>
                         )}
 
                         {/* Matchday */}
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
                             <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Progress</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Progress</h3>
                           </div>
-                          <div className="text-2xl font-black text-neutral-900">MD {standingsData[0].standing.played}</div>
-                          <p className="text-xs text-neutral-500">{standingsData.length} teams</p>
-                          <p className="text-xs text-neutral-500 mt-0.5">{competitionSeason?.season.label}</p>
+                          <div className="text-2xl font-black text-ink">MD {standingsData[0].standing.played}</div>
+                          <p className="text-xs text-muted">{standingsData.length} teams</p>
+                          <p className="text-xs text-muted mt-0.5">{competitionSeason?.season.label}</p>
                         </div>
 
                         {/* Top Form */}
                         {(() => {
                           const bestForm = standingsData.find(s => s.standing.form && s.standing.form.length >= 3);
                           return bestForm?.standing.form ? (
-                            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                            <div className="bg-surface rounded-xl border border-line p-4">
                               <div className="flex items-center gap-1.5 mb-2">
                                 <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Best Form</h3>
+                                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Best Form</h3>
                               </div>
                               <div className="flex gap-1.5 mt-1 mb-1.5">
                                 {bestForm.standing.form.split("").slice(-5).map((result, i) => (
@@ -318,15 +318,15 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                                   </span>
                                 ))}
                               </div>
-                              <p className="text-xs text-neutral-500 truncate">{bestForm.team.shortName || bestForm.team.name}</p>
+                              <p className="text-xs text-muted truncate">{bestForm.team.shortName || bestForm.team.name}</p>
                             </div>
                           ) : (
-                            <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                            <div className="bg-surface rounded-xl border border-line p-4">
                               <div className="flex items-center gap-1.5 mb-2">
-                                <TrendingUp className="w-3.5 h-3.5 text-neutral-400" />
-                                <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Best Form</h3>
+                                <TrendingUp className="w-3.5 h-3.5 text-faint" />
+                                <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Best Form</h3>
                               </div>
-                              <p className="text-sm text-neutral-400">No data</p>
+                              <p className="text-sm text-faint">No data</p>
                             </div>
                           );
                         })()}
@@ -337,7 +337,7 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                     {matchesData.recent.length > 0 && (
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Recent Results</h3>
+                          <h3 className="text-sm font-bold text-ink">Recent Results</h3>
                           <Link href={`/competitions/${slug}?tab=fixtures`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             All fixtures <ChevronRight className="w-3 h-3" />
                           </Link>
@@ -347,33 +347,33 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                             <Link
                               key={match.id}
                               href={`/matches/${match.slug ?? match.id}`}
-                              className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                              className="flex-shrink-0 w-[160px] bg-surface rounded-lg border border-line p-3 hover:shadow-md hover:border-blue-200 transition-all"
                             >
                               <div className="flex items-center gap-1.5 mb-1.5">
                                 {match.homeTeam.logoUrl ? (
                                   <ImageWithFallback src={match.homeTeam.logoUrl} alt={match.homeTeam.name} width={16} height={16} className="w-4 h-4 object-contain" />
                                 ) : (
-                                  <Shield className="w-4 h-4 text-neutral-300" />
+                                  <Shield className="w-4 h-4 text-faint" />
                                 )}
-                                <span className="text-[11px] font-medium text-neutral-700 truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
+                                <span className="text-[11px] font-medium text-ink truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
                               </div>
                               <div className="flex items-center gap-1.5 mb-2">
                                 {match.awayTeam.logoUrl ? (
                                   <ImageWithFallback src={match.awayTeam.logoUrl} alt={match.awayTeam.name} width={16} height={16} className="w-4 h-4 object-contain" />
                                 ) : (
-                                  <Shield className="w-4 h-4 text-neutral-300" />
+                                  <Shield className="w-4 h-4 text-faint" />
                                 )}
-                                <span className="text-[11px] font-medium text-neutral-700 truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
+                                <span className="text-[11px] font-medium text-ink truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-lg font-bold text-neutral-900">
+                                <span className="text-lg font-bold text-ink">
                                   {match.homeScore}-{match.awayScore}
                                 </span>
                                 {match.matchday && (
-                                  <span className="text-[10px] text-neutral-400">MD {match.matchday}</span>
+                                  <span className="text-[10px] text-faint">MD {match.matchday}</span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-neutral-400 mt-1">{format(new Date(match.scheduledAt), "MMM d")}</p>
+                              <p className="text-[10px] text-faint mt-1">{format(new Date(match.scheduledAt), "MMM d")}</p>
                             </Link>
                           ))}
                         </div>
@@ -382,38 +382,38 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
                     {/* Upcoming Fixtures */}
                     {matchesData.upcoming.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <div className="bg-surface rounded-xl border border-line p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Fixtures</h3>
+                          <h3 className="text-sm font-bold text-ink">Upcoming Fixtures</h3>
                         </div>
                         <div className="space-y-2">
                           {matchesData.upcoming.map((match) => (
                             <Link
                               key={match.id}
                               href={`/matches/${match.slug ?? match.id}`}
-                              className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors"
+                              className="flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-2 transition-colors"
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   {match.homeTeam.logoUrl ? (
                                     <ImageWithFallback src={match.homeTeam.logoUrl} alt={match.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                   ) : (
-                                    <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
+                                    <Shield className="w-5 h-5 text-faint flex-shrink-0" />
                                   )}
-                                  <span className="text-xs font-medium text-neutral-900 truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
+                                  <span className="text-xs font-medium text-ink truncate">{match.homeTeam.shortName || match.homeTeam.name}</span>
                                 </div>
-                                <span className="text-[10px] text-neutral-400 flex-shrink-0">vs</span>
+                                <span className="text-[10px] text-faint flex-shrink-0">vs</span>
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   {match.awayTeam.logoUrl ? (
                                     <ImageWithFallback src={match.awayTeam.logoUrl} alt={match.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                   ) : (
-                                    <Shield className="w-5 h-5 text-neutral-300 flex-shrink-0" />
+                                    <Shield className="w-5 h-5 text-faint flex-shrink-0" />
                                   )}
-                                  <span className="text-xs font-medium text-neutral-900 truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
+                                  <span className="text-xs font-medium text-ink truncate">{match.awayTeam.shortName || match.awayTeam.name}</span>
                                 </div>
                               </div>
                               <div className="text-right flex-shrink-0 ml-3">
-                                <div className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d, HH:mm")}</div>
+                                <div className="text-xs text-muted">{format(new Date(match.scheduledAt), "MMM d, HH:mm")}</div>
                                 <div className="text-[10px] font-medium text-blue-600">
                                   {formatDistanceToNowStrict(new Date(match.scheduledAt), { addSuffix: true })}
                                 </div>
@@ -426,9 +426,9 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
                     {/* Top 3 Scorers Mini-list */}
                     {topScorers.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <div className="bg-surface rounded-xl border border-line p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Top Scorers</h3>
+                          <h3 className="text-sm font-bold text-ink">Top Scorers</h3>
                           <Link href={`/top-scorers/${slug}`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             Full list <ChevronRight className="w-3 h-3" />
                           </Link>
@@ -439,16 +439,16 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                               key={player.id}
                               slug={player.slug}
                               isLinkWorthy={player.isIndexable ?? false}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
                             >
-                              <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-500">{index + 1}</span>
+                              <span className="w-6 h-6 bg-surface-2 rounded-full flex items-center justify-center text-xs font-bold text-muted">{index + 1}</span>
                               <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-neutral-900 truncate">{player.name}</div>
-                                <div className="text-[11px] text-neutral-500">{team.shortName || team.name}</div>
+                                <div className="text-sm font-medium text-ink truncate">{player.name}</div>
+                                <div className="text-[11px] text-muted">{team.shortName || team.name}</div>
                               </div>
                               <div className="text-right">
-                                <span className="text-lg font-black text-neutral-900">{stat.goals}</span>
-                                <span className="text-[10px] text-neutral-500 ml-1">goals</span>
+                                <span className="text-lg font-black text-ink">{stat.goals}</span>
+                                <span className="text-[10px] text-muted ml-1">goals</span>
                               </div>
                             </PlayerLink>
                           ))}
@@ -458,9 +458,9 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
                     {/* Top 3 Assists Mini-list */}
                     {topAssists.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <div className="bg-surface rounded-xl border border-line p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Top Assists</h3>
+                          <h3 className="text-sm font-bold text-ink">Top Assists</h3>
                           <Link href={`/top-assists/${slug}`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             Full list <ChevronRight className="w-3 h-3" />
                           </Link>
@@ -471,16 +471,16 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                               key={player.id}
                               slug={player.slug}
                               isLinkWorthy={player.isIndexable ?? false}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
                             >
-                              <span className="w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center text-xs font-bold text-neutral-500">{index + 1}</span>
+                              <span className="w-6 h-6 bg-surface-2 rounded-full flex items-center justify-center text-xs font-bold text-muted">{index + 1}</span>
                               <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-neutral-900 truncate">{player.name}</div>
-                                <div className="text-[11px] text-neutral-500">{team.shortName || team.name}</div>
+                                <div className="text-sm font-medium text-ink truncate">{player.name}</div>
+                                <div className="text-[11px] text-muted">{team.shortName || team.name}</div>
                               </div>
                               <div className="text-right">
-                                <span className="text-lg font-black text-neutral-900">{stat.assists}</span>
-                                <span className="text-[10px] text-neutral-500 ml-1">assists</span>
+                                <span className="text-lg font-black text-ink">{stat.assists}</span>
+                                <span className="text-[10px] text-muted ml-1">assists</span>
                               </div>
                             </PlayerLink>
                           ))}
@@ -490,21 +490,21 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
 
                     {/* Standings Table */}
                     {standingsData.length === 0 ? (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                        <Trophy className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                        <p className="text-neutral-500">No standings data available</p>
+                      <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                        <Trophy className="w-12 h-12 text-faint mx-auto mb-4" />
+                        <p className="text-muted">No standings data available</p>
                       </div>
                     ) : (
-                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+                      <div className="bg-surface rounded-xl border border-line overflow-hidden">
                         <StandingsTable standings={standingsData} />
                       </div>
                     )}
 
                     {/* About (below standings) */}
                     {aboutParagraphs.length > 0 && (
-                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {competition.name}</h2>
-                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                      <section className="bg-surface rounded-xl border border-line p-6">
+                        <h2 className="text-lg font-bold text-ink mb-3">About {competition.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-ink">
                           {aboutParagraphs.map((p, i) => (
                             <p key={i}>{p}</p>
                           ))}
@@ -522,8 +522,8 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                       limit={50}
                     />
                   ) : (
-                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                      <p className="text-neutral-500">No fixture data available</p>
+                    <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                      <p className="text-muted">No fixture data available</p>
                     </div>
                   )}
                 </TabPanel>
@@ -531,36 +531,36 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                 {/* === TOP SCORERS TAB === */}
                 <TabPanel tabId="scorers" defaultTab="standings">
                   {topScorers.length > 0 ? (
-                    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                      <div className="divide-y divide-neutral-100">
+                    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+                      <div className="divide-y divide-line">
                         {topScorers.map(({ stat, player, team }, index) => (
                           <PlayerLink
                             key={player.id}
                             slug={player.slug}
                             isLinkWorthy={player.isIndexable ?? false}
-                            className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition-colors group"
+                            className="flex items-center gap-3 p-4 hover:bg-surface-2 transition-colors group"
                           >
-                            <span className="w-8 text-center text-sm font-bold text-neutral-400">{index + 1}</span>
+                            <span className="w-8 text-center text-sm font-bold text-faint">{index + 1}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">{player.name}</div>
-                              <div className="text-xs text-neutral-500">{team.name}</div>
+                              <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">{player.name}</div>
+                              <div className="text-xs text-muted">{team.name}</div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-neutral-900">{stat.goals}</div>
-                              <div className="text-xs text-neutral-500">goals</div>
+                              <div className="font-bold text-ink">{stat.goals}</div>
+                              <div className="text-xs text-muted">goals</div>
                             </div>
                           </PlayerLink>
                         ))}
                       </div>
-                      <div className="border-t border-neutral-200 p-4">
+                      <div className="border-t border-line p-4">
                         <Link href={`/top-scorers/${slug}`} className="text-sm font-medium text-blue-600 hover:text-blue-700">
                           View full Top Scorers table →
                         </Link>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                      <p className="text-neutral-500">No top scorer data available</p>
+                    <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                      <p className="text-muted">No top scorer data available</p>
                     </div>
                   )}
                 </TabPanel>
@@ -568,36 +568,36 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                 {/* === TOP ASSISTS TAB === */}
                 <TabPanel tabId="assists" defaultTab="standings">
                   {topAssists.length > 0 ? (
-                    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                      <div className="divide-y divide-neutral-100">
+                    <div className="bg-surface rounded-xl border border-line overflow-hidden">
+                      <div className="divide-y divide-line">
                         {topAssists.map(({ stat, player, team }, index) => (
                           <PlayerLink
                             key={player.id}
                             slug={player.slug}
                             isLinkWorthy={player.isIndexable ?? false}
-                            className="flex items-center gap-3 p-4 hover:bg-neutral-50 transition-colors group"
+                            className="flex items-center gap-3 p-4 hover:bg-surface-2 transition-colors group"
                           >
-                            <span className="w-8 text-center text-sm font-bold text-neutral-400">{index + 1}</span>
+                            <span className="w-8 text-center text-sm font-bold text-faint">{index + 1}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">{player.name}</div>
-                              <div className="text-xs text-neutral-500">{team.name}</div>
+                              <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">{player.name}</div>
+                              <div className="text-xs text-muted">{team.name}</div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-neutral-900">{stat.assists}</div>
-                              <div className="text-xs text-neutral-500">assists</div>
+                              <div className="font-bold text-ink">{stat.assists}</div>
+                              <div className="text-xs text-muted">assists</div>
                             </div>
                           </PlayerLink>
                         ))}
                       </div>
-                      <div className="border-t border-neutral-200 p-4">
+                      <div className="border-t border-line p-4">
                         <Link href={`/top-assists/${slug}`} className="text-sm font-medium text-blue-600 hover:text-blue-700">
                           View full Top Assists table →
                         </Link>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                      <p className="text-neutral-500">No top assist data available</p>
+                    <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                      <p className="text-muted">No top assist data available</p>
                     </div>
                   )}
                 </TabPanel>
@@ -605,14 +605,14 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                 {/* === PREDICTIONS TAB === */}
                 <TabPanel tabId="predictions" defaultTab="standings">
                   {competitionSeason ? (
-                    <div className="bg-white rounded-xl border border-neutral-200 p-6">
+                    <div className="bg-surface rounded-xl border border-line p-6">
                       <MatchdayCommunityPicks
                         competitionSeasonId={competitionSeason.competitionSeason.id}
                       />
                     </div>
                   ) : (
-                    <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                      <p className="text-neutral-500">No prediction data available</p>
+                    <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                      <p className="text-muted">No prediction data available</p>
                     </div>
                   )}
                 </TabPanel>
@@ -625,13 +625,13 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                 )}
 
                 {faqItems.length > 0 && (
-                  <section className="bg-white rounded-xl border border-neutral-200 p-5">
-                    <h3 className="text-sm font-bold text-neutral-900 mb-3">FAQ</h3>
+                  <section className="bg-surface rounded-xl border border-line p-5">
+                    <h3 className="text-sm font-bold text-ink mb-3">FAQ</h3>
                     <div className="space-y-2">
                       {faqItems.map((item) => (
-                        <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
-                          <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
-                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
+                        <details key={item.question} className="group rounded-lg border border-line px-3 py-2">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-ink">{item.question}</summary>
+                          <p className="mt-2 text-xs leading-5 text-muted">{item.answer}</p>
                         </details>
                       ))}
                     </div>

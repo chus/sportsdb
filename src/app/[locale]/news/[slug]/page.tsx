@@ -221,8 +221,8 @@ export default async function ArticlePage({ params }: Props) {
   const { article, competition, season, primaryPlayer, primaryTeam } = result;
   const typeInfo = TYPE_LABELS[article.type] || {
     label: article.type,
-    color: "text-neutral-700",
-    bg: "bg-neutral-50 border-neutral-200",
+    color: "text-ink",
+    bg: "bg-surface-2 border-line",
   };
 
   // Fetch match data, related entities, related articles, and match context in parallel
@@ -503,12 +503,12 @@ export default async function ArticlePage({ params }: Props) {
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker />
 
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-surface">
         {/* Compact Hero Header */}
         <div className="bg-gradient-to-br from-neutral-900 via-blue-950 to-indigo-950 text-white">
           <div className="max-w-3xl mx-auto px-4 py-6 md:py-8">
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-sm text-neutral-400 mb-4">
+            <nav className="flex items-center gap-2 text-sm text-faint mb-4">
               <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
@@ -537,23 +537,23 @@ export default async function ArticlePage({ params }: Props) {
                 {typeInfo.label}
               </span>
               {article.publishedAt && (
-                <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+                <span className="flex items-center gap-1.5 text-xs text-faint">
                   <Calendar className="w-3.5 h-3.5" />
                   {format(new Date(article.publishedAt), "MMM d, yyyy")}
                 </span>
               )}
-              <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+              <span className="flex items-center gap-1.5 text-xs text-faint">
                 <User className="w-3.5 h-3.5" />
                 DataSports Editorial
               </span>
-              <span className="flex items-center gap-1.5 text-xs text-neutral-400">
+              <span className="flex items-center gap-1.5 text-xs text-faint">
                 <Clock className="w-3.5 h-3.5" />
                 {readingTime} min read
               </span>
               {competition && (
                 <Link
                   href={`/competitions/${competition.slug}`}
-                  className="flex items-center gap-1.5 text-xs text-neutral-300 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-faint hover:text-white transition-colors"
                 >
                   <Trophy className="w-3.5 h-3.5" />
                   {competition.name}{season ? ` · ${season.label}` : ""}
@@ -571,7 +571,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Scoreboard Card (for match reports) */}
         {matchData && matchData.match.homeScore !== null && matchData.match.awayScore !== null && (
           <div className="max-w-3xl mx-auto px-4 -mt-6">
-            <div className="bg-white rounded-xl border border-neutral-200 shadow-md p-6">
+            <div className="bg-surface rounded-xl border border-line shadow-md p-6">
               <div className="flex items-center justify-center gap-4 sm:gap-8">
                 {/* Home team */}
                 <Link
@@ -589,20 +589,20 @@ export default async function ArticlePage({ params }: Props) {
                         priority
                       />
                     ) : (
-                      <Shield className="w-10 h-10 text-neutral-300" />
+                      <Shield className="w-10 h-10 text-faint" />
                     )}
                   </div>
-                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
+                  <span className="font-semibold text-ink group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
                     {matchData.homeTeam.name}
                   </span>
                 </Link>
 
                 {/* Score */}
                 <div className="flex flex-col items-center">
-                  <div className="text-4xl sm:text-5xl font-bold text-neutral-900 tracking-tight">
+                  <div className="text-4xl sm:text-5xl font-bold text-ink tracking-tight">
                     {matchData.match.homeScore} – {matchData.match.awayScore}
                   </div>
-                  <span className="text-xs text-neutral-500 mt-1 uppercase tracking-wide">
+                  <span className="text-xs text-muted mt-1 uppercase tracking-wide">
                     Full Time
                   </span>
                 </div>
@@ -622,17 +622,17 @@ export default async function ArticlePage({ params }: Props) {
                         className="object-contain"
                       />
                     ) : (
-                      <Shield className="w-10 h-10 text-neutral-300" />
+                      <Shield className="w-10 h-10 text-faint" />
                     )}
                   </div>
-                  <span className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
+                  <span className="font-semibold text-ink group-hover:text-blue-600 transition-colors text-center text-sm sm:text-base truncate max-w-full">
                     {matchData.awayTeam.name}
                   </span>
                 </Link>
               </div>
 
               {/* Venue / Referee / Attendance */}
-              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-4 pt-4 border-t border-neutral-100 text-sm text-neutral-500">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-4 pt-4 border-t border-line text-sm text-muted">
                 {matchData.venue?.name && (
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
@@ -667,10 +667,10 @@ export default async function ArticlePage({ params }: Props) {
           <div className="max-w-3xl mx-auto px-4 pt-6">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Goal Scorers */}
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="text-sm">⚽</span>
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Goals</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Goals</h3>
                 </div>
                 {(() => {
                   const goals = matchContext.events.filter((e) => e.type === "goal" || e.type === "own_goal" || e.type === "penalty");
@@ -678,26 +678,26 @@ export default async function ArticlePage({ params }: Props) {
                     <div className="space-y-1">
                       {goals.sort((a, b) => a.minute - b.minute).slice(0, 4).map((e) => (
                         <div key={e.id} className="flex items-center justify-between text-xs">
-                          <span className="font-medium text-neutral-900 truncate">
+                          <span className="font-medium text-ink truncate">
                             {e.player?.name ?? "Unknown"}
                             {e.type === "own_goal" && " (OG)"}
                             {e.type === "penalty" && " (P)"}
                           </span>
-                          <span className="text-neutral-500 flex-shrink-0 ml-1">{e.minute}&apos;</span>
+                          <span className="text-muted flex-shrink-0 ml-1">{e.minute}&apos;</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-neutral-400">No goals</p>
+                    <p className="text-sm text-faint">No goals</p>
                   );
                 })()}
               </div>
 
               {/* Cards */}
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="text-sm">🟨</span>
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Cards</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Cards</h3>
                 </div>
                 {(() => {
                   const homeEvts = matchContext.events.filter((e) => e.teamId === matchData.match.homeTeamId);
@@ -709,16 +709,16 @@ export default async function ArticlePage({ params }: Props) {
                   return (hY + hR + aY + aR) > 0 ? (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-700 font-medium">{matchData.homeTeam.name}</span>
-                        <span className="text-neutral-500">{hY > 0 ? `🟨${hY}` : ""} {hR > 0 ? `🟥${hR}` : ""}</span>
+                        <span className="text-ink font-medium">{matchData.homeTeam.name}</span>
+                        <span className="text-muted">{hY > 0 ? `🟨${hY}` : ""} {hR > 0 ? `🟥${hR}` : ""}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-700 font-medium">{matchData.awayTeam.name}</span>
-                        <span className="text-neutral-500">{aY > 0 ? `🟨${aY}` : ""} {aR > 0 ? `🟥${aR}` : ""}</span>
+                        <span className="text-ink font-medium">{matchData.awayTeam.name}</span>
+                        <span className="text-muted">{aY > 0 ? `🟨${aY}` : ""} {aR > 0 ? `🟥${aR}` : ""}</span>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-neutral-400">No cards</p>
+                    <p className="text-sm text-faint">No cards</p>
                   );
                 })()}
               </div>
@@ -727,42 +727,42 @@ export default async function ArticlePage({ params }: Props) {
               {competition ? (
                 <Link
                   href={`/competitions/${competition.slug}`}
-                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                  className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Competition</h3>
                   </div>
-                  <div className="text-sm font-bold text-neutral-900 truncate">{competition.name}</div>
-                  <p className="text-xs text-neutral-500">
+                  <div className="text-sm font-bold text-ink truncate">{competition.name}</div>
+                  <p className="text-xs text-muted">
                     {season ? season.label : ""}
                   </p>
                 </Link>
               ) : (
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="bg-surface rounded-xl border border-line p-4">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Trophy className="w-3.5 h-3.5 text-neutral-400" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Competition</h3>
+                    <Trophy className="w-3.5 h-3.5 text-faint" />
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Competition</h3>
                   </div>
-                  <p className="text-sm text-neutral-400">Unknown</p>
+                  <p className="text-sm text-faint">Unknown</p>
                 </div>
               )}
 
               {/* Venue */}
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
+              <div className="bg-surface rounded-xl border border-line p-4">
                 <div className="flex items-center gap-1.5 mb-2">
                   <MapPin className="w-3.5 h-3.5 text-blue-500" />
-                  <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Venue</h3>
+                  <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Venue</h3>
                 </div>
                 {matchData.venue?.name ? (
                   <>
-                    <div className="text-sm font-bold text-neutral-900 truncate">{matchData.venue.name}</div>
-                    <p className="text-xs text-neutral-500">
+                    <div className="text-sm font-bold text-ink truncate">{matchData.venue.name}</div>
+                    <p className="text-xs text-muted">
                       {[matchData.venue.city, matchData.match.attendance ? `${matchData.match.attendance.toLocaleString()} att.` : null].filter(Boolean).join(" · ")}
                     </p>
                   </>
                 ) : (
-                  <p className="text-sm text-neutral-400">Not available</p>
+                  <p className="text-sm text-faint">Not available</p>
                 )}
               </div>
             </div>
@@ -797,10 +797,10 @@ export default async function ArticlePage({ params }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* League Position */}
               {(homeStanding || awayStanding) && (
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="bg-surface rounded-xl border border-line p-4">
                   <div className="flex items-center gap-1.5 mb-3">
                     <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Position</h3>
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League Position</h3>
                   </div>
                   <div className="space-y-3">
                     {homeStanding && (
@@ -808,10 +808,10 @@ export default async function ArticlePage({ params }: Props) {
                         {matchData.homeTeam.logoUrl && (
                           <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
-                        <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                        <span className="text-sm font-bold text-ink group-hover:text-blue-600 transition-colors">
                           {ordinal(homeStanding.standing.position)}
                         </span>
-                        <span className="text-xs text-neutral-500">
+                        <span className="text-xs text-muted">
                           {homeStanding.standing.points} pts · {homeStanding.standing.won}W {homeStanding.standing.drawn}D {homeStanding.standing.lost}L
                         </span>
                       </Link>
@@ -821,10 +821,10 @@ export default async function ArticlePage({ params }: Props) {
                         {matchData.awayTeam.logoUrl && (
                           <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                         )}
-                        <span className="text-sm font-bold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                        <span className="text-sm font-bold text-ink group-hover:text-blue-600 transition-colors">
                           {ordinal(awayStanding.standing.position)}
                         </span>
-                        <span className="text-xs text-neutral-500">
+                        <span className="text-xs text-muted">
                           {awayStanding.standing.points} pts · {awayStanding.standing.won}W {awayStanding.standing.drawn}D {awayStanding.standing.lost}L
                         </span>
                       </Link>
@@ -835,10 +835,10 @@ export default async function ArticlePage({ params }: Props) {
 
               {/* Recent Form */}
               {(homeStanding?.standing.form || awayStanding?.standing.form) && (
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                <div className="bg-surface rounded-xl border border-line p-4">
                   <div className="flex items-center gap-1.5 mb-3">
                     <Target className="w-3.5 h-3.5 text-green-500" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Recent Form</h3>
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Recent Form</h3>
                   </div>
                   <div className="space-y-3">
                     {homeStanding?.standing.form && (
@@ -852,7 +852,7 @@ export default async function ArticlePage({ params }: Props) {
                               key={i}
                               className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${
                                 r === "W" ? "bg-green-100 text-green-700" :
-                                r === "D" ? "bg-neutral-100 text-neutral-600" :
+                                r === "D" ? "bg-surface-2 text-muted" :
                                 "bg-red-100 text-red-700"
                               }`}
                             >
@@ -873,7 +873,7 @@ export default async function ArticlePage({ params }: Props) {
                               key={i}
                               className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${
                                 r === "W" ? "bg-green-100 text-green-700" :
-                                r === "D" ? "bg-neutral-100 text-neutral-600" :
+                                r === "D" ? "bg-surface-2 text-muted" :
                                 "bg-red-100 text-red-700"
                               }`}
                             >
@@ -898,22 +898,22 @@ export default async function ArticlePage({ params }: Props) {
               {primaryStanding && primaryTeam && (
                 <Link
                   href={`/competitions/${primaryStanding.competitionSlug}`}
-                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                  className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                 >
                   <div className="flex items-center gap-1.5 mb-3">
                     <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Standing</h3>
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League Standing</h3>
                   </div>
                   <div className="flex items-center gap-3 mb-2">
                     {primaryTeam.logoUrl && (
                       <ImageWithFallback src={primaryTeam.logoUrl} alt={primaryTeam.name} width={28} height={28} className="w-7 h-7 object-contain" />
                     )}
                     <div>
-                      <span className="text-lg font-bold text-neutral-900">{ordinal(primaryStanding.standing.position)}</span>
-                      <span className="text-xs text-neutral-500 ml-2">{primaryStanding.competitionName}</span>
+                      <span className="text-lg font-bold text-ink">{ordinal(primaryStanding.standing.position)}</span>
+                      <span className="text-xs text-muted ml-2">{primaryStanding.competitionName}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-neutral-500">
+                  <div className="flex items-center gap-3 text-xs text-muted">
                     <span>{primaryStanding.standing.points} pts</span>
                     <span>{primaryStanding.standing.won}W {primaryStanding.standing.drawn}D {primaryStanding.standing.lost}L</span>
                     {primaryStanding.standing.form && (
@@ -923,7 +923,7 @@ export default async function ArticlePage({ params }: Props) {
                             key={i}
                             className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center ${
                               r === "W" ? "bg-green-100 text-green-700" :
-                              r === "D" ? "bg-neutral-100 text-neutral-600" :
+                              r === "D" ? "bg-surface-2 text-muted" :
                               "bg-red-100 text-red-700"
                             }`}
                           >
@@ -940,27 +940,27 @@ export default async function ArticlePage({ params }: Props) {
               {primaryPlayerStats && primaryPlayerStats.length > 0 && primaryPlayer && (
                 <Link
                   href={`/players/${primaryPlayer.slug}`}
-                  className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                  className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                 >
                   <div className="flex items-center gap-1.5 mb-3">
                     <User className="w-3.5 h-3.5 text-amber-500" />
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Season Stats</h3>
+                    <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Season Stats</h3>
                   </div>
-                  <div className="text-sm font-bold text-neutral-900 mb-2">{primaryPlayer.name}</div>
+                  <div className="text-sm font-bold text-ink mb-2">{primaryPlayer.name}</div>
                   <div className="grid grid-cols-3 gap-2">
                     {primaryPlayerStats.slice(0, 1).map((s) => (
                       <div key={s.seasonLabel} className="contents">
                         <div className="text-center">
-                          <div className="text-lg font-bold text-neutral-900">{s.stat.appearances ?? 0}</div>
-                          <div className="text-[10px] text-neutral-500 uppercase">Apps</div>
+                          <div className="text-lg font-bold text-ink">{s.stat.appearances ?? 0}</div>
+                          <div className="text-[10px] text-muted uppercase">Apps</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-neutral-900">{s.stat.goals ?? 0}</div>
-                          <div className="text-[10px] text-neutral-500 uppercase">Goals</div>
+                          <div className="text-lg font-bold text-ink">{s.stat.goals ?? 0}</div>
+                          <div className="text-[10px] text-muted uppercase">Goals</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-neutral-900">{s.stat.assists ?? 0}</div>
-                          <div className="text-[10px] text-neutral-500 uppercase">Assists</div>
+                          <div className="text-lg font-bold text-ink">{s.stat.assists ?? 0}</div>
+                          <div className="text-[10px] text-muted uppercase">Assists</div>
                         </div>
                       </div>
                     ))}
@@ -987,11 +987,11 @@ export default async function ArticlePage({ params }: Props) {
               )}
               <Link
                 href={`/teams/${primaryTeam.slug}`}
-                className="text-sm font-medium text-neutral-700 hover:text-blue-600 transition-colors"
+                className="text-sm font-medium text-ink hover:text-blue-600 transition-colors"
               >
                 {primaryTeam.name}
               </Link>
-              <span className="text-neutral-300">·</span>
+              <span className="text-faint">·</span>
               <ShareButtons title={article.title} url={articleUrl} />
             </div>
           )}
@@ -1002,23 +1002,23 @@ export default async function ArticlePage({ params }: Props) {
           )}
 
           {/* Lead paragraph */}
-          <p className="text-lg text-neutral-700 leading-relaxed mb-8 font-medium">
+          <p className="text-lg text-ink leading-relaxed mb-8 font-medium">
             {article.excerpt}
           </p>
 
           {/* Article body */}
           <article
             className="max-w-none
-              [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-neutral-900 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-neutral-200
-              [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-neutral-900 [&_h3]:mt-8 [&_h3]:mb-3
-              [&_p]:text-base [&_p]:text-neutral-800 [&_p]:leading-relaxed [&_p]:mb-6
+              [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-line
+              [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-ink [&_h3]:mt-8 [&_h3]:mb-3
+              [&_p]:text-base [&_p]:text-ink [&_p]:leading-relaxed [&_p]:mb-6
               [&_a]:text-blue-600 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
-              [&_strong]:text-neutral-900 [&_strong]:font-semibold
+              [&_strong]:text-ink [&_strong]:font-semibold
               [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6
               [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6
-              [&_li]:text-neutral-800 [&_li]:leading-relaxed [&_li]:mb-2
-              [&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:bg-blue-50 [&_blockquote]:py-4 [&_blockquote]:px-6 [&_blockquote]:rounded-r-lg [&_blockquote]:not-italic [&_blockquote]:text-neutral-700
-              [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-neutral-700 [&>p:first-of-type]:leading-relaxed [&>p:first-of-type]:font-normal"
+              [&_li]:text-ink [&_li]:leading-relaxed [&_li]:mb-2
+              [&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:bg-blue-50 [&_blockquote]:py-4 [&_blockquote]:px-6 [&_blockquote]:rounded-r-lg [&_blockquote]:not-italic [&_blockquote]:text-neutral-900
+              [&>p:first-of-type]:text-lg [&>p:first-of-type]:text-ink [&>p:first-of-type]:leading-relaxed [&>p:first-of-type]:font-normal"
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
 
@@ -1028,12 +1028,12 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Player Ratings Section */}
           {article.type === "match_report" && matchData && hasRatings && homeLineups && awayLineups && (
-            <div className="mt-12 pt-8 border-t border-neutral-200">
-              <h3 className="text-xl font-bold text-neutral-900 mb-6">Player Ratings</h3>
+            <div className="mt-12 pt-8 border-t border-line">
+              <h3 className="text-xl font-bold text-ink mb-6">Player Ratings</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Home team */}
                 <div>
-                  <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-ink mb-3 flex items-center gap-2">
                     {matchData.homeTeam.logoUrl && (
                       <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
@@ -1042,7 +1042,7 @@ export default async function ArticlePage({ params }: Props) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-neutral-200 text-neutral-500">
+                        <tr className="border-b border-line text-muted">
                           <th scope="col" className="text-left py-2 font-medium">Player</th>
                           <th scope="col" className="text-center py-2 font-medium w-12">Pos</th>
                           <th scope="col" className="text-center py-2 font-medium w-14">Rating</th>
@@ -1051,16 +1051,16 @@ export default async function ArticlePage({ params }: Props) {
                       </thead>
                       <tbody>
                         {homeLineups.starters.map((l) => (
-                          <tr key={l.lineup.id} className="border-b border-neutral-100">
+                          <tr key={l.lineup.id} className="border-b border-line">
                             <td className="py-2">
                               <Link
                                 href={`/players/${l.player.slug}`}
-                                className="text-neutral-900 hover:text-blue-600 transition-colors"
+                                className="text-ink hover:text-blue-600 transition-colors"
                               >
                                 {l.player.name}
                               </Link>
                             </td>
-                            <td className="text-center text-neutral-500 text-xs">
+                            <td className="text-center text-muted text-xs">
                               {l.lineup.position?.slice(0, 3).toUpperCase() || "—"}
                             </td>
                             <td className="text-center">
@@ -1073,10 +1073,10 @@ export default async function ArticlePage({ params }: Props) {
                                   {parseFloat(l.lineup.rating).toFixed(1)}
                                 </span>
                               ) : (
-                                <span className="text-neutral-400">—</span>
+                                <span className="text-faint">—</span>
                               )}
                             </td>
-                            <td className="text-center text-neutral-500 text-xs">
+                            <td className="text-center text-muted text-xs">
                               {l.lineup.minutesPlayed ?? "—"}
                             </td>
                           </tr>
@@ -1088,7 +1088,7 @@ export default async function ArticlePage({ params }: Props) {
 
                 {/* Away team */}
                 <div>
-                  <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-ink mb-3 flex items-center gap-2">
                     {matchData.awayTeam.logoUrl && (
                       <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} width={20} height={20} className="w-5 h-5 object-contain" />
                     )}
@@ -1097,7 +1097,7 @@ export default async function ArticlePage({ params }: Props) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-neutral-200 text-neutral-500">
+                        <tr className="border-b border-line text-muted">
                           <th scope="col" className="text-left py-2 font-medium">Player</th>
                           <th scope="col" className="text-center py-2 font-medium w-12">Pos</th>
                           <th scope="col" className="text-center py-2 font-medium w-14">Rating</th>
@@ -1106,16 +1106,16 @@ export default async function ArticlePage({ params }: Props) {
                       </thead>
                       <tbody>
                         {awayLineups.starters.map((l) => (
-                          <tr key={l.lineup.id} className="border-b border-neutral-100">
+                          <tr key={l.lineup.id} className="border-b border-line">
                             <td className="py-2">
                               <Link
                                 href={`/players/${l.player.slug}`}
-                                className="text-neutral-900 hover:text-blue-600 transition-colors"
+                                className="text-ink hover:text-blue-600 transition-colors"
                               >
                                 {l.player.name}
                               </Link>
                             </td>
-                            <td className="text-center text-neutral-500 text-xs">
+                            <td className="text-center text-muted text-xs">
                               {l.lineup.position?.slice(0, 3).toUpperCase() || "—"}
                             </td>
                             <td className="text-center">
@@ -1128,10 +1128,10 @@ export default async function ArticlePage({ params }: Props) {
                                   {parseFloat(l.lineup.rating).toFixed(1)}
                                 </span>
                               ) : (
-                                <span className="text-neutral-400">—</span>
+                                <span className="text-faint">—</span>
                               )}
                             </td>
-                            <td className="text-center text-neutral-500 text-xs">
+                            <td className="text-center text-muted text-xs">
                               {l.lineup.minutesPlayed ?? "—"}
                             </td>
                           </tr>
@@ -1146,15 +1146,15 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Standings Impact Section */}
           {article.type === "match_report" && matchData && standingsData && (
-            <div className="mt-12 pt-8 border-t border-neutral-200">
-              <h3 className="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+            <div className="mt-12 pt-8 border-t border-line">
+              <h3 className="text-xl font-bold text-ink mb-4 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-blue-600" />
                 Standings
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b-2 border-neutral-200 text-neutral-500">
+                    <tr className="border-b-2 border-line text-muted">
                       <th scope="col" className="text-left py-2 font-medium w-8">#</th>
                       <th scope="col" className="text-left py-2 font-medium">Team</th>
                       <th scope="col" className="text-center py-2 font-medium w-8">P</th>
@@ -1173,15 +1173,15 @@ export default async function ArticlePage({ params }: Props) {
                       return (
                         <tr
                           key={row.standing.id}
-                          className={`border-b border-neutral-100 ${
+                          className={`border-b border-line ${
                             isMatchTeam ? "bg-blue-50 font-medium" : ""
                           }`}
                         >
-                          <td className="py-2 text-neutral-500">{row.standing.position}</td>
+                          <td className="py-2 text-muted">{row.standing.position}</td>
                           <td className="py-2">
                             <Link
                               href={`/teams/${row.team.slug}`}
-                              className="text-neutral-900 hover:text-blue-600 transition-colors flex items-center gap-2"
+                              className="text-ink hover:text-blue-600 transition-colors flex items-center gap-2"
                             >
                               {row.team.logoUrl && (
                                 <ImageWithFallback src={row.team.logoUrl} alt={row.team.name} width={16} height={16} className="w-4 h-4 object-contain" />
@@ -1189,15 +1189,15 @@ export default async function ArticlePage({ params }: Props) {
                               {row.team.name}
                             </Link>
                           </td>
-                          <td className="text-center text-neutral-600">{row.standing.played}</td>
-                          <td className="text-center text-neutral-600">{row.standing.won}</td>
-                          <td className="text-center text-neutral-600 hidden sm:table-cell">{row.standing.drawn}</td>
-                          <td className="text-center text-neutral-600">{row.standing.lost}</td>
-                          <td className="text-center text-neutral-600 hidden sm:table-cell">
+                          <td className="text-center text-muted">{row.standing.played}</td>
+                          <td className="text-center text-muted">{row.standing.won}</td>
+                          <td className="text-center text-muted hidden sm:table-cell">{row.standing.drawn}</td>
+                          <td className="text-center text-muted">{row.standing.lost}</td>
+                          <td className="text-center text-muted hidden sm:table-cell">
                             {row.standing.goalDifference > 0 ? "+" : ""}
                             {row.standing.goalDifference}
                           </td>
-                          <td className="text-center font-bold text-neutral-900">
+                          <td className="text-center font-bold text-ink">
                             {row.standing.points}
                           </td>
                         </tr>
@@ -1210,8 +1210,8 @@ export default async function ArticlePage({ params }: Props) {
           )}
 
           {/* Related Topics — entity cards */}
-          <div className="mt-12 pt-8 border-t border-neutral-200">
-            <h3 className="text-xl font-semibold text-neutral-900 mb-4">
+          <div className="mt-12 pt-8 border-t border-line">
+            <h3 className="text-xl font-semibold text-ink mb-4">
               Related Topics
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1220,36 +1220,36 @@ export default async function ArticlePage({ params }: Props) {
                 <>
                   <Link
                   href={`/teams/${matchData.homeTeam.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                  <div className="relative w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {matchData.homeTeam.logoUrl ? (
                         <ImageWithFallback src={matchData.homeTeam.logoUrl} alt={matchData.homeTeam.name} fill sizes="48px" className="object-contain" />
                       ) : (
-                        <Shield className="w-6 h-6 text-neutral-400" />
+                        <Shield className="w-6 h-6 text-faint" />
                       )}
                     </div>
                     <div>
                       <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Team</span>
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                         {matchData.homeTeam.name}
                       </div>
                     </div>
                   </Link>
                   <Link
                   href={`/teams/${matchData.awayTeam.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                  <div className="relative w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {matchData.awayTeam.logoUrl ? (
                         <ImageWithFallback src={matchData.awayTeam.logoUrl} alt={matchData.awayTeam.name} fill sizes="48px" className="object-contain" />
                       ) : (
-                        <Shield className="w-6 h-6 text-neutral-400" />
+                        <Shield className="w-6 h-6 text-faint" />
                       )}
                     </div>
                     <div>
                       <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Team</span>
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                         {matchData.awayTeam.name}
                       </div>
                     </div>
@@ -1261,18 +1261,18 @@ export default async function ArticlePage({ params }: Props) {
               {!matchData && primaryTeam && (
                 <Link
                   href={`/teams/${primaryTeam.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                  <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                  <div className="relative w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                     {primaryTeam.logoUrl ? (
                       <ImageWithFallback src={primaryTeam.logoUrl} alt={primaryTeam.name} fill sizes="48px" className="object-contain" />
                     ) : (
-                      <Shield className="w-6 h-6 text-neutral-400" />
+                      <Shield className="w-6 h-6 text-faint" />
                     )}
                   </div>
                   <div>
                     <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Team</span>
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                       {primaryTeam.name}
                     </div>
                   </div>
@@ -1283,14 +1283,14 @@ export default async function ArticlePage({ params }: Props) {
               {competition && (
                 <Link
                   href={`/competitions/${competition.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
                   <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Trophy className="w-6 h-6 text-blue-500" />
                   </div>
                   <div>
                     <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Competition</span>
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                       {competition.name}
                     </div>
                   </div>
@@ -1301,14 +1301,14 @@ export default async function ArticlePage({ params }: Props) {
               {primaryPlayer && (
                 <Link
                   href={`/players/${primaryPlayer.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                  <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-6 h-6 text-neutral-400" />
+                  <div className="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-6 h-6 text-faint" />
                   </div>
                   <div>
                     <span className="text-xs font-medium text-orange-600 uppercase tracking-wide">Player</span>
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                       {primaryPlayer.name}
                     </div>
                   </div>
@@ -1322,14 +1322,14 @@ export default async function ArticlePage({ params }: Props) {
                   <Link
                     key={player.slug}
                     href={`/players/${player.slug}`}
-                    className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                    className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                   >
-                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-neutral-400" />
+                    <div className="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center flex-shrink-0">
+                      <User className="w-6 h-6 text-faint" />
                     </div>
                     <div>
                       <span className="text-xs font-medium text-orange-600 uppercase tracking-wide">Player</span>
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                         {player.name}
                       </div>
                     </div>
@@ -1348,18 +1348,18 @@ export default async function ArticlePage({ params }: Props) {
                   <Link
                     key={team.slug}
                   href={`/teams/${team.slug}`}
-                  className="flex items-center gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all group"
+                  className="flex items-center gap-4 p-4 bg-surface-2 rounded-xl border border-line hover:shadow-md hover:border-blue-200 transition-all group"
                 >
-                    <div className="relative w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 p-1">
+                    <div className="relative w-12 h-12 bg-surface rounded-lg flex items-center justify-center flex-shrink-0 p-1">
                       {team.logoUrl ? (
                         <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="48px" className="object-contain" />
                       ) : (
-                        <Shield className="w-6 h-6 text-neutral-400" />
+                        <Shield className="w-6 h-6 text-faint" />
                       )}
                     </div>
                     <div>
                       <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">Team</span>
-                      <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors">
+                      <div className="font-medium text-ink group-hover:text-blue-600 transition-colors">
                         {team.name}
                       </div>
                     </div>
@@ -1370,7 +1370,7 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         {/* Upgrade CTA */}
-        <div className="bg-neutral-50 border-t border-neutral-200">
+        <div className="bg-surface-2 border-t border-line">
           <div className="max-w-3xl mx-auto px-4 py-8">
             <SidebarUpgradeOrAd context="article" />
           </div>
@@ -1378,10 +1378,10 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* More Articles Section */}
         {relatedArticles.length > 0 && (
-          <div className="bg-white border-t border-neutral-200">
+          <div className="bg-surface border-t border-line">
             <div className="max-w-6xl mx-auto px-4 py-12">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-neutral-900">
+                <h2 className="text-2xl font-bold text-ink">
                   More Stories
                 </h2>
                 <Link

@@ -337,30 +337,30 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Compact Header */}
       <section className="bg-neutral-900 text-white">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/15 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            <div className="w-14 h-14 bg-surface/15 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">
               {userInitial}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate">{user.name || "Sports Fan"}</h1>
-              <p className="text-sm text-neutral-400">{user.email} · Member since {memberSince}</p>
+              <p className="text-sm text-faint">{user.email} · Member since {memberSince}</p>
             </div>
             <div className="hidden sm:flex items-center gap-4 text-center">
               <div>
                 <div className="text-xl font-bold">{totalFollowing}</div>
-                <div className="text-xs text-neutral-400">Following</div>
+                <div className="text-xs text-faint">Following</div>
               </div>
               <div>
                 <div className="text-xl font-bold">{followedPlayers.length}</div>
-                <div className="text-xs text-neutral-400">Players</div>
+                <div className="text-xs text-faint">Players</div>
               </div>
               <div>
                 <div className="text-xl font-bold">{followedTeams.length}</div>
-                <div className="text-xs text-neutral-400">Teams</div>
+                <div className="text-xs text-faint">Teams</div>
               </div>
             </div>
           </div>
@@ -368,7 +368,7 @@ export default function AccountPage() {
       </section>
 
       {/* Tab Navigation */}
-      <div className="sticky top-[73px] z-40 bg-white border-b border-neutral-200">
+      <div className="sticky top-[73px] z-40 bg-surface border-b border-line">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex gap-1">
             {tabs.map((tab) => {
@@ -381,7 +381,7 @@ export default function AccountPage() {
                     "flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors",
                     activeTab === tab.id
                       ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300"
+                      : "border-transparent text-muted hover:text-ink hover:border-line"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -399,11 +399,11 @@ export default function AccountPage() {
         {activeTab === "profile" && (
           <div className="space-y-12">
             {/* Edit Name */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
-              <h2 className="text-xl font-bold text-neutral-900 mb-6">Edit Profile</h2>
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
+              <h2 className="text-xl font-bold text-ink mb-6">Edit Profile</h2>
               <div className="flex items-end gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Display Name
                   </label>
                   <input
@@ -411,7 +411,7 @@ export default function AccountPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={!editingName}
-                    className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg text-neutral-900 disabled:bg-neutral-50 disabled:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+                    className="w-full px-4 py-2.5 border border-line rounded-lg text-ink disabled:bg-surface-2 disabled:text-muted focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                   />
                 </div>
                 {editingName ? (
@@ -421,7 +421,7 @@ export default function AccountPage() {
                         setEditingName(false);
                         setName(user.name || "");
                       }}
-                      className="px-4 py-2.5 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                      className="px-4 py-2.5 border border-line rounded-lg text-ink hover:bg-surface-2 transition-colors"
                     >
                       Cancel
                     </button>
@@ -437,7 +437,7 @@ export default function AccountPage() {
                 ) : (
                   <button
                     onClick={() => setEditingName(true)}
-                    className="px-4 py-2.5 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    className="px-4 py-2.5 border border-line rounded-lg text-ink hover:bg-surface-2 transition-colors"
                   >
                     Edit
                   </button>
@@ -449,8 +449,8 @@ export default function AccountPage() {
                   Name updated successfully
                 </div>
               )}
-              <div className="mt-4 pt-4 border-t border-neutral-100">
-                <p className="text-sm text-neutral-500">
+              <div className="mt-4 pt-4 border-t border-line">
+                <p className="text-sm text-muted">
                   Email: {user.email}
                 </p>
               </div>
@@ -459,13 +459,13 @@ export default function AccountPage() {
             {/* Followed Entities */}
             {followsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-faint" />
               </div>
             ) : totalFollowing === 0 ? (
-              <div className="bg-white rounded-2xl p-12 border border-neutral-200 text-center">
-                <Heart className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-neutral-900 mb-2">Start following entities</h2>
-                <p className="text-neutral-600 mb-6">
+              <div className="bg-surface rounded-2xl p-12 border border-line text-center">
+                <Heart className="w-12 h-12 text-faint mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-ink mb-2">Start following entities</h2>
+                <p className="text-muted mb-6">
                   Follow players, teams, and competitions to build your personalized experience
                 </p>
                 <Link
@@ -488,23 +488,23 @@ export default function AccountPage() {
                         <Link
                           key={follow.id}
                           href={`/players/${player.slug}`}
-                          className="bg-white rounded-xl p-6 border border-neutral-200 hover:shadow-lg hover:border-blue-300 transition-all group"
+                          className="bg-surface rounded-xl p-6 border border-line hover:shadow-lg hover:border-blue-300 transition-all group"
                         >
                           <div className="flex items-center gap-4 mb-3">
                             <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">
                               {player.name.substring(0, 2).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                              <h3 className="font-bold text-ink group-hover:text-blue-600 transition-colors truncate">
                                 {player.name}
                               </h3>
-                              <p className="text-sm text-neutral-500 truncate">
+                              <p className="text-sm text-muted truncate">
                                 {player.position}{player.nationality ? ` · ${player.nationality}` : ""}
                               </p>
                             </div>
                           </div>
                           {follow.createdAt && (
-                            <div className="text-xs text-neutral-400">
+                            <div className="text-xs text-faint">
                               Following since {new Date(follow.createdAt).toLocaleDateString()}
                             </div>
                           )}
@@ -525,7 +525,7 @@ export default function AccountPage() {
                         <Link
                           key={follow.id}
                           href={`/teams/${team.slug}`}
-                          className="bg-white rounded-xl p-6 border border-neutral-200 hover:shadow-lg hover:border-green-300 transition-all group"
+                          className="bg-surface rounded-xl p-6 border border-line hover:shadow-lg hover:border-green-300 transition-all group"
                         >
                           <div className="flex items-center gap-4 mb-3">
                             <div className="w-14 h-14 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center overflow-hidden">
@@ -538,14 +538,14 @@ export default function AccountPage() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-neutral-900 group-hover:text-green-600 transition-colors truncate">
+                              <h3 className="font-bold text-ink group-hover:text-green-600 transition-colors truncate">
                                 {team.name}
                               </h3>
-                              <p className="text-sm text-neutral-500">{team.country}</p>
+                              <p className="text-sm text-muted">{team.country}</p>
                             </div>
                           </div>
                           {follow.createdAt && (
-                            <div className="text-xs text-neutral-400">
+                            <div className="text-xs text-faint">
                               Following since {new Date(follow.createdAt).toLocaleDateString()}
                             </div>
                           )}
@@ -566,21 +566,21 @@ export default function AccountPage() {
                         <Link
                           key={follow.id}
                           href={`/competitions/${competition.slug}`}
-                          className="bg-white rounded-xl p-6 border border-neutral-200 hover:shadow-lg hover:border-yellow-300 transition-all group"
+                          className="bg-surface rounded-xl p-6 border border-line hover:shadow-lg hover:border-yellow-300 transition-all group"
                         >
                           <div className="flex items-center gap-4 mb-3">
                             <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-2xl">
                               <Trophy className="w-7 h-7" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-neutral-900 group-hover:text-yellow-600 transition-colors truncate">
+                              <h3 className="font-bold text-ink group-hover:text-yellow-600 transition-colors truncate">
                                 {competition.name}
                               </h3>
-                              <p className="text-sm text-neutral-500">{competition.type}</p>
+                              <p className="text-sm text-muted">{competition.type}</p>
                             </div>
                           </div>
                           {follow.createdAt && (
-                            <div className="text-xs text-neutral-400">
+                            <div className="text-xs text-faint">
                               Following since {new Date(follow.createdAt).toLocaleDateString()}
                             </div>
                           )}
@@ -598,20 +598,20 @@ export default function AccountPage() {
         {activeTab === "settings" && (
           <div className="space-y-8">
             {/* Change Password */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                   <Lock className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Change Password</h2>
-                  <p className="text-sm text-neutral-600">Update your password to keep your account secure</p>
+                  <p className="text-sm text-muted">Update your password to keep your account secure</p>
                 </div>
               </div>
 
               <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-sm font-medium text-ink mb-1.5">
                     Current Password
                   </label>
                   <div className="relative">
@@ -620,12 +620,12 @@ export default function AccountPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-10"
+                      className="w-full px-4 py-2.5 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-faint hover:text-muted"
                     >
                       {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -633,7 +633,7 @@ export default function AccountPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-sm font-medium text-ink mb-1.5">
                     New Password
                   </label>
                   <div className="relative">
@@ -643,12 +643,12 @@ export default function AccountPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-10"
+                      className="w-full px-4 py-2.5 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-faint hover:text-muted"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -656,7 +656,7 @@ export default function AccountPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                  <label className="block text-sm font-medium text-ink mb-1.5">
                     Confirm New Password
                   </label>
                   <input
@@ -664,7 +664,7 @@ export default function AccountPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+                    className="w-full px-4 py-2.5 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                   />
                 </div>
 
@@ -690,23 +690,23 @@ export default function AccountPage() {
             </div>
 
             {/* Notification Settings */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
                   <Bell className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Notifications</h2>
-                  <p className="text-sm text-neutral-600">Choose what you want to be notified about</p>
+                  <p className="text-sm text-muted">Choose what you want to be notified about</p>
                 </div>
               </div>
 
               {notifLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+                  <Loader2 className="w-6 h-6 animate-spin text-faint" />
                 </div>
               ) : notifSettings ? (
-                <div className="divide-y divide-neutral-100">
+                <div className="divide-y divide-line">
                   <ToggleRow
                     label="Goals & Assists"
                     description="When followed players score or assist"
@@ -742,24 +742,24 @@ export default function AccountPage() {
             </div>
 
             {/* Preferences */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                   <Mail className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Preferences</h2>
-                  <p className="text-sm text-neutral-600">Customize your experience</p>
+                  <p className="text-sm text-muted">Customize your experience</p>
                 </div>
               </div>
 
-              <div className="divide-y divide-neutral-100">
+              <div className="divide-y divide-line">
                 {notifSettings && (
                   <>
                     <ToggleRow
                       label="Email Updates"
                       description="Weekly digest of activity"
-                      icon={<Mail className="w-5 h-5 text-neutral-400" />}
+                      icon={<Mail className="w-5 h-5 text-faint" />}
                       checked={notifSettings.emailEnabled}
                       onChange={(v) => handleToggleNotification("emailEnabled", v)}
                       color="purple"
@@ -767,7 +767,7 @@ export default function AccountPage() {
                     <ToggleRow
                       label="Push Notifications"
                       description="Real-time alerts on your device"
-                      icon={<Smartphone className="w-5 h-5 text-neutral-400" />}
+                      icon={<Smartphone className="w-5 h-5 text-faint" />}
                       checked={notifSettings.pushEnabled}
                       onChange={(v) => handleToggleNotification("pushEnabled", v)}
                       color="purple"
@@ -777,7 +777,7 @@ export default function AccountPage() {
                 <ToggleRow
                   label="Marketing Emails"
                   description="Football news and product updates"
-                  icon={<Mail className="w-5 h-5 text-neutral-400" />}
+                  icon={<Mail className="w-5 h-5 text-faint" />}
                   checked={marketingConsent}
                   onChange={handleToggleMarketingConsent}
                   color="purple"
@@ -786,14 +786,14 @@ export default function AccountPage() {
             </div>
 
             {/* Refer a Friend */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                   <Users className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-neutral-900">Refer a Friend</h2>
-                  <p className="text-sm text-neutral-600">Share DataSports and earn rewards</p>
+                  <h2 className="text-xl font-bold text-ink">Refer a Friend</h2>
+                  <p className="text-sm text-muted">Share DataSports and earn rewards</p>
                 </div>
               </div>
 
@@ -815,7 +815,7 @@ export default function AccountPage() {
                 </div>
               )}
 
-              <p className="text-sm text-neutral-600 mb-4">
+              <p className="text-sm text-muted mb-4">
                 Share your referral link. When someone subscribes through your link, you get 1 month free.
               </p>
 
@@ -825,7 +825,7 @@ export default function AccountPage() {
                     <input
                       readOnly
                       value={`https://datasports.co?ref=${referralCode}`}
-                      className="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-700 font-mono"
+                      className="flex-1 px-4 py-2.5 bg-surface-2 border border-line rounded-lg text-sm text-ink font-mono"
                     />
                     <button
                       onClick={() => {
@@ -879,14 +879,14 @@ export default function AccountPage() {
 
               {/* Referred users table */}
               {referralStats && referralStats.referredUsers.length > 0 && (
-                <div className="border-t border-neutral-200 pt-4">
-                  <h3 className="text-sm font-semibold text-neutral-700 mb-2">Your Referrals</h3>
+                <div className="border-t border-line pt-4">
+                  <h3 className="text-sm font-semibold text-ink mb-2">Your Referrals</h3>
                   <div className="space-y-2">
                     {referralStats.referredUsers.map((ref, i) => (
                       <div key={i} className="flex items-center justify-between text-sm py-1.5">
-                        <span className="text-neutral-700">{ref.name}</span>
+                        <span className="text-ink">{ref.name}</span>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-neutral-400">
+                          <span className="text-xs text-faint">
                             {ref.joinedAt ? new Date(ref.joinedAt).toLocaleDateString() : "—"}
                           </span>
                           <span
@@ -894,7 +894,7 @@ export default function AccountPage() {
                               "text-xs font-medium px-2 py-0.5 rounded-full",
                               ref.status === "subscribed"
                                 ? "bg-green-100 text-green-700"
-                                : "bg-neutral-100 text-neutral-600"
+                                : "bg-surface-2 text-muted"
                             )}
                           >
                             {ref.status === "subscribed" ? "Subscribed" : "Signed up"}
@@ -908,17 +908,17 @@ export default function AccountPage() {
             </div>
 
             {/* Privacy & Data */}
-            <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                   <Shield className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-neutral-900">Privacy & Data</h2>
-                  <p className="text-sm text-neutral-600">Manage your personal data</p>
+                  <h2 className="text-xl font-bold text-ink">Privacy & Data</h2>
+                  <p className="text-sm text-muted">Manage your personal data</p>
                 </div>
               </div>
-              <p className="text-sm text-neutral-600 mb-4">
+              <p className="text-sm text-muted mb-4">
                 Download a copy of all your data or review our privacy policy to understand how we handle your information.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -959,7 +959,7 @@ export default function AccountPage() {
                 </button>
                 <Link
                   href="/privacy"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-line text-ink rounded-lg hover:bg-surface-2 transition-colors"
                 >
                   Privacy Policy
                 </Link>
@@ -967,7 +967,7 @@ export default function AccountPage() {
             </div>
 
             {/* Danger Zone */}
-            <div className="bg-white rounded-2xl p-6 border border-red-200 shadow-sm">
+            <div className="bg-surface rounded-2xl p-6 border border-red-200 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -977,7 +977,7 @@ export default function AccountPage() {
                   <p className="text-sm text-red-600">Irreversible actions</p>
                 </div>
               </div>
-              <p className="text-sm text-neutral-600 mb-4">
+              <p className="text-sm text-muted mb-4">
                 Once you delete your account, there is no going back. All your data, follows, and predictions will be permanently removed.
               </p>
               <button
@@ -999,21 +999,21 @@ export default function AccountPage() {
       {/* Delete Account Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-surface rounded-2xl shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900">Delete Account</h3>
+              <h3 className="text-xl font-bold text-ink">Delete Account</h3>
             </div>
 
-            <p className="text-sm text-neutral-600 mb-6">
+            <p className="text-sm text-muted mb-6">
               This action is permanent and cannot be undone. All your data will be deleted.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                <label className="block text-sm font-medium text-ink mb-1.5">
                   {user?.hasPassword ? "Enter your password" : "Enter your email address"}
                 </label>
                 <input
@@ -1021,19 +1021,19 @@ export default function AccountPage() {
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
                   placeholder={user?.hasPassword ? undefined : user?.email}
-                  className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
+                  className="w-full px-4 py-2.5 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                <label className="block text-sm font-medium text-ink mb-1.5">
                   Type <span className="font-mono font-bold text-red-600">DELETE</span> to confirm
                 </label>
                 <input
                   type="text"
                   value={deleteConfirmation}
                   onChange={(e) => setDeleteConfirmation(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
+                  className="w-full px-4 py-2.5 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
                   placeholder="DELETE"
                 />
               </div>
@@ -1050,7 +1050,7 @@ export default function AccountPage() {
                     setDeleteConfirmation("");
                     setDeleteError("");
                   }}
-                  className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-line rounded-lg text-ink hover:bg-surface-2 transition-colors"
                 >
                   Cancel
                 </button>
@@ -1100,13 +1100,13 @@ function BillingTab({
   return (
     <div className="space-y-8">
       {/* Current Plan */}
-      <div className="bg-white rounded-2xl p-6 border border-neutral-200 shadow-sm">
+      <div className="bg-surface rounded-2xl p-6 border border-line shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold">Current Plan</h2>
           <span
             className={cn(
               "px-3 py-1 rounded-full text-sm font-semibold",
-              tier === "free" && "bg-neutral-100 text-neutral-700",
+              tier === "free" && "bg-surface-2 text-ink",
               tier === "pro" && "bg-blue-100 text-blue-700"
             )}
           >
@@ -1114,7 +1114,7 @@ function BillingTab({
           </span>
         </div>
         {subscription?.endDate && (
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted">
             {subscription.autoRenew ? "Renews" : "Expires"} on{" "}
             {new Date(subscription.endDate).toLocaleDateString()}
           </p>
@@ -1123,7 +1123,7 @@ function BillingTab({
           <button
             onClick={handleManageSubscription}
             disabled={portalLoading}
-            className="mt-4 px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="mt-4 px-5 py-2.5 border border-line rounded-lg text-sm font-medium text-ink hover:bg-surface-2 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
             Manage Subscription
@@ -1133,11 +1133,11 @@ function BillingTab({
 
       {/* Pricing Cards */}
       <div>
-        <h2 className="text-2xl font-bold text-neutral-900 mb-6">
+        <h2 className="text-2xl font-bold text-ink mb-6">
           {tier === "free" ? "Upgrade Your Plan" : "Change Plan"}
         </h2>
         <PricingCards />
-        <p className="text-xs text-neutral-500 text-center mt-4">
+        <p className="text-xs text-muted text-center mt-4">
           By subscribing you agree to our{" "}
           <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>{" "}
           and{" "}
@@ -1169,8 +1169,8 @@ function ToggleRow({
       <div className="flex items-center gap-3">
         {icon}
         <div>
-          <div className="font-medium text-neutral-900">{label}</div>
-          <div className="text-sm text-neutral-600">{description}</div>
+          <div className="font-medium text-ink">{label}</div>
+          <div className="text-sm text-muted">{description}</div>
         </div>
       </div>
       <label className="relative inline-flex items-center cursor-pointer">
@@ -1182,7 +1182,7 @@ function ToggleRow({
         />
         <div
           className={cn(
-            "w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all",
+            "w-11 h-6 bg-surface-2 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:border-line after:border after:rounded-full after:h-5 after:w-5 after:transition-all",
             color === "blue"
               ? "peer-focus:ring-blue-300 peer-checked:bg-blue-600"
               : "peer-focus:ring-purple-300 peer-checked:bg-purple-600"

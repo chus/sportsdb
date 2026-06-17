@@ -124,7 +124,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
         }))}
       />
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title={`${adjective} Football Players`}
           subtitle={`${playersList.length} players from ${nationality} in our database`}
@@ -152,23 +152,23 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                 key={player.id}
                 slug={player.slug}
                 isLinkWorthy={player.isIndexable}
-                className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-xl transition-shadow group"
+                className="bg-surface rounded-xl border border-line p-4 hover:shadow-xl transition-shadow group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
                     {player.imageUrl ? (
                       <ImageWithFallback src={player.imageUrl} alt={player.name} className="w-12 h-12 rounded-full object-cover" width={48} height={48} />
                     ) : (
-                      <User className="w-6 h-6 text-neutral-400" />
+                      <User className="w-6 h-6 text-faint" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                    <div className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                       {player.name}
                     </div>
-                    <div className="text-sm text-neutral-500">{player.position}</div>
+                    <div className="text-sm text-muted">{player.position}</div>
                     {player.team && (
-                      <div className="flex items-center gap-1 text-xs text-neutral-400 mt-0.5">
+                      <div className="flex items-center gap-1 text-xs text-faint mt-0.5">
                         {player.team.logoUrl ? (
                           <ImageWithFallback src={player.team.logoUrl} alt={player.team.name} className="w-3 h-3 object-contain" width={12} height={12} />
                         ) : (
@@ -185,23 +185,23 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
 
           {/* Cross-links */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">Explore More</h2>
+            <h2 className="text-lg font-bold text-ink mb-4">Explore More</h2>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/players"
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-blue-300 hover:text-blue-600 transition-colors"
               >
                 All Players
               </Link>
               <Link
                 href="/players/nationality"
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-teal-300 hover:text-teal-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-teal-300 hover:text-teal-600 transition-colors"
               >
                 All Nationalities
               </Link>
               <Link
                 href={`/teams/country/${encodeURIComponent(nationality)}`}
-                className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-green-300 hover:text-green-600 transition-colors"
+                className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-green-300 hover:text-green-600 transition-colors"
               >
                 {adjective} Teams
               </Link>
@@ -209,7 +209,7 @@ export default async function NationalityPlayersPage({ params }: PageProps) {
                 <Link
                   key={pos}
                   href={`/players/position/${pos.toLowerCase()}`}
-                  className="px-4 py-2 bg-white rounded-lg border border-neutral-200 text-sm font-medium text-neutral-700 hover:border-purple-300 hover:text-purple-600 transition-colors"
+                  className="px-4 py-2 bg-surface rounded-lg border border-line text-sm font-medium text-ink hover:border-purple-300 hover:text-purple-600 transition-colors"
                 >
                   {pos}s
                 </Link>

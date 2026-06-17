@@ -32,8 +32,8 @@ export default async function PickemPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Pick'em</h1>
-        <p className="text-neutral-600">
+        <h1 className="text-3xl font-bold text-ink mb-2">Pick'em</h1>
+        <p className="text-muted">
           Pick the winner of each match. See how the community voted and earn 1 point for each correct pick.
         </p>
       </div>

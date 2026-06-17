@@ -36,13 +36,13 @@ export function LandingFeatures() {
           {explorationCards.map((card) => (
             <div
               key={card.title}
-              className="bg-white rounded-2xl p-6 border border-neutral-200 hover:shadow-lg transition-shadow"
+              className="bg-surface rounded-2xl p-6 border border-line hover:shadow-lg transition-shadow"
             >
               <div className={`w-12 h-12 bg-gradient-to-br ${card.gradient} rounded-xl flex items-center justify-center mb-4`}>
                 <card.icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-900 mb-2">{card.title}</h3>
-              <p className="text-neutral-600 mb-4 text-sm">{card.description}</p>
+              <h3 className="text-xl font-bold text-ink mb-2">{card.title}</h3>
+              <p className="text-muted mb-4 text-sm">{card.description}</p>
               <Link
                 href={card.href}
                 className="text-blue-600 font-medium text-sm hover:text-blue-700 flex items-center gap-1"

@@ -19,7 +19,7 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   const { article: a, competition, primaryTeam, primaryPlayer } = article;
-  const typeInfo = TYPE_LABELS[a.type] || { label: a.type, color: "bg-neutral-100 text-neutral-700" };
+  const typeInfo = TYPE_LABELS[a.type] || { label: a.type, color: "bg-surface-2 text-ink" };
 
   const publishedDate = a.publishedAt
     ? formatDistanceToNow(new Date(a.publishedAt), { addSuffix: true })
@@ -29,10 +29,10 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
     return (
       <Link
         href={`/news/${a.slug}`}
-        className="group block bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-xl transition-shadow"
+        className="group block bg-surface rounded-xl border border-line overflow-hidden hover:shadow-xl transition-shadow"
       >
         {a.imageUrl && (
-          <div className="relative h-48 bg-neutral-100 flex items-center justify-center overflow-hidden">
+          <div className="relative h-48 bg-surface-2 flex items-center justify-center overflow-hidden">
             <ImageWithFallback
               src={a.imageUrl}
               alt={a.title}
@@ -48,14 +48,14 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               {typeInfo.label}
             </span>
             {competition && (
-              <span className="text-sm text-neutral-500">{competition.name}</span>
+              <span className="text-sm text-muted">{competition.name}</span>
             )}
           </div>
-          <h2 className="text-2xl font-bold text-neutral-900 group-hover:text-blue-600 transition-colors mb-3">
+          <h2 className="text-2xl font-bold text-ink group-hover:text-blue-600 transition-colors mb-3">
             {a.title}
           </h2>
-          <p className="text-neutral-600 mb-4 line-clamp-2">{a.excerpt}</p>
-          <div className="flex items-center justify-between text-sm text-neutral-500">
+          <p className="text-muted mb-4 line-clamp-2">{a.excerpt}</p>
+          <div className="flex items-center justify-between text-sm text-muted">
             <div className="flex items-center gap-4">
               {primaryTeam && (
                 <span className="flex items-center gap-2">
@@ -85,10 +85,10 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   return (
     <Link
       href={`/news/${a.slug}`}
-      className="group flex gap-4 bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-lg transition-shadow"
+      className="group flex gap-4 bg-surface rounded-xl border border-line p-4 hover:shadow-lg transition-shadow"
     >
       {a.imageUrl && (
-        <div className="flex-shrink-0 w-16 h-16 bg-neutral-50 rounded-lg flex items-center justify-center">
+        <div className="flex-shrink-0 w-16 h-16 bg-surface-2 rounded-lg flex items-center justify-center">
           <ImageWithFallback
             src={a.imageUrl}
             alt={a.title}
@@ -104,14 +104,14 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
             {typeInfo.label}
           </span>
           {competition && (
-            <span className="text-xs text-neutral-400">{competition.name}</span>
+            <span className="text-xs text-faint">{competition.name}</span>
           )}
         </div>
-        <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors mb-1.5 line-clamp-2">
+        <h3 className="font-semibold text-ink group-hover:text-blue-600 transition-colors mb-1.5 line-clamp-2">
           {a.title}
         </h3>
-        <p className="text-sm text-neutral-600 line-clamp-1 mb-2">{a.excerpt}</p>
-        <div className="flex items-center justify-between text-xs text-neutral-400">
+        <p className="text-sm text-muted line-clamp-1 mb-2">{a.excerpt}</p>
+        <div className="flex items-center justify-between text-xs text-faint">
           {primaryTeam && (
             <span className="flex items-center gap-1">
               {primaryTeam.logoUrl && (
@@ -135,16 +135,16 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
 
 export function ArticleCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-4 animate-pulse">
+    <div className="bg-surface rounded-xl border border-line p-4 animate-pulse">
       <div className="flex gap-4">
-        <div className="flex-shrink-0 w-16 h-16 bg-neutral-200 rounded-lg" />
+        <div className="flex-shrink-0 w-16 h-16 bg-surface-2 rounded-lg" />
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-5 w-20 bg-neutral-200 rounded-full" />
-            <div className="h-4 w-24 bg-neutral-100 rounded" />
+            <div className="h-5 w-20 bg-surface-2 rounded-full" />
+            <div className="h-4 w-24 bg-surface-2 rounded" />
           </div>
-          <div className="h-5 w-full bg-neutral-200 rounded mb-2" />
-          <div className="h-4 w-2/3 bg-neutral-100 rounded" />
+          <div className="h-5 w-full bg-surface-2 rounded mb-2" />
+          <div className="h-4 w-2/3 bg-surface-2 rounded" />
         </div>
       </div>
     </div>

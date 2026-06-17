@@ -133,7 +133,7 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
             setShowJoin(!showJoin);
             setShowCreate(false);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 border border-neutral-300 text-neutral-700 text-sm font-semibold rounded-lg hover:bg-neutral-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 border border-line text-ink text-sm font-semibold rounded-lg hover:bg-surface-2 transition-colors"
         >
           {!isPro && <Lock className="w-4 h-4" />}
           Join League
@@ -142,8 +142,8 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
 
       {/* Create form */}
       {showCreate && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
-          <h3 className="font-semibold text-neutral-900 mb-3">
+        <div className="bg-surface rounded-xl border border-line p-6">
+          <h3 className="font-semibold text-ink mb-3">
             Create a League
           </h3>
           <div className="flex gap-3">
@@ -152,7 +152,7 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
               placeholder="League name"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 px-4 py-2.5 border border-line rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               maxLength={50}
             />
             <button
@@ -171,8 +171,8 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
 
       {/* Join form */}
       {showJoin && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
-          <h3 className="font-semibold text-neutral-900 mb-3">
+        <div className="bg-surface rounded-xl border border-line p-6">
+          <h3 className="font-semibold text-ink mb-3">
             Join a League
           </h3>
           <div className="flex gap-3">
@@ -183,7 +183,7 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
               onChange={(e) =>
                 setJoinCode(e.target.value.toUpperCase().slice(0, 6))
               }
-              className="w-40 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm font-mono text-center tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-40 px-4 py-2.5 border border-line rounded-lg text-sm font-mono text-center tracking-widest uppercase focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               maxLength={6}
             />
             <button
@@ -202,12 +202,12 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
 
       {/* League list */}
       {leagues.length === 0 ? (
-        <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
-          <Users className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+        <div className="bg-surface rounded-xl border border-line p-12 text-center">
+          <Users className="w-12 h-12 text-faint mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-ink mb-2">
             No leagues yet
           </h3>
-          <p className="text-neutral-500 text-sm max-w-sm mx-auto">
+          <p className="text-muted text-sm max-w-sm mx-auto">
             Create a league and share the code with friends to start competing
             together.
           </p>
@@ -218,15 +218,15 @@ export function LeaguesContent({ leagues, isLoggedIn }: LeaguesContentProps) {
             <Link
               key={league.id}
               href={`/games/leagues/${league.code}`}
-              className="group bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-lg transition-all"
+              className="group bg-surface rounded-xl border border-line p-5 hover:shadow-lg transition-all"
             >
               <div className="flex items-start justify-between mb-3">
-                <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                <h3 className="font-semibold text-ink group-hover:text-blue-600 transition-colors">
                   {league.name}
                 </h3>
-                <ArrowRight className="w-4 h-4 text-neutral-400 group-hover:text-blue-600 transition-colors" />
+                <ArrowRight className="w-4 h-4 text-faint group-hover:text-blue-600 transition-colors" />
               </div>
-              <div className="flex items-center gap-4 text-sm text-neutral-500">
+              <div className="flex items-center gap-4 text-sm text-muted">
                 <div className="flex items-center gap-1.5">
                   <Users className="w-4 h-4" />
                   {league.memberCount} members

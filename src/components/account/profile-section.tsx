@@ -64,16 +64,16 @@ export function ProfileSection({ user }: ProfileSectionProps) {
   return (
     <div className="space-y-6">
       {/* Account Info */}
-      <div className="pb-6 border-b border-neutral-200">
-        <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-4">
+      <div className="pb-6 border-b border-line">
+        <h3 className="text-sm font-medium text-muted uppercase tracking-wide mb-4">
           Account Information
         </h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5 text-neutral-400" />
+            <Mail className="w-5 h-5 text-faint" />
             <div>
-              <p className="text-sm text-neutral-500">Email</p>
-              <p className="font-medium text-neutral-900">{user.email}</p>
+              <p className="text-sm text-muted">Email</p>
+              <p className="font-medium text-ink">{user.email}</p>
             </div>
             {user.emailVerified ? (
               <span className="ml-auto flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
@@ -88,10 +88,10 @@ export function ProfileSection({ user }: ProfileSectionProps) {
             )}
           </div>
           <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-neutral-400" />
+            <Calendar className="w-5 h-5 text-faint" />
             <div>
-              <p className="text-sm text-neutral-500">Member since</p>
-              <p className="font-medium text-neutral-900">{memberSince}</p>
+              <p className="text-sm text-muted">Member since</p>
+              <p className="font-medium text-ink">{memberSince}</p>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
 
       {/* Edit Profile Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
+        <h3 className="text-sm font-medium text-muted uppercase tracking-wide">
           Edit Profile
         </h3>
 
@@ -121,31 +121,31 @@ export function ProfileSection({ user }: ProfileSectionProps) {
         )}
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-2">
+          <label htmlFor="name" className="block text-sm font-medium text-ink mb-2">
             Display Name
           </label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-faint" />
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full pl-10 pr-4 py-3 border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className="w-full pl-10 pr-4 py-3 border-2 border-line rounded-xl bg-surface text-ink placeholder:text-muted focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all"
             />
           </div>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted">
             This is how your name will appear across the site.
           </p>
         </div>
 
         <div>
-          <label htmlFor="avatarUrl" className="block text-sm font-medium text-neutral-700 mb-2">
+          <label htmlFor="avatarUrl" className="block text-sm font-medium text-ink mb-2">
             Avatar URL
           </label>
           <div className="flex gap-4">
-            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -156,7 +156,7 @@ export function ProfileSection({ user }: ProfileSectionProps) {
                   }}
                 />
               ) : (
-                <User className="w-8 h-8 text-neutral-400" />
+                <User className="w-8 h-8 text-faint" />
               )}
             </div>
             <input
@@ -165,10 +165,10 @@ export function ProfileSection({ user }: ProfileSectionProps) {
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/avatar.jpg"
-              className="flex-1 px-4 py-3 border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className="flex-1 px-4 py-3 border-2 border-line rounded-xl bg-surface text-ink placeholder:text-muted focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all"
             />
           </div>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted">
             Enter a URL for your profile picture.
           </p>
         </div>

@@ -31,7 +31,7 @@ export function LandingStats({ players, teams, competitions, matches }: LandingS
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700" />
 
       {/* Decorative blurred circles */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full opacity-10 blur-3xl" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-surface rounded-full opacity-10 blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-400 rounded-full opacity-10 blur-3xl" />
 
       <div className="relative max-w-6xl mx-auto px-4">
@@ -47,7 +47,7 @@ export function LandingStats({ players, teams, competitions, matches }: LandingS
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {stats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="group">
-              <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 transition-colors">
+              <div className="w-14 h-14 bg-surface/10 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-surface/20 transition-colors">
                 <Icon className="w-7 h-7 text-white/80" />
               </div>
               <div className="text-4xl md:text-5xl font-bold text-white mb-2">

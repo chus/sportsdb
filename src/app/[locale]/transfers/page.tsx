@@ -54,7 +54,7 @@ export default async function TransfersPage() {
         />
       )}
 
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           title="Transfers"
           subtitle="Latest football transfers, signings, and player movements"
@@ -79,44 +79,44 @@ export default async function TransfersPage() {
             const topSeller = Object.entries(sellCount).sort((a, b) => b[1] - a[1])[0];
             return (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Total Transfers</div>
-                  <div className="text-2xl font-bold text-neutral-900">{transfers.length}</div>
-                  <div className="text-xs text-neutral-500">player movements</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Total Transfers</div>
+                  <div className="text-2xl font-bold text-ink">{transfers.length}</div>
+                  <div className="text-xs text-muted">player movements</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Active Buyer</div>
-                  <div className="text-lg font-bold text-neutral-900 truncate">{topBuyer?.[0] ?? "—"}</div>
-                  <div className="text-xs text-neutral-500">{topBuyer?.[1] ?? 0} signings</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Most Active Buyer</div>
+                  <div className="text-lg font-bold text-ink truncate">{topBuyer?.[0] ?? "—"}</div>
+                  <div className="text-xs text-muted">{topBuyer?.[1] ?? 0} signings</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Most Active Seller</div>
-                  <div className="text-lg font-bold text-neutral-900 truncate">{topSeller?.[0] ?? "—"}</div>
-                  <div className="text-xs text-neutral-500">{topSeller?.[1] ?? 0} departures</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Most Active Seller</div>
+                  <div className="text-lg font-bold text-ink truncate">{topSeller?.[0] ?? "—"}</div>
+                  <div className="text-xs text-muted">{topSeller?.[1] ?? 0} departures</div>
                 </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                  <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">Latest Transfer</div>
-                  <div className="text-lg font-bold text-neutral-900 truncate">{transfers[0].player.name}</div>
-                  <div className="text-xs text-neutral-500">to {transfers[0].toTeam.name}</div>
+                <div className="bg-surface rounded-xl border border-line p-4">
+                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-1">Latest Transfer</div>
+                  <div className="text-lg font-bold text-ink truncate">{transfers[0].player.name}</div>
+                  <div className="text-xs text-muted">to {transfers[0].toTeam.name}</div>
                 </div>
               </div>
             );
           })()}
 
           {transfers.length === 0 ? (
-            <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
-              <ArrowRightLeft className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-neutral-900 mb-2">No transfer data yet</h2>
-              <p className="text-neutral-500">
+            <div className="bg-surface rounded-xl border border-line p-12 text-center">
+              <ArrowRightLeft className="w-16 h-16 text-faint mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-ink mb-2">No transfer data yet</h2>
+              <p className="text-muted">
                 Transfer information will appear as player movements are recorded.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="bg-surface rounded-xl border border-line overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-neutral-50 text-left text-sm text-neutral-500">
+                    <tr className="bg-surface-2 text-left text-sm text-muted">
                       <th scope="col" className="px-4 py-3 font-medium">Player</th>
                       <th scope="col" className="px-4 py-3 font-medium hidden md:table-cell">From</th>
                       <th scope="col" className="px-4 py-3 font-medium">To</th>
@@ -124,16 +124,16 @@ export default async function TransfersPage() {
                       <th scope="col" className="px-4 py-3 font-medium text-right">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-100">
+                  <tbody className="divide-y divide-line">
                     {transfers.map((transfer) => (
-                      <tr key={transfer.id} className="hover:bg-neutral-50 transition-colors">
+                      <tr key={transfer.id} className="hover:bg-surface-2 transition-colors">
                         <td className="px-4 py-3">
                           <PlayerLink
                             slug={transfer.player.slug}
                             isLinkWorthy={transfer.player.isIndexable ?? false}
                             className="flex items-center gap-3 hover:text-blue-600 transition-colors"
                           >
-                            <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
                               {transfer.player.imageUrl ? (
                                 <ImageWithFallback
                                   src={transfer.player.imageUrl}
@@ -143,12 +143,12 @@ export default async function TransfersPage() {
                                   height={32}
                                 />
                               ) : (
-                                <User className="w-4 h-4 text-neutral-400" />
+                                <User className="w-4 h-4 text-faint" />
                               )}
                             </div>
                             <div>
                               <div className="font-medium">{transfer.player.name}</div>
-                              <div className="text-xs text-neutral-500">{transfer.player.position}</div>
+                              <div className="text-xs text-muted">{transfer.player.position}</div>
                             </div>
                           </PlayerLink>
                         </td>
@@ -161,12 +161,12 @@ export default async function TransfersPage() {
                               {transfer.fromTeam.logoUrl ? (
                                 <ImageWithFallback src={transfer.fromTeam.logoUrl} alt={transfer.fromTeam.name} className="w-5 h-5 object-contain" width={20} height={20} />
                               ) : (
-                                <Shield className="w-4 h-4 text-neutral-300" />
+                                <Shield className="w-4 h-4 text-faint" />
                               )}
                               <span className="text-sm">{transfer.fromTeam.name}</span>
                             </Link>
                           ) : (
-                            <span className="text-sm text-neutral-400">—</span>
+                            <span className="text-sm text-faint">—</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -177,21 +177,21 @@ export default async function TransfersPage() {
                             {transfer.toTeam.logoUrl ? (
                               <ImageWithFallback src={transfer.toTeam.logoUrl} alt={transfer.toTeam.name} className="w-5 h-5 object-contain" width={20} height={20} />
                             ) : (
-                              <Shield className="w-4 h-4 text-neutral-300" />
+                              <Shield className="w-4 h-4 text-faint" />
                             )}
                             <span className="text-sm">{transfer.toTeam.name}</span>
                           </Link>
                         </td>
                         <td className="px-4 py-3 hidden sm:table-cell">
                           {transfer.transferType ? (
-                            <span className="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 rounded capitalize">
+                            <span className="text-xs px-2 py-1 bg-surface-2 text-muted rounded capitalize">
                               {transfer.transferType}
                             </span>
                           ) : (
-                            <span className="text-sm text-neutral-400">—</span>
+                            <span className="text-sm text-faint">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-sm text-neutral-500">
+                        <td className="px-4 py-3 text-right text-sm text-muted">
                           {format(new Date(transfer.date), "MMM d, yyyy")}
                         </td>
                       </tr>

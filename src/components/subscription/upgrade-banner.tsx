@@ -81,10 +81,10 @@ export function UpgradeBanner({
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-semibold text-neutral-900 text-sm">
+            <p className="font-semibold text-ink text-sm">
               {copy.headline}
             </p>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-muted">
               Pro from €8/year
             </p>
           </div>
@@ -102,7 +102,7 @@ export function UpgradeBanner({
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-blue-200 overflow-hidden",
+        "bg-surface rounded-xl border border-blue-200 overflow-hidden",
         className
       )}
     >
@@ -115,7 +115,7 @@ export function UpgradeBanner({
       <div className="p-5">
         <ul className="space-y-2.5 mb-4">
           {copy.bullets.map((bullet, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-neutral-700">
+            <li key={i} className="flex items-start gap-2 text-sm text-ink">
               <Star className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
               {bullet}
             </li>

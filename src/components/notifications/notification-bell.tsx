@@ -46,7 +46,7 @@ export function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+        className="relative p-2 text-muted hover:text-ink hover:bg-surface-2 rounded-lg transition-colors"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
@@ -58,10 +58,10 @@ export function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-line rounded-xl shadow-lg z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-            <h3 className="font-semibold text-neutral-900">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+            <h3 className="font-semibold text-ink">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
@@ -76,16 +76,16 @@ export function NotificationBell() {
           {/* Notifications List */}
           <div className="max-h-96 overflow-y-auto">
             {isLoading ? (
-              <div className="p-4 text-center text-neutral-500 text-sm">
+              <div className="p-4 text-center text-muted text-sm">
                 Loading...
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center">
-                <Bell className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                <p className="text-neutral-500 text-sm">No notifications yet</p>
+                <Bell className="w-8 h-8 text-faint mx-auto mb-2" />
+                <p className="text-muted text-sm">No notifications yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-neutral-100">
+              <div className="divide-y divide-line">
                 {notifications.map((notification) => {
                   const href =
                     notification.entityType && notification.entityId
@@ -94,7 +94,7 @@ export function NotificationBell() {
 
                   const content = (
                     <div
-                      className={`px-4 py-3 hover:bg-neutral-50 cursor-pointer ${
+                      className={`px-4 py-3 hover:bg-surface-2 cursor-pointer ${
                         !notification.isRead ? "bg-blue-50/50" : ""
                       }`}
                       onClick={() => handleNotificationClick(notification)}
@@ -108,13 +108,13 @@ export function NotificationBell() {
                           }`}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-neutral-900">
+                          <p className="text-sm font-medium text-ink">
                             {notification.title}
                           </p>
-                          <p className="text-sm text-neutral-600 mt-0.5">
+                          <p className="text-sm text-muted mt-0.5">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-neutral-400 mt-1">
+                          <p className="text-xs text-faint mt-1">
                             {formatDistanceToNow(
                               new Date(notification.createdAt),
                               { addSuffix: true }
@@ -139,7 +139,7 @@ export function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-neutral-100 text-center">
+            <div className="px-4 py-2 border-t border-line text-center">
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-sm text-blue-600 hover:text-blue-700"

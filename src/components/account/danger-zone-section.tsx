@@ -65,8 +65,8 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
         <div className="p-6 border border-red-200 rounded-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h4 className="font-medium text-neutral-900">Delete Account</h4>
-              <p className="text-sm text-neutral-600 mt-1">
+              <h4 className="font-medium text-ink">Delete Account</h4>
+              <p className="text-sm text-muted mt-1">
                 Permanently delete your account and all associated data. This action cannot be undone.
               </p>
             </div>
@@ -86,11 +86,11 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
             <h4 className="font-semibold text-red-800">Confirm Account Deletion</h4>
           </div>
 
-          <div className="bg-white p-4 rounded-lg border border-red-200 mb-4">
-            <p className="text-sm text-neutral-700 mb-2">
+          <div className="bg-surface p-4 rounded-lg border border-red-200 mb-4">
+            <p className="text-sm text-ink mb-2">
               <strong>This will permanently delete:</strong>
             </p>
-            <ul className="text-sm text-neutral-600 list-disc list-inside space-y-1">
+            <ul className="text-sm text-muted list-disc list-inside space-y-1">
               <li>Your account and profile information</li>
               <li>All your followed players, teams, and competitions</li>
               <li>Your activity history and preferences</li>
@@ -107,7 +107,7 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 Enter your password
               </label>
               <div className="relative">
@@ -116,12 +116,12 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Your current password"
-                  className="w-full pl-4 pr-12 py-3 border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all"
+                  className="w-full pl-4 pr-12 py-3 border-2 border-line rounded-xl bg-surface text-ink placeholder:text-muted focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-faint hover:text-muted"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -129,15 +129,15 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Type <span className="font-mono bg-neutral-100 px-1 rounded text-red-600">DELETE</span> to confirm
+              <label className="block text-sm font-medium text-ink mb-2">
+                Type <span className="font-mono bg-surface-2 px-1 rounded text-red-600">DELETE</span> to confirm
               </label>
               <input
                 type="text"
                 value={confirmation}
                 onChange={(e) => setConfirmation(e.target.value.toUpperCase())}
                 placeholder="Type DELETE"
-                className="w-full px-4 py-3 border-2 border-neutral-300 rounded-xl bg-white text-neutral-900 font-mono placeholder:text-neutral-500 placeholder:font-sans focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-line rounded-xl bg-surface text-ink font-mono placeholder:text-muted placeholder:font-sans focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all"
               />
             </div>
 
@@ -150,7 +150,7 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
                   setConfirmation("");
                   setError(null);
                 }}
-                className="flex-1 px-4 py-3 border-2 border-neutral-300 text-neutral-700 font-medium rounded-xl hover:bg-neutral-50 transition-colors"
+                className="flex-1 px-4 py-3 border-2 border-line text-ink font-medium rounded-xl hover:bg-surface-2 transition-colors"
               >
                 Cancel
               </button>
@@ -167,9 +167,9 @@ export function DangerZoneSection({ user }: DangerZoneSectionProps) {
         </div>
       )}
 
-      <div className="mt-6 p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
-        <h4 className="font-medium text-neutral-900 mb-2">Need help?</h4>
-        <p className="text-sm text-neutral-600">
+      <div className="mt-6 p-4 bg-surface-2 border border-line rounded-xl">
+        <h4 className="font-medium text-ink mb-2">Need help?</h4>
+        <p className="text-sm text-muted">
           If you're having issues with your account or want to export your data before deleting,{" "}
           <a href="/contact" className="text-blue-600 hover:underline">
             contact our support team

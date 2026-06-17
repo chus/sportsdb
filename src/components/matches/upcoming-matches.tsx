@@ -35,7 +35,7 @@ export async function UpcomingMatches({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Calendar className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-neutral-900">
+            <h2 className="text-2xl font-bold text-ink">
               Upcoming Matches
             </h2>
           </div>
@@ -52,7 +52,7 @@ export async function UpcomingMatches({
         <div className="space-y-6">
           {Object.entries(matchesByDate).map(([dateKey, dateMatches]) => (
             <div key={dateKey}>
-              <div className="text-sm font-medium text-neutral-500 mb-3">
+              <div className="text-sm font-medium text-muted mb-3">
                 {format(new Date(dateKey), "EEEE, MMMM d")}
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -60,14 +60,14 @@ export async function UpcomingMatches({
                   <Link
                     key={match.id}
                     href={`/matches/${match.slug ?? match.id}`}
-                    className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-lg hover:border-blue-200 transition-all group"
+                    className="bg-surface rounded-xl border border-line p-4 hover:shadow-lg hover:border-blue-200 transition-all group"
                   >
                     {/* Competition badge */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
+                      <span className="text-xs font-medium text-muted bg-surface-2 px-2 py-1 rounded">
                         {match.competition?.name}
                       </span>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-faint">
                         {format(new Date(match.scheduledAt), "HH:mm")}
                       </span>
                     </div>
@@ -76,7 +76,7 @@ export async function UpcomingMatches({
                     <div className="space-y-3">
                       {/* Home Team */}
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                           {match.homeTeam?.logoUrl ? (
                             <img
                               src={match.homeTeam.logoUrl}
@@ -84,17 +84,17 @@ export async function UpcomingMatches({
                               className="w-6 h-6 object-contain"
                             />
                           ) : (
-                            <Shield className="w-4 h-4 text-neutral-400" />
+                            <Shield className="w-4 h-4 text-faint" />
                           )}
                         </div>
-                        <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                        <span className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                           {match.homeTeam?.shortName || match.homeTeam?.name}
                         </span>
                       </div>
 
                       {/* Away Team */}
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                           {match.awayTeam?.logoUrl ? (
                             <img
                               src={match.awayTeam.logoUrl}
@@ -102,10 +102,10 @@ export async function UpcomingMatches({
                               className="w-6 h-6 object-contain"
                             />
                           ) : (
-                            <Shield className="w-4 h-4 text-neutral-400" />
+                            <Shield className="w-4 h-4 text-faint" />
                           )}
                         </div>
-                        <span className="font-medium text-neutral-900 group-hover:text-blue-600 transition-colors truncate">
+                        <span className="font-medium text-ink group-hover:text-blue-600 transition-colors truncate">
                           {match.awayTeam?.shortName || match.awayTeam?.name}
                         </span>
                       </div>
@@ -113,7 +113,7 @@ export async function UpcomingMatches({
 
                     {/* Matchday */}
                     {match.matchday && (
-                      <div className="mt-3 pt-3 border-t border-neutral-100 text-xs text-neutral-500">
+                      <div className="mt-3 pt-3 border-t border-line text-xs text-muted">
                         Matchday {match.matchday}
                       </div>
                     )}

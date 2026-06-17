@@ -37,19 +37,19 @@ function MatchResultCard({ m }: { m: HeroMatch }) {
     <Link
       key={m.id}
       href={`/matches/${m.slug ?? m.id}`}
-      className="group block bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-colors"
+      className="group block bg-surface/10 hover:bg-surface/20 border border-white/10 rounded-xl p-4 transition-colors"
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-white/70 truncate">
           {m.competition?.name ?? "Competition"}
         </span>
-        <span className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full">
+        <span className="text-xs font-semibold bg-surface/20 px-2 py-0.5 rounded-full">
           FT
         </span>
       </div>
       <div className="space-y-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-white/20 flex-shrink-0 flex items-center justify-center">
+          <div className="w-6 h-6 rounded bg-surface/20 flex-shrink-0 flex items-center justify-center">
             {m.homeTeam.logoUrl ? (
               <ImageWithFallback
                 src={m.homeTeam.logoUrl}
@@ -68,7 +68,7 @@ function MatchResultCard({ m }: { m: HeroMatch }) {
           <span className="font-bold text-lg tabular-nums">{m.homeScore ?? "-"}</span>
         </div>
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-white/20 flex-shrink-0 flex items-center justify-center">
+          <div className="w-6 h-6 rounded bg-surface/20 flex-shrink-0 flex items-center justify-center">
             {m.awayTeam.logoUrl ? (
               <ImageWithFallback
                 src={m.awayTeam.logoUrl}
@@ -115,20 +115,20 @@ export function HeroBannerSection({ data }: { data: HeroBanner }) {
               <Link
                 key={m.id}
                 href={`/matches/${m.slug ?? m.id}`}
-                className="group block bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-colors"
+                className="group block bg-surface/10 hover:bg-surface/20 border border-white/10 rounded-xl p-4 transition-colors"
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-white/70 truncate">
                     {m.competition?.name ?? "Competition"}
                   </span>
-                  <span className="flex items-center gap-1 text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full">
+                  <span className="flex items-center gap-1 text-xs font-semibold bg-surface/20 px-2 py-0.5 rounded-full">
                     <Clock className="w-3 h-3" />
                     {formatClock(m.scheduledAt)}
                   </span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded bg-white/20 flex-shrink-0 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded bg-surface/20 flex-shrink-0 flex items-center justify-center">
                       {m.homeTeam.logoUrl ? (
                         <ImageWithFallback
                           src={m.homeTeam.logoUrl}
@@ -146,7 +146,7 @@ export function HeroBannerSection({ data }: { data: HeroBanner }) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded bg-white/20 flex-shrink-0 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded bg-surface/20 flex-shrink-0 flex items-center justify-center">
                       {m.awayTeam.logoUrl ? (
                         <ImageWithFallback
                           src={m.awayTeam.logoUrl}
@@ -212,7 +212,7 @@ export function HeroBannerSection({ data }: { data: HeroBanner }) {
             <Link
               key={m.id}
               href={`/matches/${m.slug ?? m.id}`}
-              className="group block bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 transition-colors"
+              className="group block bg-surface/5 hover:bg-surface/10 border border-white/10 rounded-xl p-4 transition-colors"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-white/60 truncate">

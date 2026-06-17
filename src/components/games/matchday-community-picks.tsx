@@ -70,7 +70,7 @@ export async function MatchdayCommunityPicks({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-neutral-900">
+        <h3 className="text-lg font-bold text-ink">
           Matchday {nextMatch.matchday} Predictions
         </h3>
         <Link
@@ -92,14 +92,14 @@ export async function MatchdayCommunityPicks({
           return (
             <div
               key={match.id}
-              className="bg-neutral-50 rounded-lg p-3"
+              className="bg-surface-2 rounded-lg p-3"
             >
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="font-medium text-neutral-900 flex-1 text-right pr-3">
+                <span className="font-medium text-ink flex-1 text-right pr-3">
                   {homeName}
                 </span>
-                <span className="text-xs text-neutral-400 px-1">vs</span>
-                <span className="font-medium text-neutral-900 flex-1 pl-3">
+                <span className="text-xs text-faint px-1">vs</span>
+                <span className="font-medium text-ink flex-1 pl-3">
                   {awayName}
                 </span>
               </div>
@@ -120,14 +120,14 @@ export async function MatchdayCommunityPicks({
                       style={{ width: `${pct.away}%` }}
                     />
                   </div>
-                  <div className="flex justify-between mt-1 text-[10px] text-neutral-400">
+                  <div className="flex justify-between mt-1 text-[10px] text-faint">
                     <span>H {pct.home}%</span>
                     <span>D {pct.draw}%</span>
                     <span>A {pct.away}%</span>
                   </div>
                 </>
               ) : (
-                <div className="text-center text-xs text-neutral-400 py-1">
+                <div className="text-center text-xs text-faint py-1">
                   No predictions yet
                 </div>
               )}
@@ -137,7 +137,7 @@ export async function MatchdayCommunityPicks({
       </div>
 
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-4 text-center">
-        <p className="text-sm text-neutral-700 mb-2">
+        <p className="text-sm text-ink mb-2">
           Think you know the results?
         </p>
         <Link

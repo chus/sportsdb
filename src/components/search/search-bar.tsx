@@ -289,7 +289,7 @@ export function SearchBar({
           {isLoading && query ? (
             <Loader2 className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconSizeClasses} text-blue-500 animate-spin`} />
           ) : (
-            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconSizeClasses} text-neutral-400`} />
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconSizeClasses} text-faint`} />
           )}
           <input
             ref={inputRef}
@@ -307,8 +307,8 @@ export function SearchBar({
             aria-activedescendant={activeDescendantId}
             className={`w-full ${inputSizeClasses} border-2 rounded-xl font-medium focus:outline-none focus:ring-4 transition-all ${
               isDark
-                ? "border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 placeholder:font-normal focus:ring-blue-900/40 focus:border-blue-500 shadow-none hover:border-neutral-600"
-                : "border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-500 placeholder:font-normal focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400"
+                ? "border-neutral-700 bg-neutral-800 text-white placeholder:text-muted placeholder:font-normal focus:ring-blue-900/40 focus:border-blue-500 shadow-none hover:border-neutral-600"
+                : "border-line bg-surface text-ink placeholder:text-muted placeholder:font-normal focus:ring-blue-100 focus:border-blue-500 shadow-md hover:shadow-lg hover:border-neutral-400"
             }`}
           />
           {query && (
@@ -316,7 +316,7 @@ export function SearchBar({
               type="button"
               onClick={handleClear}
               aria-label="Clear search"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-faint hover:text-muted transition-colors"
             >
               <X className={iconSizeClasses} />
             </button>
@@ -330,7 +330,7 @@ export function SearchBar({
             ref={dropdownRef}
             id={listboxId}
             role="listbox"
-            className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-[60] max-h-[480px] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 bg-surface border border-line rounded-xl shadow-xl overflow-hidden z-[60] max-h-[480px] overflow-y-auto"
           >
             {/* Recent Searches */}
             {showRecentSearches && (
@@ -350,10 +350,10 @@ export function SearchBar({
                   <div className="p-2">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex items-center gap-3 px-3 py-3 animate-pulse">
-                        <div className="w-10 h-10 bg-neutral-100 rounded-lg" />
+                        <div className="w-10 h-10 bg-surface-2 rounded-lg" />
                         <div className="flex-1">
-                          <div className="h-4 bg-neutral-100 rounded w-2/3 mb-2" />
-                          <div className="h-3 bg-neutral-50 rounded w-1/2" />
+                          <div className="h-4 bg-surface-2 rounded w-2/3 mb-2" />
+                          <div className="h-3 bg-surface-2 rounded w-1/2" />
                         </div>
                       </div>
                     ))}
@@ -362,11 +362,11 @@ export function SearchBar({
 
                 {!isLoading && results.length === 0 && query.trim().length >= 2 && (
                   <div className="px-4 py-8 text-center">
-                    <Search className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                    <p className="text-neutral-500 text-sm">
-                      No results for &quot;<span className="font-medium text-neutral-700">{query}</span>&quot;
+                    <Search className="w-8 h-8 text-faint mx-auto mb-2" />
+                    <p className="text-muted text-sm">
+                      No results for &quot;<span className="font-medium text-ink">{query}</span>&quot;
                     </p>
-                    <p className="text-neutral-400 text-xs mt-1">
+                    <p className="text-faint text-xs mt-1">
                       Try a different spelling or search term
                     </p>
                   </div>
@@ -387,37 +387,37 @@ export function SearchBar({
                           className={`w-full px-3 py-2.5 text-left flex items-center gap-3 rounded-lg transition-colors ${
                             highlightedIndex === index
                               ? "bg-blue-50"
-                              : "hover:bg-neutral-50"
+                              : "hover:bg-surface-2"
                           }`}
                         >
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                             highlightedIndex === index
                               ? "bg-blue-100"
-                              : "bg-neutral-100"
+                              : "bg-surface-2"
                           }`}>
                             <Icon className={`w-5 h-5 ${
                               highlightedIndex === index
                                 ? "text-blue-600"
-                                : "text-neutral-500"
+                                : "text-muted"
                             }`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className={`font-semibold truncate ${
                               highlightedIndex === index
                                 ? "text-blue-900"
-                                : "text-neutral-900"
+                                : "text-ink"
                             }`}>
                               {highlightMatch(result.name, query)}
                             </div>
                             {result.subtitle && (
-                              <div className="text-sm text-neutral-500 truncate">
+                              <div className="text-sm text-muted truncate">
                                 {highlightMatch(result.subtitle, query)}
                               </div>
                             )}
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span
-                              className={`text-xs px-2 py-1 rounded-md font-medium ${TYPE_COLORS[result.entityType] || "bg-neutral-100 text-neutral-600"}`}
+                              className={`text-xs px-2 py-1 rounded-md font-medium ${TYPE_COLORS[result.entityType] || "bg-surface-2 text-muted"}`}
                             >
                               {TYPE_LABELS[result.entityType] || result.entityType}
                             </span>
@@ -435,14 +435,14 @@ export function SearchBar({
                     role="option"
                     aria-selected={highlightedIndex === results.length}
                     onClick={handleSubmit}
-                    className={`w-full px-4 py-3 text-left text-sm font-semibold border-t border-neutral-100 flex items-center justify-between ${
+                    className={`w-full px-4 py-3 text-left text-sm font-semibold border-t border-line flex items-center justify-between ${
                       highlightedIndex === results.length
                         ? "bg-blue-50 text-blue-700"
                         : "text-blue-600 hover:bg-blue-50"
                     }`}
                   >
                     <span>See all results for &quot;{query}&quot;</span>
-                    <span className="text-xs text-neutral-400">↵</span>
+                    <span className="text-xs text-faint">↵</span>
                   </button>
                 )}
               </>

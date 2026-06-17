@@ -102,8 +102,8 @@ export default function AdminOverviewPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-neutral-900">Overview</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h2 className="text-2xl font-bold text-ink">Overview</h2>
+        <p className="mt-1 text-sm text-muted">
           A summary of your platform metrics.
         </p>
       </div>
@@ -118,21 +118,21 @@ export default function AdminOverviewPage() {
         {statCards.map((card) => (
           <div
             key={card.key}
-            className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-line bg-surface p-6 shadow-sm"
           >
             <div className="flex items-center gap-3">
               <div className={`rounded-lg ${card.bgColor} p-2.5`}>
                 <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
-              <span className="text-sm font-medium text-neutral-500">
+              <span className="text-sm font-medium text-muted">
                 {card.label}
               </span>
             </div>
             <div className="mt-4">
               {loading ? (
-                <div className="h-9 w-24 animate-pulse rounded-md bg-neutral-100" />
+                <div className="h-9 w-24 animate-pulse rounded-md bg-surface-2" />
               ) : (
-                <span className="text-3xl font-bold text-neutral-900">
+                <span className="text-3xl font-bold text-ink">
                   {stats ? formatNumber(stats[card.key]) : "--"}
                 </span>
               )}

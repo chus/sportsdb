@@ -100,8 +100,8 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Users</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-bold text-ink">Users</h1>
+        <p className="mt-1 text-sm text-muted">
           Manage user accounts and subscription tiers
         </p>
       </div>
@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
       {/* Search */}
       <div className="mb-6">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
           <input
             type="text"
             placeholder="Search by name or email..."
@@ -118,43 +118,43 @@ export default function AdminUsersPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-neutral-200 bg-white py-2.5 pl-10 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-line bg-surface py-2.5 pl-10 pr-4 text-sm text-ink placeholder:text-faint focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-neutral-100 bg-neutral-50">
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+              <tr className="border-b border-line bg-surface-2">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Name
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Email
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Tier
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Role
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Created At
                 </th>
-                <th className="px-6 py-3.5 font-medium text-neutral-500">
+                <th className="px-6 py-3.5 font-medium text-muted">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-line">
               {loading ? (
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-12 text-center text-neutral-400"
+                    className="px-6 py-12 text-center text-faint"
                   >
                     Loading...
                   </td>
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-6 py-12 text-center text-neutral-400"
+                    className="px-6 py-12 text-center text-faint"
                   >
                     No users found
                   </td>
@@ -173,14 +173,14 @@ export default function AdminUsersPage() {
                   <tr
                     key={user.id}
                     className={cn(
-                      "transition-colors hover:bg-neutral-50",
+                      "transition-colors hover:bg-surface-2",
                       updatingId === user.id && "opacity-50"
                     )}
                   >
-                    <td className="px-6 py-4 font-medium text-neutral-900">
+                    <td className="px-6 py-4 font-medium text-ink">
                       {user.name || "—"}
                     </td>
-                    <td className="px-6 py-4 text-neutral-600">{user.email}</td>
+                    <td className="px-6 py-4 text-muted">{user.email}</td>
                     <td className="px-6 py-4">
                       <select
                         value={user.tier}
@@ -189,11 +189,11 @@ export default function AdminUsersPage() {
                         }
                         disabled={updatingId === user.id}
                         className={cn(
-                          "rounded-md border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
+                          "rounded-md border border-line bg-surface px-2.5 py-1.5 text-xs font-medium focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
                           user.tier === "pro" &&
                             "border-blue-200 bg-blue-50 text-blue-700",
                           user.tier === "free" &&
-                            "border-neutral-200 bg-neutral-50 text-neutral-600"
+                            "border-line bg-surface-2 text-muted"
                         )}
                       >
                         {TIERS.map((tier) => (
@@ -209,13 +209,13 @@ export default function AdminUsersPage() {
                           "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
                           user.role === "admin"
                             ? "bg-red-50 text-red-700"
-                            : "bg-neutral-100 text-neutral-600"
+                            : "bg-surface-2 text-muted"
                         )}
                       >
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-neutral-500">
+                    <td className="px-6 py-4 text-muted">
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleDateString("en-US", {
                             year: "numeric",
@@ -228,7 +228,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleDelete(user.id)}
                         disabled={updatingId === user.id}
-                        className="rounded-lg p-2 text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg p-2 text-faint transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                         title="Delete user"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -243,8 +243,8 @@ export default function AdminUsersPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-neutral-100 px-6 py-4">
-            <p className="text-sm text-neutral-500">
+          <div className="flex items-center justify-between border-t border-line px-6 py-4">
+            <p className="text-sm text-muted">
               Showing {(page - 1) * limit + 1} to{" "}
               {Math.min(page * limit, total)} of {total} users
             </p>
@@ -252,18 +252,18 @@ export default function AdminUsersPage() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Prev
               </button>
-              <span className="px-2 text-sm text-neutral-500">
+              <span className="px-2 text-sm text-muted">
                 {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />

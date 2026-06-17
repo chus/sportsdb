@@ -114,7 +114,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         <span
           className={cn(
             "text-sm font-medium transition-colors",
-            billingPeriod === "monthly" ? "text-neutral-900" : "text-neutral-400"
+            billingPeriod === "monthly" ? "text-ink" : "text-faint"
           )}
         >
           Monthly
@@ -128,7 +128,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         >
           <div
             className={cn(
-              "absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform",
+              "absolute top-0.5 w-6 h-6 bg-surface rounded-full shadow-md transition-transform",
               billingPeriod === "annual" ? "translate-x-7" : "translate-x-0.5"
             )}
           />
@@ -136,7 +136,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         <span
           className={cn(
             "text-sm font-medium transition-colors",
-            billingPeriod === "annual" ? "text-neutral-900" : "text-neutral-400"
+            billingPeriod === "annual" ? "text-ink" : "text-faint"
           )}
         >
           Annual
@@ -162,7 +162,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
             <div
               key={tierItem.id}
               className={cn(
-                "relative bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-2xl",
+                "relative bg-surface rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-2xl",
                 tierItem.recommended && "ring-4 ring-blue-600 scale-105"
               )}
             >
@@ -215,17 +215,17 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                       {feature.included ? (
                         <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                       ) : (
-                        <X className="w-5 h-5 text-neutral-300 flex-shrink-0 mt-0.5" />
+                        <X className="w-5 h-5 text-faint flex-shrink-0 mt-0.5" />
                       )}
                       <span
                         className={cn(
                           "text-sm",
-                          feature.included ? "text-neutral-900" : "text-neutral-400"
+                          feature.included ? "text-ink" : "text-faint"
                         )}
                       >
                         {feature.text}
                         {feature.comingSoon && (
-                          <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded">
+                          <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium text-muted bg-surface-2 rounded">
                             <Clock className="w-3 h-3" />
                             Soon
                           </span>
@@ -236,7 +236,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                 </ul>
 
                 {isCurrentTier ? (
-                  <div className="w-full px-4 py-3 bg-neutral-100 text-neutral-900 rounded-lg text-center font-semibold">
+                  <div className="w-full px-4 py-3 bg-surface-2 text-ink rounded-lg text-center font-semibold">
                     Current Plan
                   </div>
                 ) : canUpgrade ? (
@@ -254,7 +254,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                   <button
                     onClick={() => handleUpgrade("free")}
                     disabled={isLoading}
-                    className="w-full px-4 py-3 border-2 border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-semibold disabled:opacity-50"
+                    className="w-full px-4 py-3 border-2 border-line text-ink rounded-lg hover:bg-surface-2 transition-colors font-semibold disabled:opacity-50"
                   >
                     Downgrade to Free
                   </button>
@@ -269,7 +269,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
       <div className="mt-10 max-w-md mx-auto">
         <button
           onClick={() => setShowPromoInput(!showPromoInput)}
-          className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 transition-colors mx-auto"
+          className="flex items-center gap-2 text-sm text-muted hover:text-ink transition-colors mx-auto"
         >
           <Tag className="w-4 h-4" />
           Have a promo code?
@@ -296,7 +296,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
                   if (e.key === "Enter") validatePromoCode(promoCode);
                 }}
                 placeholder="Enter promo code"
-                className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2.5 border border-line rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
                 onClick={() => validatePromoCode(promoCode)}

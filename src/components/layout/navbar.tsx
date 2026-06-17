@@ -64,7 +64,7 @@ export function Navbar() {
                   className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
                     isActive
                       ? "border-blue-500 text-white"
-                      : "border-transparent text-neutral-400 hover:text-white"
+                      : "border-transparent text-faint hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -97,7 +97,7 @@ export function Navbar() {
             {/* Mobile search icon */}
             <Link
               href="/search"
-              className="md:hidden p-2 text-neutral-400 hover:text-white rounded-lg transition-colors"
+              className="md:hidden p-2 text-faint hover:text-white rounded-lg transition-colors"
               aria-label={t("common.search")}
             >
               <Search className="w-5 h-5" />
@@ -119,7 +119,7 @@ export function Navbar() {
                       <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
                         {userInitial}
                       </div>
-                      <ChevronDown className="w-4 h-4 text-neutral-500" />
+                      <ChevronDown className="w-4 h-4 text-muted" />
                     </button>
 
                     {userMenuOpen && (
@@ -134,7 +134,7 @@ export function Navbar() {
                   <div className="hidden lg:flex items-center gap-2">
                     <button
                       onClick={() => openModal("signin")}
-                      className="px-4 py-2 text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-faint hover:text-white transition-colors"
                     >
                       Sign In
                     </button>
@@ -155,7 +155,7 @@ export function Navbar() {
               aria-label={mobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation"
-              className="lg:hidden p-2 text-neutral-400 hover:text-white rounded-lg"
+              className="lg:hidden p-2 text-faint hover:text-white rounded-lg"
             >
               {mobileMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -180,7 +180,7 @@ export function Navbar() {
                     className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                       isActive
                         ? "text-white bg-neutral-800"
-                        : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                        : "text-faint hover:text-white hover:bg-neutral-800"
                     }`}
                   >
                     {link.label}
@@ -220,7 +220,7 @@ export function Navbar() {
                           setMobileMenuOpen(false);
                           openModal("signin");
                         }}
-                        className="w-full px-4 py-2.5 text-sm font-medium text-neutral-300 border border-neutral-700 rounded-lg hover:bg-neutral-800 transition-colors"
+                        className="w-full px-4 py-2.5 text-sm font-medium text-faint border border-neutral-700 rounded-lg hover:bg-neutral-800 transition-colors"
                       >
                         Sign In
                       </button>
@@ -256,32 +256,32 @@ function UserDropdown({
   const router = useRouter();
 
   return (
-    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-neutral-200 shadow-xl py-1 z-50">
-      <div className="px-4 py-3 border-b border-neutral-100">
-        <p className="text-sm font-medium text-neutral-900 truncate">{userName}</p>
+    <div className="absolute right-0 mt-2 w-56 bg-surface rounded-xl border border-line shadow-xl py-1 z-50">
+      <div className="px-4 py-3 border-b border-line">
+        <p className="text-sm font-medium text-ink truncate">{userName}</p>
       </div>
       <Link
         href="/dashboard"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-surface-2 transition-colors"
       >
-        <LayoutDashboard className="w-4 h-4 text-neutral-400" />
+        <LayoutDashboard className="w-4 h-4 text-faint" />
         Dashboard
       </Link>
       <Link
         href="/account"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-surface-2 transition-colors"
       >
-        <User className="w-4 h-4 text-neutral-400" />
+        <User className="w-4 h-4 text-faint" />
         Account
       </Link>
       <Link
         href="/pricing"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-surface-2 transition-colors"
       >
-        <CreditCard className="w-4 h-4 text-neutral-400" />
+        <CreditCard className="w-4 h-4 text-faint" />
         Pricing
       </Link>
       <button
@@ -308,25 +308,25 @@ function MobileAuthLinks({ onClose }: { onClose: () => void }) {
       <Link
         href="/dashboard"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-faint hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <LayoutDashboard className="w-4 h-4 text-neutral-500" />
+        <LayoutDashboard className="w-4 h-4 text-muted" />
         Dashboard
       </Link>
       <Link
         href="/account"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-faint hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <User className="w-4 h-4 text-neutral-500" />
+        <User className="w-4 h-4 text-muted" />
         Account
       </Link>
       <Link
         href="/pricing"
         onClick={onClose}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+        className="flex items-center gap-3 px-4 py-3 text-sm text-faint hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
       >
-        <CreditCard className="w-4 h-4 text-neutral-500" />
+        <CreditCard className="w-4 h-4 text-muted" />
         Pricing
       </Link>
       <button

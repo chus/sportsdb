@@ -125,8 +125,8 @@ export default function AdminDataPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-neutral-900">Data</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h2 className="text-2xl font-bold text-ink">Data</h2>
+        <p className="mt-1 text-sm text-muted">
           Row counts across all main data tables.
         </p>
       </div>
@@ -141,21 +141,21 @@ export default function AdminDataPage() {
         {tableCards.map((card) => (
           <div
             key={card.key}
-            className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+            className="rounded-2xl border border-line bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="flex items-center gap-3">
               <div className={cn("rounded-lg p-2.5", card.bgColor)}>
                 <card.icon className={cn("h-5 w-5", card.color)} />
               </div>
-              <span className="text-sm font-medium text-neutral-500">
+              <span className="text-sm font-medium text-muted">
                 {card.label}
               </span>
             </div>
             <div className="mt-4">
               {loading ? (
-                <div className="h-9 w-24 animate-pulse rounded-md bg-neutral-100" />
+                <div className="h-9 w-24 animate-pulse rounded-md bg-surface-2" />
               ) : (
-                <span className="text-3xl font-bold text-neutral-900">
+                <span className="text-3xl font-bold text-ink">
                   {tableCounts ? formatNumber(tableCounts[card.key]) : "--"}
                 </span>
               )}

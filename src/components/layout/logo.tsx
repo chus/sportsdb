@@ -54,10 +54,10 @@ export function Logo({ size = "md", showText = true, variant = "light" }: LogoPr
 
       {showText && (
         <div className="hidden sm:block">
-          <div className={`font-bold ${textSizeClasses[size]} tracking-tight ${isDark ? "text-white" : "text-neutral-900"}`}>
+          <div className={`font-bold ${textSizeClasses[size]} tracking-tight ${isDark ? "text-white" : "text-ink"}`}>
             DataSports
           </div>
-          <div className={`text-xs -mt-0.5 leading-tight ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
+          <div className={`text-xs -mt-0.5 leading-tight ${isDark ? "text-faint" : "text-muted"}`}>
             The Sports Database
           </div>
         </div>

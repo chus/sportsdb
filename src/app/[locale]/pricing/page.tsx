@@ -47,7 +47,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="py-16 bg-neutral-50">
+      <section className="py-16 bg-surface-2">
         <div className="max-w-7xl mx-auto px-4">
           <PricingCards />
         </div>
@@ -56,7 +56,7 @@ export default function PricingPage() {
       {/* FAQ */}
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-neutral-900 text-center mb-10">
+          <h2 className="text-3xl font-bold text-ink text-center mb-10">
             Frequently Asked Questions
           </h2>
           <div className="space-y-3">
@@ -74,22 +74,22 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+    <div className="bg-surface rounded-xl border border-line overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-6 py-4 text-left"
       >
-        <span className="text-sm font-medium text-neutral-900">{question}</span>
+        <span className="text-sm font-medium text-ink">{question}</span>
         <ChevronDown
           className={cn(
-            "w-5 h-5 text-neutral-400 flex-shrink-0 ml-4 transition-transform",
+            "w-5 h-5 text-faint flex-shrink-0 ml-4 transition-transform",
             open && "rotate-180"
           )}
         />
       </button>
       {open && (
         <div className="px-6 pb-4">
-          <p className="text-sm text-neutral-600">{answer}</p>
+          <p className="text-sm text-muted">{answer}</p>
         </div>
       )}
     </div>

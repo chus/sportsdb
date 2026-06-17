@@ -90,7 +90,7 @@ export default async function MatchesPage({
       />
 
       <PageTracker />
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-surface-2">
         <PageHeader
           compact
           title="Matches"

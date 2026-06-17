@@ -62,8 +62,8 @@ export default function AdminIntegrationsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-neutral-900">Integrations</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h2 className="text-2xl font-bold text-ink">Integrations</h2>
+        <p className="mt-1 text-sm text-muted">
           Status of connected third-party services.
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function AdminIntegrationsPage() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-36 animate-pulse rounded-2xl border border-neutral-200 bg-white"
+              className="h-36 animate-pulse rounded-2xl border border-line bg-surface"
             />
           ))}
         </div>
@@ -88,14 +88,14 @@ export default function AdminIntegrationsPage() {
           {services.map((service) => {
             const Icon = serviceIcons[service.name] || Globe;
             const colors = serviceColors[service.name] || {
-              color: "text-neutral-600",
-              bgColor: "bg-neutral-50",
+              color: "text-muted",
+              bgColor: "bg-surface-2",
             };
 
             return (
               <div
                 key={service.name}
-                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="rounded-2xl border border-line bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function AdminIntegrationsPage() {
                       <Icon className={cn("h-5 w-5", colors.color)} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-neutral-900">
+                      <h3 className="text-sm font-semibold text-ink">
                         {service.name}
                       </h3>
                     </div>
@@ -120,14 +120,14 @@ export default function AdminIntegrationsPage() {
                         "text-xs font-medium",
                         service.configured
                           ? "text-green-700"
-                          : "text-neutral-400"
+                          : "text-faint"
                       )}
                     >
                       {service.configured ? "Configured" : "Not configured"}
                     </span>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-neutral-500">
+                <p className="mt-3 text-sm text-muted">
                   {service.description}
                 </p>
               </div>

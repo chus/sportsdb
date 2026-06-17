@@ -156,9 +156,9 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="bg-white rounded-xl p-8">
+        <div className="bg-surface rounded-xl p-8">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-          <p className="mt-4 text-neutral-600">Loading suggestions...</p>
+          <p className="mt-4 text-muted">Loading suggestions...</p>
         </div>
       </div>
     );
@@ -166,13 +166,13 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-surface rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white">
           <button
             onClick={onSkip}
             aria-label="Skip onboarding"
-            className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="absolute top-4 right-4 p-2 hover:bg-surface/20 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -192,7 +192,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               <div
                 key={s}
                 className={`flex-1 h-2 rounded-full transition-all ${
-                  s <= step ? "bg-white" : "bg-white/30"
+                  s <= step ? "bg-surface" : "bg-surface/30"
                 }`}
               />
             ))}
@@ -227,10 +227,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
           {step === 1 && (
             <div>
-              <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+              <h3 className="text-2xl font-bold text-ink mb-2">
                 Follow Your Favorite Players
               </h3>
-              <p className="text-neutral-600 mb-6">
+              <p className="text-muted mb-6">
                 Select at least 2 players ({selectedPlayers.length}/5 selected)
               </p>
 
@@ -244,7 +244,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                       className={`relative p-4 rounded-xl border-2 transition-all ${
                         isSelected
                           ? "border-blue-600 bg-blue-50"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
+                          : "border-line hover:border-line bg-surface"
                       }`}
                     >
                       {isSelected && (
@@ -265,13 +265,13 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                         )}
                       </div>
 
-                      <h4 className="font-semibold text-sm text-neutral-900 mb-1 truncate">
+                      <h4 className="font-semibold text-sm text-ink mb-1 truncate">
                         {player.name}
                       </h4>
-                      <p className="text-xs text-neutral-500 truncate">
+                      <p className="text-xs text-muted truncate">
                         {player.teamName || "Free Agent"}
                       </p>
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-faint">
                         {player.position}
                       </p>
                     </button>
@@ -279,7 +279,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 })}
               </div>
               {players.length === 0 && (
-                <p className="mt-4 text-sm text-neutral-500">
+                <p className="mt-4 text-sm text-muted">
                   No player recommendations available right now.
                 </p>
               )}
@@ -288,10 +288,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
           {step === 2 && (
             <div>
-              <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+              <h3 className="text-2xl font-bold text-ink mb-2">
                 Follow Your Favorite Teams
               </h3>
-              <p className="text-neutral-600 mb-6">
+              <p className="text-muted mb-6">
                 Select at least 1 team ({selectedTeams.length}/3 selected)
               </p>
 
@@ -305,7 +305,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                       className={`relative p-6 rounded-xl border-2 transition-all flex items-center gap-4 ${
                         isSelected
                           ? "border-green-600 bg-green-50"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
+                          : "border-line hover:border-line bg-surface"
                       }`}
                     >
                       {isSelected && (
@@ -327,20 +327,20 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                       </div>
 
                       <div className="text-left">
-                        <h4 className="font-semibold text-lg text-neutral-900 mb-1">
+                        <h4 className="font-semibold text-lg text-ink mb-1">
                           {team.name}
                         </h4>
-                        <p className="text-sm text-neutral-500">
+                        <p className="text-sm text-muted">
                           {team.competitionName}
                         </p>
-                        <p className="text-xs text-neutral-400">{team.country}</p>
+                        <p className="text-xs text-faint">{team.country}</p>
                       </div>
                     </button>
                   );
                 })}
               </div>
               {teams.length === 0 && (
-                <p className="mt-4 text-sm text-neutral-500">
+                <p className="mt-4 text-sm text-muted">
                   No team recommendations available right now.
                 </p>
               )}
@@ -349,10 +349,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
 
           {step === 3 && (
             <div>
-              <h3 className="text-2xl font-bold text-neutral-900 mb-2">
+              <h3 className="text-2xl font-bold text-ink mb-2">
                 Follow Competitions (Optional)
               </h3>
-              <p className="text-neutral-600 mb-6">
+              <p className="text-muted mb-6">
                 Select competitions to track ({selectedCompetitions.length}/2
                 selected)
               </p>
@@ -369,7 +369,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                       className={`relative p-6 rounded-xl border-2 transition-all ${
                         isSelected
                           ? "border-yellow-600 bg-yellow-50"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
+                          : "border-line hover:border-line bg-surface"
                       }`}
                     >
                       {isSelected && (
@@ -390,10 +390,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                         )}
                       </div>
 
-                      <h4 className="font-semibold text-lg text-neutral-900 mb-1">
+                      <h4 className="font-semibold text-lg text-ink mb-1">
                         {competition.name}
                       </h4>
-                      <p className="text-sm text-neutral-500">
+                      <p className="text-sm text-muted">
                         {competition.type}
                       </p>
                     </button>
@@ -401,7 +401,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 })}
               </div>
               {competitions.length === 0 && (
-                <p className="mt-4 text-sm text-neutral-500">
+                <p className="mt-4 text-sm text-muted">
                   No competition recommendations available right now.
                 </p>
               )}
@@ -410,10 +410,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-neutral-50 border-t flex justify-between items-center">
+        <div className="p-6 bg-surface-2 border-t flex justify-between items-center">
           <button
             onClick={onSkip}
-            className="px-6 py-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="px-6 py-2 text-muted hover:text-ink transition-colors"
           >
             Skip for now
           </button>
@@ -422,7 +422,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             {step > 1 && (
               <button
                 onClick={() => setStep((prev) => prev - 1)}
-                className="px-6 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors"
+                className="px-6 py-2 border border-line rounded-lg text-ink hover:bg-surface-2 transition-colors"
               >
                 Back
               </button>

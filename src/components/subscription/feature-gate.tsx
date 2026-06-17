@@ -23,7 +23,7 @@ export function FeatureGate({
 
   if (isLoading) {
     return (
-      <div className="animate-pulse bg-neutral-100 rounded-xl h-32" />
+      <div className="animate-pulse bg-surface-2 rounded-xl h-32" />
     );
   }
 
@@ -96,10 +96,10 @@ export function UpgradePrompt({
         <Lock className="w-8 h-8 text-white" />
       </div>
 
-      <h3 className="text-xl font-bold text-neutral-900 mb-2">
+      <h3 className="text-xl font-bold text-ink mb-2">
         {title || featureInfo.title}
       </h3>
-      <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+      <p className="text-muted mb-6 max-w-md mx-auto">
         {description || featureInfo.description}
       </p>
 

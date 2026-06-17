@@ -70,7 +70,7 @@ export function LandingHero({
           </h1>
 
           {/* Description */}
-          <p className="text-xl text-neutral-300 mb-10 max-w-2xl leading-relaxed">
+          <p className="text-xl text-faint mb-10 max-w-2xl leading-relaxed">
             {isAuthenticated
               ? "Pick up where you left off with live matches, player tracking, and the football data you follow most."
               : "The comprehensive, structured database for football. Search across players, teams, competitions, and matches with time-aware data."}
@@ -79,13 +79,13 @@ export function LandingHero({
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="max-w-2xl mb-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-faint" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search players, teams, matches, competitions..."
-                className="w-full pl-12 pr-32 py-4 text-base bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white/15 transition-all"
+                className="w-full pl-12 pr-32 py-4 text-base bg-surface/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-surface/15 transition-all"
               />
               <button
                 type="submit"
@@ -107,14 +107,14 @@ export function LandingHero({
             </Link>
             <Link
               href={isAuthenticated ? "/news" : "/signup"}
-              className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-6 py-4 font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-white/15"
+              className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-surface/10 px-6 py-4 font-semibold text-white backdrop-blur-md transition-all duration-200 hover:bg-surface/15"
             >
               {isAuthenticated ? "Read Latest News" : "Create Free Account"}
             </Link>
           </div>
 
           {!isAuthenticated && (
-            <p className="mt-4 text-sm text-neutral-400">
+            <p className="mt-4 text-sm text-faint">
               Create a free account to follow teams and players, save searches, and get notified when new coverage lands.
             </p>
           )}
@@ -126,19 +126,19 @@ export function LandingHero({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-white">{formatStat(stats.players)}</div>
-                <div className="text-sm text-neutral-400 mt-1">Players</div>
+                <div className="text-sm text-faint mt-1">Players</div>
               </div>
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-white">{formatStat(stats.teams)}</div>
-                <div className="text-sm text-neutral-400 mt-1">Teams</div>
+                <div className="text-sm text-faint mt-1">Teams</div>
               </div>
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-white">{formatStat(stats.competitions)}</div>
-                <div className="text-sm text-neutral-400 mt-1">Competitions</div>
+                <div className="text-sm text-faint mt-1">Competitions</div>
               </div>
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-white">{formatStat(stats.matches)}</div>
-                <div className="text-sm text-neutral-400 mt-1">Matches</div>
+                <div className="text-sm text-faint mt-1">Matches</div>
               </div>
             </div>
           </div>

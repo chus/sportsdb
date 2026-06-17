@@ -280,17 +280,17 @@ function UpgradeModal({
     >
       <div
         ref={modalRef}
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+        className="bg-surface rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
       >
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-surface/20 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4">
+          <div className="w-14 h-14 bg-surface/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4">
             <Icon className="w-7 h-7" />
           </div>
           <h2 id="upgrade-modal-title" className="text-2xl font-bold mb-1">
@@ -305,15 +305,15 @@ function UpgradeModal({
             {content.bullets.map((bullet, i) => (
               <li key={i} className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-neutral-700">{bullet}</span>
+                <span className="text-sm text-ink">{bullet}</span>
               </li>
             ))}
           </ul>
 
           <div className="text-center mb-4">
-            <span className="text-3xl font-bold text-neutral-900">&euro;8</span>
-            <span className="text-neutral-500 text-sm">/year</span>
-            <p className="text-xs text-neutral-400 mt-1">
+            <span className="text-3xl font-bold text-ink">&euro;8</span>
+            <span className="text-muted text-sm">/year</span>
+            <p className="text-xs text-faint mt-1">
               Less than a coffee per month
             </p>
           </div>
@@ -339,7 +339,7 @@ function UpgradeModal({
 
           <button
             onClick={handleDismiss}
-            className="w-full mt-3 py-2.5 text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
+            className="w-full mt-3 py-2.5 text-sm text-muted hover:text-ink transition-colors"
           >
             Maybe later
           </button>

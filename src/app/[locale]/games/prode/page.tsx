@@ -28,8 +28,8 @@ export default async function ProdePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Score Predictions</h1>
-        <p className="text-neutral-600">
+        <h1 className="text-3xl font-bold text-ink mb-2">Score Predictions</h1>
+        <p className="text-muted">
           Predict exact scores for upcoming matches. Earn 3 points for an exact match, 1 for the correct result.
         </p>
       </div>

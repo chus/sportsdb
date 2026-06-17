@@ -195,8 +195,8 @@ export default async function AdminCalendarPage({
     <div>
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Sports Calendar</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="text-2xl font-bold text-ink">Sports Calendar</h1>
+          <p className="mt-1 text-sm text-muted">
             Curate events and trigger AI previews & recaps
           </p>
         </div>
@@ -204,17 +204,17 @@ export default async function AdminCalendarPage({
         <div className="flex items-center gap-2">
           <Link
             href={`/admin/calendar?month=${formatMonthParam(prev.year, prev.month)}`}
-            className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-2"
           >
             <ChevronLeft className="h-4 w-4" />
             Prev
           </Link>
-          <div className="min-w-[140px] text-center text-sm font-semibold text-neutral-900">
+          <div className="min-w-[140px] text-center text-sm font-semibold text-ink">
             {MONTH_NAMES[month - 1]} {year}
           </div>
           <Link
             href={`/admin/calendar?month=${formatMonthParam(next.year, next.month)}`}
-            className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-2"
           >
             Next
             <ChevronRight className="h-4 w-4" />
@@ -242,7 +242,7 @@ export default async function AdminCalendarPage({
       </div>
 
       {dates.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white p-12 text-center text-neutral-500">
+        <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center text-muted">
           No events for {MONTH_NAMES[month - 1]} {year}. Run the calendar
           generator to backfill events for this window.
         </div>
@@ -253,14 +253,14 @@ export default async function AdminCalendarPage({
             return (
               <div
                 key={date}
-                className="overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+                className="overflow-hidden rounded-2xl border border-line bg-surface"
               >
-                <div className="border-b border-neutral-100 bg-neutral-50 px-6 py-3">
-                  <h2 className="text-sm font-semibold text-neutral-900">
+                <div className="border-b border-line bg-surface-2 px-6 py-3">
+                  <h2 className="text-sm font-semibold text-ink">
                     {formatDayLabel(date)}
                   </h2>
                 </div>
-                <div className="divide-y divide-neutral-100">
+                <div className="divide-y divide-line">
                   {dayEvents.map((event) => (
                     <EventRow key={event.id} event={event} />
                   ))}
@@ -284,14 +284,14 @@ function StatCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4">
+    <div className="rounded-xl border border-line bg-surface p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted">
           {label}
         </span>
         {icon}
       </div>
-      <div className="mt-2 text-2xl font-bold text-neutral-900">{value}</div>
+      <div className="mt-2 text-2xl font-bold text-ink">{value}</div>
     </div>
   );
 }

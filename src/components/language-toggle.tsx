@@ -55,7 +55,7 @@ export function LanguageToggle() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isChanging}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-ink hover:text-ink hover:bg-surface-2 rounded-lg transition-colors disabled:opacity-50"
         aria-label="Switch language"
       >
         <Globe className="w-4 h-4" />
@@ -65,13 +65,13 @@ export function LanguageToggle() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl border border-neutral-200 shadow-lg overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-40 bg-surface rounded-xl border border-line shadow-lg overflow-hidden z-50">
           {locales.map((loc) => (
             <button
               key={loc}
               onClick={() => handleLocaleChange(loc)}
-              className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-neutral-50 transition-colors ${
-                loc === locale ? "bg-blue-50 text-blue-600" : "text-neutral-700"
+              className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-surface-2 transition-colors ${
+                loc === locale ? "bg-blue-50 text-blue-600" : "text-ink"
               }`}
             >
               <span className="text-lg">{localeFlags[loc]}</span>

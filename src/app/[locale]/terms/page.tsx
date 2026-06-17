@@ -31,22 +31,22 @@ export default function TermsPage() {
         { name: "Terms of Service", url: `${BASE_URL}/terms` },
       ]}
     />
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-surface/10 rounded-2xl mb-6">
             <FileText className="w-8 h-8" />
           </div>
           <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
-          <p className="text-neutral-400">Last updated: {lastUpdated}</p>
+          <p className="text-faint">Last updated: {lastUpdated}</p>
         </div>
       </section>
 
       {/* Content */}
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-4">
-          <div className="bg-white rounded-xl border border-neutral-200 p-8 md:p-12">
+          <div className="bg-surface rounded-xl border border-line p-8 md:p-12">
             <div className="prose prose-neutral max-w-none">
               <h2>1. Acceptance of Terms</h2>
               <p>

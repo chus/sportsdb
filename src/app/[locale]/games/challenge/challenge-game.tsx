@@ -128,16 +128,16 @@ export function ChallengeGame({
       <div className="lg:col-span-2 space-y-6">
         {/* Progress bar */}
         {questions.length > 0 && (
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
+          <div className="bg-surface rounded-xl border border-line p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-ink">
                 {answeredCount}/{questions.length} answered
               </span>
-              <span className="text-sm font-bold text-neutral-900">
+              <span className="text-sm font-bold text-ink">
                 {totalPoints} pts
               </span>
             </div>
-            <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all"
                 style={{
@@ -154,8 +154,8 @@ export function ChallengeGame({
 
         {questions.length === 0 && (
           <div className="text-center py-12">
-            <Brain className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <p className="text-neutral-500">
+            <Brain className="w-12 h-12 text-faint mx-auto mb-4" />
+            <p className="text-muted">
               No questions available today. Check back tomorrow!
             </p>
           </div>
@@ -169,10 +169,10 @@ export function ChallengeGame({
           return (
             <div
               key={q.id}
-              className="bg-white rounded-xl border border-neutral-200 p-6"
+              className="bg-surface rounded-xl border border-line p-6"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-medium text-neutral-400">
+                <span className="text-xs font-medium text-faint">
                   Question {idx + 1}
                 </span>
                 <span
@@ -182,7 +182,7 @@ export function ChallengeGame({
                 </span>
               </div>
 
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+              <h3 className="text-lg font-semibold text-ink mb-4">
                 {q.question}
               </h3>
 
@@ -203,14 +203,14 @@ export function ChallengeGame({
                           : isWrongAnswer
                           ? "bg-red-50 border-red-300 text-red-800"
                           : isAnswered
-                          ? "bg-neutral-50 border-neutral-200 text-neutral-400"
+                          ? "bg-surface-2 border-line text-faint"
                           : !isPro
-                          ? "bg-neutral-50 border-neutral-200 text-neutral-500 cursor-not-allowed"
-                          : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-purple-300 hover:bg-purple-50"
+                          ? "bg-surface-2 border-line text-muted cursor-not-allowed"
+                          : "bg-surface-2 border-line text-ink hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700"
                       }`}
                     >
                       {!isPro && !isAnswered && (
-                        <Lock className="absolute top-3 right-3 w-3.5 h-3.5 text-neutral-400" />
+                        <Lock className="absolute top-3 right-3 w-3.5 h-3.5 text-faint" />
                       )}
                       {isCorrectAnswer && (
                         <CheckCircle className="absolute top-3 right-3 w-4 h-4 text-green-500" />
@@ -225,7 +225,7 @@ export function ChallengeGame({
               </div>
 
               {isAnswered && (
-                <div className="mt-3 text-sm text-neutral-500">
+                <div className="mt-3 text-sm text-muted">
                   {answer.isCorrect
                     ? `Correct! +${answer.points} points`
                     : "Incorrect"}
@@ -238,14 +238,14 @@ export function ChallengeGame({
 
       {/* Sidebar: Leaderboard */}
       <div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-5 sticky top-24">
+        <div className="bg-surface rounded-xl border border-line p-5 sticky top-24">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            <h3 className="font-bold text-neutral-900">Challenge Leaderboard</h3>
+            <h3 className="font-bold text-ink">Challenge Leaderboard</h3>
           </div>
 
           {leaderboard.length === 0 ? (
-            <p className="text-neutral-500 text-sm text-center py-4">
+            <p className="text-muted text-sm text-center py-4">
               No answers yet.
             </p>
           ) : (
@@ -256,14 +256,14 @@ export function ChallengeGame({
                   className="flex items-center justify-between text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-6 text-neutral-400 font-mono text-xs">
+                    <span className="w-6 text-faint font-mono text-xs">
                       {entry.rank}
                     </span>
-                    <span className="font-medium text-neutral-900 truncate max-w-[140px]">
+                    <span className="font-medium text-ink truncate max-w-[140px]">
                       {entry.userName}
                     </span>
                   </div>
-                  <span className="font-bold text-neutral-900">
+                  <span className="font-bold text-ink">
                     {entry.totalPoints} pts
                   </span>
                 </div>
