@@ -822,7 +822,7 @@ async function syncStandings(
   const allStandings = data.response[0].league.standings.flat();
 
   let count = 0;
-  const freshTeamIds = new Set<string>();
+  const keptIds: string[] = [];
   for (const row of allStandings) {
     let teamId = teamIdMap.get(row.team.id);
 
@@ -836,13 +836,18 @@ async function syncStandings(
       teamIdMap.set(row.team.id, team.id);
       await linkTeamSeason(team.id, compSeasonId);
     }
-    freshTeamIds.add(teamId);
 
-    await db
+    // Group/conference ("Eastern Conference", "Apertura - Group A"). Empty
+    // for single-table leagues. Part of the key so multi-group leagues keep
+    // a row per team per group instead of overwriting each other.
+    const group = (row.group ?? "").toString().trim();
+
+    const [saved] = await db
       .insert(schema.standings)
       .values({
         competitionSeasonId: compSeasonId,
         teamId,
+        group,
         position: row.rank,
         played: row.all.played,
         won: row.all.win,
@@ -855,7 +860,7 @@ async function syncStandings(
         form: row.form || null,
       })
       .onConflictDoUpdate({
-        target: [schema.standings.competitionSeasonId, schema.standings.teamId],
+        target: [schema.standings.competitionSeasonId, schema.standings.teamId, schema.standings.group],
         set: {
           position: row.rank,
           played: row.all.played,
@@ -869,26 +874,26 @@ async function syncStandings(
           form: row.form || null,
           updatedAt: new Date(),
         },
-      });
+      })
+      .returning({ id: schema.standings.id });
 
+    if (saved) keptIds.push(saved.id);
     count++;
   }
 
-  // Drop stale rows: any standings row for this competition_season whose
-  // team isn't in the fresh payload. Without this, upsert-only writes let
+  // Drop stale rows: any standings row for this competition_season not in
+  // the fresh payload (by id). Without this, upsert-only writes let
   // old-provider rows and wrong-league contamination accumulate forever
   // (e.g. a relegated team's row, or two providers' rows at conflicting
-  // positions after an identity change). This is what left SS Lazio /
-  // Club Necaxa sitting in the Eredivisie table and produced duplicate
-  // standings positions the data-health canary flags.
-  if (freshTeamIds.size > 0) {
-    const keep = [...freshTeamIds];
+  // positions). This is what left SS Lazio / Club Necaxa in the Eredivisie
+  // table and produced the duplicate positions the data-health canary flags.
+  if (keptIds.length > 0) {
     const deleted = await db
       .delete(schema.standings)
       .where(
         and(
           eq(schema.standings.competitionSeasonId, compSeasonId),
-          notInArray(schema.standings.teamId, keep),
+          notInArray(schema.standings.id, keptIds),
         ),
       )
       .returning({ id: schema.standings.id });

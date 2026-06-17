@@ -24,15 +24,6 @@ export const maxDuration = 30;
 
 const TOP_LEAGUES = ["premier-league", "la-liga", "bundesliga", "serie-a", "ligue-1"];
 
-// Single-table leagues: each position is unique, so two teams sharing a
-// position means a duplicate club entity or a stale standings row. (MLS
-// and the Argentine league run conferences/zonas that legitimately repeat
-// positions, so they're excluded — the schema has no group column yet.)
-const SINGLE_TABLE_LEAGUES = [
-  "premier-league", "la-liga", "bundesliga", "serie-a", "ligue-1",
-  "eredivisie", "primeira-liga",
-];
-
 interface Check {
   name: string;
   ok: boolean;
@@ -113,18 +104,18 @@ export async function GET() {
     checks.push({ name: `standings:${slug}`, ok: rows >= 18, detail: `${rows} rows` });
   }
 
-  // 4b. No duplicate standings positions in single-table leagues — the
-  //     signature of a duplicate club entity (two rows for one real club)
-  //     or a stale row left by an upsert-only sync.
+  // 4b. No duplicate standings positions within a (competition-season,
+  //     group) — the signature of a duplicate club entity or a stale row
+  //     left by an upsert-only sync. Group-aware, so multi-group leagues
+  //     (MLS conferences, Argentine zonas) don't false-positive; covers
+  //     every current-season league.
   const [{ c: posCollisions }] = await sql`
     SELECT count(*)::int AS c FROM (
       SELECT 1
       FROM standings st
       JOIN competition_seasons cs ON cs.id = st.competition_season_id
-      JOIN competitions co ON co.id = cs.competition_id
       JOIN seasons se ON se.id = cs.season_id AND se.is_current = true
-      WHERE co.slug = ANY(${SINGLE_TABLE_LEAGUES})
-      GROUP BY cs.id, st.position
+      GROUP BY cs.id, st."group", st.position
       HAVING count(*) > 1
     ) d
   `;

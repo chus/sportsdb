@@ -303,10 +303,15 @@ export const standings = pgTable(
     goalDifference: integer("goal_difference").notNull().default(0),
     points: integer("points").notNull().default(0),
     form: text("form"), // 'WWDLW'
+    // Group/conference within a competition-season ("Eastern Conference",
+    // "Apertura - Group A"). Empty for single-table leagues. Part of the
+    // unique key so a team can hold a row per group (e.g. Argentina runs
+    // Apertura and Clausura within one season).
+    group: text("group").notNull().default(""),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    uniqueIndex("uq_standing").on(table.competitionSeasonId, table.teamId),
+    uniqueIndex("uq_standing").on(table.competitionSeasonId, table.teamId, table.group),
     index("idx_standings_cs").on(table.competitionSeasonId),
   ]
 );

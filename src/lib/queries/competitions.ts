@@ -39,7 +39,7 @@ export async function getStandings(competitionSeasonId: string) {
     .from(standings)
     .innerJoin(teams, eq(teams.id, standings.teamId))
     .where(eq(standings.competitionSeasonId, competitionSeasonId))
-    .orderBy(standings.position);
+    .orderBy(standings.group, standings.position);
 }
 
 /**

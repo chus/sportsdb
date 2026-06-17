@@ -494,11 +494,38 @@ export default async function CompetitionPage({ params }: CompetitionPageProps) 
                         <Trophy className="w-12 h-12 text-faint mx-auto mb-4" />
                         <p className="text-muted">No standings data available</p>
                       </div>
-                    ) : (
-                      <div className="bg-surface rounded-xl border border-line overflow-hidden">
-                        <StandingsTable standings={standingsData} />
-                      </div>
-                    )}
+                    ) : (() => {
+                      // Group by conference/zone when present (MLS, Argentina);
+                      // otherwise render a single table.
+                      const groups = new Map<string, typeof standingsData>();
+                      for (const r of standingsData) {
+                        const g = r.standing.group || "";
+                        const list = groups.get(g);
+                        if (list) list.push(r);
+                        else groups.set(g, [r]);
+                      }
+                      const keys = [...groups.keys()];
+                      const grouped = keys.length > 1 || (keys.length === 1 && keys[0] !== "");
+                      if (!grouped) {
+                        return (
+                          <div className="bg-surface rounded-xl border border-line overflow-hidden">
+                            <StandingsTable standings={standingsData} />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="space-y-6">
+                          {keys.sort().map((g) => (
+                            <div key={g} className="bg-surface rounded-xl border border-line overflow-hidden">
+                              <div className="px-4 py-3 border-b border-line">
+                                <h3 className="font-bold text-ink">{g}</h3>
+                              </div>
+                              <StandingsTable standings={groups.get(g)!} />
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
 
                     {/* About (below standings) */}
                     {aboutParagraphs.length > 0 && (
