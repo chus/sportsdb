@@ -23,12 +23,12 @@ export function KnowledgeCard({
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left border border-neutral-300 bg-white hover:bg-neutral-50 transition-colors rounded flex items-center gap-3 group ${
+      className={`w-full text-left border border-line bg-surface hover:bg-surface-2 transition-colors rounded flex items-center gap-3 group ${
         isCompact ? "p-2" : "p-3"
       }`}
     >
       {imageUrl && (
-        <div className={`flex-shrink-0 bg-neutral-200 rounded overflow-hidden ${
+        <div className={`flex-shrink-0 bg-surface-2 rounded overflow-hidden ${
           isCompact ? "w-10 h-10" : "w-12 h-12"
         }`}>
           <ImageWithFallback
@@ -41,27 +41,27 @@ export function KnowledgeCard({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <div className={`font-medium text-neutral-900 truncate ${
+        <div className={`font-medium text-ink truncate ${
           isCompact ? "text-sm" : "text-base"
         }`}>
           {title}
         </div>
         {subtitle && (
-          <div className={`text-neutral-600 truncate ${
+          <div className={`text-muted truncate ${
             isCompact ? "text-xs" : "text-sm"
           }`}>
             {subtitle}
           </div>
         )}
         {meta && meta.length > 0 && (
-          <div className={`text-neutral-500 truncate ${
+          <div className={`text-muted truncate ${
             isCompact ? "text-xs" : "text-xs"
           }`}>
             {meta.join(" · ")}
           </div>
         )}
       </div>
-      <ChevronRight className={`flex-shrink-0 text-neutral-400 group-hover:text-neutral-600 ${
+      <ChevronRight className={`flex-shrink-0 text-faint group-hover:text-muted ${
         isCompact ? "w-4 h-4" : "w-5 h-5"
       }`} />
     </button>

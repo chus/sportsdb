@@ -82,7 +82,7 @@ export function PlayerStatsSection({
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-neutral-900">Statistics</h2>
+        <h2 className="text-xl font-bold text-ink">Statistics</h2>
         <EntitySeasonSelector
           selectedSeasonId={selectedSeasonId}
           onSeasonChange={handleSeasonChange}
@@ -92,60 +92,60 @@ export function PlayerStatsSection({
 
       {/* Stats Summary */}
       <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 ${isLoading ? "opacity-50" : ""}`}>
-        <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+        <div className="bg-surface rounded-xl border border-line p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-xs text-neutral-500 uppercase tracking-wide">Apps</span>
+            <span className="text-xs text-muted uppercase tracking-wide">Apps</span>
           </div>
-          <div className="text-2xl font-bold text-neutral-900">{totals.appearances}</div>
+          <div className="text-2xl font-bold text-ink">{totals.appearances}</div>
         </div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+        <div className="bg-surface rounded-xl border border-line p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Target className="w-4 h-4 text-green-500" />
-            <span className="text-xs text-neutral-500 uppercase tracking-wide">Goals</span>
+            <span className="text-xs text-muted uppercase tracking-wide">Goals</span>
           </div>
-          <div className="text-2xl font-bold text-neutral-900">{totals.goals}</div>
+          <div className="text-2xl font-bold text-ink">{totals.goals}</div>
         </div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+        <div className="bg-surface rounded-xl border border-line p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-purple-500" />
-            <span className="text-xs text-neutral-500 uppercase tracking-wide">Assists</span>
+            <span className="text-xs text-muted uppercase tracking-wide">Assists</span>
           </div>
-          <div className="text-2xl font-bold text-neutral-900">{totals.assists}</div>
+          <div className="text-2xl font-bold text-ink">{totals.assists}</div>
         </div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+        <div className="bg-surface rounded-xl border border-line p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-orange-500" />
-            <span className="text-xs text-neutral-500 uppercase tracking-wide">Minutes</span>
+            <span className="text-xs text-muted uppercase tracking-wide">Minutes</span>
           </div>
-          <div className="text-2xl font-bold text-neutral-900">{totals.minutesPlayed.toLocaleString()}</div>
+          <div className="text-2xl font-bold text-ink">{totals.minutesPlayed.toLocaleString()}</div>
         </div>
       </div>
 
       {/* Stats Table */}
       {stats.length > 0 && (
-        <div className={`bg-white rounded-xl border border-neutral-200 overflow-hidden ${isLoading ? "opacity-50" : ""}`}>
+        <div className={`bg-surface rounded-xl border border-line overflow-hidden ${isLoading ? "opacity-50" : ""}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Season</th>
-                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Competition</th>
-                  <th scope="col" className="px-4 py-3 text-left font-medium text-neutral-500">Team</th>
-                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Apps</th>
-                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Goals</th>
-                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">Assists</th>
-                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-muted">Season</th>
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-muted">Competition</th>
+                  <th scope="col" className="px-4 py-3 text-left font-medium text-muted">Team</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-muted">Apps</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-muted">Goals</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-muted">Assists</th>
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-muted">
                     <span className="inline-block w-4 h-4 bg-yellow-400 rounded-sm" title="Yellow Cards" />
                   </th>
-                  <th scope="col" className="px-4 py-3 text-center font-medium text-neutral-500">
+                  <th scope="col" className="px-4 py-3 text-center font-medium text-muted">
                     <span className="inline-block w-4 h-4 bg-red-500 rounded-sm" title="Red Cards" />
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-line">
                 {stats.map((entry, index) => (
-                  <tr key={`${entry.season.id}-${entry.competition.id}-${index}`} className="hover:bg-neutral-50">
+                  <tr key={`${entry.season.id}-${entry.competition.id}-${index}`} className="hover:bg-surface-2">
                     <td className="px-4 py-3">
                       <span className="font-medium">{entry.season.label}</span>
                       {entry.season.isCurrent && (
@@ -165,7 +165,7 @@ export function PlayerStatsSection({
                     <td className="px-4 py-3">
                       <Link
                         href={`/teams/${entry.team.slug}`}
-                        className="flex items-center gap-2 text-neutral-700 hover:text-blue-600"
+                        className="flex items-center gap-2 text-ink hover:text-blue-600"
                       >
                         {entry.team.logoUrl && (
                           <img
@@ -199,9 +199,9 @@ export function PlayerStatsSection({
       )}
 
       {stats.length === 0 && !isLoading && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-          <AlertTriangle className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <p className="text-neutral-500">No statistics available for this season</p>
+        <div className="bg-surface rounded-xl border border-line p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-faint mx-auto mb-4" />
+          <p className="text-muted">No statistics available for this season</p>
         </div>
       )}
     </section>

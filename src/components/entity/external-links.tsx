@@ -41,9 +41,9 @@ export function ExternalLinks({
   if (links.length === 0) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 p-5">
-      <h3 className="text-sm font-bold text-neutral-900 mb-3 flex items-center gap-2">
-        <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
+    <section className="bg-surface rounded-xl border border-line p-5">
+      <h3 className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
+        <ExternalLink className="w-3.5 h-3.5 text-faint" />
         Links
       </h3>
       <div className="space-y-1.5">
@@ -53,9 +53,9 @@ export function ExternalLinks({
             href={link.href}
             target="_blank"
             rel="nofollow noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-700 hover:bg-neutral-50 hover:text-blue-600 transition-colors group"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ink hover:bg-surface-2 hover:text-blue-600 transition-colors group"
           >
-            <span className="text-neutral-400 group-hover:text-blue-500 flex-shrink-0">
+            <span className="text-faint group-hover:text-blue-500 flex-shrink-0">
               {link.icon}
             </span>
             <span className="truncate">{link.label}</span>

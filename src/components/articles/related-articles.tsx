@@ -29,9 +29,9 @@ export async function RelatedArticles({ playerId, teamId, limit = 5 }: RelatedAr
   };
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6">
+    <div className="bg-surface rounded-xl border border-line p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-neutral-500 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-muted flex items-center gap-2">
           <Newspaper className="w-4 h-4" />
           Latest News
         </h3>
@@ -55,10 +55,10 @@ export async function RelatedArticles({ playerId, teamId, limit = 5 }: RelatedAr
                 <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
                   {typeLabels[article.type] || article.type}
                 </span>
-                <h4 className="text-sm font-medium text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-2 mt-0.5">
+                <h4 className="text-sm font-medium text-ink group-hover:text-blue-600 transition-colors line-clamp-2 mt-0.5">
                   {article.title}
                 </h4>
-                <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
+                <div className="flex items-center gap-2 mt-1 text-xs text-muted">
                   {competition && <span>{competition.name}</span>}
                   {article.publishedAt && (
                     <span>

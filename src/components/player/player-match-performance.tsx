@@ -9,7 +9,7 @@ interface PlayerMatchPerformanceProps {
 }
 
 function RatingBadge({ rating }: { rating: number }) {
-  let colorClass = "bg-neutral-100 text-neutral-700";
+  let colorClass = "bg-surface-2 text-ink";
   if (rating >= 8) {
     colorClass = "bg-green-100 text-green-700";
   } else if (rating >= 7) {
@@ -36,22 +36,22 @@ export async function PlayerMatchPerformance({
   if (performances.length === 0) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200 flex items-center gap-2">
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-blue-500" />
-        <h2 className="text-lg font-bold text-neutral-900">Recent Performances</h2>
-        <span className="ml-auto text-xs text-neutral-400 flex items-center gap-1">
+        <h2 className="text-lg font-bold text-ink">Recent Performances</h2>
+        <span className="ml-auto text-xs text-faint flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-purple-400" />
           AI Analysis
         </span>
       </div>
 
-      <div className="divide-y divide-neutral-100">
+      <div className="divide-y divide-line">
         {performances.map((perf) => (
           <Link
             key={perf.id}
             href={`/matches/${perf.matchSlug ?? perf.matchId}`}
-            className="block p-4 hover:bg-neutral-50 transition-colors"
+            className="block p-4 hover:bg-surface-2 transition-colors"
           >
             <div className="flex items-start gap-4">
               {/* Rating */}
@@ -62,13 +62,13 @@ export async function PlayerMatchPerformance({
               {/* Content */}
               <div className="flex-1 min-w-0">
                 {/* Date */}
-                <div className="flex items-center gap-1 text-xs text-neutral-500 mb-1">
+                <div className="flex items-center gap-1 text-xs text-muted mb-1">
                   <Calendar className="w-3 h-3" />
                   {format(new Date(perf.scheduledAt), "MMM d, yyyy")}
                 </div>
 
                 {/* Summary */}
-                <p className="text-sm text-neutral-700 line-clamp-2">
+                <p className="text-sm text-ink line-clamp-2">
                   {perf.summary}
                 </p>
 
@@ -78,7 +78,7 @@ export async function PlayerMatchPerformance({
                     {perf.highlights.slice(0, 3).map((highlight: string, idx: number) => (
                       <span
                         key={idx}
-                        className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded"
+                        className="text-xs px-2 py-0.5 bg-surface-2 text-muted rounded"
                       >
                         {highlight}
                       </span>
@@ -92,8 +92,8 @@ export async function PlayerMatchPerformance({
       </div>
 
       {performances.length >= limit && (
-        <div className="px-6 py-3 border-t border-neutral-100 text-center">
-          <span className="text-sm text-neutral-500">
+        <div className="px-6 py-3 border-t border-line text-center">
+          <span className="text-sm text-muted">
             Showing last {limit} matches
           </span>
         </div>

@@ -17,6 +17,7 @@ import { UpgradeModalProvider } from "@/components/subscription/upgrade-modal";
 import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consent-provider";
 import { CookieConsentBanner } from "@/components/cookie-consent/cookie-consent-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { routing } from "@/i18n/routing";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -153,8 +154,9 @@ export default async function LocaleLayout({
                       <AdSenseScript />
                       <Navbar />
                       <ScoreStrip />
-                      <main className="min-h-screen">{children}</main>
+                      <main className="min-h-screen pb-16 lg:pb-0">{children}</main>
                       <Footer />
+                      <BottomNav />
                       <CookieConsentBanner />
                       <SpeedInsights />
                     </OnboardingProvider>

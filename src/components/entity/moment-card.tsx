@@ -19,7 +19,7 @@ export function MomentCard({
   return (
     <button
       onClick={onClick}
-      className="group relative bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 text-left"
+      className="group relative bg-surface rounded-2xl overflow-hidden border border-line hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 text-left"
     >
       {/* Image with overlay */}
       <div className="relative h-64 overflow-hidden">
@@ -34,8 +34,8 @@ export function MomentCard({
         
         {/* Label */}
         {label && (
-          <div className="absolute top-4 left-4 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full">
-            <span className="text-xs font-semibold text-neutral-900">{label}</span>
+          <div className="absolute top-4 left-4 px-3 py-1.5 bg-surface/90 backdrop-blur-sm rounded-full">
+            <span className="text-xs font-semibold text-ink">{label}</span>
           </div>
         )}
         

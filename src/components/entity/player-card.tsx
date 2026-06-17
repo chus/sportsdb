@@ -23,7 +23,7 @@ export function PlayerCard({
   return (
     <button
       onClick={onClick}
-      className="group relative bg-white rounded-xl overflow-hidden border border-neutral-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group relative bg-surface rounded-xl overflow-hidden border border-line hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
     >
       {/* Image */}
       <div className="relative h-56 bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden">
@@ -55,14 +55,14 @@ export function PlayerCard({
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-bold text-lg text-neutral-900 mb-1 group-hover:text-blue-600 transition-colors">
+        <h3 className="font-bold text-lg text-ink mb-1 group-hover:text-blue-600 transition-colors">
           {name}
         </h3>
-        <p className="text-sm text-neutral-600 mb-2">{position}</p>
+        <p className="text-sm text-muted mb-2">{position}</p>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-neutral-700">{team}</span>
+          <span className="text-sm font-medium text-ink">{team}</span>
           {stats && (
-            <span className="text-xs text-neutral-500">{stats}</span>
+            <span className="text-xs text-muted">{stats}</span>
           )}
         </div>
       </div>

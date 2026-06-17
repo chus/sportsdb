@@ -101,8 +101,8 @@ export function FollowButton({
           className={cn(
             "flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-50",
             following
-              ? "bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
-              : "bg-white text-blue-600 hover:bg-white/90",
+              ? "bg-surface/20 text-white hover:bg-surface/30 backdrop-blur-sm"
+              : "bg-surface text-blue-600 hover:bg-surface/90",
             className
           )}
           title={following ? `Unfollow ${entityName || ""}` : `Follow ${entityName || ""}`}
@@ -131,7 +131,7 @@ export function FollowButton({
             "p-2 rounded-lg transition-colors disabled:opacity-50",
             following
               ? "text-red-500 hover:bg-red-50"
-              : "text-neutral-400 hover:text-red-500 hover:bg-red-50",
+              : "text-faint hover:text-red-500 hover:bg-red-50",
             className
           )}
           title={following ? `Unfollow ${entityName || ""}` : `Follow ${entityName || ""}`}
@@ -157,7 +157,7 @@ export function FollowButton({
           "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border disabled:opacity-50",
           following
             ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-            : "border-neutral-200 bg-white text-neutral-700 hover:border-blue-300 hover:text-blue-600",
+            : "border-line bg-surface text-ink hover:border-blue-300 hover:text-blue-600",
           className
         )}
         title={following ? `Unfollow ${entityName || ""}` : `Follow ${entityName || ""}`}

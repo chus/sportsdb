@@ -280,7 +280,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="player" entityId={player.id} />
 
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Compact Header */}
       <PageHeader
         title={player.name}
@@ -298,7 +298,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           { label: player.name },
         ]}
         icon={
-          <div className="relative w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="relative w-20 h-20 bg-surface/20 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
             {player.imageUrl ? (
               <ImageWithFallback
                 src={player.imageUrl}
@@ -315,20 +315,20 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         }
         badges={
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+            <span className="px-3 py-1 bg-surface/20 rounded-full text-xs font-medium">
               {player.position}
             </span>
             {currentTeam && (
               <Link
                 href={`/teams/${currentTeam.slug}`}
-                className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium hover:bg-white/30 transition-colors flex items-center gap-1"
+                className="px-3 py-1 bg-surface/20 rounded-full text-xs font-medium hover:bg-surface/30 transition-colors flex items-center gap-1"
               >
                 <Shield className="w-3 h-3" />
                 {currentTeam.shortName || currentTeam.name}
               </Link>
             )}
             {shirtNumber && (
-              <span className="px-2.5 py-1 bg-white/20 rounded-full text-xs font-bold">
+              <span className="px-2.5 py-1 bg-surface/20 rounded-full text-xs font-bold">
                 #{shirtNumber}
               </span>
             )}
@@ -349,7 +349,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         }
       />
       {player.updatedAt && (
-        <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+        <p className="text-xs text-faint mt-2 max-w-7xl mx-auto px-4">
           Updated {formatDistanceToNowStrict(new Date(player.updatedAt), { addSuffix: true })}
         </p>
       )}
@@ -372,22 +372,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                       {/* Current Season */}
                       {currentSeasonStats ? (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
                             <Target className="w-3.5 h-3.5 text-green-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">This Season</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">This Season</h3>
                           </div>
-                          <div className="text-2xl font-black text-neutral-900">{currentSeasonStats.goals}</div>
-                          <p className="text-xs text-neutral-500">goals · {currentSeasonStats.assists} assists</p>
-                          <p className="text-xs text-neutral-500 mt-0.5">{currentSeasonStats.appearances} apps</p>
+                          <div className="text-2xl font-black text-ink">{currentSeasonStats.goals}</div>
+                          <p className="text-xs text-muted">goals · {currentSeasonStats.assists} assists</p>
+                          <p className="text-xs text-muted mt-0.5">{currentSeasonStats.appearances} apps</p>
                         </div>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Target className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">This Season</h3>
+                            <Target className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">This Season</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">No data</p>
+                          <p className="text-sm text-faint">No data</p>
                         </div>
                       )}
 
@@ -395,27 +395,27 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       {rankings.length > 0 ? (
                         <Link
                           href={`/top-scorers/${rankings[0].competitionSlug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Ranking</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Ranking</h3>
                           </div>
                           <div className="flex items-baseline gap-2">
                             {rankings[0].goals > 0 && (
                               <div>
-                                <span className="text-2xl font-black text-neutral-900">#{rankings[0].goalsRank}</span>
-                                <p className="text-xs text-neutral-500">goals</p>
+                                <span className="text-2xl font-black text-ink">#{rankings[0].goalsRank}</span>
+                                <p className="text-xs text-muted">goals</p>
                               </div>
                             )}
                             {rankings[0].assists > 0 && (
                               <div>
-                                <span className="text-2xl font-black text-neutral-900">#{rankings[0].assistsRank}</span>
-                                <p className="text-xs text-neutral-500">assists</p>
+                                <span className="text-2xl font-black text-ink">#{rankings[0].assistsRank}</span>
+                                <p className="text-xs text-muted">assists</p>
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-neutral-500 truncate mt-0.5">{rankings[0].competitionName}</p>
+                          <p className="text-xs text-muted truncate mt-0.5">{rankings[0].competitionName}</p>
                         </Link>
                       ) : null}
 
@@ -423,22 +423,22 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       {rankings[0] ? (
                         <Link
                           href={`/competitions/${rankings[0].competitionSlug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Trophy className="w-3.5 h-3.5 text-purple-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League</h3>
                           </div>
-                          <span className="text-sm font-bold text-neutral-900 truncate">{rankings[0].competitionName}</span>
-                          <p className="text-xs text-neutral-500 mt-0.5">View standings & results</p>
+                          <span className="text-sm font-bold text-ink truncate">{rankings[0].competitionName}</span>
+                          <p className="text-xs text-muted mt-0.5">View standings & results</p>
                         </Link>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Trophy className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Ranking</h3>
+                            <Trophy className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Ranking</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">No data</p>
+                          <p className="text-sm text-faint">No data</p>
                         </div>
                       )}
 
@@ -446,37 +446,37 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                       {currentTeam ? (
                         <Link
                           href={`/teams/${currentTeam.slug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Shield className="w-3.5 h-3.5 text-blue-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Club</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Club</h3>
                           </div>
                           <div className="flex items-center gap-2 mb-1">
                             {currentTeam.logoUrl ? (
                               <ImageWithFallback src={currentTeam.logoUrl} alt={currentTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
-                              <Shield className="w-6 h-6 text-neutral-300" />
+                              <Shield className="w-6 h-6 text-faint" />
                             )}
-                            <span className="text-sm font-bold text-neutral-900 truncate">{currentTeam.shortName || currentTeam.name}</span>
+                            <span className="text-sm font-bold text-ink truncate">{currentTeam.shortName || currentTeam.name}</span>
                           </div>
-                          <p className="text-xs text-neutral-500">{currentTeam.country}</p>
+                          <p className="text-xs text-muted">{currentTeam.country}</p>
                         </Link>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Shield className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Club</h3>
+                            <Shield className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Club</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">Free agent</p>
+                          <p className="text-sm text-faint">Free agent</p>
                         </div>
                       )}
 
                       {/* Recent Form */}
-                      <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                      <div className="bg-surface rounded-xl border border-line p-4">
                         <div className="flex items-center gap-1.5 mb-2">
                           <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                          <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
+                          <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Form</h3>
                         </div>
                         {recentMatches.length > 0 && currentTeamData ? (
                           <div className="flex gap-1.5 mt-1">
@@ -507,7 +507,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             })}
                           </div>
                         ) : (
-                          <p className="text-sm text-neutral-400">No data</p>
+                          <p className="text-sm text-faint">No data</p>
                         )}
                       </div>
                     </div>
@@ -516,7 +516,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {recentMatches.length > 0 && (
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Recent Appearances</h3>
+                          <h3 className="text-sm font-bold text-ink">Recent Appearances</h3>
                           <Link href={`/players/${slug}?tab=news`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             View all <ChevronRight className="w-3 h-3" />
                           </Link>
@@ -526,24 +526,24 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             <Link
                               key={m.match.id}
                               href={`/matches/${m.match.slug ?? m.match.id}`}
-                              className="flex-shrink-0 w-[160px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                              className="flex-shrink-0 w-[160px] bg-surface rounded-lg border border-line p-3 hover:shadow-md hover:border-blue-200 transition-all"
                             >
-                              <div className="flex items-center gap-1.5 text-xs text-neutral-700 mb-1.5">
+                              <div className="flex items-center gap-1.5 text-xs text-ink mb-1.5">
                                 <span className="font-medium truncate">{m.homeTeam.name}</span>
                                 {m.match.status === "finished" ? (
-                                  <span className="font-bold text-neutral-900 flex-shrink-0">{m.match.homeScore}-{m.match.awayScore}</span>
+                                  <span className="font-bold text-ink flex-shrink-0">{m.match.homeScore}-{m.match.awayScore}</span>
                                 ) : (
-                                  <span className="text-neutral-400 flex-shrink-0">vs</span>
+                                  <span className="text-faint flex-shrink-0">vs</span>
                                 )}
                                 <span className="font-medium truncate">{m.awayTeam.name}</span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className={`text-[10px] font-medium ${m.lineup.isStarter ? "text-green-600" : "text-neutral-500"}`}>
+                                <span className={`text-[10px] font-medium ${m.lineup.isStarter ? "text-green-600" : "text-muted"}`}>
                                   {m.lineup.isStarter ? "Starter" : "Sub"}
                                   {m.lineup.minutesPlayed != null && ` · ${m.lineup.minutesPlayed}'`}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-neutral-400 mt-1">
+                              <p className="text-[10px] text-faint mt-1">
                                 {m.match.scheduledAt && format(new Date(m.match.scheduledAt), "MMM d")}
                               </p>
                             </Link>
@@ -559,10 +559,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                     {nextMatch && currentTeam && (
                       <Link
                         href={`/matches/${nextMatch.slug ?? nextMatch.id}`}
-                        className="block bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md hover:border-blue-200 transition-all"
+                        className="block bg-surface rounded-xl border border-line p-5 hover:shadow-md hover:border-blue-200 transition-all"
                       >
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Match</h3>
+                          <h3 className="text-sm font-bold text-ink">Upcoming Match</h3>
                           <span className="text-xs font-medium text-blue-600">
                             {formatDistanceToNowStrict(new Date(nextMatch.scheduledAt), { addSuffix: true })}
                           </span>
@@ -572,21 +572,21 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             {nextMatch.homeTeam?.logoUrl ? (
                               <ImageWithFallback src={nextMatch.homeTeam.logoUrl} alt={nextMatch.homeTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
-                              <Shield className="w-6 h-6 text-neutral-300" />
+                              <Shield className="w-6 h-6 text-faint" />
                             )}
-                            <span className="text-sm font-medium text-neutral-900">{nextMatch.homeTeam?.shortName || nextMatch.homeTeam?.name}</span>
+                            <span className="text-sm font-medium text-ink">{nextMatch.homeTeam?.shortName || nextMatch.homeTeam?.name}</span>
                           </div>
-                          <span className="text-xs text-neutral-400 px-3">vs</span>
+                          <span className="text-xs text-faint px-3">vs</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-neutral-900">{nextMatch.awayTeam?.shortName || nextMatch.awayTeam?.name}</span>
+                            <span className="text-sm font-medium text-ink">{nextMatch.awayTeam?.shortName || nextMatch.awayTeam?.name}</span>
                             {nextMatch.awayTeam?.logoUrl ? (
                               <ImageWithFallback src={nextMatch.awayTeam.logoUrl} alt={nextMatch.awayTeam.name} width={24} height={24} className="w-6 h-6 object-contain" />
                             ) : (
-                              <Shield className="w-6 h-6 text-neutral-300" />
+                              <Shield className="w-6 h-6 text-faint" />
                             )}
                           </div>
                         </div>
-                        <p className="text-xs text-neutral-500 mt-2 text-center">
+                        <p className="text-xs text-muted mt-2 text-center">
                           {format(new Date(nextMatch.scheduledAt), "EEE, MMM d · h:mm a")}
                           {nextMatch.competition && <span> · {nextMatch.competition.name}</span>}
                         </p>
@@ -595,16 +595,16 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
                     {/* Recent Seasons mini-table */}
                     {statsHistory.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
-                          <h3 className="text-sm font-bold text-neutral-900">Season Stats</h3>
+                      <div className="bg-surface rounded-xl border border-line overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-line">
+                          <h3 className="text-sm font-bold text-ink">Season Stats</h3>
                           <Link href={`/players/${slug}?tab=stats`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             Full stats <ChevronRight className="w-3 h-3" />
                           </Link>
                         </div>
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="bg-neutral-50 text-left text-[10px] text-neutral-500 uppercase">
+                            <tr className="bg-surface-2 text-left text-[10px] text-muted uppercase">
                               <th scope="col" className="px-3 py-2 font-medium">Season</th>
                               <th scope="col" className="px-3 py-2 font-medium">Team</th>
                               <th scope="col" className="px-3 py-2 font-medium text-center">Apps</th>
@@ -612,28 +612,28 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                               <th scope="col" className="px-3 py-2 font-medium text-center">A</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-neutral-50">
+                          <tbody className="divide-y divide-line">
                             {statsHistory.slice(0, 3).map(({ stat, team, season }) => (
-                              <tr key={stat.id} className="hover:bg-neutral-50">
-                                <td className="px-3 py-2 font-medium text-neutral-700">{season.label}</td>
+                              <tr key={stat.id} className="hover:bg-surface-2">
+                                <td className="px-3 py-2 font-medium text-ink">{season.label}</td>
                                 <td className="px-3 py-2">
                                   <div className="flex items-center gap-1.5">
                                     {team.logoUrl ? (
                                       <ImageWithFallback src={team.logoUrl} alt={team.name} width={16} height={16} className="w-4 h-4 object-contain" />
                                     ) : (
-                                      <Shield className="w-4 h-4 text-neutral-300" />
+                                      <Shield className="w-4 h-4 text-faint" />
                                     )}
-                                    <span className="text-neutral-700 truncate">{team.shortName || team.name}</span>
+                                    <span className="text-ink truncate">{team.shortName || team.name}</span>
                                   </div>
                                 </td>
-                                <td className="px-3 py-2 text-center text-neutral-600">{stat.appearances}</td>
-                                <td className="px-3 py-2 text-center font-bold text-neutral-900">{stat.goals}</td>
-                                <td className="px-3 py-2 text-center text-neutral-600">{stat.assists}</td>
+                                <td className="px-3 py-2 text-center text-muted">{stat.appearances}</td>
+                                <td className="px-3 py-2 text-center font-bold text-ink">{stat.goals}</td>
+                                <td className="px-3 py-2 text-center text-muted">{stat.assists}</td>
                               </tr>
                             ))}
                           </tbody>
-                          <tfoot className="border-t border-neutral-200 bg-neutral-50">
-                            <tr className="font-medium text-neutral-900">
+                          <tfoot className="border-t border-line bg-surface-2">
+                            <tr className="font-medium text-ink">
                               <td className="px-3 py-2" colSpan={2}>Career Total</td>
                               <td className="px-3 py-2 text-center">{totalApps}</td>
                               <td className="px-3 py-2 text-center font-bold">{totalGoals}</td>
@@ -646,9 +646,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
                     {/* Career Path mini-list */}
                     {career.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <div className="bg-surface rounded-xl border border-line p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Career Path</h3>
+                          <h3 className="text-sm font-bold text-ink">Career Path</h3>
                           {career.length > 3 && (
                             <Link href={`/players/${slug}?tab=career`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                               Full history <ChevronRight className="w-3 h-3" />
@@ -660,23 +660,23 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             <Link
                               key={entry.id}
                               href={`/teams/${entry.team.slug}`}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-2 transition-colors"
                             >
-                              <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <div className="w-8 h-8 bg-surface-2 rounded-lg flex items-center justify-center flex-shrink-0">
                                 {entry.team.logoUrl ? (
                                   <ImageWithFallback src={entry.team.logoUrl} alt={entry.team.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                 ) : (
-                                  <Shield className="w-4 h-4 text-neutral-400" />
+                                  <Shield className="w-4 h-4 text-faint" />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-neutral-900 truncate">{entry.team.name}</div>
-                                <div className="text-[11px] text-neutral-500">
+                                <div className="text-sm font-medium text-ink truncate">{entry.team.name}</div>
+                                <div className="text-[11px] text-muted">
                                   {entry.validFrom && format(new Date(entry.validFrom), "MMM yyyy")} → {entry.validTo ? format(new Date(entry.validTo), "MMM yyyy") : "Present"}
                                 </div>
                               </div>
                               {entry.shirtNumber && (
-                                <span className="text-xs text-neutral-400 flex-shrink-0">#{entry.shirtNumber}</span>
+                                <span className="text-xs text-faint flex-shrink-0">#{entry.shirtNumber}</span>
                               )}
                             </Link>
                           ))}
@@ -686,9 +686,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
                     {/* About (moved below fold) */}
                     {aboutParagraphs.length > 0 && (
-                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {player.name}</h2>
-                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                      <section className="bg-surface rounded-xl border border-line p-6">
+                        <h2 className="text-lg font-bold text-ink mb-3">About {player.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-ink">
                           {aboutParagraphs.map((paragraph, i) => (
                             <p key={i}>{renderBioWithLinks(paragraph)}</p>
                           ))}
@@ -703,12 +703,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                   <>
                     {statsHistory.length > 0 ? (
                       <section>
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Season Statistics</h2>
+                        <h2 className="text-lg font-bold text-ink mb-4">Season Statistics</h2>
                         <ProTeaserWithModal feature="historical_data" label="Unlock Full History">
-                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden overflow-x-auto">
+                        <div className="bg-surface rounded-xl border border-line overflow-hidden overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="bg-neutral-50 text-left text-xs text-neutral-500 uppercase">
+                              <tr className="bg-surface-2 text-left text-xs text-muted uppercase">
                                 <th scope="col" className="px-3 py-2.5 font-medium">Season</th>
                                 <th scope="col" className="px-3 py-2.5 font-medium">Team</th>
                                 <th scope="col" className="px-3 py-2.5 font-medium hidden sm:table-cell">Competition</th>
@@ -720,30 +720,30 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                 <th scope="col" className="px-3 py-2.5 font-medium text-center hidden md:table-cell" title="Red cards">🟥</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-neutral-100">
+                            <tbody className="divide-y divide-line">
                               {statsHistory.map(({ stat, team, season, competition }) => (
-                                <tr key={stat.id} className="hover:bg-neutral-50">
-                                  <td className="px-3 py-2.5 font-medium text-neutral-900">{season.label}</td>
+                                <tr key={stat.id} className="hover:bg-surface-2">
+                                  <td className="px-3 py-2.5 font-medium text-ink">{season.label}</td>
                                   <td className="px-3 py-2.5">
                                     <Link href={`/teams/${team.slug}`} className="flex items-center gap-2 hover:text-blue-600">
-                                      {team.logoUrl ? <ImageWithFallback src={team.logoUrl} alt={team.name} width={18} height={18} className="w-[18px] h-[18px] object-contain" /> : <Shield className="w-4 h-4 text-neutral-300" />}
+                                      {team.logoUrl ? <ImageWithFallback src={team.logoUrl} alt={team.name} width={18} height={18} className="w-[18px] h-[18px] object-contain" /> : <Shield className="w-4 h-4 text-faint" />}
                                       <span className="hidden md:inline">{team.name}</span>
                                       <span className="md:hidden">{team.shortName || team.name}</span>
                                     </Link>
                                   </td>
-                                  <td className="px-3 py-2.5 text-neutral-600 hidden sm:table-cell">
+                                  <td className="px-3 py-2.5 text-muted hidden sm:table-cell">
                                     <Link href={`/competitions/${competition.slug}`} className="hover:text-blue-600">{competition.name}</Link>
                                   </td>
-                                  <td className="px-3 py-2.5 text-center text-neutral-600">{stat.appearances}</td>
-                                  <td className="px-3 py-2.5 text-center font-medium text-neutral-900">{stat.goals}</td>
-                                  <td className="px-3 py-2.5 text-center text-neutral-600">{stat.assists}</td>
-                                  <td className="px-3 py-2.5 text-center text-neutral-500 hidden sm:table-cell">{stat.minutesPlayed.toLocaleString()}</td>
-                                  <td className="px-3 py-2.5 text-center text-neutral-500 hidden md:table-cell">{stat.yellowCards || "–"}</td>
-                                  <td className="px-3 py-2.5 text-center text-neutral-500 hidden md:table-cell">{stat.redCards || "–"}</td>
+                                  <td className="px-3 py-2.5 text-center text-muted">{stat.appearances}</td>
+                                  <td className="px-3 py-2.5 text-center font-medium text-ink">{stat.goals}</td>
+                                  <td className="px-3 py-2.5 text-center text-muted">{stat.assists}</td>
+                                  <td className="px-3 py-2.5 text-center text-muted hidden sm:table-cell">{stat.minutesPlayed.toLocaleString()}</td>
+                                  <td className="px-3 py-2.5 text-center text-muted hidden md:table-cell">{stat.yellowCards || "–"}</td>
+                                  <td className="px-3 py-2.5 text-center text-muted hidden md:table-cell">{stat.redCards || "–"}</td>
                                 </tr>
                               ))}
                             </tbody>
-                            <tfoot className="bg-neutral-50 border-t border-neutral-200 font-medium">
+                            <tfoot className="bg-surface-2 border-t border-line font-medium">
                               <tr>
                                 <td className="px-3 py-2.5" colSpan={2}>Career Total</td>
                                 <td className="px-3 py-2.5 hidden sm:table-cell" />
@@ -759,8 +759,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                         </ProTeaserWithModal>
                       </section>
                     ) : (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                        <p className="text-neutral-500">No season statistics available yet.</p>
+                      <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                        <p className="text-muted">No season statistics available yet.</p>
                       </div>
                     )}
                   </>
@@ -771,48 +771,48 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                   <>
                     {career.length > 0 ? (
                       <section>
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Career History</h2>
-                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                        <h2 className="text-lg font-bold text-ink mb-4">Career History</h2>
+                        <div className="bg-surface rounded-xl border border-line overflow-hidden divide-y divide-line">
                           {career.map((entry) => (
                             <Link
                               key={entry.id}
                               href={`/teams/${entry.team.slug}`}
-                              className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
+                              className="flex items-center justify-between p-4 hover:bg-surface-2 transition-colors"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
+                                <div className="w-10 h-10 bg-surface-2 rounded-lg flex items-center justify-center">
                                   {entry.team.logoUrl ? (
                                     <ImageWithFallback src={entry.team.logoUrl} alt={entry.team.name} width={28} height={28} className="w-7 h-7 object-contain" />
                                   ) : (
-                                    <Shield className="w-5 h-5 text-neutral-400" />
+                                    <Shield className="w-5 h-5 text-faint" />
                                   )}
                                 </div>
                                 <div>
-                                  <div className="font-medium text-neutral-900 text-sm">{entry.team.name}</div>
-                                  <div className="text-xs text-neutral-500">
+                                  <div className="font-medium text-ink text-sm">{entry.team.name}</div>
+                                  <div className="text-xs text-muted">
                                     {entry.validFrom && format(new Date(entry.validFrom), "MMM yyyy")} → {entry.validTo ? format(new Date(entry.validTo), "MMM yyyy") : "Present"}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                {entry.shirtNumber && <span className="text-xs text-neutral-500">#{entry.shirtNumber}</span>}
-                                {entry.transferType && <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">{entry.transferType}</span>}
+                                {entry.shirtNumber && <span className="text-xs text-muted">#{entry.shirtNumber}</span>}
+                                {entry.transferType && <span className="text-xs px-2 py-0.5 bg-surface-2 text-muted rounded">{entry.transferType}</span>}
                               </div>
                             </Link>
                           ))}
                         </div>
                       </section>
                     ) : (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                        <p className="text-neutral-500">No career history available.</p>
+                      <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                        <p className="text-muted">No career history available.</p>
                       </div>
                     )}
 
                     {/* Transfer History */}
                     {transferHistory.length > 0 && (
                       <section className="mt-8">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Transfer History</h2>
-                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                        <h2 className="text-lg font-bold text-ink mb-4">Transfer History</h2>
+                        <div className="bg-surface rounded-xl border border-line overflow-hidden divide-y divide-line">
                           {transferHistory.map((t) => (
                             <div key={t.id} className="flex items-center justify-between p-4">
                               <div className="flex items-center gap-2 min-w-0">
@@ -821,27 +821,27 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                                     {t.fromTeam.logoUrl && (
                                       <ImageWithFallback src={t.fromTeam.logoUrl} alt={t.fromTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                     )}
-                                    <span className="text-sm text-neutral-700 truncate">{t.fromTeam.name}</span>
+                                    <span className="text-sm text-ink truncate">{t.fromTeam.name}</span>
                                   </Link>
                                 ) : (
-                                  <span className="text-sm text-neutral-400">Unknown</span>
+                                  <span className="text-sm text-faint">Unknown</span>
                                 )}
-                                <ArrowRightLeft className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0 mx-1" />
+                                <ArrowRightLeft className="w-3.5 h-3.5 text-faint flex-shrink-0 mx-1" />
                                 <Link href={`/teams/${t.toTeam.slug}`} className="flex items-center gap-1.5 hover:text-blue-600 min-w-0">
                                   {t.toTeam.logoUrl && (
                                     <ImageWithFallback src={t.toTeam.logoUrl} alt={t.toTeam.name} width={20} height={20} className="w-5 h-5 object-contain flex-shrink-0" />
                                   )}
-                                  <span className="text-sm font-medium text-neutral-900 truncate">{t.toTeam.name}</span>
+                                  <span className="text-sm font-medium text-ink truncate">{t.toTeam.name}</span>
                                 </Link>
                               </div>
                               <div className="text-right flex-shrink-0 ml-3">
                                 {t.transferFeeEur != null && t.transferFeeEur > 0 && (
-                                  <div className="text-sm font-bold text-neutral-900">{formatMarketValue(t.transferFeeEur)}</div>
+                                  <div className="text-sm font-bold text-ink">{formatMarketValue(t.transferFeeEur)}</div>
                                 )}
                                 {t.transferFeeEur === 0 && (
                                   <div className="text-xs font-medium text-green-600">Free transfer</div>
                                 )}
-                                <div className="text-xs text-neutral-500">
+                                <div className="text-xs text-muted">
                                   {t.transferDate && format(new Date(t.transferDate), "MMM d, yyyy")}
                                 </div>
                               </div>
@@ -860,30 +860,30 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
                     {recentMatches.length > 0 && (
                       <section>
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">Recent Appearances</h2>
-                        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                        <h2 className="text-lg font-bold text-ink mb-4">Recent Appearances</h2>
+                        <div className="bg-surface rounded-xl border border-line overflow-hidden divide-y divide-line">
                           {recentMatches.map((m) => (
                             <Link
                               key={m.match.id}
                               href={`/matches/${m.match.slug ?? m.match.id}`}
-                              className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
+                              className="flex items-center justify-between p-4 hover:bg-surface-2 transition-colors"
                             >
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 text-sm">
-                                  <span className="font-medium text-neutral-900">{m.homeTeam.name}</span>
+                                  <span className="font-medium text-ink">{m.homeTeam.name}</span>
                                   {m.match.status === "finished" ? (
-                                    <span className="font-bold text-neutral-900">{m.match.homeScore} - {m.match.awayScore}</span>
+                                    <span className="font-bold text-ink">{m.match.homeScore} - {m.match.awayScore}</span>
                                   ) : (
-                                    <span className="text-neutral-400">vs</span>
+                                    <span className="text-faint">vs</span>
                                   )}
-                                  <span className="font-medium text-neutral-900">{m.awayTeam.name}</span>
+                                  <span className="font-medium text-ink">{m.awayTeam.name}</span>
                                 </div>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-neutral-500">
+                                <div className="flex items-center gap-2 mt-1 text-xs text-muted">
                                   <span>{m.competition.name}</span>
                                   {m.match.scheduledAt && <span>{format(new Date(m.match.scheduledAt), "MMM d, yyyy")}</span>}
                                 </div>
                               </div>
-                              <div className="text-right text-xs text-neutral-500">
+                              <div className="text-right text-xs text-muted">
                                 <span className={m.lineup.isStarter ? "text-green-600 font-medium" : ""}>
                                   {m.lineup.isStarter ? "Starter" : "Sub"}
                                 </span>
@@ -907,13 +907,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 <PlayerProfileSummary playerId={player.id} />
 
                 {faqItems.length > 0 && (
-                  <section className="bg-white rounded-xl border border-neutral-200 p-5">
-                    <h3 className="text-sm font-bold text-neutral-900 mb-3">Player FAQ</h3>
+                  <section className="bg-surface rounded-xl border border-line p-5">
+                    <h3 className="text-sm font-bold text-ink mb-3">Player FAQ</h3>
                     <div className="space-y-2">
                       {faqItems.map((item) => (
-                        <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
-                          <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
-                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
+                        <details key={item.question} className="group rounded-lg border border-line px-3 py-2">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-ink">{item.question}</summary>
+                          <p className="mt-2 text-xs leading-5 text-muted">{item.answer}</p>
                         </details>
                       ))}
                     </div>
@@ -932,8 +932,8 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
                 {/* Compare CTA */}
                 <div className="bg-blue-50 rounded-xl border border-blue-200 p-5">
-                  <h3 className="font-semibold text-neutral-900 text-sm mb-2">Compare Players</h3>
-                  <p className="text-xs text-neutral-600 mb-3">
+                  <h3 className="font-semibold text-ink text-sm mb-2">Compare Players</h3>
+                  <p className="text-xs text-muted mb-3">
                     See how {player.name} stacks up against other players.
                   </p>
                   <Link

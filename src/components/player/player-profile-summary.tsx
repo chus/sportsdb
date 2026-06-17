@@ -125,18 +125,18 @@ export async function PlayerProfileSummary({ playerId }: PlayerProfileSummaryPro
   if (!summary) return null;
 
   return (
-    <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-neutral-200 flex items-center gap-2">
+    <section className="bg-surface rounded-xl border border-line overflow-hidden">
+      <div className="px-6 py-4 border-b border-line flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-blue-500" />
-        <h2 className="text-lg font-bold text-neutral-900">Player Profile</h2>
-        <span className="ml-auto text-xs text-neutral-400 flex items-center gap-1">
+        <h2 className="text-lg font-bold text-ink">Player Profile</h2>
+        <span className="ml-auto text-xs text-faint flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-purple-400" />
           Summary
         </span>
       </div>
 
       <div className="p-6">
-        <p className="text-neutral-700 leading-relaxed">{summary}</p>
+        <p className="text-ink leading-relaxed">{summary}</p>
 
         {highlights.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">

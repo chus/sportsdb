@@ -41,7 +41,7 @@ export function TabNavigation({ tabs, defaultTab, children }: TabNavigationProps
   return (
     <div>
       {/* Tab bar */}
-      <div className="border-b border-neutral-200 bg-white sticky top-[65px] z-30">
+      <div className="border-b border-line bg-surface sticky top-[65px] z-30">
         <div className="max-w-7xl mx-auto px-4">
           <nav
             className="flex gap-0 overflow-x-auto scrollbar-hide -mb-px"
@@ -59,7 +59,7 @@ export function TabNavigation({ tabs, defaultTab, children }: TabNavigationProps
                   "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors",
                   activeTab === tab.id
                     ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-neutral-500 hover:text-neutral-800 hover:border-neutral-300"
+                    : "border-transparent text-muted hover:text-ink hover:border-line"
                 )}
               >
                 {tab.label}
@@ -69,7 +69,7 @@ export function TabNavigation({ tabs, defaultTab, children }: TabNavigationProps
                       "text-xs px-1.5 py-0.5 rounded-full",
                       activeTab === tab.id
                         ? "bg-blue-100 text-blue-700"
-                        : "bg-neutral-100 text-neutral-500"
+                        : "bg-surface-2 text-muted"
                     )}
                   >
                     {tab.count}

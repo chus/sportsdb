@@ -19,9 +19,9 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
     <div className="space-y-6">
       {/* Upcoming Fixtures */}
       {upcoming.length > 0 && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
+        <div className="bg-surface rounded-xl border border-line p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-muted flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Upcoming Fixtures
             </h3>
@@ -31,13 +31,13 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
               <Link
                 key={match.id}
                 href={`/matches/${match.slug ?? match.id}`}
-                className="block p-3 bg-neutral-50 rounded-lg hover:bg-blue-50 transition-colors group"
+                className="block p-3 bg-surface-2 rounded-lg hover:bg-blue-50 transition-colors group"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-muted">
                     {match.competition?.name}
                   </span>
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-muted">
                     {format(new Date(match.scheduledAt), "EEE, MMM d")}
                   </span>
                 </div>
@@ -50,7 +50,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
-                      <Shield className="w-5 h-5 text-neutral-300" />
+                      <Shield className="w-5 h-5 text-faint" />
                     )}
                     <span
                       className={`text-sm truncate ${
@@ -60,7 +60,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                       {match.homeTeam?.shortName || match.homeTeam?.name}
                     </span>
                   </div>
-                  <span className="text-xs text-neutral-400 px-2">vs</span>
+                  <span className="text-xs text-faint px-2">vs</span>
                   <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
                     <span
                       className={`text-sm truncate ${
@@ -76,11 +76,11 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                         className="w-5 h-5 object-contain"
                       />
                     ) : (
-                      <Shield className="w-5 h-5 text-neutral-300" />
+                      <Shield className="w-5 h-5 text-faint" />
                     )}
                   </div>
                 </div>
-                <div className="text-xs text-center text-neutral-500 mt-2">
+                <div className="text-xs text-center text-muted mt-2">
                   {format(new Date(match.scheduledAt), "h:mm a")}
                 </div>
               </Link>
@@ -91,9 +91,9 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
 
       {/* Recent Results */}
       {recent.length > 0 && (
-        <div className="bg-white rounded-xl border border-neutral-200 p-6">
+        <div className="bg-surface rounded-xl border border-line p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-muted flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Recent Results
             </h3>
@@ -116,13 +116,13 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                 <Link
                   key={match.id}
                   href={`/matches/${match.slug ?? match.id}`}
-                  className="block p-3 bg-neutral-50 rounded-lg hover:bg-blue-50 transition-colors group"
+                  className="block p-3 bg-surface-2 rounded-lg hover:bg-blue-50 transition-colors group"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-neutral-500">
+                    <span className="text-xs text-muted">
                       {match.competition?.name}
                     </span>
-                    <span className="text-xs text-neutral-500">
+                    <span className="text-xs text-muted">
                       {format(new Date(match.scheduledAt), "MMM d")}
                     </span>
                   </div>
@@ -135,7 +135,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-5 h-5 text-neutral-300" />
+                        <Shield className="w-5 h-5 text-faint" />
                       )}
                       <span
                         className={`text-sm truncate ${
@@ -147,7 +147,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                     </div>
                     <div className="flex items-center gap-1 px-3">
                       <span className="text-sm font-bold">{match.homeScore ?? "-"}</span>
-                      <span className="text-neutral-400">-</span>
+                      <span className="text-faint">-</span>
                       <span className="text-sm font-bold">{match.awayScore ?? "-"}</span>
                     </div>
                     <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
@@ -165,7 +165,7 @@ export async function TeamFixtures({ teamId, limit = 5 }: TeamFixturesProps) {
                           className="w-5 h-5 object-contain"
                         />
                       ) : (
-                        <Shield className="w-5 h-5 text-neutral-300" />
+                        <Shield className="w-5 h-5 text-faint" />
                       )}
                     </div>
                     {result && (

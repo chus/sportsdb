@@ -209,8 +209,8 @@ function PositionGroup({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
-        {title} <span className="text-neutral-400">({players.length})</span>
+      <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+        {title} <span className="text-faint">({players.length})</span>
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {players.map(({ player, shirtNumber }) => (
@@ -218,7 +218,7 @@ function PositionGroup({
             key={player.id}
             slug={player.slug}
             isLinkWorthy={player.isIndexable ?? false}
-            className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-100 hover:shadow-md hover:border-blue-200 transition-all group"
+            className="flex items-center gap-3 p-3 bg-surface rounded-lg border border-line hover:shadow-md hover:border-blue-200 transition-all group"
           >
             {player.imageUrl ? (
               <ImageWithFallback
@@ -226,18 +226,18 @@ function PositionGroup({
                 alt={player.name}
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-full object-cover bg-neutral-100"
+                className="w-10 h-10 rounded-full object-cover bg-surface-2"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-700 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-xs font-bold text-ink group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                 {shirtNumber || "—"}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-neutral-900 truncate group-hover:text-blue-600 transition-colors">
+              <div className="font-medium text-ink truncate group-hover:text-blue-600 transition-colors">
                 {shirtNumber ? `${shirtNumber} · ` : ""}{player.name}
               </div>
-              <div className="text-sm text-neutral-500 truncate">
+              <div className="text-sm text-muted truncate">
                 {player.nationality || player.position}
               </div>
             </div>
@@ -446,7 +446,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {faqItems.length > 0 && <FAQJsonLd items={faqItems} />}
       <PageTracker entityType="team" entityId={team.id} />
 
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-surface-2">
       {/* Compact Header */}
       <div className="text-white" style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #1e1b4b 100%)` }}>
         <PageHeader
@@ -459,23 +459,23 @@ export default async function TeamPage({ params }: TeamPageProps) {
             { label: team.name },
           ]}
           icon={
-            <div className="relative w-16 h-16 bg-white rounded-xl flex items-center justify-center flex-shrink-0 p-2">
+            <div className="relative w-16 h-16 bg-surface rounded-xl flex items-center justify-center flex-shrink-0 p-2">
               {team.logoUrl ? (
                 <ImageWithFallback src={team.logoUrl} alt={team.name} fill sizes="64px" className="object-contain" priority />
               ) : (
-                <Shield className="w-8 h-8 text-neutral-300" />
+                <Shield className="w-8 h-8 text-faint" />
               )}
             </div>
           }
           badges={
             <div className="flex items-center gap-2 flex-wrap">
               {positionBadge && (
-                <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold bg-surface/20 px-2.5 py-1 rounded-full">
                   {positionBadge}
                 </span>
               )}
               {team.coachName && (
-                <span className="text-xs font-medium bg-white/20 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-medium bg-surface/20 px-2.5 py-1 rounded-full">
                   Coach: {team.coachName}
                 </span>
               )}
@@ -498,7 +498,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         />
       </div>
       {team.updatedAt && (
-        <p className="text-xs text-neutral-400 mt-2 max-w-7xl mx-auto px-4">
+        <p className="text-xs text-faint mt-2 max-w-7xl mx-auto px-4">
           Updated {formatDistanceToNowStrict(new Date(team.updatedAt), { addSuffix: true })}
         </p>
       )}
@@ -519,11 +519,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       {nextMatch ? (
                         <Link
                           href={`/matches/${nextMatch.slug ?? nextMatch.id}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Next Match</h3>
                           </div>
                           {(() => {
                             const isHome = nextMatch.homeTeamId === team.id;
@@ -535,13 +535,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
                                   {opponent?.logoUrl ? (
                                     <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={24} height={24} className="w-6 h-6 object-contain" />
                                   ) : (
-                                    <Shield className="w-6 h-6 text-neutral-300" />
+                                    <Shield className="w-6 h-6 text-faint" />
                                   )}
-                                  <span className="text-sm font-bold text-neutral-900 truncate">
+                                  <span className="text-sm font-bold text-ink truncate">
                                     {isHome ? "vs" : "@"} {opponent?.shortName || opponent?.name}
                                   </span>
                                 </div>
-                                <p className="text-xs text-neutral-500">
+                                <p className="text-xs text-muted">
                                   {format(matchDate, "EEE, MMM d · h:mm a")}
                                 </p>
                                 <p className="text-xs font-medium text-blue-600 mt-1">
@@ -552,12 +552,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
                           })()}
                         </Link>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Calendar className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Next Match</h3>
+                            <Calendar className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Next Match</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">No upcoming fixtures</p>
+                          <p className="text-sm text-faint">No upcoming fixtures</p>
                         </div>
                       )}
 
@@ -565,31 +565,31 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       {standing && competitionSlug ? (
                         <Link
                           href={`/competitions/${competitionSlug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Pos.</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League Pos.</h3>
                           </div>
-                          <div className="text-3xl font-black text-neutral-900">{ordinal(standing.position)}</div>
-                          <p className="text-xs text-neutral-500 truncate">{competitionName}</p>
-                          <p className="text-xs font-medium text-neutral-700 mt-0.5">{standing.points} pts</p>
+                          <div className="text-3xl font-black text-ink">{ordinal(standing.position)}</div>
+                          <p className="text-xs text-muted truncate">{competitionName}</p>
+                          <p className="text-xs font-medium text-ink mt-0.5">{standing.points} pts</p>
                         </Link>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Trophy className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">League Pos.</h3>
+                            <Trophy className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">League Pos.</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">No standings data</p>
+                          <p className="text-sm text-faint">No standings data</p>
                         </div>
                       )}
 
                       {/* Form */}
-                      <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                      <div className="bg-surface rounded-xl border border-line p-4">
                         <div className="flex items-center gap-1.5 mb-2">
                           <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                          <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Form</h3>
+                          <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Form</h3>
                         </div>
                         {standing?.form ? (
                           <div className="flex gap-1.5 mt-1">
@@ -612,7 +612,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                             })}
                           </div>
                         ) : (
-                          <p className="text-sm text-neutral-400">No data</p>
+                          <p className="text-sm text-faint">No data</p>
                         )}
                       </div>
 
@@ -620,23 +620,23 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       {topScorer ? (
                         <Link
                           href={`/players/${topScorer.player.slug}`}
-                          className="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                          className="bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <Target className="w-3.5 h-3.5 text-red-500" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Top Scorer</h3>
                           </div>
-                          <div className="text-2xl font-black text-neutral-900">{topScorer.goals}</div>
-                          <p className="text-xs text-neutral-500">goals</p>
-                          <p className="text-sm font-medium text-neutral-900 truncate mt-0.5">{topScorer.player.name}</p>
+                          <div className="text-2xl font-black text-ink">{topScorer.goals}</div>
+                          <p className="text-xs text-muted">goals</p>
+                          <p className="text-sm font-medium text-ink truncate mt-0.5">{topScorer.player.name}</p>
                         </Link>
                       ) : (
-                        <div className="bg-white rounded-xl border border-neutral-200 p-4">
+                        <div className="bg-surface rounded-xl border border-line p-4">
                           <div className="flex items-center gap-1.5 mb-2">
-                            <Target className="w-3.5 h-3.5 text-neutral-400" />
-                            <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Top Scorer</h3>
+                            <Target className="w-3.5 h-3.5 text-faint" />
+                            <h3 className="text-[11px] font-semibold text-muted uppercase tracking-wide">Top Scorer</h3>
                           </div>
-                          <p className="text-sm text-neutral-400">No data</p>
+                          <p className="text-sm text-faint">No data</p>
                         </div>
                       )}
                     </div>
@@ -644,7 +644,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     {/* Recent Results Strip */}
                     {recentMatches.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-bold text-neutral-900 mb-3">Recent Results</h3>
+                        <h3 className="text-sm font-bold text-ink mb-3">Recent Results</h3>
                         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                           {recentMatches.map((match) => {
                             const isHome = match.homeTeamId === team.id;
@@ -660,20 +660,20 @@ export default async function TeamPage({ params }: TeamPageProps) {
                               <Link
                                 key={match.id}
                                 href={`/matches/${match.slug ?? match.id}`}
-                                className="flex-shrink-0 w-[140px] bg-white rounded-lg border border-neutral-200 p-3 hover:shadow-md hover:border-blue-200 transition-all"
+                                className="flex-shrink-0 w-[140px] bg-surface rounded-lg border border-line p-3 hover:shadow-md hover:border-blue-200 transition-all"
                               >
                                 <div className="flex items-center gap-2 mb-2">
                                   {opponent?.logoUrl ? (
                                     <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                   ) : (
-                                    <Shield className="w-5 h-5 text-neutral-300" />
+                                    <Shield className="w-5 h-5 text-faint" />
                                   )}
-                                  <span className="text-xs font-medium text-neutral-700 truncate">
+                                  <span className="text-xs font-medium text-ink truncate">
                                     {opponent?.shortName || opponent?.name}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-lg font-bold text-neutral-900">
+                                  <span className="text-lg font-bold text-ink">
                                     {match.homeScore}-{match.awayScore}
                                   </span>
                                   {result && (
@@ -686,7 +686,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-[10px] text-neutral-400 mt-1">
+                                <p className="text-[10px] text-faint mt-1">
                                   {format(new Date(match.scheduledAt), "MMM d")}
                                 </p>
                               </Link>
@@ -698,9 +698,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
                     {/* Upcoming fixtures */}
                     {matchesData.upcoming.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-5">
+                      <div className="bg-surface rounded-xl border border-line p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-bold text-neutral-900">Upcoming Fixtures</h3>
+                          <h3 className="text-sm font-bold text-ink">Upcoming Fixtures</h3>
                           <Link href={`/teams/${slug}?tab=fixtures`} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-0.5">
                             View all <ChevronRight className="w-3 h-3" />
                           </Link>
@@ -710,18 +710,18 @@ export default async function TeamPage({ params }: TeamPageProps) {
                             const isHome = match.homeTeamId === team.id;
                             const opponent = isHome ? match.awayTeam : match.homeTeam;
                             return (
-                              <Link key={match.id} href={`/matches/${match.slug ?? match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-neutral-50 transition-colors">
+                              <Link key={match.id} href={`/matches/${match.slug ?? match.id}`} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-surface-2 transition-colors">
                                 <div className="flex items-center gap-2">
                                   {opponent?.logoUrl ? (
                                     <ImageWithFallback src={opponent.logoUrl} alt={opponent.name} width={20} height={20} className="w-5 h-5 object-contain" />
                                   ) : (
-                                    <Shield className="w-5 h-5 text-neutral-300" />
+                                    <Shield className="w-5 h-5 text-faint" />
                                   )}
-                                  <span className="text-sm text-neutral-900">
+                                  <span className="text-sm text-ink">
                                     {isHome ? "vs" : "@"} {opponent?.shortName || opponent?.name}
                                   </span>
                                 </div>
-                                <span className="text-xs text-neutral-500">{format(new Date(match.scheduledAt), "MMM d")}</span>
+                                <span className="text-xs text-muted">{format(new Date(match.scheduledAt), "MMM d")}</span>
                               </Link>
                             );
                           })}
@@ -731,11 +731,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
                     {/* Recent Transfers */}
                     {teamTransfers.length > 0 && (
-                      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
-                          <h3 className="text-sm font-bold text-neutral-900">Recent Transfers</h3>
+                      <div className="bg-surface rounded-xl border border-line overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-line">
+                          <h3 className="text-sm font-bold text-ink">Recent Transfers</h3>
                         </div>
-                        <div className="divide-y divide-neutral-100">
+                        <div className="divide-y divide-line">
                           {teamTransfers.slice(0, 5).map((t) => {
                             const isIncoming = t.toTeamId === team.id;
                             const otherTeam = isIncoming ? t.fromTeam : t.toTeam;
@@ -750,10 +750,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
                                     )}
                                   </div>
                                   <div className="min-w-0">
-                                    <Link href={`/players/${t.player.slug}`} className="text-sm font-medium text-neutral-900 hover:text-blue-600 truncate block">
+                                    <Link href={`/players/${t.player.slug}`} className="text-sm font-medium text-ink hover:text-blue-600 truncate block">
                                       {t.player.name}
                                     </Link>
-                                    <div className="flex items-center gap-1 text-xs text-neutral-500">
+                                    <div className="flex items-center gap-1 text-xs text-muted">
                                       <span>{isIncoming ? "from" : "to"}</span>
                                       {otherTeam.name ? (
                                         <Link href={`/teams/${otherTeam.slug}`} className="hover:text-blue-600 truncate">{otherTeam.name}</Link>
@@ -765,12 +765,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
                                 </div>
                                 <div className="text-right flex-shrink-0 ml-3">
                                   {t.transferFeeEur != null && t.transferFeeEur > 0 && (
-                                    <div className="text-sm font-bold text-neutral-900">{formatMarketValue(t.transferFeeEur)}</div>
+                                    <div className="text-sm font-bold text-ink">{formatMarketValue(t.transferFeeEur)}</div>
                                   )}
                                   {t.transferFeeEur === 0 && (
                                     <div className="text-xs font-medium text-green-600">Free</div>
                                   )}
-                                  <div className="text-[10px] text-neutral-400">
+                                  <div className="text-[10px] text-faint">
                                     {t.transferDate && format(new Date(t.transferDate), "MMM yyyy")}
                                   </div>
                                 </div>
@@ -783,9 +783,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
                     {/* About (moved below fold) */}
                     {aboutParagraphs.length > 0 && (
-                      <section className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-3">About {team.name}</h2>
-                        <div className="space-y-3 text-sm leading-7 text-neutral-700">
+                      <section className="bg-surface rounded-xl border border-line p-6">
+                        <h2 className="text-lg font-bold text-ink mb-3">About {team.name}</h2>
+                        <div className="space-y-3 text-sm leading-7 text-ink">
                           {aboutParagraphs.map((paragraph, i) => (
                             <p key={i}>{renderBioWithLinks(paragraph)}</p>
                           ))}
@@ -799,9 +799,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 <TabPanel tabId="squad" defaultTab="overview">
                   <>
                     {squad.length === 0 ? (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
-                        <Users className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-                        <p className="text-neutral-500">No squad data available</p>
+                      <div className="bg-surface rounded-xl border border-line p-8 text-center">
+                        <Users className="w-12 h-12 text-faint mx-auto mb-4" />
+                        <p className="text-muted">No squad data available</p>
                       </div>
                     ) : (
                       <div className="space-y-6">
@@ -824,37 +824,37 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 <TabPanel tabId="stats" defaultTab="overview">
                   <>
                     {standing && (
-                      <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                        <h2 className="text-lg font-bold text-neutral-900 mb-4">{seasonLabel} Season Stats</h2>
+                      <div className="bg-surface rounded-xl border border-line p-6">
+                        <h2 className="text-lg font-bold text-ink mb-4">{seasonLabel} Season Stats</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                          <div className="text-center p-3 bg-surface-2 rounded-lg">
                             <div className="text-2xl font-bold">#{standing.position}</div>
-                            <div className="text-xs text-neutral-500">Position</div>
+                            <div className="text-xs text-muted">Position</div>
                           </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                          <div className="text-center p-3 bg-surface-2 rounded-lg">
                             <div className="text-2xl font-bold">{standing.points}</div>
-                            <div className="text-xs text-neutral-500">Points</div>
+                            <div className="text-xs text-muted">Points</div>
                           </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                          <div className="text-center p-3 bg-surface-2 rounded-lg">
                             <div className="text-2xl font-bold text-green-600">{standing.goalsFor}</div>
-                            <div className="text-xs text-neutral-500">Goals For</div>
+                            <div className="text-xs text-muted">Goals For</div>
                           </div>
-                          <div className="text-center p-3 bg-neutral-50 rounded-lg">
+                          <div className="text-center p-3 bg-surface-2 rounded-lg">
                             <div className="text-2xl font-bold text-red-600">{standing.goalsAgainst}</div>
-                            <div className="text-xs text-neutral-500">Goals Against</div>
+                            <div className="text-xs text-muted">Goals Against</div>
                           </div>
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-center">
-                          <div className="p-3 bg-green-50 rounded-lg"><div className="text-lg font-bold text-green-600">{standing.won}</div><div className="text-xs text-neutral-500">Won</div></div>
-                          <div className="p-3 bg-neutral-50 rounded-lg"><div className="text-lg font-bold text-neutral-600">{standing.drawn}</div><div className="text-xs text-neutral-500">Drawn</div></div>
-                          <div className="p-3 bg-red-50 rounded-lg"><div className="text-lg font-bold text-red-600">{standing.lost}</div><div className="text-xs text-neutral-500">Lost</div></div>
+                          <div className="p-3 bg-green-50 rounded-lg"><div className="text-lg font-bold text-green-600">{standing.won}</div><div className="text-xs text-muted">Won</div></div>
+                          <div className="p-3 bg-surface-2 rounded-lg"><div className="text-lg font-bold text-muted">{standing.drawn}</div><div className="text-xs text-muted">Drawn</div></div>
+                          <div className="p-3 bg-red-50 rounded-lg"><div className="text-lg font-bold text-red-600">{standing.lost}</div><div className="text-xs text-muted">Lost</div></div>
                         </div>
                       </div>
                     )}
 
                     {/* Squad Breakdown */}
-                    <div className="bg-white rounded-xl border border-neutral-200 p-5">
-                      <h3 className="text-sm font-bold text-neutral-900 mb-3">Squad Breakdown</h3>
+                    <div className="bg-surface rounded-xl border border-line p-5">
+                      <h3 className="text-sm font-bold text-ink mb-3">Squad Breakdown</h3>
                       <div className="space-y-2 text-sm">
                         {[
                           { label: "Goalkeepers", count: goalkeepers.length },
@@ -863,8 +863,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
                           { label: "Forwards", count: forwards.length },
                         ].map(({ label, count }) => (
                           <div key={label} className="flex justify-between">
-                            <span className="text-neutral-600">{label}</span>
-                            <span className="font-medium text-neutral-900">{count}</span>
+                            <span className="text-muted">{label}</span>
+                            <span className="font-medium text-ink">{count}</span>
                           </div>
                         ))}
                       </div>
@@ -875,24 +875,24 @@ export default async function TeamPage({ params }: TeamPageProps) {
                       const visiblePlayers = formerPlayers.slice(0, 3);
                       const hiddenPlayers = formerPlayers.slice(3);
                       const renderPlayerRow = ({ player, shirtNumber, validFrom, validTo }: typeof formerPlayers[number]) => (
-                        <PlayerLink key={player.id} slug={player.slug} isLinkWorthy={player.isIndexable ?? false} className="flex items-center justify-between p-3 hover:bg-neutral-50 transition-colors group">
+                        <PlayerLink key={player.id} slug={player.slug} isLinkWorthy={player.isIndexable ?? false} className="flex items-center justify-between p-3 hover:bg-surface-2 transition-colors group">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-500 text-xs font-medium">{shirtNumber || "—"}</div>
+                            <div className="w-8 h-8 bg-surface-2 rounded-full flex items-center justify-center text-muted text-xs font-medium">{shirtNumber || "—"}</div>
                             <div>
-                              <div className="font-medium text-sm text-neutral-900 group-hover:text-blue-600">{player.name}</div>
-                              <div className="text-xs text-neutral-500">{player.position} · {new Date(validFrom).getFullYear()}-{validTo ? new Date(validTo).getFullYear() : "Present"}</div>
+                              <div className="font-medium text-sm text-ink group-hover:text-blue-600">{player.name}</div>
+                              <div className="text-xs text-muted">{player.position} · {new Date(validFrom).getFullYear()}-{validTo ? new Date(validTo).getFullYear() : "Present"}</div>
                             </div>
                           </div>
                         </PlayerLink>
                       );
                       return (
                         <section>
-                          <h2 className="text-lg font-bold text-neutral-900 mb-4">Former Players</h2>
-                          <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden divide-y divide-neutral-100">
+                          <h2 className="text-lg font-bold text-ink mb-4">Former Players</h2>
+                          <div className="bg-surface rounded-xl border border-line overflow-hidden divide-y divide-line">
                             {visiblePlayers.map(renderPlayerRow)}
                             {hiddenPlayers.length > 0 && (
                               <ProTeaser label={`Unlock all ${formerPlayers.length} former players`}>
-                                <div className="divide-y divide-neutral-100">{hiddenPlayers.map(renderPlayerRow)}</div>
+                                <div className="divide-y divide-line">{hiddenPlayers.map(renderPlayerRow)}</div>
                               </ProTeaser>
                             )}
                           </div>
@@ -910,13 +910,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 <RelatedArticles teamId={team.id} limit={5} />
 
                 {faqItems.length > 0 && (
-                  <section className="bg-white rounded-xl border border-neutral-200 p-5">
-                    <h3 className="text-sm font-bold text-neutral-900 mb-3">Team FAQ</h3>
+                  <section className="bg-surface rounded-xl border border-line p-5">
+                    <h3 className="text-sm font-bold text-ink mb-3">Team FAQ</h3>
                     <div className="space-y-2">
                       {faqItems.map((item) => (
-                        <details key={item.question} className="group rounded-lg border border-neutral-200 px-3 py-2">
-                          <summary className="cursor-pointer list-none text-sm font-medium text-neutral-900">{item.question}</summary>
-                          <p className="mt-2 text-xs leading-5 text-neutral-600">{item.answer}</p>
+                        <details key={item.question} className="group rounded-lg border border-line px-3 py-2">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-ink">{item.question}</summary>
+                          <p className="mt-2 text-xs leading-5 text-muted">{item.answer}</p>
                         </details>
                       ))}
                     </div>
@@ -926,15 +926,15 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 {venue && venue.slug && (
                   <Link
                     href={`/venues/${venue.slug}`}
-                    className="block bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-blue-200 transition-all"
+                    className="block bg-surface rounded-xl border border-line p-4 hover:shadow-md hover:border-blue-200 transition-all"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
                         <MapPin className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-neutral-900">{venue.name}</p>
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-sm font-medium text-ink">{venue.name}</p>
+                        <p className="text-xs text-muted">
                           {venue.capacity ? `Capacity: ${venue.capacity.toLocaleString()}` : "View stadium details"}
                         </p>
                       </div>
