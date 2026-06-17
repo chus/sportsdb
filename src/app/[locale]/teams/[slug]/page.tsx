@@ -8,6 +8,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 import { getTeamBySlug, getSquad, getTeamStats, getFormerPlayers, getTeamTopScorer, getTeamTransfers } from "@/lib/queries/teams";
+import { getTeamInjuries } from "@/lib/queries/injuries";
+import { TeamInjuries } from "@/components/team/team-injuries";
 
 // Pre-render Tier 1–2 teams at build time so Googlebot lands on a cached
 // page. Smaller clubs and national teams stay on ISR-on-demand to keep
@@ -295,12 +297,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
     notFound();
   }
 
-  const [squad, statsData, formerPlayers, matchesData, teamTransfers] = await Promise.all([
+  const [squad, statsData, formerPlayers, matchesData, teamTransfers, teamInjuries] = await Promise.all([
     getSquad(team.id),
     getTeamStats(team.id),
     getFormerPlayers(team.id, 10),
     getTeamMatches(team.id, 5),
     getTeamTransfers(team.id, 10),
+    getTeamInjuries(team.id),
   ]);
 
   const standing = statsData[0]?.standing;
@@ -513,6 +516,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 {/* === OVERVIEW TAB === */}
                 <TabPanel tabId="overview" defaultTab="overview">
                   <>
+                    {/* Current injuries & suspensions */}
+                    <TeamInjuries injuries={teamInjuries} teamName={team.name} />
+
                     {/* Data Dashboard — 4 cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                       {/* Next Match */}

@@ -1800,6 +1800,60 @@ async function syncPlayerMatchStats(league: LeagueConfig, force = false) {
 }
 
 // ============================================================
+// INJURIES & SUSPENSIONS (current snapshot)
+// ============================================================
+
+async function syncInjuries(league: LeagueConfig) {
+  console.log(`\n=== Injuries: ${league.name} ===`);
+  const data = await apiFetch(`/injuries?league=${league.apiId}&season=${league.season}`);
+  const rows = (data.response || []) as Array<{
+    player: { id: number; name: string; type: string; reason: string };
+    team: { id: number; name: string };
+    fixture: { timestamp: number };
+  }>;
+
+  const season = await ensureSeason(league.season, league.isLatam);
+  const competition = await upsertCompetition(league);
+  const compSeason = await upsertCompetitionSeason(competition.id, season.id);
+
+  // "Current" = the latest matchday window present in the data. The feed
+  // lags real time (often ~3 weeks behind even mid-season), so anchor the
+  // window to the most recent fixture in the response rather than to today;
+  // a player who has recovered drops out of that matchday's list. Then keep
+  // the latest record per player.
+  const tsList = rows.map((r) => (r.fixture?.timestamp ? r.fixture.timestamp * 1000 : 0)).filter(Boolean);
+  const maxTs = tsList.length ? Math.max(...tsList) : 0;
+  const cutoff = maxTs - 10 * 86400000;
+  const byPlayer = new Map<number, { r: (typeof rows)[number]; ts: number }>();
+  for (const r of rows) {
+    const ts = r.fixture?.timestamp ? r.fixture.timestamp * 1000 : 0;
+    if (!ts || ts < cutoff) continue;
+    const cur = byPlayer.get(r.player.id);
+    if (!cur || ts > cur.ts) byPlayer.set(r.player.id, { r, ts });
+  }
+
+  // Replace this competition-season's snapshot wholesale.
+  await sql`DELETE FROM injuries WHERE competition_season_id = ${compSeason.id}`;
+  let n = 0;
+  for (const { r, ts } of byPlayer.values()) {
+    if (!r.team?.id || !r.team?.name || !r.player?.id) continue;
+    const team = await resolveTeam(sql, "af", r.team.id, r.team.name);
+    if (!team) continue;
+    const player = await resolvePlayer(sql, "af", r.player.id, r.player.name ?? "Unknown");
+    if (!player) continue;
+    await sql`
+      INSERT INTO injuries (player_id, team_id, competition_season_id, type, reason, fixture_date)
+      VALUES (${player.id}, ${team.id}, ${compSeason.id}, ${r.player.type ?? null}, ${r.player.reason ?? null}, ${new Date(ts).toISOString()})
+      ON CONFLICT (player_id, competition_season_id) DO UPDATE SET
+        team_id = EXCLUDED.team_id, type = EXCLUDED.type, reason = EXCLUDED.reason,
+        fixture_date = EXCLUDED.fixture_date, updated_at = now()
+    `;
+    n++;
+  }
+  console.log(`   ${rows.length} season records → ${n} current injuries`);
+}
+
+// ============================================================
 // CLI
 // ============================================================
 
@@ -1835,6 +1889,13 @@ async function main() {
   if (args.includes("--player-match-stats")) {
     const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
     for (const league of targets) await syncPlayerMatchStats(league, args.includes("--force"));
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
+
+  if (args.includes("--injuries")) {
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) await syncInjuries(league);
     console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
     return;
   }

@@ -75,6 +75,10 @@ function slugify(text: string): string {
 }
 
 export async function findTeamByName(sql: Sql, apiName: string): Promise<TeamHit | null> {
+  // Defensive: a null/empty name (some feeds omit it) must not crash the
+  // normalization rules below — treat as "no match".
+  if (!apiName) return null;
+
   // 1. Exact name or short_name
   let result = await sql`
     SELECT id, slug FROM teams WHERE name = ${apiName} OR short_name = ${apiName} LIMIT 1

@@ -39,6 +39,7 @@ export function Footer() {
       { label: "Players by Position", href: "/players/position" },
       { label: "Players by Nationality", href: "/players/nationality" },
       { label: "Venues", href: "/venues" },
+      { label: "Injuries", href: "/injuries" },
       { label: "Compare Players", href: "/compare" },
     ],
     [t("footer.legal")]: [

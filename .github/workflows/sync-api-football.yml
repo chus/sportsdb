@@ -22,6 +22,7 @@ on:
           - match-details
           - match-stats
           - player-match-stats
+          - injuries
           - full-data
           - restore
 
@@ -75,7 +76,7 @@ jobs:
           elif [ "$MODE" = "full" ]; then
             echo "mode=full" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
-          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "match-stats" ] || [ "$MODE" = "player-match-stats" ] || [ "$MODE" = "full-data" ] || [ "$MODE" = "restore" ]; then
+          elif [ "$MODE" = "player-stats" ] || [ "$MODE" = "match-details" ] || [ "$MODE" = "match-stats" ] || [ "$MODE" = "player-match-stats" ] || [ "$MODE" = "injuries" ] || [ "$MODE" = "full-data" ] || [ "$MODE" = "restore" ]; then
             echo "mode=$MODE" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
           fi
@@ -108,6 +109,11 @@ jobs:
         if: steps.target.outputs.mode == 'enrich-all'
         run: npx tsx scripts/sync-api-football.ts --all-standings || true
 
+      # Injuries change daily; refresh the current snapshot every run (~11 req).
+      - name: Refresh all injuries
+        if: steps.target.outputs.mode == 'enrich-all'
+        run: npx tsx scripts/sync-api-football.ts --injuries || true
+
       - name: Full player season stats
         if: steps.target.outputs.mode == 'player-stats'
         run: npx tsx scripts/sync-api-football.ts --player-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
@@ -124,6 +130,10 @@ jobs:
         if: steps.target.outputs.mode == 'player-match-stats'
         run: npx tsx scripts/sync-api-football.ts --player-match-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
 
+      - name: Injuries & suspensions (current snapshot)
+        if: steps.target.outputs.mode == 'injuries'
+        run: npx tsx scripts/sync-api-football.ts --injuries ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
+
       # One-shot full data pass: every league's fixtures get lineups +
       # events + team statistics + per-player stat lines, then every player
       # gets a season stat line. Run from CI on purpose — datacenter-to-Neon
@@ -135,7 +145,8 @@ jobs:
           npx tsx scripts/sync-api-football.ts --player-stats || true
           npx tsx scripts/sync-api-football.ts --match-details || true
           npx tsx scripts/sync-api-football.ts --match-stats || true
-          npx tsx scripts/sync-api-football.ts --player-match-stats
+          npx tsx scripts/sync-api-football.ts --player-match-stats || true
+          npx tsx scripts/sync-api-football.ts --injuries
 
       # Full disaster-recovery rebuild: restore missing club rows, then
       # full-sync every league (teams, squads, standings, fixtures via
@@ -155,6 +166,7 @@ jobs:
           npx tsx scripts/sync-api-football.ts --match-details || true
           npx tsx scripts/sync-api-football.ts --match-stats || true
           npx tsx scripts/sync-api-football.ts --player-match-stats || true
+          npx tsx scripts/sync-api-football.ts --injuries || true
 
       - name: Log completion
         run: echo "Sync completed at $(date). Mode=${{ steps.target.outputs.mode }} Slug=${{ steps.target.outputs.slug }}"

@@ -543,6 +543,35 @@ export const playerMatchStats = pgTable(
   ]
 );
 
+// Current injuries & suspensions from API-Football /injuries. Stored as a
+// per-player current snapshot (latest record per player per season). Feeds
+// the /injuries hub plus team and player page sections — fresh, recurring
+// content with dense internal linking, good for crawl frequency and SEO.
+export const injuries = pgTable(
+  "injuries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id),
+    competitionSeasonId: uuid("competition_season_id")
+      .notNull()
+      .references(() => competitionSeasons.id),
+    type: text("type"), // "Missing Fixture" | "Questionable" | …
+    reason: text("reason"), // "Knee Injury", "Suspended", "Knock" …
+    fixtureDate: timestamp("fixture_date", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_injury_player_season").on(table.playerId, table.competitionSeasonId),
+    index("idx_injuries_team").on(table.teamId),
+    index("idx_injuries_player").on(table.playerId),
+  ]
+);
+
 // ============================================================
 // AUTHENTICATION
 // ============================================================
