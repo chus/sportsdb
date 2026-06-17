@@ -62,6 +62,8 @@ const TEAM_SLUG_ALIASES: Record<string, string> = {
   "celta-vigo": "rc-celta-de-vigo",
   "alaves": "deportivo-alaves",
   "paris-saint-germain": "paris-saint-germain-fc",
+  "club-leon": "leon",
+  "club-atletico-huracan": "huracan",
 };
 
 const CANONICAL_HOST = "datasports.co";
