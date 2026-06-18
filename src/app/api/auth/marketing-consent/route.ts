@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { updateNotificationSettings } from "@/lib/queries/notification-settings";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -21,6 +22,11 @@ export async function PATCH(request: NextRequest) {
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
+
+    // Consent is the legal record; email_enabled is the operational send-gate
+    // the crons read. Keep them in sync so toggling consent actually starts/stops
+    // the digest + reminder emails.
+    await updateNotificationSettings(user.id, { emailEnabled: consent });
 
     return NextResponse.json({ success: true, marketingEmailConsent: consent });
   } catch (error) {

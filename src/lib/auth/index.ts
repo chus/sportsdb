@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { users, sessions, passwordResetTokens, emailVerificationTokens } from "@/lib/db/schema";
+import { users, sessions, passwordResetTokens, emailVerificationTokens, notificationSettings } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 
@@ -45,6 +45,14 @@ export async function createUser(email: string, password: string, name?: string,
       referralCode: generateReferralCode(name),
     })
     .returning();
+
+  // Seed notification settings so the consent the user just gave actually
+  // gates email. The digest/reminder crons read notification_settings.email_enabled,
+  // not users.marketing_email_consent_at — without this, opting in does nothing.
+  await db
+    .insert(notificationSettings)
+    .values({ userId: user.id, emailEnabled: !!marketingEmailConsent })
+    .onConflictDoNothing();
 
   return user;
 }

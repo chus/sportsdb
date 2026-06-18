@@ -754,34 +754,26 @@ export default function AccountPage() {
               </div>
 
               <div className="divide-y divide-line">
-                {notifSettings && (
-                  <>
-                    <ToggleRow
-                      label="Email Updates"
-                      description="Weekly digest of activity"
-                      icon={<Mail className="w-5 h-5 text-faint" />}
-                      checked={notifSettings.emailEnabled}
-                      onChange={(v) => handleToggleNotification("emailEnabled", v)}
-                      color="purple"
-                    />
-                    <ToggleRow
-                      label="Push Notifications"
-                      description="Real-time alerts on your device"
-                      icon={<Smartphone className="w-5 h-5 text-faint" />}
-                      checked={notifSettings.pushEnabled}
-                      onChange={(v) => handleToggleNotification("pushEnabled", v)}
-                      color="purple"
-                    />
-                  </>
-                )}
+                {/* Single email switch: consent is the legal record and also
+                    gates the digest/reminder crons (email_enabled). */}
                 <ToggleRow
-                  label="Marketing Emails"
-                  description="Football news and product updates"
+                  label="Email Updates"
+                  description="Weekly digest, matchday reminders and football news. Unsubscribe anytime."
                   icon={<Mail className="w-5 h-5 text-faint" />}
                   checked={marketingConsent}
                   onChange={handleToggleMarketingConsent}
                   color="purple"
                 />
+                {notifSettings && (
+                  <ToggleRow
+                    label="Push Notifications"
+                    description="Real-time alerts on your device"
+                    icon={<Smartphone className="w-5 h-5 text-faint" />}
+                    checked={notifSettings.pushEnabled}
+                    onChange={(v) => handleToggleNotification("pushEnabled", v)}
+                    color="purple"
+                  />
+                )}
               </div>
             </div>
 

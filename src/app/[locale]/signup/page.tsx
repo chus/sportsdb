@@ -129,7 +129,7 @@ export default function SignupPage() {
                 className="mt-1 h-4 w-4 rounded border-line text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="marketing" className="text-xs text-muted leading-relaxed">
-                Send me football news and product updates
+                Email me my weekly digest, matchday reminders and football news. Unsubscribe anytime.
               </label>
             </div>
             <button
