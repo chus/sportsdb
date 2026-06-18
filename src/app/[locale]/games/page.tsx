@@ -67,6 +67,30 @@ export default async function GamesPage() {
         </p>
       </div>
 
+      {/* Prediction Leagues — the social front door (invite friends by link) */}
+      <Link
+        href="/games/leagues"
+        className="group block mb-8 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white hover:shadow-xl transition-all"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center shrink-0">
+              <Trophy className="w-7 h-7" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold mb-1">Prediction Leagues — play with your friends</h2>
+              <p className="text-emerald-50 text-sm max-w-xl">
+                Create a private league, share one link, and battle it out on your
+                own table every matchday. Free to start.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg shrink-0 group-hover:gap-3 transition-all">
+            Create a league <ArrowRight className="w-4 h-4" />
+          </span>
+        </div>
+      </Link>
+
       {/* Pro banner for free users */}
       {user && (
         <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white flex items-center justify-between">
