@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { submitUrlsToGoogle, submitUrlsToIndexNow } from "@/lib/seo/indexnow";
+import { submitUrlsToIndexNow } from "@/lib/seo/indexnow";
 import { compareMatchup } from "@/lib/seo/compare";
 
 export const maxDuration = 60;
 
 /**
- * Submits important pages to Google Indexing API + IndexNow.
- * Runs daily, rotates through page types to stay under Google's 200/day quota.
+ * Pings IndexNow (Bing, Yandex, Naver, …) for important pages.
+ * Runs daily, rotating through page types so the whole site gets re-pinged.
+ *
+ * NOTE: deliberately does NOT use the Google Indexing API. That API is
+ * officially restricted to JobPosting / BroadcastEvent pages; using it for
+ * regular entity/article/comparison pages is "misuse" that Google ignores
+ * and runs spam-detection against (access can be revoked). Google discovers
+ * these pages via the sitemap, internal links, and earned backlinks — not a
+ * submission API. Google never adopted IndexNow, so this helps Bing/Yandex only.
  *
  * Strategy: each day submits a different category of pages, cycling through:
  *   Day 0: Competition pages + recent articles
@@ -147,11 +154,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // IndexNow has no daily limit, so submit both locales (en at root,
-    // es prefixed). Google's Indexing API caps at 200/day — we cap the
-    // English-locale set at 200 there and skip Spanish (most submissions
-    // for non-JobPosting/BroadcastEvent content are ignored anyway).
-    const enPaths = paths.slice(0, 200);
+    // IndexNow has no daily limit, so submit both locales (en at root, es prefixed).
     const indexNowPaths = [
       ...paths,
       ...paths.map((p) => `/es${p === "/" ? "" : p}`),
@@ -162,26 +165,19 @@ export async function GET(request: NextRequest) {
         dryRun: true,
         category,
         dayOfWeek,
-        enUrlCount: enPaths.length,
         indexNowUrlCount: indexNowPaths.length,
-        sampleEnUrls: enPaths.slice(0, 5),
+        sampleUrls: paths.slice(0, 5),
         sampleEsUrls: paths.slice(0, 5).map((p) => `/es${p === "/" ? "" : p}`),
       });
     }
 
-    const [googleResult] = await Promise.all([
-      submitUrlsToGoogle(enPaths),
-      submitUrlsToIndexNow(indexNowPaths),
-    ]);
+    await submitUrlsToIndexNow(indexNowPaths);
 
     return NextResponse.json({
       success: true,
       category,
       dayOfWeek,
-      enUrlCount: enPaths.length,
       indexNowUrlCount: indexNowPaths.length,
-      googleSubmitted: googleResult.submitted,
-      googleErrors: googleResult.errors.length,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

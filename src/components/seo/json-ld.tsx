@@ -404,21 +404,19 @@ export function BreadcrumbJsonLd({
   return <JsonLd data={data} />;
 }
 
-export function FAQJsonLd({ items }: { items: { question: string; answer: string }[] }) {
-  const data = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: items.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  };
-
-  return <JsonLd data={data} />;
+/**
+ * FAQPage structured data is intentionally NOT emitted.
+ *
+ * Google removed FAQ rich results from Search on 2026-05-07 (and dropped the
+ * Rich Results Test for FAQPage in Jan 2026), so the markup yields zero SERP
+ * enhancement, while excess/templated structured data is now a "spammy markup"
+ * risk signal. The on-page FAQ *content* still ships on each page (useful for
+ * users, long-tail relevance, and AI answer engines) — only the now-useless
+ * JSON-LD is suppressed. Kept as a no-op component so the ~16 callers don't
+ * need touching and FAQ schema can be re-enabled centrally if it ever returns.
+ */
+export function FAQJsonLd(_props: { items: { question: string; answer: string }[] }) {
+  return null;
 }
 
 export function ItemListJsonLd({

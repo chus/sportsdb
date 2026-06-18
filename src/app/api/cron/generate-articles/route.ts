@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
 import OpenAI from "openai";
-import { submitUrlsToIndexNow, pingGoogleSitemap, submitUrlsToGoogle } from "@/lib/seo/indexnow";
+import { submitUrlsToIndexNow } from "@/lib/seo/indexnow";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -274,14 +274,12 @@ export async function GET(request: NextRequest) {
       runMatchPreviews(),
     ]);
 
-    // Ping search engines about new content (non-blocking, non-critical)
+    // Ping IndexNow (Bing/Yandex) about new content (non-blocking, non-critical).
+    // No Google Indexing API call: that API is JobPosting/BroadcastEvent-only;
+    // Google finds new articles via the sitemap + internal links + backlinks.
     if (generatedSlugs.length > 0) {
       const urls = generatedSlugs.map((s) => `/news/${s}`);
-      await Promise.all([
-        submitUrlsToIndexNow(urls),
-        submitUrlsToGoogle(urls),
-        pingGoogleSitemap(),
-      ]).catch(() => {});
+      await submitUrlsToIndexNow(urls).catch(() => {});
     }
 
     return NextResponse.json({

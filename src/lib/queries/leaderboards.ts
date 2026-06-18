@@ -504,6 +504,8 @@ export async function getPlayerWithAggregatedStats(slug: string) {
     websiteUrl: player.websiteUrl,
     instagramHandle: player.instagramHandle,
     twitterHandle: player.twitterHandle,
+    isIndexable: player.isIndexable,
+    popularityScore: player.popularityScore,
     team: team ? { name: team.name, slug: team.slug, logoUrl: team.logo_url } : null,
     totalStats: {
       appearances: stats[0]?.appearances || 0,

@@ -1,15 +1,21 @@
 /**
- * Search engine indexing integrations:
+ * Search engine indexing integrations.
  *
- * 1. IndexNow — pings Bing/Yandex when pages are created or updated.
- * 2. Google Sitemap ping — nudges Google to re-crawl the sitemap.
- * 3. Google Indexing API — programmatic URL submission to Google.
- *    Requires a Google Cloud service account with Search Console owner access.
- *    Set GOOGLE_SERVICE_ACCOUNT_JSON env var with the JSON key contents.
+ * ACTIVE:
+ *   submitUrlsToIndexNow — pings Bing/Yandex/Naver/Seznam when pages change.
+ *   (Google has never adopted IndexNow, so this helps non-Google engines only.)
+ *
+ * DEPRECATED — do not use for regular pages (kept only for a possible future
+ * JobPosting/BroadcastEvent feed):
+ *   pingGoogleSitemap   — Google removed the sitemap-ping endpoint in 2023; no-op.
+ *   submitUrlsToGoogle  — the Indexing API is officially JobPosting/BroadcastEvent
+ *                         ONLY. Using it for entity/article/comparison pages is
+ *                         "misuse": Google ignores it and runs spam detection
+ *                         (access can be revoked). Google finds those pages via
+ *                         the sitemap, internal links, and earned backlinks.
  *
  * Usage:
  *   await submitUrlsToIndexNow(["/news/some-article", "/players/messi"]);
- *   await submitUrlsToGoogle(["/news/some-article", "/teams/liverpool"]);
  */
 
 import crypto from "crypto";
@@ -46,8 +52,8 @@ export async function submitUrlsToIndexNow(paths: string[]): Promise<void> {
 }
 
 /**
- * Ping Google's sitemap refresh endpoint.
- * Google rate-limits this, so call at most once per cron run.
+ * @deprecated Google removed the sitemap-ping endpoint in 2023 — this is a no-op.
+ * Submit the sitemap once in Search Console instead. Kept to avoid breaking callers.
  */
 export async function pingGoogleSitemap(): Promise<void> {
   try {
@@ -138,9 +144,10 @@ async function getGoogleAccessToken(): Promise<string | null> {
 }
 
 /**
- * Submit URLs to Google's Indexing API for crawling.
- * Requires GOOGLE_SERVICE_ACCOUNT_JSON env var.
- * Google's daily quota is 200 URLs — use wisely.
+ * @deprecated Google's Indexing API is officially JobPosting/BroadcastEvent ONLY.
+ * Do NOT call this for entity/article/comparison pages — it's "misuse" Google
+ * ignores and spam-checks (access can be revoked). Kept for a possible future
+ * JobPosting/BroadcastEvent feed only. Requires GOOGLE_SERVICE_ACCOUNT_JSON.
  *
  * @param paths - Array of paths like ["/news/slug", "/teams/slug"]
  * @param type - "URL_UPDATED" (default) or "URL_DELETED"

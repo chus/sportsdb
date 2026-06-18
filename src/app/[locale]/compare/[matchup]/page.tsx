@@ -79,9 +79,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // duplicate pages.
   const canonical = compareMatchup(parsed.slug1, parsed.slug2);
 
+  // Demand-gate indexing: only the pairwise matrix's genuinely useful pages —
+  // both players individually notable (is_indexable) AND with real career data
+  // — belong in the index. Everything else stays noindex,follow: crawlable,
+  // usable, and link-equity-passing, but kept out of Google's index so the
+  // combinatorial matrix can't be classified as scaled/thin content. The
+  // sitemap already lists only indexable pairs (this aligns the page itself).
+  const indexable =
+    (p1.isIndexable ?? false) &&
+    (p2.isIndexable ?? false) &&
+    (p1.totalStats.appearances ?? 0) > 0 &&
+    (p2.totalStats.appearances ?? 0) > 0;
+
   return {
     title,
     description,
+    robots: indexable ? undefined : { index: false, follow: true },
     openGraph: {
       title,
       description,
