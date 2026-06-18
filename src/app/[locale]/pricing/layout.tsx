@@ -7,11 +7,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 export const metadata: Metadata = {
   title: "Pricing – Free & Pro Plans",
   description:
-    "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €8/year.",
+    "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €3/month.",
   openGraph: {
     title: "Pricing – Free & Pro Plans",
     description:
-      "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €8/year.",
+      "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €3/month.",
     url: `${BASE_URL}/pricing`,
   },
   alternates: { canonical: `${BASE_URL}/pricing` },
@@ -73,11 +73,11 @@ export default function PricingLayout({
           {
             "@type": "Offer",
             name: "Pro Plan",
-            price: "8",
+            price: "3",
             priceCurrency: "EUR",
             availability: "https://schema.org/InStock",
             priceValidUntil: "2026-12-31",
-            description: "Full access to advanced stats, unlimited comparisons, historical data, and export features.",
+            description: "Full access to advanced stats, unlimited comparisons, historical data, and unlimited games.",
           },
         ],
       }} />

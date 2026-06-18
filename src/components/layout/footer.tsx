@@ -72,7 +72,7 @@ export function Footer() {
             <p className="text-sm text-faint leading-relaxed">
               {t("footer.tagline")}
             </p>
-            <p className="text-xs text-blue-400 mt-2">Pro from €8/year</p>
+            <p className="text-xs text-blue-400 mt-2">Pro — €3/month</p>
           </div>
 
           {/* Link columns */}

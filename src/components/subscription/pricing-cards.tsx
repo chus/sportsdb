@@ -143,7 +143,7 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         </span>
         {billingPeriod === "annual" && (
           <span className="text-xs font-bold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
-            Save 33%
+            Save 17%
           </span>
         )}
       </div>

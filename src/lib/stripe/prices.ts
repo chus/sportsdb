@@ -14,14 +14,17 @@ const TIER_PRICES: Record<"pro", Record<BillingPeriod, PriceConfig>> = {
   pro: {
     monthly: {
       name: "DataSports Pro (Monthly)",
-      amount: 100, // €1.00
-      lookupKey: "sportsdb_pro_monthly",
+      amount: 300, // €3.00
+      // Lookup keys bumped (_v2) so getStripePriceId creates fresh Stripe
+      // Prices at the new amount rather than returning the old €1/€8 ones
+      // (lookup-key retrieval is idempotent). Safe — no paying subs to migrate.
+      lookupKey: "sportsdb_pro_monthly_v2",
       interval: "month",
     },
     annual: {
       name: "DataSports Pro (Annual)",
-      amount: 800, // €8.00
-      lookupKey: "sportsdb_pro_annual",
+      amount: 3000, // €30.00 (€2.50/mo — ~17% off)
+      lookupKey: "sportsdb_pro_annual_v2",
       interval: "year",
     },
   },
@@ -76,6 +79,7 @@ export function tierFromLookupKey(lookupKey: string): { tier: SubscriptionTier; 
 }
 
 export function tierFromPriceAmount(amount: number): SubscriptionTier | null {
-  if (amount === 100 || amount === 800) return "pro";
+  // New (€3/€30) and legacy (€1/€8) amounts both map to Pro.
+  if (amount === 300 || amount === 3000 || amount === 100 || amount === 800) return "pro";
   return null;
 }

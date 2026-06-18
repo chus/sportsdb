@@ -241,7 +241,7 @@ export default async function HomePage() {
               href="/pricing"
               className="inline-flex items-center gap-2 px-6 py-3 bg-surface text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
             >
-              Go Pro — from &euro;8/year
+              Go Pro — &euro;3/month
             </Link>
           </div>
         </section>

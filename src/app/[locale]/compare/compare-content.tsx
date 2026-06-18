@@ -373,7 +373,7 @@ export function ComparePageContent() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
             >
               <Zap className="w-5 h-5" />
-              Upgrade to Pro — €8/year
+              Upgrade to Pro — €3/month
             </Link>
           </div>
         )}

@@ -40,8 +40,8 @@ export const SUBSCRIPTION_TIERS: Record<SubscriptionTier, TierConfig> = {
   },
   pro: {
     name: "Pro",
-    price: 1,
-    annualPrice: 8,
+    price: 3,
+    annualPrice: 30,
     period: "month",
     description: "For serious sports enthusiasts",
     features: {
