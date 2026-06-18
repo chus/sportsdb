@@ -5,6 +5,7 @@ import { Target, Trophy, Lock, Zap } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { EmailOptInCard } from "@/components/email/email-optin-card";
 import { Link } from "@/i18n/navigation";
 
 interface Match {
@@ -108,6 +109,15 @@ export function ProdeForm({
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Match list */}
       <div className="lg:col-span-2 space-y-8">
+        {/* Once they've locked in a pick, offer matchday reminders */}
+        {submitted.size > 0 && (
+          <EmailOptInCard
+            context="prode_submit"
+            title="Never miss your picks"
+            description="Get a reminder before kickoff so you always lock in your predictions on time."
+            cta="Remind me before matches"
+          />
+        )}
         {Object.entries(grouped).length === 0 && (
           <p className="text-muted text-center py-12">
             No upcoming matches available for predictions right now.

@@ -5,6 +5,7 @@ import { Trophy, Lock, CheckCircle, XCircle, Brain } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { EmailOptInCard } from "@/components/email/email-optin-card";
 
 interface Question {
   id: string;
@@ -150,6 +151,16 @@ export function ChallengeGame({
               />
             </div>
           </div>
+        )}
+
+        {/* Capture opt-in right after they've finished — peak engagement */}
+        {questions.length > 0 && answeredCount === questions.length && (
+          <EmailOptInCard
+            context="challenge_complete"
+            title="Never break your streak"
+            description="Get a daily email reminder so you don't miss the challenge and lose your streak."
+            cta="Remind me daily"
+          />
         )}
 
         {questions.length === 0 && (

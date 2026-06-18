@@ -14,6 +14,7 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { getDashboardData } from "@/lib/queries/dashboard";
 import { getUserSubscription } from "@/lib/queries/subscriptions";
+import { EmailOptInCard } from "@/components/email/email-optin-card";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -48,6 +49,15 @@ export default async function DashboardPage() {
           <p className="mt-1 text-muted">
             Here is what is happening across your leagues.
           </p>
+        </div>
+
+        <div className="mb-8">
+          <EmailOptInCard
+            context="dashboard"
+            title="Stay in the loop"
+            description="Get your weekly digest, matchday reminders and football news. Unsubscribe anytime."
+            cta="Email me updates"
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
