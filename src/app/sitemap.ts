@@ -15,6 +15,7 @@ import {
 import { eq, sql, or, and, isNotNull, desc } from "drizzle-orm";
 import { compareMatchup } from "@/lib/seo/compare";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
+import { listStudies } from "@/lib/queries/studies";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -80,6 +81,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/studies`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${BASE_URL}/venues`,
@@ -546,8 +553,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
+  // Data-study pages (original rankings, refreshed weekly) — data-dense
+  // SEO assets and link bait.
+  const studyList = await listStudies();
+  const studyPages: MetadataRoute.Sitemap = studyList.map((s) => ({
+    url: `${BASE_URL}/studies/${s.slug}`,
+    lastModified: s.updatedAt ?? new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
   const allEntries: MetadataRoute.Sitemap = [
     ...staticPages,
+    ...studyPages,
     ...matchesHubPage,
     ...competitionPages,
     ...teamPages,

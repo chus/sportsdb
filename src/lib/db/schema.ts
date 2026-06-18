@@ -1379,3 +1379,28 @@ export const externalIds = pgTable(
     index("idx_external_ids_entity").on(table.entityType, table.entityId),
   ]
 );
+
+// ============================================================
+// DATA STUDIES (digital-PR / link-bait)
+// ============================================================
+
+// Auto-generated, data-dense "study" pages (e.g. "Most goals 2025/26") —
+// original rankings journalists can cite and a stable, freshening SEO asset.
+// Refreshed weekly by the generate-study cron; one slug per study type+season.
+export const studies = pgTable(
+  "studies",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull().unique(),
+    type: text("type").notNull(), // 'most-goals' | 'goals-per-90' | …
+    title: text("title").notNull(),
+    dek: text("dek").notNull(), // sub-headline / summary
+    data: jsonb("data").notNull(), // { columns, rows, methodology, seasonLabel, generatedAt }
+    pitchDraft: text("pitch_draft"), // LLM-drafted outreach pitch (human edits before sending)
+    status: text("status").notNull().default("published"),
+    linksEarned: integer("links_earned").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_studies_status").on(table.status)]
+);

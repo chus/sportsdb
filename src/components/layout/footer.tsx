@@ -41,6 +41,7 @@ export function Footer() {
       { label: "Venues", href: "/venues" },
       { label: "Injuries", href: "/injuries" },
       { label: "Compare Players", href: "/compare" },
+      { label: "Data Studies", href: "/studies" },
     ],
     [t("footer.legal")]: [
       { label: t("footer.about"), href: "/about" },
