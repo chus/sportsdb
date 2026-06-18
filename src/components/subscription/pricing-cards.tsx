@@ -11,7 +11,7 @@ interface PricingCardsProps {
 }
 
 export function PricingCards({ onUpgrade }: PricingCardsProps) {
-  const { tier: currentTier, upgrade, downgrade, isLoading } = useSubscription();
+  const { tier: currentTier, subscription, upgrade, downgrade, isLoading } = useSubscription();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("annual");
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [promoCode, setPromoCode] = useState("");
@@ -152,9 +152,14 @@ export function PricingCards({ onUpgrade }: PricingCardsProps) {
         {tiers.map((tierItem) => {
           const config = SUBSCRIPTION_TIERS[tierItem.id];
           const Icon = tierItem.icon;
-          const isCurrentTier = currentTier === tierItem.id;
-          const canUpgrade = currentTier === "free" && tierItem.id === "pro";
-          const canDowngrade = tierItem.id === "free" && currentTier !== "free";
+          // Trial users have tier "pro" but aren't paying — treat them as
+          // upgrade candidates so the "keep Pro" conversion path works.
+          const isTrialing = subscription?.status === "trialing";
+          const effectivelyPro = currentTier === "pro" && !isTrialing;
+          const isCurrentTier =
+            tierItem.id === "pro" ? effectivelyPro : currentTier === "free" && !isTrialing;
+          const canUpgrade = !effectivelyPro && tierItem.id === "pro";
+          const canDowngrade = tierItem.id === "free" && effectivelyPro;
           const displayPrice = getDisplayPrice(tierItem.id);
           const monthlyEquiv = getMonthlyEquivalent(tierItem.id);
 

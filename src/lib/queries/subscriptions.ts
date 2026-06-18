@@ -11,13 +11,17 @@ export interface UserSubscription {
   id: string;
   userId: string;
   tier: SubscriptionTier;
-  status: "active" | "cancelled" | "past_due";
+  status: "active" | "cancelled" | "past_due" | "trialing";
   startDate: Date;
   endDate: Date | null;
   autoRenew: boolean;
 }
 
-// Get user's subscription (creates free tier if none exists)
+/** Reverse trial: new users get full Pro free for this many days, no card. */
+export const TRIAL_DAYS = 7;
+
+// Get user's subscription. New users start a 7-day Pro reverse trial; an
+// expired trial reads as free (the expire-trials cron persists the flip).
 export async function getUserSubscription(
   userId: string
 ): Promise<UserSubscription> {
@@ -28,34 +32,43 @@ export async function getUserSubscription(
     .limit(1);
 
   if (existing) {
+    const trialExpired =
+      existing.status === "trialing" &&
+      existing.endDate != null &&
+      existing.endDate.getTime() < Date.now();
     return {
       id: existing.id,
       userId: existing.userId,
-      tier: existing.tier as SubscriptionTier,
-      status: existing.status as "active" | "cancelled" | "past_due",
+      // Defensive: never grant Pro from a lapsed trial even if the cron
+      // hasn't flipped the row yet.
+      tier: trialExpired ? "free" : (existing.tier as SubscriptionTier),
+      status: trialExpired ? "active" : (existing.status as UserSubscription["status"]),
       startDate: existing.startDate!,
       endDate: existing.endDate,
       autoRenew: existing.autoRenew,
     };
   }
 
-  // Create free tier for new users
+  // New user → start a Pro reverse trial (no card). They experience the full
+  // product, build habits, then drop to Free and convert on loss-aversion.
+  const trialEnd = new Date(Date.now() + TRIAL_DAYS * 86400000);
   const [newSub] = await db
     .insert(subscriptions)
     .values({
       userId,
-      tier: "free",
-      status: "active",
+      tier: "pro",
+      status: "trialing",
+      endDate: trialEnd,
     })
     .returning();
 
   return {
     id: newSub.id,
     userId: newSub.userId,
-    tier: "free",
-    status: "active",
+    tier: "pro",
+    status: "trialing",
     startDate: newSub.startDate!,
-    endDate: null,
+    endDate: trialEnd,
     autoRenew: true,
   };
 }

@@ -18,6 +18,7 @@ import { CookieConsentProvider } from "@/components/cookie-consent/cookie-consen
 import { CookieConsentBanner } from "@/components/cookie-consent/cookie-consent-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { TrialBanner } from "@/components/subscription/trial-banner";
 import { routing } from "@/i18n/routing";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -152,6 +153,7 @@ export default async function LocaleLayout({
                       <GoogleAnalytics />
                       <AdSenseScript />
                       <Navbar />
+                      <TrialBanner />
                       <ScoreStrip />
                       <main className="min-h-screen pb-16 lg:pb-0">{children}</main>
                       <Footer />

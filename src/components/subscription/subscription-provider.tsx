@@ -22,7 +22,7 @@ interface Subscription {
   id: string;
   userId: string;
   tier: SubscriptionTier;
-  status: "active" | "cancelled" | "past_due";
+  status: "active" | "cancelled" | "past_due" | "trialing";
   startDate: Date;
   endDate: Date | null;
   autoRenew: boolean;
