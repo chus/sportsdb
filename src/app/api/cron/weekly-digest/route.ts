@@ -40,15 +40,31 @@ function row(m: DM, withScore: boolean): string {
   </tr>`;
 }
 
-function buildHtml(name: string | null, results: DM[], fixtures: DM[]): string {
+function buildHtml(
+  name: string | null,
+  results: DM[],
+  fixtures: DM[],
+  injuries: { playerName: string; reason: string | null }[],
+): string {
   const section = (title: string, rows: DM[], withScore: boolean) =>
     rows.length === 0
       ? ""
       : `<h2 style="font-size:16px;color:#0f172a;margin:24px 0 8px;">${title}</h2>
          <table style="width:100%;border-collapse:collapse;">${rows.map((m) => row(m, withScore)).join("")}</table>`;
+  const injurySection =
+    injuries.length === 0
+      ? ""
+      : `<h2 style="font-size:16px;color:#0f172a;margin:24px 0 8px;">Injuries to your players</h2>
+         <table style="width:100%;border-collapse:collapse;">${injuries
+           .map(
+             (i) =>
+               `<tr><td style="padding:8px 0;font-size:14px;color:#0f172a;">${i.playerName}</td><td style="padding:8px 0;font-size:14px;color:#b91c1c;text-align:right;">${i.reason ?? "Out"}</td></tr>`,
+           )
+           .join("")}</table>`;
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
     <h1 style="font-size:20px;color:#0f172a;margin:0 0 4px;">Your football week${name ? `, ${name}` : ""}</h1>
-    <p style="font-size:14px;color:#64748b;margin:0 0 8px;">Results and fixtures for the teams you follow.</p>
+    <p style="font-size:14px;color:#64748b;margin:0 0 8px;">Results, fixtures and injury news for who you follow.</p>
+    ${injurySection}
     ${section("Recent results", results, true)}
     ${section("Upcoming fixtures", fixtures, false)}
     <div style="margin-top:28px;">
@@ -77,8 +93,8 @@ export async function GET(request: NextRequest) {
 
   for (const u of recipients) {
     if (!u.email) continue;
-    const { results, fixtures } = await getUserDigestContent(u.id);
-    if (results.length === 0 && fixtures.length === 0) {
+    const { results, fixtures, injuries } = await getUserDigestContent(u.id);
+    if (results.length === 0 && fixtures.length === 0 && injuries.length === 0) {
       skippedEmpty++;
       continue; // nothing to say — don't send an empty email
     }
@@ -89,7 +105,7 @@ export async function GET(request: NextRequest) {
     const ok = await sendEmail({
       to: u.email,
       subject: "Your football week — results & fixtures",
-      html: buildHtml(u.name, results, fixtures),
+      html: buildHtml(u.name, results, fixtures, injuries),
     });
     if (ok) sent++;
   }

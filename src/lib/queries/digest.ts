@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { users, follows, notificationSettings, matches, teams } from "@/lib/db/schema";
+import { users, follows, notificationSettings, matches, teams, players, injuries, competitionSeasons, seasons } from "@/lib/db/schema";
 import { and, eq, gte, lte, or, inArray, desc, asc, isNotNull } from "drizzle-orm";
 
 /**
@@ -35,16 +35,41 @@ interface DigestMatch {
  * results (last 7d) and upcoming fixtures (next 14d). The recurring hook —
  * "your teams played / play next" — that gives a reason to return.
  */
+export interface DigestInjury {
+  playerName: string;
+  reason: string | null;
+  type: string | null;
+}
+
+/** Current injuries among a user's followed players — a follow alert. */
+async function getFollowedPlayerInjuries(userId: string): Promise<DigestInjury[]> {
+  const followed = await db
+    .select({ playerId: follows.entityId })
+    .from(follows)
+    .where(and(eq(follows.userId, userId), eq(follows.entityType, "player")));
+  const playerIds = followed.map((f) => f.playerId);
+  if (playerIds.length === 0) return [];
+  return db
+    .select({ playerName: players.name, reason: injuries.reason, type: injuries.type })
+    .from(injuries)
+    .innerJoin(players, eq(players.id, injuries.playerId))
+    .innerJoin(competitionSeasons, eq(competitionSeasons.id, injuries.competitionSeasonId))
+    .innerJoin(seasons, and(eq(seasons.id, competitionSeasons.seasonId), eq(seasons.isCurrent, true)))
+    .where(inArray(injuries.playerId, playerIds));
+}
+
 export async function getUserDigestContent(userId: string): Promise<{
   results: DigestMatch[];
   fixtures: DigestMatch[];
+  injuries: DigestInjury[];
 }> {
+  const playerInjuries = await getFollowedPlayerInjuries(userId);
   const followed = await db
     .select({ teamId: follows.entityId })
     .from(follows)
     .where(and(eq(follows.userId, userId), eq(follows.entityType, "team")));
   const teamIds = followed.map((f) => f.teamId);
-  if (teamIds.length === 0) return { results: [], fixtures: [] };
+  if (teamIds.length === 0) return { results: [], fixtures: [], injuries: playerInjuries };
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 86400000);
@@ -99,5 +124,5 @@ export async function getUserDigestContent(userId: string): Promise<{
     awayScore: r.awayScore,
   });
 
-  return { results: resultRows.map(enrich), fixtures: fixtureRows.map(enrich) };
+  return { results: resultRows.map(enrich), fixtures: fixtureRows.map(enrich), injuries: playerInjuries };
 }

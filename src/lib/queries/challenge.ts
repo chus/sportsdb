@@ -195,6 +195,36 @@ export async function getUserDailyProgress(userId: string) {
   };
 }
 
+/**
+ * Current consecutive-day challenge streak for a user. Counts the run of
+ * days ending today or yesterday (a streak answered through yesterday is
+ * still "live" until midnight). Returns 0 if no active run. Feeds the
+ * streak badge in the challenge UI — the visible half of the habit loop
+ * that the daily-reminders email protects.
+ */
+export async function getCurrentStreak(userId: string): Promise<number> {
+  const res = await db.execute(sql`
+    WITH days AS (
+      SELECT DISTINCT cq.active_date AS d
+      FROM ${challengeAnswers} ca
+      JOIN ${challengeQuestions} cq ON cq.id = ca.question_id
+      WHERE ca.user_id = ${userId} AND cq.active_date IS NOT NULL
+    ),
+    ranked AS (
+      SELECT d, (d - (row_number() OVER (ORDER BY d))::int) AS grp FROM days
+    ),
+    streaks AS (
+      SELECT count(*)::int AS len, max(d) AS last_d FROM ranked GROUP BY grp
+    )
+    SELECT len FROM streaks
+    WHERE last_d >= CURRENT_DATE - 1
+    ORDER BY last_d DESC
+    LIMIT 1
+  `);
+  const rows = (res as unknown as { rows?: { len: number }[] }).rows ?? (res as unknown as { len: number }[]);
+  return rows[0]?.len ?? 0;
+}
+
 // Get challenge leaderboard
 export async function getChallengeLeaderboard(limit = 50) {
   const results = await db
