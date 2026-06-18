@@ -151,6 +151,25 @@ export async function GET() {
     await sql`UPDATE players SET is_indexable = false, updated_at = NOW() WHERE id = ANY(${chunk}::uuid[])`;
   }
 
+  // Refresh popularity_score from real output (goals/assists/appearances +
+  // rating). Drives the /compare matrix, internal "Compare with" links, and
+  // compare pre-rendering. Mirrors scripts/compute-player-popularity.ts.
+  const popResult = await sql`
+    UPDATE players p SET popularity_score = sub.score
+    FROM (
+      SELECT pl.id,
+        GREATEST(0,
+          COALESCE(s.g, 0) * 4 + COALESCE(s.a, 0) * 3 + COALESCE(s.apps, 0)
+          + COALESCE(ROUND(GREATEST(r.ar - 6, 0) * 30)::int, 0)
+        ) AS score
+      FROM players pl
+      LEFT JOIN (SELECT player_id, SUM(goals) g, SUM(assists) a, SUM(appearances) apps FROM player_season_stats GROUP BY player_id) s ON s.player_id = pl.id
+      LEFT JOIN (SELECT player_id, AVG(rating) ar FROM player_match_stats WHERE rating IS NOT NULL GROUP BY player_id) r ON r.player_id = pl.id
+    ) sub
+    WHERE p.id = sub.id AND p.popularity_score IS DISTINCT FROM sub.score
+    RETURNING p.id
+  `;
+
   return NextResponse.json({
     success: true,
     totalPlayers: players.length,
@@ -158,6 +177,7 @@ export async function GET() {
     totalIndexable: tierCounts.A + tierCounts.B,
     flippedToTrue: toSetTrue.length,
     flippedToFalse: toSetFalse.length,
+    popularityUpdated: popResult.length,
     timestamp: new Date().toISOString(),
   });
 }

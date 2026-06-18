@@ -258,6 +258,32 @@ export const getPlayerRecentPerformances = cache(async (playerId: string, limit 
 });
 
 /**
+ * Same-position indexable players nearest in popularity — the comparison
+ * set for a player. Powers the "Compare with" links on the player page,
+ * which are the internal-link trail Google follows into the /compare
+ * matrix (the one format that ranks). Ordered by closeness in popularity
+ * so we surface like-for-like matchups (star vs star), not mismatches.
+ */
+export const getPlayerComparisonRivals = cache(
+  async (playerId: string, position: string | null, popularityScore: number | null, limit = 8) => {
+    if (!position) return [];
+    return db
+      .select({ slug: players.slug, name: players.name })
+      .from(players)
+      .where(
+        and(
+          eq(players.isIndexable, true),
+          eq(players.position, position),
+          sql`${players.id} <> ${playerId}`,
+          sql`${players.popularityScore} > 0`,
+        ),
+      )
+      .orderBy(sql`abs(${players.popularityScore} - ${popularityScore ?? 0})`)
+      .limit(limit);
+  },
+);
+
+/**
  * Compute the quality score for a player page.
  * Used to decide 404 vs noindex vs indexed.
  */

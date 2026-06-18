@@ -12,7 +12,8 @@ import {
   venues,
   players,
 } from "@/lib/db/schema";
-import { eq, sql, or, and, isNotNull } from "drizzle-orm";
+import { eq, sql, or, and, isNotNull, desc } from "drizzle-orm";
+import { compareMatchup } from "@/lib/seo/compare";
 import { scoreTeamPage } from "@/lib/seo/page-quality";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -337,11 +338,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           )`,
         )
       ),
-    // Top players for compare matchup pages — currently unused (compare matchup
-    // pages were dropped from the sitemap because popularity_score is 0 for all
-    // players, so the "top 15" was arbitrary and the pages rendered with all-zero
-    // stats). Re-enable when popularity_score is actually computed.
-    Promise.resolve([] as { slug: string }[]),
+    // Top indexable players (by computed popularity_score) for the compare
+    // matchup matrix. Comparison pages are the one format that ranks on page
+    // one in GSC, so we feed Google a generous, position-grouped set. Pairs
+    // are built per-position below ("X vs Y" is almost always same-position).
+    db
+      .select({ slug: players.slug, position: players.position })
+      .from(players)
+      .where(and(eq(players.isIndexable, true), sql`${players.popularityScore} > 0`))
+      .orderBy(desc(players.popularityScore))
+      .limit(200),
     // Distinct team countries with 3+ teams (for /teams/country/[country])
     db
       .selectDistinct({ country: teams.country })
@@ -470,16 +476,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Compare matchup pages — top player pairs (C(15,2) = 105 pages)
+  // Compare matchup pages — the one format that ranks page-one in GSC.
+  // Pair players WITHIN the same position ("X vs Y" is almost always
+  // like-for-like), capped per position to keep the set high-quality.
+  // Pages render on-demand via ISR, so a few thousand URLs cost no build
+  // time — they just give Google a crawl trail into the matrix.
+  const POSITION_CAPS: Record<string, number> = {
+    Forward: 55,
+    Midfielder: 40,
+    Defender: 28,
+    Goalkeeper: 10,
+  };
+  const byPosition = new Map<string, { slug: string }[]>();
+  for (const p of topPlayerPairs as Array<{ slug: string; position: string | null }>) {
+    const pos = p.position ?? "Forward";
+    (byPosition.get(pos) ?? byPosition.set(pos, []).get(pos)!).push(p);
+  }
   const comparePages: MetadataRoute.Sitemap = [];
-  for (let i = 0; i < topPlayerPairs.length; i++) {
-    for (let j = i + 1; j < topPlayerPairs.length; j++) {
-      comparePages.push({
-        url: `${BASE_URL}/compare/${topPlayerPairs[i].slug}-vs-${topPlayerPairs[j].slug}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      });
+  for (const [pos, group] of byPosition) {
+    const capped = group.slice(0, POSITION_CAPS[pos] ?? 30);
+    for (let i = 0; i < capped.length; i++) {
+      for (let j = i + 1; j < capped.length; j++) {
+        comparePages.push({
+          url: `${BASE_URL}/compare/${compareMatchup(capped[i].slug, capped[j].slug)}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        });
+      }
     }
   }
 

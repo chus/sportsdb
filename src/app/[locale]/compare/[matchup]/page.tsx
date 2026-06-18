@@ -8,6 +8,7 @@ import {
   getPlayerWithAggregatedStats,
 } from "@/lib/queries/leaderboards";
 import { BreadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld";
+import { compareMatchup } from "@/lib/seo/compare";
 import { PageTracker } from "@/components/analytics/page-tracker";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { ExternalLinks } from "@/components/entity/external-links";
@@ -30,14 +31,20 @@ function parseMatchup(matchup: string): { slug1: string; slug2: string } | null 
 }
 
 export async function generateStaticParams() {
-  const topPlayers = await getTopPlayerPairs(15);
+  // Pre-render the very top players' pairs (now ranked by real
+  // popularity_score); the rest of the sitemap matrix renders on-demand
+  // via ISR. Canonical (alphabetical) order so prerendered paths match the
+  // canonical tag.
+  const topPlayers = await getTopPlayerPairs(25);
+  const seen = new Set<string>();
   const params: { matchup: string }[] = [];
 
   for (let i = 0; i < topPlayers.length; i++) {
     for (let j = i + 1; j < topPlayers.length; j++) {
-      params.push({
-        matchup: `${topPlayers[i].slug}-vs-${topPlayers[j].slug}`,
-      });
+      const matchup = compareMatchup(topPlayers[i].slug, topPlayers[j].slug);
+      if (seen.has(matchup)) continue;
+      seen.add(matchup);
+      params.push({ matchup });
     }
   }
 
@@ -65,7 +72,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (emptyBoth) notFound();
 
   const title = `${p1.name} vs ${p2.name} – Stats Comparison`;
-  const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, and career statistics.`;
+  const description = `Compare ${p1.name} and ${p2.name} side by side. Goals, assists, appearances, ratings, and career statistics.`;
+
+  // Canonical (alphabetical) order so reverse-order URLs don't read as
+  // duplicate pages.
+  const canonical = compareMatchup(parsed.slug1, parsed.slug2);
 
   return {
     title,
@@ -73,11 +84,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      url: `${BASE_URL}/compare/${matchup}`,
+      url: `${BASE_URL}/compare/${canonical}`,
       siteName: "DataSports",
       type: "website",
     },
-    alternates: localizedAlternates(`/compare/${matchup}`),
+    alternates: localizedAlternates(`/compare/${canonical}`),
   };
 }
 
