@@ -42,6 +42,7 @@ export function Footer() {
       { label: "Injuries", href: "/injuries" },
       { label: "Compare Players", href: "/compare" },
       { label: "Data Studies", href: "/studies" },
+      { label: "FPL Tools", href: "/fpl" },
     ],
     [t("footer.legal")]: [
       { label: t("footer.about"), href: "/about" },

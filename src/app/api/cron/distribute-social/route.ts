@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { postTweet } from "@/lib/social/twitter";
 import { postToReddit } from "@/lib/social/reddit";
+import { postToBluesky } from "@/lib/social/bluesky";
 import {
   composeTweet,
   composeRedditTitle,
@@ -14,6 +15,7 @@ export const maxDuration = 120;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 const MAX_TWEETS_PER_RUN = 10;
+const MAX_BLUESKY_PER_RUN = 10;
 const MAX_REDDIT_PER_RUN = 5;
 const REDDIT_ARTICLE_TYPES = ["match_report", "round_recap"];
 
@@ -43,6 +45,7 @@ export async function GET(request: NextRequest) {
 
   const results = {
     tweetsPosted: 0,
+    blueskyPosted: 0,
     redditPosted: 0,
     errors: [] as string[],
     dryRun,
@@ -73,6 +76,31 @@ export async function GET(request: NextRequest) {
         AND sp.id IS NULL
       ORDER BY a.published_at DESC
       LIMIT ${MAX_TWEETS_PER_RUN}
+    `;
+
+    const articlesForBluesky = await sql`
+      SELECT
+        a.id, a.slug, a.type, a.title, a.excerpt, a.matchday,
+        m.home_score, m.away_score,
+        ht.name as home_team, awt.name as away_team,
+        p.name as player_name,
+        pss.goals as player_goals, pss.assists as player_assists,
+        c.name as competition_name, c.slug as competition_slug
+      FROM articles a
+      LEFT JOIN matches m ON a.match_id = m.id
+      LEFT JOIN teams ht ON m.home_team_id = ht.id
+      LEFT JOIN teams awt ON m.away_team_id = awt.id
+      LEFT JOIN players p ON a.primary_player_id = p.id
+      LEFT JOIN competition_seasons cs ON a.competition_season_id = cs.id
+      LEFT JOIN competitions c ON cs.competition_id = c.id
+      LEFT JOIN player_season_stats pss ON pss.player_id = p.id
+        AND pss.competition_season_id = cs.id
+      LEFT JOIN social_posts sp ON sp.article_id = a.id AND sp.platform = 'bluesky'
+      WHERE a.status = 'published'
+        AND a.published_at >= NOW() - INTERVAL '24 hours'
+        AND sp.id IS NULL
+      ORDER BY a.published_at DESC
+      LIMIT ${MAX_BLUESKY_PER_RUN}
     `;
 
     const articlesForReddit = await sql`
@@ -158,6 +186,65 @@ export async function GET(request: NextRequest) {
       }
 
       if (articlesForTwitter.indexOf(row) < articlesForTwitter.length - 1) {
+        await sleep(randomDelay());
+      }
+    }
+
+    // Post to Bluesky (the safest social channel + best referral click-rate).
+    // Reuses the tweet composer (text already includes the article URL); the
+    // URL is turned into a clickable link facet by postToBluesky.
+    for (const row of articlesForBluesky) {
+      const article: ArticleForSocial = {
+        slug: row.slug,
+        type: row.type,
+        title: row.title,
+        excerpt: row.excerpt,
+        homeTeam: row.home_team,
+        awayTeam: row.away_team,
+        homeScore: row.home_score,
+        awayScore: row.away_score,
+        playerName: row.player_name,
+        playerGoals: row.player_goals,
+        playerAssists: row.player_assists,
+        competitionName: row.competition_name,
+        competitionSlug: row.competition_slug,
+        matchday: row.matchday,
+      };
+
+      const text = composeTweet(article);
+      const articleUrl = `${BASE_URL}/news/${row.slug}`;
+
+      if (dryRun) {
+        console.log(`[DRY RUN] Bluesky for ${row.slug}:\n${text}\n`);
+        results.blueskyPosted++;
+        continue;
+      }
+
+      try {
+        const result = await postToBluesky(text, articleUrl);
+        await sql`
+          INSERT INTO social_posts (platform, content, link_url, article_id, external_id, status, posted_at)
+          VALUES (
+            'bluesky',
+            ${text},
+            ${articleUrl},
+            ${row.id},
+            ${result?.uri || null},
+            ${result ? "posted" : "failed"},
+            ${result ? new Date().toISOString() : null}
+          )
+        `;
+        if (result) results.blueskyPosted++;
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        results.errors.push(`Bluesky ${row.slug}: ${msg}`);
+        await sql`
+          INSERT INTO social_posts (platform, content, link_url, article_id, status, error_message)
+          VALUES ('bluesky', ${text}, ${articleUrl}, ${row.id}, 'failed', ${msg})
+        `;
+      }
+
+      if (articlesForBluesky.indexOf(row) < articlesForBluesky.length - 1) {
         await sleep(randomDelay());
       }
     }
