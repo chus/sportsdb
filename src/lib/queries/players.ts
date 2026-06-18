@@ -258,6 +258,29 @@ export const getPlayerRecentPerformances = cache(async (playerId: string, limit 
 });
 
 /**
+ * Per-match performance averages from player_match_stats — rating, shots,
+ * key passes, pass accuracy, dribble & duel success. Makes the comparison
+ * pages genuinely differentiated (most rival sites only show career totals),
+ * which both ranks better and reads as less "thin". Returns null-ish zeros
+ * when a player has no rated matches.
+ */
+export const getPlayerMatchAggregates = cache(async (playerId: string) => {
+  const [r] = await db
+    .select({
+      rated: sql<number>`count(*) FILTER (WHERE ${playerMatchStats.rating} IS NOT NULL)::int`,
+      avgRating: sql<number | null>`AVG(${playerMatchStats.rating})`,
+      avgShots: sql<number | null>`AVG(${playerMatchStats.shotsTotal})`,
+      avgKeyPasses: sql<number | null>`AVG(${playerMatchStats.keyPasses})`,
+      avgPassAcc: sql<number | null>`AVG(${playerMatchStats.passAccuracy})`,
+      dribblePct: sql<number | null>`SUM(${playerMatchStats.dribblesSuccess})::float / NULLIF(SUM(${playerMatchStats.dribblesAttempts}), 0) * 100`,
+      duelPct: sql<number | null>`SUM(${playerMatchStats.duelsWon})::float / NULLIF(SUM(${playerMatchStats.duelsTotal}), 0) * 100`,
+    })
+    .from(playerMatchStats)
+    .where(eq(playerMatchStats.playerId, playerId));
+  return r;
+});
+
+/**
  * Same-position indexable players nearest in popularity — the comparison
  * set for a player. Powers the "Compare with" links on the player page,
  * which are the internal-link trail Google follows into the /compare

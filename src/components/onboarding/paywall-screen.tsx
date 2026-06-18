@@ -43,7 +43,6 @@ const FEATURE_LABELS: { key: string; label: string; comingSoon?: boolean }[] = [
   { key: "follows", label: "Player & team follows" },
   { key: "comparisons", label: "Daily comparisons" },
   { key: "adFree", label: "Ad-free experience" },
-  { key: "exportData", label: "Export data" },
   { key: "historicalData", label: "Multi-season historical data" },
 ];
 

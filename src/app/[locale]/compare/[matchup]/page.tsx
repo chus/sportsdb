@@ -7,6 +7,7 @@ import {
   getTopPlayerPairs,
   getPlayerWithAggregatedStats,
 } from "@/lib/queries/leaderboards";
+import { getPlayerMatchAggregates } from "@/lib/queries/players";
 import { BreadcrumbJsonLd, JsonLd } from "@/components/seo/json-ld";
 import { compareMatchup } from "@/lib/seo/compare";
 import { PageTracker } from "@/components/analytics/page-tracker";
@@ -98,22 +99,25 @@ function StatRow({
   value2,
   icon: Icon,
   higherIsBetter = true,
+  format,
 }: {
   label: string;
   value1: number;
   value2: number;
   icon: React.ElementType;
   higherIsBetter?: boolean;
+  format?: (v: number) => string;
 }) {
   const p1Better = higherIsBetter ? value1 > value2 : value1 < value2;
   const p2Better = higherIsBetter ? value2 > value1 : value2 < value1;
   const equal = value1 === value2;
+  const fmt = (v: number) => (format ? format(v) : v.toLocaleString());
 
   return (
     <div className="flex items-center py-3 border-b border-line last:border-0">
       <div className="flex-1 text-right">
         <span className={`text-lg font-semibold ${p1Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
-          {value1.toLocaleString()}
+          {fmt(value1)}
         </span>
       </div>
       <div className="w-32 text-center">
@@ -124,7 +128,7 @@ function StatRow({
       </div>
       <div className="flex-1 text-left">
         <span className={`text-lg font-semibold ${p2Better ? "text-green-600" : equal ? "text-ink" : "text-muted"}`}>
-          {value2.toLocaleString()}
+          {fmt(value2)}
         </span>
       </div>
     </div>
@@ -178,6 +182,16 @@ export default async function CompareMatchupPage({ params }: PageProps) {
   ]);
 
   if (!player1 || !player2) notFound();
+
+  // Per-match performance averages (rating, shots, passes …) — the
+  // differentiated content that lifts these pages above career-totals-only
+  // rivals. Shown only when both players have rated matches.
+  const [agg1, agg2] = await Promise.all([
+    getPlayerMatchAggregates(player1.id),
+    getPlayerMatchAggregates(player2.id),
+  ]);
+  const showPerMatch = (agg1?.rated ?? 0) > 0 && (agg2?.rated ?? 0) > 0;
+  const num = (v: number | null | undefined) => (v == null ? 0 : Number(v));
 
   return (
     <>
@@ -299,6 +313,56 @@ export default async function CompareMatchupPage({ params }: PageProps) {
                     value1={parseFloat((player1.totalStats.assists / player1.totalStats.appearances).toFixed(2))}
                     value2={parseFloat((player2.totalStats.assists / player2.totalStats.appearances).toFixed(2))}
                     icon={TrendingUp}
+                  />
+                </div>
+              )}
+
+              {showPerMatch && (
+                <div className="mt-6 pt-4 border-t border-line">
+                  <h4 className="text-sm font-medium text-muted text-center mb-4">
+                    Per-Match Averages
+                  </h4>
+                  <StatRow
+                    label="Rating"
+                    value1={num(agg1!.avgRating)}
+                    value2={num(agg2!.avgRating)}
+                    icon={TrendingUp}
+                    format={(v) => v.toFixed(2)}
+                  />
+                  <StatRow
+                    label="Shots/Game"
+                    value1={num(agg1!.avgShots)}
+                    value2={num(agg2!.avgShots)}
+                    icon={Target}
+                    format={(v) => v.toFixed(1)}
+                  />
+                  <StatRow
+                    label="Key Passes"
+                    value1={num(agg1!.avgKeyPasses)}
+                    value2={num(agg2!.avgKeyPasses)}
+                    icon={TrendingUp}
+                    format={(v) => v.toFixed(1)}
+                  />
+                  <StatRow
+                    label="Pass %"
+                    value1={num(agg1!.avgPassAcc)}
+                    value2={num(agg2!.avgPassAcc)}
+                    icon={Target}
+                    format={(v) => `${Math.round(v)}%`}
+                  />
+                  <StatRow
+                    label="Dribble %"
+                    value1={num(agg1!.dribblePct)}
+                    value2={num(agg2!.dribblePct)}
+                    icon={TrendingUp}
+                    format={(v) => `${Math.round(v)}%`}
+                  />
+                  <StatRow
+                    label="Duels Won"
+                    value1={num(agg1!.duelPct)}
+                    value2={num(agg2!.duelPct)}
+                    icon={Shield}
+                    format={(v) => `${Math.round(v)}%`}
                   />
                 </div>
               )}
