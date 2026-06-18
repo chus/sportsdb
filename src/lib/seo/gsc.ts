@@ -80,7 +80,7 @@ export interface GscTotals {
   position: number;
 }
 
-export type GscStatus = "ok" | "no_credentials" | "not_authorized" | "error";
+export type GscStatus = "ok" | "no_credentials" | "not_authorized" | "api_disabled" | "error";
 
 /** Low-level Search Analytics query. Returns null on any failure. */
 export async function gscQuery(params: {
@@ -106,12 +106,17 @@ export async function gscQuery(params: {
         }),
       }
     );
-    if (res.status === 403) {
-      console.warn("[GSC] 403 — service account not added to the property");
-      return { rows: [], status: "not_authorized" };
-    }
     if (!res.ok) {
-      console.warn(`[GSC] query error ${res.status}: ${await res.text()}`);
+      const body = await res.text();
+      if (/SERVICE_DISABLED|accessNotConfigured|has not been used/i.test(body)) {
+        console.warn("[GSC] Search Console API is not enabled in the Cloud project");
+        return { rows: [], status: "api_disabled" };
+      }
+      if (res.status === 403) {
+        console.warn("[GSC] 403 — service account lacks access to the property");
+        return { rows: [], status: "not_authorized" };
+      }
+      console.warn(`[GSC] query error ${res.status}: ${body}`);
       return { rows: [], status: "error" };
     }
     const data = await res.json();

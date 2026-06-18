@@ -70,11 +70,13 @@ function buildEmail(wow: WeekOverWeek, geo: Awaited<ReturnType<typeof checkCitat
               <td style="padding:4px 0;font-size:13px;color:#dc2626;text-align:right;">${d.prior} → ${d.current} (${d.delta})</td></tr>`
            ).join("")
          }</table>` : ""}`
-      : wow.status === "not_authorized"
-        ? `<p style="font-size:14px;color:#b45309;">⚠️ Search Console not connected. Add the service account email as a user on the datasports.co property (Settings → Users and permissions) to enable GSC monitoring.</p>`
-        : wow.status === "no_credentials"
-          ? `<p style="font-size:14px;color:#b45309;">GOOGLE_SERVICE_ACCOUNT_JSON not set — GSC monitoring skipped.</p>`
-          : `<p style="font-size:14px;color:#b45309;">GSC query error — see logs.</p>`;
+      : wow.status === "api_disabled"
+        ? `<p style="font-size:14px;color:#b45309;">⚠️ The Search Console API is not enabled in the Google Cloud project. Enable it once at console.cloud.google.com → APIs &amp; Services → Search Console API → Enable (project sportsdb-490313), then wait a few minutes.</p>`
+        : wow.status === "not_authorized"
+          ? `<p style="font-size:14px;color:#b45309;">⚠️ Search Console not connected. Add the service account email as a user on the datasports.co property (Settings → Users and permissions).</p>`
+          : wow.status === "no_credentials"
+            ? `<p style="font-size:14px;color:#b45309;">GOOGLE_SERVICE_ACCOUNT_JSON not set — GSC monitoring skipped.</p>`
+            : `<p style="font-size:14px;color:#b45309;">GSC query error — see logs.</p>`;
 
   const geoSection =
     geo.status === "ok"
