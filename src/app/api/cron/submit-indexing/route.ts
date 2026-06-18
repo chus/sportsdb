@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { submitUrlsToGoogle, submitUrlsToIndexNow } from "@/lib/seo/indexnow";
+import { compareMatchup } from "@/lib/seo/compare";
 
 export const maxDuration = 60;
 
@@ -98,15 +99,37 @@ export async function GET(request: NextRequest) {
         break;
       }
       case 4: {
-        // Leaderboard pages
-        category = "leaderboards";
+        // Leaderboards + comparison pages. Compare pages are the format
+        // that ranks page-one in GSC, so actively push them: pair the top
+        // popularity-ranked players within position (matches the sitemap)
+        // and submit in canonical order.
+        category = "leaderboards + comparisons";
         const competitions = await sql`
           SELECT slug FROM competitions ORDER BY name LIMIT 30
         `;
-        paths = competitions.flatMap((c) => [
+        const leaderboardPaths = competitions.flatMap((c) => [
           `/top-scorers/${c.slug}`,
           `/top-assists/${c.slug}`,
         ]);
+        const topPlayers = (await sql`
+          SELECT slug, position FROM players
+          WHERE is_indexable = true AND popularity_score > 0
+          ORDER BY popularity_score DESC LIMIT 60
+        `) as Array<{ slug: string; position: string | null }>;
+        const byPos = new Map<string, string[]>();
+        for (const p of topPlayers) {
+          const k = p.position ?? "Forward";
+          (byPos.get(k) ?? byPos.set(k, []).get(k)!).push(p.slug);
+        }
+        const comparePaths: string[] = [];
+        for (const group of byPos.values()) {
+          for (let i = 0; i < group.length && comparePaths.length < 150; i++) {
+            for (let j = i + 1; j < group.length && comparePaths.length < 150; j++) {
+              comparePaths.push(`/compare/${compareMatchup(group[i], group[j])}`);
+            }
+          }
+        }
+        paths = [...leaderboardPaths, ...comparePaths];
         break;
       }
       default: {
