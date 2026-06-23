@@ -130,7 +130,7 @@ export async function resolvePlayer(
   provider: Provider,
   providerPlayerId: number,
   name: string,
-  create?: { position?: string | null; nationality?: string | null; imageUrl?: string | null },
+  create?: { position?: string | null; nationality?: string | null; imageUrl?: string | null; teamId?: string | null },
 ): Promise<ResolvedEntity | null> {
   const mapped = await lookupMapping(sql, "player", provider, providerPlayerId);
   if (mapped) return { ...mapped, via: "external_id" };
@@ -140,6 +140,36 @@ export async function resolvePlayer(
   if (bySlug[0]) {
     await writeMapping(sql, "player", bySlug[0].id, provider, providerPlayerId);
     return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
+  }
+
+  // Bridge before creating a duplicate. API-Football sends abbreviated names
+  // ("E. Haaland") that never slug-match the football-data full-name row
+  // ("Erling Haaland"), so a second player row used to be created and the af id
+  // stamped on it (the duplicate-player bug). Link instead to an existing
+  // full-name player on the SAME current team with the same surname + first
+  // initial — but ONLY when exactly one such candidate exists and it doesn't
+  // already carry an id from this provider. Conservative by design: never links
+  // when two same-initial+surname players share a team (e.g. Ché vs Chase Adams).
+  if (create?.teamId) {
+    const candidates = await sql.query(
+      `SELECT p.id, p.slug
+       FROM players p
+       JOIN player_team_history pth ON pth.player_id = p.id AND pth.valid_to IS NULL AND pth.team_id = $1
+       WHERE substr(p.name, 2, 1) <> '.'
+         AND upper(left(p.name, 1)) = upper(left($2, 1))
+         AND lower(regexp_replace(p.name, '^.* ', '')) = lower(regexp_replace($2, '^.* ', ''))
+         AND length(regexp_replace(p.name, '^.* ', '')) >= 3
+         AND NOT EXISTS (
+           SELECT 1 FROM external_ids x
+           WHERE x.entity_id = p.id AND x.entity_type = 'player' AND x.provider = $3
+         )
+       LIMIT 2`,
+      [create.teamId, name, provider],
+    );
+    if (candidates.length === 1) {
+      await writeMapping(sql, "player", candidates[0].id, provider, providerPlayerId);
+      return { ...candidates[0], via: "name_match" } as ResolvedEntity;
+    }
   }
 
   if (!create) return null;

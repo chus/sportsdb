@@ -143,6 +143,40 @@ export async function GET() {
   `;
   checks.push({ name: "no_duplicate_fixtures", ok: dupes === 0, detail: `${dupes} duplicate fixtures` });
 
+  // 7. No duplicate PLAYER entities — same signature as the club dupes:
+  //    one (current team, first initial, surname) carrying exactly an
+  //    af-abbreviated row ("E. Haaland") + an fd-full-name row ("Erling
+  //    Haaland"). The resolver now bridges these, so any new occurrence means
+  //    the bridge missed a case — catch it before it splits stats again.
+  //    Matches scripts/merge-duplicate-players.ts findPairs() gating.
+  const [{ c: dupePlayers }] = await sql`
+    SELECT count(*)::int AS c FROM (
+      WITH prov AS (
+        SELECT entity_id, bool_or(provider='af') AS af, bool_or(provider='fd') AS fd
+        FROM external_ids WHERE entity_type='player' GROUP BY entity_id
+      ),
+      cur AS (
+        SELECT (substr(p.name,2,1) = '.') AS abbrev,
+          upper(left(p.name,1)) AS initial,
+          lower(regexp_replace(p.name,'^.* ','')) AS surname,
+          pth.team_id,
+          coalesce(pr.af,false) AS af, coalesce(pr.fd,false) AS fd
+        FROM players p
+        JOIN player_team_history pth ON pth.player_id=p.id AND pth.valid_to IS NULL
+        LEFT JOIN prov pr ON pr.entity_id = p.id
+      )
+      SELECT 1 FROM cur
+      WHERE length(surname) >= 3
+      GROUP BY team_id, initial, surname
+      HAVING count(*) = 2
+         AND count(*) FILTER (WHERE abbrev) = 1
+         AND count(*) FILTER (WHERE NOT abbrev) = 1
+         AND bool_or(abbrev AND af)
+         AND bool_or((NOT abbrev) AND fd)
+    ) d
+  `;
+  checks.push({ name: "no_duplicate_players", ok: dupePlayers === 0, detail: `${dupePlayers} duplicate player pairs` });
+
   const failed = checks.filter((c) => !c.ok);
   const healthy = failed.length === 0;
 

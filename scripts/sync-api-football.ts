@@ -1498,6 +1498,7 @@ async function syncPlayerStats(league: LeagueConfig) {
         position: mapPosition(stats.games?.position) || "Unknown",
         nationality: ap.nationality ?? null,
         imageUrl: ap.photo ?? null,
+        teamId: team.id,
       });
       if (!player) { missed++; continue; }
 
@@ -1587,6 +1588,7 @@ async function syncMatchDetails(league: LeagueConfig, force = false) {
         if (!lp?.id || !lp?.name) continue;
         const player = await resolvePlayer(sql, "af", lp.id, lp.name, {
           position: mapPosition(lp.pos) || "Unknown",
+          teamId: team.id,
         });
         if (!player) continue;
         await sql`
