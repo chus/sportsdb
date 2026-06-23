@@ -55,10 +55,12 @@ export async function generateMetadata({
   const { slug, locale } = await params;
   const match = await getMatchWithDetailsBySlug(slug);
 
-  // Trigger a real 404 from metadata so the response status is 404 (not 200).
-  // Returning "Match Not Found" metadata leaves the response as 200 and shows up
-  // in Search Console as a soft 404, which hurts overall domain quality.
-  if (!match || !match.homeTeam || !match.awayTeam || (match.status !== "finished" && match.status !== "live")) {
+  // Only a genuinely missing match 404s. Upcoming/scheduled matches DO render —
+  // they're linked from team pages, fixtures and the dashboard, so 404-ing them
+  // created dead internal links. They render as a noindex,follow preview (see
+  // isIndexable below) so users + crawlers get a real page without indexing thin
+  // pre-match content.
+  if (!match || !match.homeTeam || !match.awayTeam) {
     notFound();
   }
 
@@ -66,8 +68,11 @@ export async function generateMetadata({
 
   const homeTeam = match.homeTeam.shortName || match.homeTeam.name;
   const awayTeam = match.awayTeam.shortName || match.awayTeam.name;
-  const score = `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
-  const title = t("title", { home: homeTeam, score, away: awayTeam });
+  const isPlayed = match.status === "finished" || match.status === "live";
+  // Don't fabricate a "0 - 0" score for an unplayed fixture — use a preview title.
+  const title = isPlayed
+    ? t("title", { home: homeTeam, score: `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`, away: awayTeam })
+    : `${homeTeam} vs ${awayTeam}${match.competition ? ` - ${match.competition.name}` : ""} ${locale === "es" ? "— Previa" : "— Preview"}`;
 
   // " - Premier League" / " — Premier League" depending on locale would need
   // proper i18n; for now the dash is universal punctuation.
@@ -378,11 +383,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
   if (!match || !match.homeTeam || !match.awayTeam) {
     notFound();
   }
-
-  // 404 non-finished matches to avoid thin pages hurting domain quality
-  if (match.status !== "finished" && match.status !== "live") {
-    notFound();
-  }
+  // Non-finished matches render as a noindex preview (metadata sets robots);
+  // they're linked across the site, so 404-ing them broke internal links.
 
   const matchId = match.id;
   const matchUrl = `${BASE_URL}/matches/${slug}`;
