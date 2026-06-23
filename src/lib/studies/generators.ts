@@ -28,6 +28,12 @@ export interface StudyData {
   methodology: string;
   seasonLabel: string;
   generatedAt: string;
+  /** Headline aggregates over the ranked set — the "analysis" layer. */
+  summary?: { label: string; value: string }[];
+  /** Computed, data-true findings (correlations, efficiency, spread). */
+  insights?: string[];
+  /** Top-10 (label, value) for the inline bar chart. */
+  chart?: { label: string; value: number }[];
 }
 
 export interface Study {
@@ -101,6 +107,10 @@ type StudyDef = {
   dek: (top: SeasonAgg) => string;
   columns: StudyColumn[];
   methodology: string;
+  /** Plain-word unit for the metric, used in the analysis copy ("goals"). */
+  unit: string;
+  /** Whether a per-90 (minutes-adjusted) efficiency angle is meaningful. */
+  efficiency: boolean;
   /** Filter + sort + map an aggregate row to its metric values. */
   eligible: (a: SeasonAgg) => boolean;
   score: (a: SeasonAgg) => number;
@@ -116,6 +126,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} leads the scoring charts this season with ${t.goals} goals.`,
     columns: [{ key: "goals", label: "Goals" }, { key: "assists", label: "Assists" }, { key: "apps", label: "Apps" }],
     methodology: "Total goals across all tracked competitions in the current season, for players with at least one appearance.",
+    unit: "goals",
+    efficiency: true,
     eligible: (a) => a.goals > 0,
     score: (a) => a.goals,
     values: (a) => ({ goals: a.goals, assists: a.assists, apps: a.apps }),
@@ -126,6 +138,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} is the top provider this season with ${t.assists} assists.`,
     columns: [{ key: "assists", label: "Assists" }, { key: "goals", label: "Goals" }, { key: "apps", label: "Apps" }],
     methodology: "Total assists across all tracked competitions in the current season, for players with at least one appearance.",
+    unit: "assists",
+    efficiency: true,
     eligible: (a) => a.assists > 0,
     score: (a) => a.assists,
     values: (a) => ({ assists: a.assists, goals: a.goals, apps: a.apps }),
@@ -136,6 +150,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} tops goals + assists combined with ${t.goals + t.assists} this season.`,
     columns: [{ key: "ga", label: "G+A" }, { key: "goals", label: "Goals" }, { key: "assists", label: "Assists" }, { key: "apps", label: "Apps" }],
     methodology: "Goals plus assists across all tracked competitions in the current season.",
+    unit: "goal contributions",
+    efficiency: true,
     eligible: (a) => a.goals + a.assists > 0,
     score: (a) => a.goals + a.assists,
     values: (a) => ({ ga: a.goals + a.assists, goals: a.goals, assists: a.assists, apps: a.apps }),
@@ -146,6 +162,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} is the most clinical finisher per minute this season.`,
     columns: [{ key: "per90", label: "Goals/90" }, { key: "goals", label: "Goals" }, { key: "minutes", label: "Mins" }],
     methodology: "Goals per 90 minutes, restricted to players with at least 900 minutes (≈10 full matches) to exclude small-sample outliers.",
+    unit: "goals per 90",
+    efficiency: false,
     eligible: (a) => a.minutes >= 900 && a.goals > 0,
     score: (a) => a.goals / (a.minutes / 90),
     values: (a) => ({ per90: round2(a.goals / (a.minutes / 90)), goals: a.goals, minutes: a.minutes }),
@@ -156,6 +174,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} tops the disciplinary charts this season.`,
     columns: [{ key: "cards", label: "Card pts" }, { key: "yellows", label: "Yellow" }, { key: "reds", label: "Red" }, { key: "apps", label: "Apps" }],
     methodology: "Disciplinary points = yellow cards + 2× red cards, across all tracked competitions in the current season.",
+    unit: "disciplinary points",
+    efficiency: false,
     eligible: (a) => a.yellows + a.reds > 0,
     score: (a) => a.yellows + a.reds * 2,
     values: (a) => ({ cards: a.yellows + a.reds * 2, yellows: a.yellows, reds: a.reds, apps: a.apps }),
@@ -166,6 +186,8 @@ const STUDY_DEFS: StudyDef[] = [
     dek: (t) => `${t.name} has been the ultimate ever-present this season.`,
     columns: [{ key: "minutes", label: "Mins" }, { key: "apps", label: "Apps" }],
     methodology: "Total minutes played across all tracked competitions in the current season.",
+    unit: "minutes",
+    efficiency: false,
     eligible: (a) => a.minutes > 0,
     score: (a) => a.minutes,
     values: (a) => ({ minutes: a.minutes, apps: a.apps }),
@@ -190,12 +212,59 @@ function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, gener
     values: def.values(a),
   }));
 
+  // --- Analysis layer: deterministic, data-true (no AI). ---
+  const fmt = (n: number) => (Number.isInteger(n) ? n.toLocaleString() : round2(n).toLocaleString());
+  const scores = ranked.map(def.score);
+  const total = scores.reduce((s, v) => s + v, 0);
+  const avg = total / ranked.length;
+  const leaderMargin = ranked.length > 1 ? def.score(ranked[0]) - def.score(ranked[1]) : 0;
+
+  const summary = [
+    { label: `Top ${ranked.length} combined`, value: fmt(total) },
+    { label: "Average", value: fmt(avg) },
+    { label: "Leader's margin", value: `+${fmt(leaderMargin)}` },
+  ];
+
+  const insights: string[] = [];
+  insights.push(
+    `${ranked[0].name} leads the ${def.unit} chart with ${fmt(def.score(ranked[0]))}` +
+      (ranked.length > 1
+        ? leaderMargin > 0
+          ? `, ${fmt(leaderMargin)} clear of ${ranked[1].name}.`
+          : `, level with ${ranked[1].name}.`
+        : "."),
+  );
+  insights.push(
+    `The top ${ranked.length} account for ${fmt(total)} ${def.unit} between them — an average of ${fmt(avg)} each.`,
+  );
+  // Minutes-adjusted standout: the volume leader isn't always the most efficient.
+  if (def.efficiency) {
+    const per90 = (a: SeasonAgg) => (a.minutes >= 90 ? def.score(a) / (a.minutes / 90) : 0);
+    const pool = ranked.filter((a) => a.minutes >= 900);
+    if (pool.length > 1) {
+      const best = [...pool].sort((a, b) => per90(b) - per90(a))[0];
+      const leaderRated = ranked[0].minutes >= 900;
+      if (best.name === ranked[0].name) {
+        insights.push(`${best.name} leads on both raw total and per-90 rate (${round2(per90(best))} ${def.unit} per 90) — dominant on both counts.`);
+      } else if (leaderRated) {
+        insights.push(
+          `Adjusted for minutes, ${best.name} is the most productive at ${round2(per90(best))} ${def.unit} per 90 — ahead of volume leader ${ranked[0].name} (${round2(per90(ranked[0]))}).`,
+        );
+      } else {
+        insights.push(`Adjusted for minutes, ${best.name} tops the per-90 rate at ${round2(per90(best))} ${def.unit} per 90.`);
+      }
+    }
+  }
+
+  const primaryKey = def.columns[0].key;
+  const chart = rows.slice(0, 10).map((r) => ({ label: r.player, value: r.values[primaryKey] }));
+
   return {
     type: def.type,
     slug: `${def.type}-${slugifySeason(seasonLabel)}`,
     title: def.title(seasonLabel),
     dek: def.dek(ranked[0]),
-    data: { columns: def.columns, rows, methodology: def.methodology, seasonLabel, generatedAt },
+    data: { columns: def.columns, rows, methodology: def.methodology, seasonLabel, generatedAt, summary, insights, chart },
   };
 }
 

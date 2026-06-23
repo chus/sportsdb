@@ -45,9 +45,10 @@ export default async function StudyPage({ params }: PageProps) {
   const study = await getStudyBySlug(slug);
   if (!study) notFound();
 
-  const { columns, rows, methodology, seasonLabel, generatedAt } = study.data;
+  const { columns, rows, methodology, seasonLabel, generatedAt, summary, insights, chart } = study.data;
   const updated = generatedAt ? format(new Date(generatedAt), "d MMMM yyyy") : null;
   const citation = `${study.title} — DataSports (${BASE_URL}/studies/${slug})`;
+  const chartMax = chart && chart.length ? Math.max(...chart.map((c) => c.value)) : 0;
 
   return (
     <>
@@ -86,6 +87,55 @@ export default async function StudyPage({ params }: PageProps) {
           <p className="text-sm text-faint mb-6">
             {seasonLabel} season{updated ? ` · Updated ${updated}` : ""}
           </p>
+
+          {/* Headline numbers */}
+          {summary && summary.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {summary.map((s) => (
+                <div key={s.label} className="bg-surface rounded-xl border border-line p-4 text-center">
+                  <div className="text-2xl font-bold text-ink">{s.value}</div>
+                  <div className="text-xs text-muted mt-1">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Key findings */}
+          {insights && insights.length > 0 && (
+            <div className="bg-surface rounded-xl border border-line p-5 mb-6">
+              <h2 className="font-semibold text-ink mb-3">Key findings</h2>
+              <ul className="space-y-2">
+                {insights.map((line, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-muted">
+                    <span className="text-blue-600 shrink-0">▸</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Inline bar chart (top 10) — server-rendered HTML/CSS, no client JS */}
+          {chart && chart.length > 0 && chartMax > 0 && (
+            <div className="bg-surface rounded-xl border border-line p-5 mb-6">
+              <h2 className="font-semibold text-ink mb-3">{columns[0]?.label} — top {chart.length}</h2>
+              <div className="space-y-1.5">
+                {chart.map((c) => (
+                  <div key={c.label} className="flex items-center gap-3">
+                    <div className="w-28 sm:w-36 shrink-0 text-xs text-muted text-right truncate">{c.label}</div>
+                    <div className="flex-1 bg-surface-2 rounded h-5 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded flex items-center justify-end pr-2"
+                        style={{ width: `${Math.max(8, (c.value / chartMax) * 100)}%` }}
+                      >
+                        <span className="text-[10px] font-semibold text-white">{c.value}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="bg-surface rounded-xl border border-line overflow-hidden">
             <table className="w-full text-sm">
