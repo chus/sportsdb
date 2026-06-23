@@ -520,6 +520,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // Team-vs-team comparison pages: pair the top teams WITHIN each current-season
+  // league (both carry a standing → data-dense + indexable). Bounded per league.
+  const teamStandRows =
+    ((await db.execute(sql`
+      SELECT t.slug AS slug, cs.competition_id AS comp
+      FROM standings s
+      JOIN competition_seasons cs ON cs.id = s.competition_season_id
+      JOIN seasons se ON se.id = cs.season_id AND se.is_current = true
+      JOIN teams t ON t.id = s.team_id
+      WHERE s.position <= 8 AND s."group" = ''
+      ORDER BY cs.competition_id, s.position
+    `)) as unknown as { rows?: { slug: string; comp: string }[] }).rows ?? [];
+  const teamsByComp = new Map<string, string[]>();
+  for (const r of teamStandRows) (teamsByComp.get(r.comp) ?? teamsByComp.set(r.comp, []).get(r.comp)!).push(r.slug);
+  const teamComparePages: MetadataRoute.Sitemap = [];
+  for (const slugs of teamsByComp.values()) {
+    for (let i = 0; i < slugs.length; i++) {
+      for (let j = i + 1; j < slugs.length; j++) {
+        teamComparePages.push({
+          url: `${BASE_URL}/compare/teams/${compareMatchup(slugs[i], slugs[j])}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly" as const,
+          priority: 0.5,
+        });
+      }
+    }
+  }
+
   // Matches hub page
   const matchesHubPage: MetadataRoute.Sitemap = [
     {
@@ -583,6 +611,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...topAssistCompPages,
     ...historicalSeasonPages,
     ...comparePages,
+    ...teamComparePages,
     ...teamCountryPages,
     ...playerPositionPages,
     ...playerNationalityPages,

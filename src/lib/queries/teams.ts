@@ -121,6 +121,43 @@ export async function getFormerPlayers(teamId: string, limit = 20) {
     .limit(limit);
 }
 
+export interface TeamComparison {
+  teamA: typeof teams.$inferSelect;
+  teamB: typeof teams.$inferSelect;
+  standingA: { standing: typeof standings.$inferSelect; competitionName: string } | null;
+  standingB: { standing: typeof standings.$inferSelect; competitionName: string } | null;
+  h2h: { slug: string | null; scheduledAt: Date; homeTeamId: string; awayTeamId: string; homeScore: number; awayScore: number }[];
+}
+
+/**
+ * Head-to-head comparison of two teams: current standings (with form) + their
+ * most recent meetings. The data behind the team-vs-team compare pages.
+ */
+export async function getTeamComparison(slugA: string, slugB: string): Promise<TeamComparison | null> {
+  const [a, b] = await Promise.all([getTeamBySlug(slugA), getTeamBySlug(slugB)]);
+  if (!a || !b || a.id === b.id) return null;
+
+  const [sa, sb, h2hRes] = await Promise.all([
+    getTeamStats(a.id),
+    getTeamStats(b.id),
+    db.execute(sql`
+      SELECT m.slug, m.scheduled_at AS "scheduledAt", m.home_team_id AS "homeTeamId",
+             m.away_team_id AS "awayTeamId", m.home_score AS "homeScore", m.away_score AS "awayScore"
+      FROM matches m
+      WHERE m.status = 'finished' AND m.home_score IS NOT NULL AND m.away_score IS NOT NULL
+        AND ((m.home_team_id = ${a.id} AND m.away_team_id = ${b.id})
+          OR (m.home_team_id = ${b.id} AND m.away_team_id = ${a.id}))
+      ORDER BY m.scheduled_at DESC
+      LIMIT 10
+    `),
+  ]);
+  const pick = (rows: Awaited<ReturnType<typeof getTeamStats>>) =>
+    rows[0] ? { standing: rows[0].standing, competitionName: rows[0].competitionName } : null;
+  const h2h = ((h2hRes as unknown as { rows?: TeamComparison["h2h"] }).rows ?? (h2hRes as unknown as TeamComparison["h2h"]));
+
+  return { teamA: a, teamB: b, standingA: pick(sa), standingB: pick(sb), h2h };
+}
+
 /**
  * Get the top scorer for a team in a given competition season.
  */
