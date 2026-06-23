@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { generateAllStudies } from "@/lib/studies/generators";
 import { draftPitch } from "@/lib/studies/pitch";
+import { draftNarrative } from "@/lib/studies/narrative";
 import { upsertStudy } from "@/lib/queries/studies";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
 
@@ -44,6 +45,8 @@ export async function GET(request: NextRequest) {
 
   if (!dryRun) {
     for (const study of all) {
+      // Grounded analyst intro for each study (cheap; null without an API key).
+      study.data.narrative = (await draftNarrative(study)) ?? undefined;
       await upsertStudy(study, study.slug === featured.slug ? pitch : null);
     }
   }

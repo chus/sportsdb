@@ -45,7 +45,7 @@ export default async function StudyPage({ params }: PageProps) {
   const study = await getStudyBySlug(slug);
   if (!study) notFound();
 
-  const { columns, rows, methodology, seasonLabel, generatedAt, summary, insights, chart } = study.data;
+  const { columns, rows, methodology, seasonLabel, generatedAt, summary, insights, chart, narrative } = study.data;
   const updated = generatedAt ? format(new Date(generatedAt), "d MMMM yyyy") : null;
   const citation = `${study.title} — DataSports (${BASE_URL}/studies/${slug})`;
   const chartMax = chart && chart.length ? Math.max(...chart.map((c) => c.value)) : 0;
@@ -87,6 +87,13 @@ export default async function StudyPage({ params }: PageProps) {
           <p className="text-sm text-faint mb-6">
             {seasonLabel} season{updated ? ` · Updated ${updated}` : ""}
           </p>
+
+          {/* Analyst intro (grounded in the computed findings) */}
+          {narrative && (
+            <p className="text-[15px] leading-relaxed text-ink/90 mb-6 border-l-2 border-blue-500 pl-4">
+              {narrative}
+            </p>
+          )}
 
           {/* Headline numbers */}
           {summary && summary.length > 0 && (

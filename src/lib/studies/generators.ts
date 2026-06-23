@@ -34,6 +34,8 @@ export interface StudyData {
   insights?: string[];
   /** Top-10 (label, value) for the inline bar chart. */
   chart?: { label: string; value: number }[];
+  /** Short AI analyst intro, grounded in `insights` (generated in the cron). */
+  narrative?: string;
 }
 
 export interface Study {
@@ -55,6 +57,10 @@ interface SeasonAgg {
   minutes: number;
   yellows: number;
   reds: number;
+  dob: string | null;
+  // Derived in generateAllStudies:
+  age?: number | null;
+  teamGoals?: number;
 }
 
 function slugifySeason(label: string): string {
@@ -91,7 +97,7 @@ async function getSeasonAggregates(): Promise<SeasonAgg[]> {
       JOIN teams t ON t.id = pss.team_id
       ORDER BY pss.player_id, pss.minutes_played DESC
     )
-    SELECT p.name, p.slug, pt.team_name, pt.team_slug,
+    SELECT p.name, p.slug, p.date_of_birth AS dob, pt.team_name, pt.team_slug,
       a.goals, a.assists, a.apps, a.minutes, a.yellows, a.reds
     FROM agg a
     JOIN players p ON p.id = a.player_id AND p.is_indexable = true
@@ -111,6 +117,9 @@ type StudyDef = {
   unit: string;
   /** Whether a per-90 (minutes-adjusted) efficiency angle is meaningful. */
   efficiency: boolean;
+  /** True for count metrics (goals, minutes) where a "combined total" makes
+   *  sense; false for rates/ratios (per-90, share) where it doesn't. */
+  additive: boolean;
   /** Filter + sort + map an aggregate row to its metric values. */
   eligible: (a: SeasonAgg) => boolean;
   score: (a: SeasonAgg) => number;
@@ -128,6 +137,7 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Total goals across all tracked competitions in the current season, for players with at least one appearance.",
     unit: "goals",
     efficiency: true,
+    additive: true,
     eligible: (a) => a.goals > 0,
     score: (a) => a.goals,
     values: (a) => ({ goals: a.goals, assists: a.assists, apps: a.apps }),
@@ -140,6 +150,7 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Total assists across all tracked competitions in the current season, for players with at least one appearance.",
     unit: "assists",
     efficiency: true,
+    additive: true,
     eligible: (a) => a.assists > 0,
     score: (a) => a.assists,
     values: (a) => ({ assists: a.assists, goals: a.goals, apps: a.apps }),
@@ -152,6 +163,7 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Goals plus assists across all tracked competitions in the current season.",
     unit: "goal contributions",
     efficiency: true,
+    additive: true,
     eligible: (a) => a.goals + a.assists > 0,
     score: (a) => a.goals + a.assists,
     values: (a) => ({ ga: a.goals + a.assists, goals: a.goals, assists: a.assists, apps: a.apps }),
@@ -164,6 +176,7 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Goals per 90 minutes, restricted to players with at least 900 minutes (≈10 full matches) to exclude small-sample outliers.",
     unit: "goals per 90",
     efficiency: false,
+    additive: false,
     eligible: (a) => a.minutes >= 900 && a.goals > 0,
     score: (a) => a.goals / (a.minutes / 90),
     values: (a) => ({ per90: round2(a.goals / (a.minutes / 90)), goals: a.goals, minutes: a.minutes }),
@@ -176,6 +189,7 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Disciplinary points = yellow cards + 2× red cards, across all tracked competitions in the current season.",
     unit: "disciplinary points",
     efficiency: false,
+    additive: true,
     eligible: (a) => a.yellows + a.reds > 0,
     score: (a) => a.yellows + a.reds * 2,
     values: (a) => ({ cards: a.yellows + a.reds * 2, yellows: a.yellows, reds: a.reds, apps: a.apps }),
@@ -188,9 +202,36 @@ const STUDY_DEFS: StudyDef[] = [
     methodology: "Total minutes played across all tracked competitions in the current season.",
     unit: "minutes",
     efficiency: false,
+    additive: true,
     eligible: (a) => a.minutes > 0,
     score: (a) => a.minutes,
     values: (a) => ({ minutes: a.minutes, apps: a.apps }),
+  },
+  {
+    type: "youngest-scorers",
+    title: (s) => `Best U-23 Goalscorers in ${s}`,
+    dek: (t) => `${t.name} leads the under-23 scoring charts with ${t.goals} goals.`,
+    columns: [{ key: "goals", label: "Goals" }, { key: "age", label: "Age" }, { key: "apps", label: "Apps" }],
+    methodology: "Most goals by players aged 23 or under (at time of generation), across all tracked competitions this season.",
+    unit: "goals",
+    efficiency: false,
+    additive: true,
+    eligible: (a) => a.goals > 0 && a.age != null && a.age <= 23,
+    score: (a) => a.goals,
+    values: (a) => ({ goals: a.goals, age: a.age ?? 0, apps: a.apps }),
+  },
+  {
+    type: "goal-share",
+    title: (s) => `Biggest Goal Share in ${s}`,
+    dek: (t) => `${t.name} carries the biggest share of their team's goals this season.`,
+    columns: [{ key: "share", label: "% of team" }, { key: "goals", label: "Goals" }, { key: "teamGoals", label: "Team total" }],
+    methodology: "Share of their team's goals scored by the player, as a percentage (minimum 5 goals; team minimum 10). A measure of attacking reliance on one player.",
+    unit: "% of team's goals",
+    efficiency: false,
+    additive: false,
+    eligible: (a) => a.goals >= 5 && (a.teamGoals ?? 0) >= 10,
+    score: (a) => ((a.teamGoals ?? 0) > 0 ? Math.round((a.goals / (a.teamGoals as number)) * 100) : 0),
+    values: (a) => ({ share: Math.round((a.goals / ((a.teamGoals as number) || 1)) * 100), goals: a.goals, teamGoals: a.teamGoals ?? 0 }),
   },
 ];
 
@@ -219,11 +260,20 @@ function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, gener
   const avg = total / ranked.length;
   const leaderMargin = ranked.length > 1 ? def.score(ranked[0]) - def.score(ranked[1]) : 0;
 
-  const summary = [
-    { label: `Top ${ranked.length} combined`, value: fmt(total) },
-    { label: "Average", value: fmt(avg) },
-    { label: "Leader's margin", value: `+${fmt(leaderMargin)}` },
-  ];
+  const lowest = def.score(ranked[ranked.length - 1]);
+  // "Combined" only means something for count metrics; for rates/ratios show
+  // the leader + range instead.
+  const summary = def.additive
+    ? [
+        { label: `Top ${ranked.length} combined`, value: fmt(total) },
+        { label: "Average", value: fmt(avg) },
+        { label: "Leader's margin", value: `+${fmt(leaderMargin)}` },
+      ]
+    : [
+        { label: "Leader", value: fmt(def.score(ranked[0])) },
+        { label: "Average", value: fmt(avg) },
+        { label: `#${ranked.length}`, value: fmt(lowest) },
+      ];
 
   const insights: string[] = [];
   insights.push(
@@ -235,7 +285,9 @@ function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, gener
         : "."),
   );
   insights.push(
-    `The top ${ranked.length} account for ${fmt(total)} ${def.unit} between them — an average of ${fmt(avg)} each.`,
+    def.additive
+      ? `The top ${ranked.length} account for ${fmt(total)} ${def.unit} between them — an average of ${fmt(avg)} each.`
+      : `The top ${ranked.length} average ${fmt(avg)} ${def.unit}, ranging from ${fmt(def.score(ranked[0]))} down to ${fmt(lowest)}.`,
   );
   // Minutes-adjusted standout: the volume leader isn't always the most efficient.
   if (def.efficiency) {
@@ -273,5 +325,20 @@ export async function generateAllStudies(generatedAt: string): Promise<Study[]> 
   const seasonLabel = await getSeasonLabel();
   if (!seasonLabel) return [];
   const aggs = await getSeasonAggregates();
+
+  // Derive per-row context the studies need: age (from DOB) and the player's
+  // team's total goals (for goal-share). Computed once here so the study
+  // transforms stay pure.
+  const now = new Date(generatedAt).getTime();
+  const YEAR_MS = 365.25 * 86400000;
+  const teamGoals = new Map<string, number>();
+  for (const a of aggs) {
+    if (a.team_slug) teamGoals.set(a.team_slug, (teamGoals.get(a.team_slug) ?? 0) + a.goals);
+  }
+  for (const a of aggs) {
+    a.age = a.dob ? Math.floor((now - new Date(a.dob).getTime()) / YEAR_MS) : null;
+    a.teamGoals = a.team_slug ? teamGoals.get(a.team_slug) ?? 0 : 0;
+  }
+
   return STUDY_DEFS.map((d) => buildStudy(d, aggs, seasonLabel, generatedAt)).filter((s): s is Study => s !== null);
 }
