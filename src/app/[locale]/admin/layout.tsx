@@ -12,6 +12,7 @@ import {
   Gift,
   ArrowLeft,
   CalendarDays,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -24,6 +25,7 @@ const navItems = [
   { label: "Integrations", href: "/admin/integrations", icon: Puzzle },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Referrals", href: "/admin/referrals", icon: Gift },
+  { label: "PR Outreach", href: "/admin/outreach", icon: Mail },
 ];
 
 export default function AdminLayout({

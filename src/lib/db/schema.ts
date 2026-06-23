@@ -1404,3 +1404,27 @@ export const studies = pgTable(
   },
   (table) => [index("idx_studies_status").on(table.status)]
 );
+
+// Digital-PR outreach targets — journalists, creators, communities, and the
+// reporter-query platforms to pitch the data studies to. A lightweight CRM so
+// outreach is a repeatable system, not ad-hoc. Seeded with public channels;
+// the operator adds specific contacts.
+export const outreachTargets = pgTable(
+  "outreach_targets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    outlet: text("outlet"),
+    email: text("email"),
+    handle: text("handle"), // X / Bluesky / etc
+    beat: text("beat"), // "FPL", "data journalism", "Premier League" …
+    category: text("category").notNull().default("journalist"), // journalist | creator | platform | community | newsletter
+    url: text("url"),
+    status: text("status").notNull().default("new"), // new | contacted | replied | won | dead
+    notes: text("notes"),
+    lastStudyPitched: text("last_study_pitched"), // study slug
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_outreach_status").on(table.status)]
+);
