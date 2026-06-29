@@ -50,13 +50,10 @@ function scorePlayer(p: PlayerRow): number {
   if (Number(p.article_count) > 0) score += 10;
 
   // Hard content gate — must match scorePlayerPage in src/lib/seo/page-quality.ts.
-  // Pages with only bio metadata are Google "Crawled - currently not indexed"
-  // candidates; cap score at 35 so they fall into the noindex tier.
-  const hasRealContent =
-    Number(p.stats_count) > 0 ||
-    Number(p.lineup_count) > 0 ||
-    Number(p.article_count) > 0 ||
-    Number(p.transfer_count) > 0;
+  // The substantive content of a player page is its season stats table; a page
+  // with only bio + a lineup/transfer (no stats line) is thin ("low value
+  // content"). Require an actual stats line to be indexable.
+  const hasRealContent = Number(p.stats_count) > 0;
   if (!hasRealContent) {
     score = Math.min(score, 35);
   }

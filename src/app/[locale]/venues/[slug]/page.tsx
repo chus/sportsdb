@@ -48,8 +48,11 @@ export async function generateMetadata({
     notFound();
   }
 
-  // Thin page check: venue needs at least a city
-  const isThin = !venue.city;
+  // Venue pages are thin: matches.venue_id is unpopulated across the dataset,
+  // so a venue page renders only name/city/capacity with no fixtures or events —
+  // exactly the "low value content" AdSense flags. Keep them noindex until venue
+  // ↔ match linkage exists and the pages carry real content.
+  const isThin = true;
 
   const title = `${venue.name} – Stadium Info & History`;
   const description = `${venue.name}${venue.city ? ` in ${venue.city}` : ""}${venue.country ? `, ${venue.country}` : ""}. Capacity: ${venue.capacity?.toLocaleString() || "N/A"}. View teams, matches, and stadium information.`;

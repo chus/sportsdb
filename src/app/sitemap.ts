@@ -94,12 +94,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.7,
     },
-    {
-      url: `${BASE_URL}/venues`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.6,
-    },
+    // /venues hub omitted — venue detail pages are thin (no match data) and
+    // noindex, so the hub adds no indexable value for now.
     {
       url: `${BASE_URL}/injuries`,
       lastModified: new Date(),
@@ -465,13 +461,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ];
     });
 
-  // Venue pages — enriched venues with Wikipedia or capacity data
-  const venuePages: MetadataRoute.Sitemap = allVenues.map((venue) => ({
-    url: `${BASE_URL}/venues/${venue.slug}`,
-    lastModified: venue.updatedAt || new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  }));
+  // Venue pages are excluded from the sitemap: matches.venue_id is unpopulated,
+  // so venue pages have no fixtures/events and render as thin "low value
+  // content" (now noindex). Re-add once venue ↔ match linkage exists.
+  void allVenues;
+  const venuePages: MetadataRoute.Sitemap = [];
 
   // Match pages — finished current-season matches with scores (slug-based URLs only)
   const matchPages: MetadataRoute.Sitemap = finishedMatches.rows.map((match) => ({
