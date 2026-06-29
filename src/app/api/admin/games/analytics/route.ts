@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import {
   predictions,
@@ -11,12 +11,9 @@ import {
 import { sql, count, eq, and, gte } from "drizzle-orm";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
-    const user = await getCurrentUser();
-    if (!user || !(user as any).isAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 

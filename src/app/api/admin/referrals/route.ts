@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { referralEvents, users } from "@/lib/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   try {
     // Funnel counts
     const funnelCounts = await db
