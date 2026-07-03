@@ -138,8 +138,29 @@ export async function resolvePlayer(
   const slug = slugify(name);
   const bySlug = await sql`SELECT id, slug FROM players WHERE slug = ${slug} LIMIT 1`;
   if (bySlug[0]) {
-    await writeMapping(sql, "player", bySlug[0].id, provider, providerPlayerId);
-    return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
+    // Fusion guard: a same-named player is only the SAME person if we can
+    // corroborate it. With team context (af squad/lineup syncs pass teamId),
+    // require the slug-owner to have a stint at that team — otherwise two
+    // different "John Smith"s silently merge, corrupting both careers, and
+    // the mapping stamp makes it permanent. Without team context (the fd
+    // link-once path), keep the historical slug-link behavior: it is the
+    // deliberate fd↔af bridging mechanism.
+    let corroborated = true;
+    if (create?.teamId) {
+      const stint = await sql`
+        SELECT 1 FROM player_team_history
+        WHERE player_id = ${bySlug[0].id} AND team_id = ${create.teamId}
+        LIMIT 1
+      `;
+      corroborated = Boolean(stint[0]);
+    }
+    if (corroborated) {
+      await writeMapping(sql, "player", bySlug[0].id, provider, providerPlayerId);
+      return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
+    }
+    console.warn(
+      `[resolve] slug collision NOT linked: "${name}" (${provider}-${providerPlayerId}) — existing ${slug} has no stint at team ${create?.teamId}; will create de-collided row`,
+    );
   }
 
   // Bridge before creating a duplicate. API-Football sends abbreviated names
@@ -174,13 +195,24 @@ export async function resolvePlayer(
 
   if (!create) return null;
 
+  // De-collide the slug when the base is taken by an uncorroborated
+  // same-name player (guard above) — falling back to select-by-slug here
+  // would silently fuse the two. Suffix until free (real rosters rarely
+  // need more than -2).
+  let finalSlug = slug;
+  for (let i = 2; i <= 5; i++) {
+    const taken = await sql`SELECT 1 FROM players WHERE slug = ${finalSlug} LIMIT 1`;
+    if (!taken[0]) break;
+    finalSlug = `${slug}-${i}`;
+  }
+
   const inserted = await sql`
     INSERT INTO players (external_id, name, slug, position, nationality, image_url)
-    VALUES (${`${provider}-player-${providerPlayerId}`}, ${name}, ${slug}, ${create.position ?? "Unknown"}, ${create.nationality ?? null}, ${create.imageUrl ?? null})
+    VALUES (${`${provider}-player-${providerPlayerId}`}, ${name}, ${finalSlug}, ${create.position ?? "Unknown"}, ${create.nationality ?? null}, ${create.imageUrl ?? null})
     ON CONFLICT (slug) DO NOTHING
     RETURNING id, slug
   `;
-  const row = inserted[0] ?? (await sql`SELECT id, slug FROM players WHERE slug = ${slug} LIMIT 1`)[0];
+  const row = inserted[0] ?? (await sql`SELECT id, slug FROM players WHERE slug = ${finalSlug} LIMIT 1`)[0];
   if (!row) return null;
   await writeMapping(sql, "player", row.id, provider, providerPlayerId);
   return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
