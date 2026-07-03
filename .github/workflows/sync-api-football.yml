@@ -123,6 +123,21 @@ jobs:
         if: steps.target.outputs.mode == 'enrich-all'
         run: npx tsx scripts/sync-api-football.ts --matches || true
 
+      # Deep per-fixture data (lineups/events, team stats incl. xG, per-player
+      # match lines) for newly finished fixtures. The non-force sync paths are
+      # already incremental — they skip finished fixtures that have data — so
+      # a daily run only fetches the delta (~4 req/fixture, 10-30 fixtures/day,
+      # far under the 7k/day cap). Before this, the moat data only refreshed
+      # when a human manually dispatched the workflow, so new match pages went
+      # out without the depth that distinguishes them. Runs AFTER the fixtures
+      # refresh so just-finished matches are already status='finished'.
+      - name: Deep stats for newly finished fixtures
+        if: steps.target.outputs.mode == 'enrich-all'
+        run: |
+          npx tsx scripts/sync-api-football.ts --match-details || true
+          npx tsx scripts/sync-api-football.ts --match-stats || true
+          npx tsx scripts/sync-api-football.ts --player-match-stats || true
+
       - name: Full player season stats
         if: steps.target.outputs.mode == 'player-stats'
         run: npx tsx scripts/sync-api-football.ts --player-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
