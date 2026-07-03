@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { generateAllStudies } from "@/lib/studies/generators";
+import { generateAllStudies, generateCompetitionStudies } from "@/lib/studies/generators";
 import { draftPitch } from "@/lib/studies/pitch";
 import { draftNarrative } from "@/lib/studies/narrative";
 import { upsertStudy } from "@/lib/queries/studies";
@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
   const dryRun = request.nextUrl.searchParams.get("dryRun") === "1";
 
   const generatedAt = new Date().toISOString();
-  const all = await generateAllStudies(generatedAt);
+  // Global cross-competition studies + World Cup 2026 editions (the min-rows
+  // gate skips WC studies its data can't support, so this is safe year-round;
+  // it simply produces nothing once the WC season stops being current).
+  const global = await generateAllStudies(generatedAt);
+  const wc = await generateCompetitionStudies(generatedAt, "fifa-world-cup-2026", "the 2026 World Cup", "world-cup-2026");
+  const all = [...global, ...wc];
   if (all.length === 0) {
     return NextResponse.json({ success: true, generated: 0, reason: "no current-season data yet" });
   }

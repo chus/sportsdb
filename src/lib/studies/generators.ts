@@ -73,8 +73,12 @@ async function getSeasonLabel(): Promise<string | null> {
   return rows[0]?.label ?? null;
 }
 
-/** Per-player aggregate across all competitions in the current season. */
-async function getSeasonAggregates(): Promise<SeasonAgg[]> {
+/** Per-player aggregate for the current season — all competitions, or one
+ *  competition when a slug is passed (per-league / tournament studies). */
+async function getSeasonAggregates(competitionSlug?: string): Promise<SeasonAgg[]> {
+  const compFilter = competitionSlug
+    ? sql`AND cs.competition_id = (SELECT id FROM competitions WHERE slug = ${competitionSlug})`
+    : sql``;
   const r = await db.execute(sql`
     WITH agg AS (
       SELECT pss.player_id,
@@ -87,6 +91,7 @@ async function getSeasonAggregates(): Promise<SeasonAgg[]> {
       FROM player_season_stats pss
       JOIN competition_seasons cs ON cs.id = pss.competition_season_id
       JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+      ${compFilter}
       GROUP BY pss.player_id
     ),
     primary_team AS (
@@ -94,6 +99,7 @@ async function getSeasonAggregates(): Promise<SeasonAgg[]> {
       FROM player_season_stats pss
       JOIN competition_seasons cs ON cs.id = pss.competition_season_id
       JOIN seasons s ON s.id = cs.season_id AND s.is_current = true
+      ${compFilter}
       JOIN teams t ON t.id = pss.team_id
       ORDER BY pss.player_id, pss.minutes_played DESC
     )
@@ -237,7 +243,7 @@ const STUDY_DEFS: StudyDef[] = [
 
 export const STUDY_TYPES = STUDY_DEFS.map((d) => d.type);
 
-function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, generatedAt: string): Study | null {
+function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, generatedAt: string, slugKey?: string): Study | null {
   const ranked = aggs
     .filter(def.eligible)
     .sort((a, b) => def.score(b) - def.score(a))
@@ -313,22 +319,17 @@ function buildStudy(def: StudyDef, aggs: SeasonAgg[], seasonLabel: string, gener
 
   return {
     type: def.type,
-    slug: `${def.type}-${slugifySeason(seasonLabel)}`,
+    slug: `${def.type}-${slugKey ?? slugifySeason(seasonLabel)}`,
     title: def.title(seasonLabel),
     dek: def.dek(ranked[0]),
     data: { columns: def.columns, rows, methodology: def.methodology, seasonLabel, generatedAt, summary, insights, chart },
   };
 }
 
-/** Generate all studies that have enough data. */
-export async function generateAllStudies(generatedAt: string): Promise<Study[]> {
-  const seasonLabel = await getSeasonLabel();
-  if (!seasonLabel) return [];
-  const aggs = await getSeasonAggregates();
-
-  // Derive per-row context the studies need: age (from DOB) and the player's
-  // team's total goals (for goal-share). Computed once here so the study
-  // transforms stay pure.
+// Derive per-row context the studies need: age (from DOB) and the player's
+// team's total goals (for goal-share). Computed once so the study transforms
+// stay pure.
+function deriveContext(aggs: SeasonAgg[], generatedAt: string): void {
   const now = new Date(generatedAt).getTime();
   const YEAR_MS = 365.25 * 86400000;
   const teamGoals = new Map<string, number>();
@@ -339,6 +340,36 @@ export async function generateAllStudies(generatedAt: string): Promise<Study[]> 
     a.age = a.dob ? Math.floor((now - new Date(a.dob).getTime()) / YEAR_MS) : null;
     a.teamGoals = a.team_slug ? teamGoals.get(a.team_slug) ?? 0 : 0;
   }
+}
 
+/** Generate all studies that have enough data. */
+export async function generateAllStudies(generatedAt: string): Promise<Study[]> {
+  const seasonLabel = await getSeasonLabel();
+  if (!seasonLabel) return [];
+  const aggs = await getSeasonAggregates();
+  deriveContext(aggs, generatedAt);
   return STUDY_DEFS.map((d) => buildStudy(d, aggs, seasonLabel, generatedAt)).filter((s): s is Study => s !== null);
+}
+
+/**
+ * Studies scoped to ONE competition — tournament/league editions of the same
+ * rankings ("Most Goals in the 2026 World Cup"). The min-rows gate inside
+ * buildStudy quietly skips studies the competition's data can't support, so
+ * sparse tournaments never produce thin pages.
+ *
+ * @param competitionSlug - competitions.slug ("fifa-world-cup-2026")
+ * @param displayLabel - human phrase for titles ("the 2026 World Cup")
+ * @param slugKey - study slug suffix ("world-cup-2026")
+ */
+export async function generateCompetitionStudies(
+  generatedAt: string,
+  competitionSlug: string,
+  displayLabel: string,
+  slugKey: string,
+): Promise<Study[]> {
+  const aggs = await getSeasonAggregates(competitionSlug);
+  deriveContext(aggs, generatedAt);
+  return STUDY_DEFS.map((d) => buildStudy(d, aggs, displayLabel, generatedAt, slugKey)).filter(
+    (s): s is Study => s !== null,
+  );
 }
