@@ -1405,6 +1405,22 @@ export const studies = pgTable(
   (table) => [index("idx_studies_status").on(table.status)]
 );
 
+// One row per (user, email type) — dedupes lifecycle sends (trial welcome /
+// ending / win-back) so a daily cron can be safely re-run and never double-
+// sends. Types: 'trial_welcome' | 'trial_ending' | 'trial_winback'.
+export const emailLog = pgTable(
+  "email_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [uniqueIndex("uq_email_log_user_type").on(table.userId, table.type)]
+);
+
 // Digital-PR outreach targets — journalists, creators, communities, and the
 // reporter-query platforms to pitch the data studies to. A lightweight CRM so
 // outreach is a repeatable system, not ad-hoc. Seeded with public channels;
