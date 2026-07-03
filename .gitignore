@@ -44,3 +44,7 @@ next-env.d.ts
 /_figma_new
 /data
 /designs
+
+# Claude Code local session state (permissions allowlist — can embed
+# approved command strings incl. secrets; never commit)
+.claude/settings.local.json
