@@ -94,23 +94,37 @@ export async function resolveTeam(
   provider: Provider,
   providerTeamId: number,
   name: string,
-  create?: { shortName?: string | null; country?: string | null; logoUrl?: string | null },
+  create?: { shortName?: string | null; country?: string | null; logoUrl?: string | null; teamType?: "club" | "national" },
 ): Promise<ResolvedEntity | null> {
   const mapped = await lookupMapping(sql, "team", provider, providerTeamId);
   if (mapped) return { ...mapped, via: "external_id" };
 
-  const byName = await findTeamByName(sql, name);
-  if (byName) {
-    await writeMapping(sql, "team", byName.id, provider, providerTeamId);
-    return { ...byName, via: "name_match" };
+  // National teams NEVER name-match: their names are country names, and the
+  // only rows a matcher could hit are clubs ("Argentina" ILIKE-matching an
+  // Argentine club) — by definition wrong, and exactly the fusion class that
+  // produced the PSG/Paris FC untangling. Straight to create.
+  const isNational = create?.teamType === "national";
+  if (!isNational) {
+    const byName = await findTeamByName(sql, name);
+    if (byName) {
+      await writeMapping(sql, "team", byName.id, provider, providerTeamId);
+      return { ...byName, via: "name_match" };
+    }
   }
 
   if (!create) return null;
 
-  const slug = slugify(name);
+  // National teams must not fall back to select-by-slug on conflict — the
+  // slug-owner would be a CLUB (e.g. a club owning "argentina") and the two
+  // would fuse. De-collide with a "-national-team" suffix instead.
+  let slug = slugify(name);
+  if (isNational) {
+    const taken = await sql`SELECT 1 FROM teams WHERE slug = ${slug} LIMIT 1`;
+    if (taken[0]) slug = `${slug}-national-team`;
+  }
   const inserted = await sql`
     INSERT INTO teams (external_id, name, short_name, slug, country, logo_url, team_type)
-    VALUES (${`${provider}-team-${providerTeamId}`}, ${name}, ${create.shortName ?? null}, ${slug}, ${create.country ?? null}, ${create.logoUrl ?? null}, 'club')
+    VALUES (${`${provider}-team-${providerTeamId}`}, ${name}, ${create.shortName ?? null}, ${slug}, ${create.country ?? null}, ${create.logoUrl ?? null}, ${create.teamType ?? "club"})
     ON CONFLICT (slug) DO NOTHING
     RETURNING id, slug
   `;

@@ -112,6 +112,8 @@ interface LeagueConfig {
   name: string;
   type: "league" | "cup";
   isLatam: boolean;
+  /** national squads (World Cup etc.) — teams created with team_type='national' */
+  teamType?: "club" | "national";
 }
 
 // Pro tier (paid 2026-06): all seasons available, 7,500 req/day.
@@ -131,6 +133,10 @@ const LEAGUES: LeagueConfig[] = [
   { slug: "ligue-1", apiId: 61, season: 2025, country: "France", name: "Ligue 1", type: "league", isLatam: false },
   { slug: "eredivisie", apiId: 88, season: 2025, country: "Netherlands", name: "Eredivisie", type: "league", isLatam: false },
   { slug: "primeira-liga", apiId: 94, season: 2025, country: "Portugal", name: "Primeira Liga", type: "league", isLatam: false },
+  // FIFA World Cup 2026 (af league 1, season 2026 verified live: Jun 11 – Jul 7 2026).
+  // isLatam=true → calendar-year season label "2026" (the tournament's real window).
+  // Slug matches what /world-cup-2026 queries. Teams are national squads.
+  { slug: "fifa-world-cup-2026", apiId: 1, season: 2026, country: "World", name: "FIFA World Cup 2026", type: "cup", isLatam: true, teamType: "national" },
 ];
 
 // ============================================================
@@ -392,7 +398,8 @@ async function upsertCompetitionSeason(
 
 async function upsertTeam(
   apiTeam: any,
-  country: string
+  country: string,
+  teamType?: "club" | "national"
 ): Promise<typeof schema.teams.$inferSelect> {
   // Identity-first: the external_ids mapping table is the steady-state
   // path (one entity can hold both fd- and af- IDs; the single
@@ -438,6 +445,7 @@ async function upsertTeam(
     shortName: apiTeam.code || null,
     country,
     logoUrl: apiTeam.logo || null,
+    teamType,
   });
   if (!resolved) throw new Error(`unresolvable team: ${apiTeam.name}`);
 
@@ -756,7 +764,7 @@ async function syncTeams(
     const apiTeam = entry.team;
     const apiVenue = entry.venue;
 
-    const team = await upsertTeam(apiTeam, league.country);
+    const team = await upsertTeam(apiTeam, league.country, league.teamType);
     apiIdToDbId.set(apiTeam.id, team.id);
 
     // Venue
@@ -1903,6 +1911,28 @@ async function main() {
   if (args.includes("--injuries")) {
     const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
     for (const league of targets) await syncInjuries(league);
+    console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
+    return;
+  }
+
+  if (args.includes("--matches")) {
+    // Lightweight fixtures/scores refresh (~2 requests per league): keeps
+    // match pages current for leagues with no scheduled updater (the fd
+    // update-matches cron covers only the top-5 European league codes) and
+    // for the live World Cup. Teams sync first so new fixtures can resolve.
+    const targets = slugArg ? LEAGUES.filter((l) => l.slug === slugArg) : LEAGUES;
+    for (const league of targets) {
+      console.log(`\n== ${league.name} (matches refresh) ==`);
+      const season = await ensureSeason(league.season, league.isLatam);
+      const competition = await upsertCompetition(league);
+      const compSeason = await upsertCompetitionSeason(competition.id, season.id);
+      try {
+        const teamIdMap = await syncTeams(league, compSeason.id);
+        await syncMatches(league, compSeason.id, teamIdMap);
+      } catch (err) {
+        console.log(`   WARN: matches refresh failed: ${err}`);
+      }
+    }
     console.log(`\nRequests used: ${requestCount}/${MAX_REQUESTS}`);
     return;
   }

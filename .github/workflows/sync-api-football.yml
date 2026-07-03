@@ -114,6 +114,15 @@ jobs:
         if: steps.target.outputs.mode == 'enrich-all'
         run: npx tsx scripts/sync-api-football.ts --injuries || true
 
+      # Fixtures/scores for every configured league (~2 req each). This is the
+      # ONLY scheduled score updater for the calendar-year leagues (Liga MX,
+      # MLS, Liga Argentina, Brasileirão), Eredivisie, Primeira Liga and the
+      # live World Cup — the Vercel update-matches cron covers just the top-5
+      # European fd league codes.
+      - name: Refresh all fixtures & scores
+        if: steps.target.outputs.mode == 'enrich-all'
+        run: npx tsx scripts/sync-api-football.ts --matches || true
+
       - name: Full player season stats
         if: steps.target.outputs.mode == 'player-stats'
         run: npx tsx scripts/sync-api-football.ts --player-stats ${{ steps.target.outputs.slug && format('--slug={0}', steps.target.outputs.slug) || '' }}
