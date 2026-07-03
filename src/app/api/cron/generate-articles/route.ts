@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
       roundRecaps: 0,
       playerSpotlights: 0,
       matchPreviews: 0,
+      drafted: 0,
       errors: [] as string[],
     };
     const generatedSlugs: string[] = [];
@@ -92,9 +93,13 @@ export async function GET(request: NextRequest) {
           const article = await generateArticle(openai, prompt);
 
           if (article) {
-            await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
-            results.matchReports++;
-            generatedSlugs.push(article.slug);
+            const published = await insertArticle(sql, article, "match_report", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
+            if (published) {
+              results.matchReports++;
+              generatedSlugs.push(article.slug);
+            } else {
+              results.drafted++;
+            }
           }
         } catch (error) {
           results.errors.push(`Match report ${match.id}: ${error}`);
@@ -156,9 +161,13 @@ export async function GET(request: NextRequest) {
           const article = await generateArticle(openai, prompt);
 
           if (article) {
-            await insertRoundRecap(sql, article, md.competition_season_id, md.matchday, mdMatches, playersForLinking);
-            results.roundRecaps++;
-            generatedSlugs.push(article.slug);
+            const published = await insertRoundRecap(sql, article, md.competition_season_id, md.matchday, mdMatches, playersForLinking);
+            if (published) {
+              results.roundRecaps++;
+              generatedSlugs.push(article.slug);
+            } else {
+              results.drafted++;
+            }
           }
         } catch (error) {
           results.errors.push(`Round recap ${md.competition} MD${md.matchday}: ${error}`);
@@ -208,9 +217,13 @@ export async function GET(request: NextRequest) {
           const article = await generateArticle(openai, prompt);
 
           if (article) {
-            await insertPlayerSpotlight(sql, article, player.player_id, player.team_slug, playersForLinking);
-            results.playerSpotlights++;
-            generatedSlugs.push(article.slug);
+            const published = await insertPlayerSpotlight(sql, article, player.player_id, player.team_slug, playersForLinking);
+            if (published) {
+              results.playerSpotlights++;
+              generatedSlugs.push(article.slug);
+            } else {
+              results.drafted++;
+            }
           }
         } catch (error) {
           results.errors.push(`Player spotlight ${player.player_name}: ${error}`);
@@ -224,6 +237,8 @@ export async function GET(request: NextRequest) {
         m.id,
         m.matchday,
         m.scheduled_at,
+        ht.id as home_team_id,
+        at2.id as away_team_id,
         ht.name as home_team,
         ht.slug as home_team_slug,
         at2.name as away_team,
@@ -251,13 +266,18 @@ export async function GET(request: NextRequest) {
     const runMatchPreviews = async () => {
       await pMap(upcomingMatches, 5, async (match) => {
         try {
-          const prompt = buildMatchPreviewPrompt(match);
+          const grounding = await getPreviewGrounding(sql, match);
+          const prompt = buildMatchPreviewPrompt(match, grounding);
           const article = await generateArticle(openai, prompt);
 
           if (article) {
-            await insertArticle(sql, article, "match_preview", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
-            results.matchPreviews++;
-            generatedSlugs.push(article.slug);
+            const published = await insertArticle(sql, article, "match_preview", match.id, match.home_team_slug, match.away_team_slug, playersForLinking);
+            if (published) {
+              results.matchPreviews++;
+              generatedSlugs.push(article.slug);
+            } else {
+              results.drafted++;
+            }
           }
         } catch (error) {
           results.errors.push(`Match preview ${match.id}: ${error}`);
@@ -486,6 +506,114 @@ ORIGINALITY RULES — STRICT. Violating any of these is grounds for rejection:
 These rules are stronger than any other instruction. Follow them.
 `.trim();
 
+// Publish gate. The prompts threaten rejection for short/templated output but
+// nothing ever enforced it — whatever parsed as JSON went live. Articles that
+// fail now land as status='draft' for review instead of publishing thin or
+// templated content during an AdSense "low value content" probation.
+// Thresholds sit safely below the prompt minimums so only real shortfalls trip.
+const MIN_PUBLISH_WORDS: Record<string, number> = {
+  match_report: 1000,
+  round_recap: 750,
+  match_preview: 600,
+  player_spotlight: 650,
+};
+
+const BANNED_PHRASES: RegExp[] = [
+  /\bin a thrilling\b/i, /\ba captivating\b/i, /\bboth teams put on\b/i,
+  /\bwhat a match\b/i, /\bthe stage was set\b/i, /\bin a clash of\b/i,
+  /\bkicked off in style\b/i, /\bit was a match to remember\b/i,
+  /\bfootball fans were treated\b/i, /\ba game of two halves\b/i,
+  /\bit goes without saying\b/i, /\bat the end of the day\b/i,
+  /\bwhen all is said and done\b/i, /\btime will tell\b/i,
+  /\bthe beautiful game\b/i, /\bwithout a doubt\b/i, /\bmake no mistake\b/i,
+  /\bin conclusion\b/i,
+];
+
+function gateArticle(article: any, type: string): { publish: boolean; reasons: string[] } {
+  if (!article?.title || !article?.slug || !article?.content) {
+    return { publish: false, reasons: ["missing title/slug/content"] };
+  }
+  const reasons: string[] = [];
+  const words = countWords(article.content);
+  const min = MIN_PUBLISH_WORDS[type] ?? 600;
+  if (words < min) reasons.push(`word_count ${words} < ${min}`);
+  const text = `${article.title} ${article.content}`;
+  for (const re of BANNED_PHRASES) {
+    if (re.test(text)) reasons.push(`banned phrase ${re.source}`);
+  }
+  return { publish: reasons.length === 0, reasons };
+}
+
+/**
+ * Real DB facts for the preview prompt. The old prompt demanded form guides,
+ * H2H and injury news while supplying only team names and a date — forcing
+ * the model to fabricate stats on a site whose brand is data accuracy.
+ */
+async function getPreviewGrounding(
+  sql: NeonQueryFunction<false, false>,
+  match: any,
+): Promise<string> {
+  const fmt = (r: any) => `${r.home} ${r.hs}-${r.aws} ${r.away} (${r.d})`;
+  const lastFive = async (teamId: string, name: string) => {
+    const rows = await sql`
+      SELECT m.scheduled_at::date AS d, ht.name AS home, at2.name AS away,
+             m.home_score AS hs, m.away_score AS aws
+      FROM matches m
+      JOIN teams ht ON ht.id = m.home_team_id
+      JOIN teams at2 ON at2.id = m.away_team_id
+      WHERE (m.home_team_id = ${teamId} OR m.away_team_id = ${teamId})
+        AND m.status = 'finished' AND m.home_score IS NOT NULL
+      ORDER BY m.scheduled_at DESC LIMIT 5
+    `;
+    return rows.length
+      ? `${name} — last ${rows.length} results: ${rows.map(fmt).join("; ")}`
+      : `${name} — no recent finished matches in our data.`;
+  };
+  const standingLine = async (teamId: string, name: string) => {
+    const [st] = await sql`
+      SELECT position, points, played, form FROM standings
+      WHERE team_id = ${teamId} AND competition_season_id = ${match.competition_season_id}
+      LIMIT 1
+    `;
+    return st
+      ? `${name} — league position ${st.position}, ${st.points} pts from ${st.played} played${st.form ? `, form ${st.form}` : ""}`
+      : `${name} — no standings data available.`;
+  };
+  const h2h = await sql`
+    SELECT m.scheduled_at::date AS d, ht.name AS home, at2.name AS away,
+           m.home_score AS hs, m.away_score AS aws
+    FROM matches m
+    JOIN teams ht ON ht.id = m.home_team_id
+    JOIN teams at2 ON at2.id = m.away_team_id
+    WHERE m.status = 'finished' AND m.home_score IS NOT NULL
+      AND ((m.home_team_id = ${match.home_team_id} AND m.away_team_id = ${match.away_team_id})
+        OR (m.home_team_id = ${match.away_team_id} AND m.away_team_id = ${match.home_team_id}))
+    ORDER BY m.scheduled_at DESC LIMIT 5
+  `;
+  const injuries = await sql`
+    SELECT p.name AS player, t.name AS team, i.reason
+    FROM injuries i
+    JOIN players p ON p.id = i.player_id
+    JOIN teams t ON t.id = i.team_id
+    WHERE i.team_id IN (${match.home_team_id}, ${match.away_team_id})
+    LIMIT 12
+  `;
+
+  const parts = [
+    await standingLine(match.home_team_id, match.home_team),
+    await standingLine(match.away_team_id, match.away_team),
+    await lastFive(match.home_team_id, match.home_team),
+    await lastFive(match.away_team_id, match.away_team),
+    h2h.length
+      ? `Head-to-head (most recent first): ${h2h.map(fmt).join("; ")}`
+      : "Head-to-head: no previous meetings recorded in our data.",
+    injuries.length
+      ? `Current injuries/absences: ${injuries.map((i: any) => `${i.player} (${i.team}${i.reason ? `, ${i.reason}` : ""})`).join("; ")}`
+      : "Current injuries/absences: none recorded.",
+  ];
+  return parts.join("\n");
+}
+
 async function generateArticle(openai: OpenAI, prompt: string): Promise<any | null> {
   try {
     const response = await openai.chat.completions.create({
@@ -689,7 +817,7 @@ Return as JSON:
 FINAL REMINDER: The "content" field must be at least 900 words. Each ## section must hit its minimum.`;
 }
 
-function buildMatchPreviewPrompt(match: any): string {
+function buildMatchPreviewPrompt(match: any, grounding: string): string {
   const homeTeamLink = `[${match.home_team}](/teams/${match.home_team_slug})`;
   const awayTeamLink = `[${match.away_team}](/teams/${match.away_team_slug})`;
   const competitionLink = `[${match.competition}](/competitions/${match.competition_slug})`;
@@ -706,6 +834,15 @@ MATCH DETAILS:
 - Teams: ${match.home_team} vs ${match.away_team}
 ${match.venue ? `- Venue: ${match.venue}` : ""}
 ${match.matchday ? `- Matchday: ${match.matchday}` : ""}
+
+VERIFIED DATA — this is ALL the factual data available for this fixture:
+${grounding}
+
+DATA RULES — ABSOLUTE, stronger than any section instruction below:
+- Every score, stat, standing, injury or historical claim MUST come from the VERIFIED DATA above.
+- If a section has no supporting data (e.g. no head-to-head meetings recorded), say so in one
+  sentence and pivot to analysis of what IS known — NEVER invent results, form, injuries or history.
+- No invented quotes from managers, players or pundits. No transfer rumours.
 
 INTERNAL LINKS:
 - Home team: ${homeTeamLink}
@@ -782,7 +919,15 @@ async function insertArticle(
   homeTeamSlug: string,
   awayTeamSlug: string,
   playersForLinking: readonly any[]
-): Promise<void> {
+): Promise<boolean> {
+  // Publish gate: failures land as draft (new rows) or leave the existing
+  // published row untouched (regenerations) — never replace good content
+  // with gated content, never unpublish an indexed URL.
+  const gate = gateArticle(article, type);
+  if (!gate.publish) {
+    console.warn(`[article-gate] ${type} "${article?.slug}" gated: ${gate.reasons.join("; ")}`);
+  }
+
   // SEO: keep slug stable across regenerations. The previous behaviour
   // appended Date.now() to the slug on collision, which orphaned every
   // URL Google had already indexed. Update the existing row in place
@@ -792,6 +937,7 @@ async function insertArticle(
 
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
   if (existing.length > 0) {
+    if (!gate.publish) return false;
     await sql`
       UPDATE articles SET
         type = ${type},
@@ -816,7 +962,8 @@ async function insertArticle(
       ) VALUES (
         ${article.slug}, ${type}, ${article.title}, ${article.excerpt}, ${article.content},
         ${article.metaTitle}, ${article.metaDescription},
-        ${matchId}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+        ${matchId}, ${imageUrl}, ${gate.publish ? "published" : "draft"},
+        ${gate.publish ? new Date().toISOString() : null}, 'gpt-4o-mini', ${countWords(article.content)}
       )
     `;
   }
@@ -836,6 +983,7 @@ async function insertArticle(
     }
     await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking);
   }
+  return gate.publish;
 }
 
 async function insertRoundRecap(
@@ -845,7 +993,12 @@ async function insertRoundRecap(
   matchday: number,
   mdMatches: any[],
   playersForLinking: readonly any[]
-): Promise<void> {
+): Promise<boolean> {
+  const gate = gateArticle(article, "round_recap");
+  if (!gate.publish) {
+    console.warn(`[article-gate] round_recap "${article?.slug}" gated: ${gate.reasons.join("; ")}`);
+  }
+
   // SEO: keep slug stable. See note in insertArticle.
   const [compLogo] = await sql`
     SELECT c.logo_url FROM competition_seasons cs
@@ -856,6 +1009,7 @@ async function insertRoundRecap(
 
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
   if (existing.length > 0) {
+    if (!gate.publish) return false;
     await sql`
       UPDATE articles SET
         type = 'round_recap',
@@ -881,7 +1035,8 @@ async function insertRoundRecap(
       ) VALUES (
         ${article.slug}, 'round_recap', ${article.title}, ${article.excerpt}, ${article.content},
         ${article.metaTitle}, ${article.metaDescription},
-        ${competitionSeasonId}, ${matchday}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+        ${competitionSeasonId}, ${matchday}, ${imageUrl}, ${gate.publish ? "published" : "draft"},
+        ${gate.publish ? new Date().toISOString() : null}, 'gpt-4o-mini', ${countWords(article.content)}
       )
     `;
   }
@@ -902,6 +1057,7 @@ async function insertRoundRecap(
     }
     await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking);
   }
+  return gate.publish;
 }
 
 async function insertPlayerSpotlight(
@@ -910,7 +1066,12 @@ async function insertPlayerSpotlight(
   playerId: string,
   teamSlug: string,
   playersForLinking: readonly any[]
-): Promise<void> {
+): Promise<boolean> {
+  const gate = gateArticle(article, "player_spotlight");
+  if (!gate.publish) {
+    console.warn(`[article-gate] player_spotlight "${article?.slug}" gated: ${gate.reasons.join("; ")}`);
+  }
+
   // SEO: keep slug stable. See note in insertArticle.
   const [playerImg] = await sql`SELECT image_url FROM players WHERE id = ${playerId}`;
   const [teamImg] = await sql`SELECT logo_url FROM teams WHERE slug = ${teamSlug}`;
@@ -918,6 +1079,7 @@ async function insertPlayerSpotlight(
 
   const existing = await sql`SELECT id FROM articles WHERE slug = ${article.slug}`;
   if (existing.length > 0) {
+    if (!gate.publish) return false;
     await sql`
       UPDATE articles SET
         type = 'player_spotlight',
@@ -942,7 +1104,8 @@ async function insertPlayerSpotlight(
       ) VALUES (
         ${article.slug}, 'player_spotlight', ${article.title}, ${article.excerpt}, ${article.content},
         ${article.metaTitle}, ${article.metaDescription},
-        ${playerId}, ${imageUrl}, 'published', NOW(), 'gpt-4o-mini', ${countWords(article.content)}
+        ${playerId}, ${imageUrl}, ${gate.publish ? "published" : "draft"},
+        ${gate.publish ? new Date().toISOString() : null}, 'gpt-4o-mini', ${countWords(article.content)}
       )
     `;
   }
@@ -960,6 +1123,7 @@ async function insertPlayerSpotlight(
   if (insertedArticle) {
     await linkArticleToPlayers(sql, insertedArticle.id, [article.title, article.excerpt, article.content].join(" "), playersForLinking, playerId);
   }
+  return gate.publish;
 }
 
 function escapeRegex(str: string): string {
