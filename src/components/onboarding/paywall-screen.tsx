@@ -1,86 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles, Zap, Loader2, Clock } from "lucide-react";
+import { Check, Zap, Loader2, CalendarDays, Sparkles } from "lucide-react";
 import { useSubscription } from "@/components/subscription/subscription-provider";
-import {
-  SUBSCRIPTION_TIERS,
-  type SubscriptionTier,
-} from "@/lib/subscriptions/tiers";
+import { SUBSCRIPTION_TIERS } from "@/lib/subscriptions/tiers";
 
 interface PaywallScreenProps {
   onContinue: () => void;
 }
 
-const TIER_ORDER: SubscriptionTier[] = ["free", "pro"];
-
-const TIER_ICONS: Record<SubscriptionTier, React.ElementType> = {
-  free: Sparkles,
-  pro: Zap,
-};
-
-const TIER_COLORS: Record<
-  SubscriptionTier,
-  { border: string; bg: string; button: string; badge: string }
-> = {
-  free: {
-    border: "border-line",
-    bg: "bg-surface",
-    button:
-      "bg-surface-2 text-ink hover:bg-surface-2",
-    badge: "",
-  },
-  pro: {
-    border: "border-blue-600 ring-2 ring-blue-100",
-    bg: "bg-surface",
-    button:
-      "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg",
-    badge: "bg-blue-600 text-white",
-  },
-};
-
-const FEATURE_LABELS: { key: string; label: string; comingSoon?: boolean }[] = [
-  { key: "follows", label: "Player & team follows" },
-  { key: "comparisons", label: "Daily comparisons" },
-  { key: "adFree", label: "Ad-free experience" },
-  { key: "historicalData", label: "Multi-season historical data" },
+/**
+ * Post-onboarding screen. Every new user is auto-provisioned a 7-day Pro
+ * reverse trial (getUserSubscription), so this screen's job is to TELL them
+ * that — not to demand a plan choice before they've felt any value. Loss-
+ * aversion trials convert on the way out of value, not the way in. A single
+ * low-pressure "lock it in" option charges exactly what it displays: the
+ * interval is passed explicitly to upgrade() (the old version showed the
+ * annual price but charged monthly).
+ */
+const PRO_HIGHLIGHTS = [
+  "Unlimited player & team comparisons",
+  "Prediction leagues, pick'em and the Daily Challenge",
+  "Full multi-season historical data",
+  "Ad-free experience",
 ];
 
-function getFeatureValue(tier: SubscriptionTier, key: string): string | boolean {
-  const features = SUBSCRIPTION_TIERS[tier].features;
-  switch (key) {
-    case "follows":
-      return features.maxFollows === Infinity ? "Unlimited" : `${features.maxFollows}`;
-    case "comparisons":
-      return features.comparisonsPerDay === Infinity
-        ? "Unlimited"
-        : `${features.comparisonsPerDay}/day`;
-    case "advancedStats":
-      return features.advancedStats;
-    case "adFree":
-      return features.adFree;
-    case "exportData":
-      return features.exportData;
-    case "historicalData":
-      return features.historicalData;
-    default:
-      return false;
-  }
-}
-
 export function PaywallScreen({ onContinue }: PaywallScreenProps) {
-  const { upgrade } = useSubscription();
-  const [upgrading, setUpgrading] = useState<SubscriptionTier | null>(null);
+  const { upgrade, subscription } = useSubscription();
+  const [upgrading, setUpgrading] = useState<"monthly" | "annual" | null>(null);
+  const pro = SUBSCRIPTION_TIERS.pro;
 
-  const handleSelect = async (tier: SubscriptionTier) => {
-    if (tier === "free") {
-      onContinue();
-      return;
-    }
+  const trialEnd =
+    subscription?.status === "trialing" && subscription.endDate
+      ? new Date(subscription.endDate).toLocaleDateString(undefined, { month: "long", day: "numeric" })
+      : null;
 
-    setUpgrading(tier);
+  const handleUpgrade = async (period: "monthly" | "annual") => {
+    setUpgrading(period);
     try {
-      await upgrade("pro");
+      await upgrade("pro", period);
       onContinue();
     } catch {
       // Error already logged in provider
@@ -90,142 +48,72 @@ export function PaywallScreen({ onContinue }: PaywallScreenProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-surface rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-surface rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white text-center">
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-8 text-white text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Zap className="w-8 h-8" />
-            <h2 className="text-3xl font-bold">Choose Your Plan</h2>
+            <h2 className="text-3xl font-bold">You&apos;ve got Pro — free</h2>
           </div>
-          <p className="text-blue-100 text-lg max-w-xl mx-auto">
-            Unlock the full power of DataSports with a plan that fits your needs
+          <p className="text-blue-100 text-lg">
+            Your 7-day Pro trial is active. No card, no strings.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="p-8 overflow-y-auto max-h-[60vh]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {TIER_ORDER.map((tierKey) => {
-              const config = SUBSCRIPTION_TIERS[tierKey];
-              const colors = TIER_COLORS[tierKey];
-              const Icon = TIER_ICONS[tierKey];
-              const isRecommended = tierKey === "pro";
+        <div className="p-8">
+          {/* What's unlocked */}
+          <ul className="space-y-3 mb-6">
+            {PRO_HIGHLIGHTS.map((label) => (
+              <li key={label} className="flex items-start gap-2 text-sm text-ink">
+                <Check className="w-4 h-4 mt-0.5 flex-shrink-0 text-green-500" />
+                {label}
+              </li>
+            ))}
+          </ul>
 
-              return (
-                <div
-                  key={tierKey}
-                  className={`relative rounded-2xl border-2 ${colors.border} ${colors.bg} p-6 flex flex-col`}
-                >
-                  {isRecommended && (
-                    <div
-                      className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold ${colors.badge}`}
-                    >
-                      RECOMMENDED
-                    </div>
-                  )}
-
-                  <div className="text-center mb-6">
-                    <div
-                      className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${
-                        tierKey === "free"
-                          ? "bg-surface-2"
-                          : "bg-blue-100"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-6 h-6 ${
-                          tierKey === "free"
-                            ? "text-muted"
-                            : "text-blue-600"
-                        }`}
-                      />
-                    </div>
-                    <h3 className="text-xl font-bold text-ink">
-                      {config.name}
-                    </h3>
-                    <p className="text-sm text-muted mt-1">
-                      {config.description}
-                    </p>
-                    <div className="mt-4">
-                      {config.price === 0 ? (
-                        <span className="text-4xl font-bold text-ink">
-                          Free
-                        </span>
-                      ) : (
-                        <>
-                          <span className="text-4xl font-bold text-ink">
-                            &euro;{config.annualPrice}
-                          </span>
-                          <span className="text-muted text-sm">/year</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <ul className="space-y-3 mb-6 flex-1">
-                    {FEATURE_LABELS.map(({ key, label, comingSoon }) => {
-                      const value = getFeatureValue(tierKey, key);
-                      const available = value !== false;
-                      return (
-                        <li
-                          key={key}
-                          className={`flex items-start gap-2 text-sm ${
-                            available ? "text-ink" : "text-faint"
-                          }`}
-                        >
-                          <Check
-                            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                              available ? "text-green-500" : "text-faint"
-                            }`}
-                          />
-                          <span>
-                            {label}
-                            {typeof value === "string" && (
-                              <span className="font-medium text-ink">
-                                {" "}
-                                ({value})
-                              </span>
-                            )}
-                            {comingSoon && available && (
-                              <span className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-muted bg-surface-2 rounded">
-                                <Clock className="w-3 h-3" />
-                                Soon
-                              </span>
-                            )}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  <button
-                    onClick={() => handleSelect(tierKey)}
-                    disabled={upgrading !== null}
-                    className={`w-full py-3 rounded-xl font-semibold transition-all disabled:opacity-50 ${colors.button}`}
-                  >
-                    {upgrading === tierKey ? (
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-                    ) : tierKey === "free" ? (
-                      "Continue for Free"
-                    ) : (
-                      `Get ${config.name}`
-                    )}
-                  </button>
-                </div>
-              );
-            })}
+          {/* Timeline */}
+          <div className="rounded-xl border border-line bg-surface-2 p-4 mb-6 space-y-2 text-sm">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-4 h-4 mt-0.5 text-blue-600 shrink-0" />
+              <span className="text-ink"><b>Today</b> — everything above is unlocked. Explore freely.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <CalendarDays className="w-4 h-4 mt-0.5 text-muted shrink-0" />
+              <span className="text-muted">
+                <b>{trialEnd ? trialEnd : "In 7 days"}</b> — your plan quietly reverts to Free. No charge, ever, unless you choose to keep Pro.
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="p-6 bg-surface-2 border-t text-center">
+          {/* Primary: continue with trial */}
           <button
             onClick={onContinue}
             disabled={upgrading !== null}
-            className="text-muted hover:text-ink text-sm transition-colors"
+            className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg transition-all disabled:opacity-50"
           >
-            Skip for now — you can always upgrade later
+            Start exploring with Pro
           </button>
+
+          {/* Secondary: lock it in now (honest prices, explicit interval) */}
+          <div className="mt-4 text-center text-sm text-muted">
+            Already convinced? Lock it in:
+            <div className="flex justify-center gap-3 mt-2">
+              <button
+                onClick={() => handleUpgrade("monthly")}
+                disabled={upgrading !== null}
+                className="px-4 py-2 rounded-lg border border-line text-ink font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
+              >
+                {upgrading === "monthly" ? <Loader2 className="w-4 h-4 animate-spin" /> : `€${pro.price}/month`}
+              </button>
+              <button
+                onClick={() => handleUpgrade("annual")}
+                disabled={upgrading !== null}
+                className="px-4 py-2 rounded-lg border border-line text-ink font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
+              >
+                {upgrading === "annual" ? <Loader2 className="w-4 h-4 animate-spin" /> : `€${pro.annualPrice}/year`}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

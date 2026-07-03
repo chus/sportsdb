@@ -14,12 +14,12 @@ const faqs = [
   {
     question: "What payment methods do you accept?",
     answer:
-      "We accept all major credit cards (Visa, Mastercard, American Express) and PayPal.",
+      "Payments are processed securely by Stripe. We accept all major credit and debit cards (Visa, Mastercard, American Express).",
   },
   {
     question: "Is there a free trial for Pro?",
     answer:
-      "The Free tier gives you access to core features. Upgrade to Pro anytime to unlock advanced stats, unlimited comparisons, and more.",
+      "Yes — every new account automatically gets 7 days of full Pro access, no card required. When the trial ends your account simply reverts to the Free tier; you're never charged unless you choose to subscribe.",
   },
   {
     question: "What happens to my data if I downgrade?",

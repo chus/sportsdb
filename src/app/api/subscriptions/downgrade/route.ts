@@ -23,12 +23,33 @@ export async function POST() {
       return NextResponse.json({ error: "No subscription found" }, { status: 404 });
     }
 
-    // Cancel Stripe subscription if it exists
     if (sub.stripeSubscriptionId) {
-      await stripe.subscriptions.cancel(sub.stripeSubscriptionId);
+      // Paid subscription: cancel at period end so the user keeps what they
+      // paid for (this is also what the pricing FAQ promises). The Stripe
+      // customer.subscription.deleted webhook flips the tier to free when the
+      // period actually ends; customer.subscription.updated records
+      // autoRenew=false immediately.
+      await stripe.subscriptions.update(sub.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+
+      await db
+        .update(subscriptions)
+        .set({
+          autoRenew: false,
+          cancelledAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.userId, user.id));
+
+      return NextResponse.json({
+        success: true,
+        message: "Your plan will end at the close of the current billing period — you keep Pro until then.",
+      });
     }
 
-    // Downgrade to free in DB
+    // No paid Stripe subscription (e.g. ending a reverse trial early):
+    // nothing paid to honor, downgrade immediately.
     await db
       .update(subscriptions)
       .set({
@@ -36,6 +57,7 @@ export async function POST() {
         status: "active",
         stripeSubscriptionId: null,
         endDate: null,
+        autoRenew: false,
         cancelledAt: new Date(),
         updatedAt: new Date(),
       })
