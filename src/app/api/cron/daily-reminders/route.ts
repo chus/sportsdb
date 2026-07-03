@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getStreakAtRiskUsers, getMatchdayReminderUsers } from "@/lib/queries/reminders";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
+import { unsubscribeHeaders, unsubscribeFooter } from "@/lib/email/unsubscribe";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -21,15 +22,13 @@ async function verifyCron() {
   return !secret || auth === `Bearer ${secret}`;
 }
 
-function shell(body: string, cta: string, href: string): string {
+function shell(userId: string, body: string, cta: string, href: string): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
     ${body}
     <div style="margin-top:24px;">
       <a href="${href}" style="background:#2563eb;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:10px 18px;border-radius:8px;">${cta}</a>
     </div>
-    <p style="font-size:12px;color:#94a3b8;margin-top:24px;">
-      <a href="${BASE_URL}/account" style="color:#94a3b8;">Manage email preferences</a>
-    </p>
+    ${unsubscribeFooter({ kind: "user", id: userId })}
   </div>`;
 }
 
@@ -55,7 +54,9 @@ export async function GET(request: NextRequest) {
     const ok = await sendEmail({
       to: u.email,
       subject: `🔥 Keep your ${u.streak}-day streak alive`,
+      headers: unsubscribeHeaders({ kind: "user", id: u.id }),
       html: shell(
+        u.id,
         `<h1 style="font-size:20px;color:#0f172a;margin:0 0 8px;">Don't break your streak${u.name ? `, ${u.name}` : ""}!</h1>
          <p style="font-size:14px;color:#334155;">You're on a <b>${u.streak}-day</b> Daily Challenge streak. Answer today's 5 questions to keep it going.</p>`,
         "Play today's challenge",
@@ -70,7 +71,9 @@ export async function GET(request: NextRequest) {
     const ok = await sendEmail({
       to: u.email,
       subject: "Make your picks — matches kicking off soon",
+      headers: unsubscribeHeaders({ kind: "user", id: u.id }),
       html: shell(
+        u.id,
         `<h1 style="font-size:20px;color:#0f172a;margin:0 0 8px;">Matchday's almost here${u.name ? `, ${u.name}` : ""}</h1>
          <p style="font-size:14px;color:#334155;">You have <b>${u.pending}</b> upcoming ${u.pending === 1 ? "match" : "matches"} to predict before kickoff. Lock in your picks and climb your league table.</p>`,
         "Make your picks",

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getDigestRecipients } from "@/lib/queries/digest";
 import { listStudies } from "@/lib/queries/studies";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
+import { unsubscribeHeaders, unsubscribeFooter } from "@/lib/email/unsubscribe";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -52,8 +53,8 @@ export async function GET(request: NextRequest) {
     <p style="font-size:14px;color:#64748b;margin:0 0 16px;">Fresh data studies from DataSports — free to read and cite.</p>
     ${cards}
     <div style="margin-top:20px;"><a href="${BASE_URL}/studies" style="background:#2563eb;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:10px 18px;border-radius:8px;">All studies</a></div>
-    <p style="font-size:12px;color:#94a3b8;margin-top:24px;">You're getting this because you enabled email updates.
-      <a href="${BASE_URL}/account" style="color:#94a3b8;">Manage preferences</a>.</p>
+    <p style="font-size:12px;color:#94a3b8;margin-top:24px;">You're getting this because you enabled email updates.</p>
+    __UNSUB_FOOTER__
   </div>`;
 
   const recipients = await getDigestRecipients();
@@ -61,7 +62,13 @@ export async function GET(request: NextRequest) {
   if (!dryRun) {
     for (const u of recipients) {
       if (!u.email) continue;
-      if (await sendEmail({ to: u.email, subject: "📊 This week in football data", html })) sent++;
+      const ok = await sendEmail({
+        to: u.email,
+        subject: "📊 This week in football data",
+        html: html.replace("__UNSUB_FOOTER__", unsubscribeFooter({ kind: "user", id: u.id })),
+        headers: unsubscribeHeaders({ kind: "user", id: u.id }),
+      });
+      if (ok) sent++;
     }
   }
 

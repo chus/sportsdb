@@ -12,9 +12,12 @@ export interface EmailMessage {
   to: string;
   subject: string;
   html: string;
+  /** Extra SMTP headers — list emails MUST pass unsubscribeHeaders() here
+   *  (Gmail/Yahoo bulk-sender rules + deliverability for the new domain). */
+  headers?: Record<string, string>;
 }
 
-export async function sendEmail({ to, subject, html }: EmailMessage): Promise<boolean> {
+export async function sendEmail({ to, subject, html, headers }: EmailMessage): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.log(`[email] skipped (no RESEND_API_KEY) → would send "${subject}" to ${to}`);
@@ -28,7 +31,7 @@ export async function sendEmail({ to, subject, html }: EmailMessage): Promise<bo
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from, to, subject, html }),
+      body: JSON.stringify({ from, to, subject, html, ...(headers ? { headers } : {}) }),
     });
     if (!res.ok) {
       console.error(`[email] send failed (${res.status}):`, await res.text());

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getDigestRecipients, getUserDigestContent } from "@/lib/queries/digest";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
+import { unsubscribeHeaders, unsubscribeFooter } from "@/lib/email/unsubscribe";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ function row(m: DM, withScore: boolean): string {
 }
 
 function buildHtml(
+  userId: string,
   name: string | null,
   results: DM[],
   fixtures: DM[],
@@ -72,8 +74,8 @@ function buildHtml(
     </div>
     <p style="font-size:12px;color:#94a3b8;margin-top:24px;">
       You're getting this because you enabled the weekly digest.
-      <a href="${BASE_URL}/account" style="color:#94a3b8;">Manage email preferences</a>.
     </p>
+    ${unsubscribeFooter({ kind: "user", id: userId })}
   </div>`;
 }
 
@@ -105,7 +107,8 @@ export async function GET(request: NextRequest) {
     const ok = await sendEmail({
       to: u.email,
       subject: "Your football week — results & fixtures",
-      html: buildHtml(u.name, results, fixtures, injuries),
+      html: buildHtml(u.id, u.name, results, fixtures, injuries),
+      headers: unsubscribeHeaders({ kind: "user", id: u.id }),
     });
     if (ok) sent++;
   }
