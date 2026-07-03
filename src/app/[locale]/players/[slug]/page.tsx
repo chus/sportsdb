@@ -23,7 +23,6 @@ import { ExternalLinks } from "@/components/entity/external-links";
 import { RelatedArticles } from "@/components/articles/related-articles";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { SidebarUpgradeOrAd } from "@/components/subscription/sidebar-upgrade-or-ad";
-import { ProTeaserWithModal } from "@/components/subscription/pro-teaser-with-modal";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { buildPlayerAbout, buildPlayerAboutEs, buildPlayerFaqs, buildPlayerFaqsEs } from "@/lib/seo/entity-copy";
 import { PageTracker } from "@/components/analytics/page-tracker";
@@ -718,8 +717,12 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                   <>
                     {statsHistory.length > 0 ? (
                       <section>
+                        {/* Deliberately NOT Pro-teased: this table is the core
+                            content of the site's largest indexed page type. A
+                            blur overlay on it reads as cloaked/low-value to
+                            AdSense reviewers and users alike. Pro value lives
+                            in comparisons, games and FPL depth instead. */}
                         <h2 className="text-lg font-bold text-ink mb-4">Season Statistics</h2>
-                        <ProTeaserWithModal feature="historical_data" label="Unlock Full History">
                         <div className="bg-surface rounded-xl border border-line overflow-hidden overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
@@ -771,7 +774,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                             </tfoot>
                           </table>
                         </div>
-                        </ProTeaserWithModal>
                       </section>
                     ) : (
                       <div className="bg-surface rounded-xl border border-line p-8 text-center">
