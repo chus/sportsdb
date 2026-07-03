@@ -96,6 +96,10 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
+      // Let Stripe apply promo codes natively at checkout. Codes validated on
+      // the pricing page must also exist as Stripe promotion codes with the
+      // same code string for the discount to actually apply.
+      allow_promotion_codes: true,
       success_url: `${BASE_URL}/account?upgraded=${tier}`,
       cancel_url: `${BASE_URL}/pricing`,
       metadata: {

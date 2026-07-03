@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { SUBSCRIPTION_TIERS } from "@/lib/subscriptions/tiers";
 
 type UpgradeFeature =
   | "comparison_limit"
@@ -310,11 +311,15 @@ function UpgradeModal({
             ))}
           </ul>
 
+          {/* Price comes from tiers.ts (the single source of truth) and MUST
+              match what handleUpgrade charges: upgrade("pro", "annual"). A
+              hardcoded "€8/year" here once showed a different number than the
+              €30 Stripe Checkout — trust-destroying at the decision moment. */}
           <div className="text-center mb-4">
-            <span className="text-3xl font-bold text-ink">&euro;8</span>
+            <span className="text-3xl font-bold text-ink">&euro;{SUBSCRIPTION_TIERS.pro.annualPrice}</span>
             <span className="text-muted text-sm">/year</span>
             <p className="text-xs text-faint mt-1">
-              Less than a coffee per month
+              &euro;{(Number(SUBSCRIPTION_TIERS.pro.annualPrice) / 12).toFixed(2)}/month, billed annually
             </p>
           </div>
 
