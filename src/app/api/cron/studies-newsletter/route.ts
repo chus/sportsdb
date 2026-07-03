@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getDigestRecipients } from "@/lib/queries/digest";
+import { db } from "@/lib/db";
+import { newsletterSubscribers } from "@/lib/db/schema";
+import { isNotNull, isNull, and } from "drizzle-orm";
 import { listStudies } from "@/lib/queries/studies";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
 import { unsubscribeHeaders, unsubscribeFooter } from "@/lib/email/unsubscribe";
@@ -57,11 +60,22 @@ export async function GET(request: NextRequest) {
     __UNSUB_FOOTER__
   </div>`;
 
+  // Registered opted-in users + confirmed anonymous subscribers (double
+  // opt-in via the footer form). De-dupe by email — a registered user who
+  // also subscribed anonymously gets one send, via their user identity.
   const recipients = await getDigestRecipients();
+  const subscribers = await db
+    .select({ id: newsletterSubscribers.id, email: newsletterSubscribers.email })
+    .from(newsletterSubscribers)
+    .where(and(isNotNull(newsletterSubscribers.confirmedAt), isNull(newsletterSubscribers.unsubscribedAt)));
+
   let sent = 0;
+  let sentSubscribers = 0;
   if (!dryRun) {
+    const seen = new Set<string>();
     for (const u of recipients) {
       if (!u.email) continue;
+      seen.add(u.email.toLowerCase());
       const ok = await sendEmail({
         to: u.email,
         subject: "📊 This week in football data",
@@ -70,6 +84,16 @@ export async function GET(request: NextRequest) {
       });
       if (ok) sent++;
     }
+    for (const sub of subscribers) {
+      if (seen.has(sub.email.toLowerCase())) continue;
+      const ok = await sendEmail({
+        to: sub.email,
+        subject: "📊 This week in football data",
+        html: html.replace("__UNSUB_FOOTER__", unsubscribeFooter({ kind: "subscriber", id: sub.id })),
+        headers: unsubscribeHeaders({ kind: "subscriber", id: sub.id }),
+      });
+      if (ok) sentSubscribers++;
+    }
   }
 
   return NextResponse.json({
@@ -77,7 +101,9 @@ export async function GET(request: NextRequest) {
     dryRun,
     studies: studies.length,
     recipients: recipients.length,
+    subscribers: subscribers.length,
     sent,
+    sentSubscribers,
     timestamp: new Date().toISOString(),
   });
 }

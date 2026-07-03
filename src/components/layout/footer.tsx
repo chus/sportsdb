@@ -1,5 +1,7 @@
 "use client";
 
+import { NewsletterSignup } from "@/components/email/newsletter-signup";
+
 import { Trophy } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -75,6 +77,9 @@ export function Footer() {
               {t("footer.tagline")}
             </p>
             <p className="text-xs text-blue-400 mt-2">Pro — €3/month</p>
+            <div className="mt-5">
+              <NewsletterSignup />
+            </div>
           </div>
 
           {/* Link columns */}

@@ -1421,6 +1421,23 @@ export const emailLog = pgTable(
   (table) => [uniqueIndex("uq_email_log_user_type").on(table.userId, table.type)]
 );
 
+// Anonymous newsletter subscribers (public logged-out capture). Double
+// opt-in: a subscribe writes the row + consented_at, a confirmation email
+// sets confirmed_at, and only confirmed && !unsubscribed get sends. Tokenized
+// unsubscribe uses the "s:<id>" subject kind.
+export const newsletterSubscribers = pgTable(
+  "newsletter_subscribers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull().unique(),
+    consentedAt: timestamp("consented_at", { withTimezone: true }).defaultNow(),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [index("idx_newsletter_confirmed").on(table.confirmedAt)]
+);
+
 // Digital-PR outreach targets — journalists, creators, communities, and the
 // reporter-query platforms to pitch the data studies to. A lightweight CRM so
 // outreach is a repeatable system, not ad-hoc. Seeded with public channels;

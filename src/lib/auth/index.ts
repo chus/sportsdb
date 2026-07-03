@@ -78,6 +78,16 @@ export async function createUserFromGoogle(
     })
     .returning();
 
+  // Seed notification settings like the password path does. Without this row,
+  // Google-signup users were invisible to every email loop (getDigestRecipients
+  // inner-joins notification_settings) until they happened to touch a consent
+  // toggle. OAuth has no consent checkbox, so email starts disabled — the
+  // in-app EmailOptInCard is the opt-in path.
+  await db
+    .insert(notificationSettings)
+    .values({ userId: user.id, emailEnabled: false })
+    .onConflictDoNothing();
+
   return user;
 }
 
