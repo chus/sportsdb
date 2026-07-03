@@ -827,7 +827,19 @@ async function syncStandings(
   }
 
   // Flatten all groups (for cup competitions with groups)
-  const allStandings = data.response[0].league.standings.flat();
+  let allStandings = data.response[0].league.standings.flat();
+
+  // Tournament payloads (World Cup) ship an aggregate "Group Stage" table
+  // alongside the real named groups — the same teams again, which would
+  // render as a bogus 13th group. Drop the aggregate when real groups exist.
+  const groupNames = new Set(
+    allStandings.map((r: any) => (r.group ?? "").toString().trim()),
+  );
+  if (groupNames.size > 1 && groupNames.has("Group Stage")) {
+    allStandings = allStandings.filter(
+      (r: any) => (r.group ?? "").toString().trim() !== "Group Stage",
+    );
+  }
 
   let count = 0;
   const keptIds: string[] = [];
@@ -838,7 +850,8 @@ async function syncStandings(
     if (!teamId) {
       const team = await upsertTeam(
         { id: row.team.id, name: row.team.name, logo: row.team.logo, code: null, founded: null },
-        league.country
+        league.country,
+        league.teamType
       );
       teamId = team.id;
       teamIdMap.set(row.team.id, team.id);

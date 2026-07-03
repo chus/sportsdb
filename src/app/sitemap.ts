@@ -232,6 +232,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         city: teams.city,
         foundedYear: teams.foundedYear,
         logoUrl: teams.logoUrl,
+        teamType: teams.teamType,
         squadCount: sql<number>`(
           SELECT count(*) FROM player_team_history pth
           JOIN players p ON p.id = pth.player_id
@@ -388,7 +389,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const NATIONAL_TEAM_SLUGS = new Set(["mexico", "south-korea", "south-africa", "brazil", "argentina", "germany", "france", "england", "spain", "italy", "portugal", "netherlands", "belgium", "croatia", "denmark", "serbia", "switzerland", "austria", "poland", "czech-republic", "scotland", "wales", "turkey", "ukraine", "romania", "hungary", "slovakia", "slovenia", "albania", "georgia", "japan", "australia", "usa", "canada", "colombia", "uruguay", "chile", "ecuador", "paraguay", "peru", "venezuela", "bolivia"]);
   const teamPages: MetadataRoute.Sitemap = allTeams
     .filter((team) => {
-      if (NATIONAL_TEAM_SLUGS.has(team.slug)) return false; // exclude national teams
+      // National teams are excluded by type (the WC 2026 ingestion creates
+      // them with team_type='national'); the slug list remains as
+      // belt-and-braces for legacy rows created before the type existed.
+      // Deliberate pre-Jul-5 caution: don't expand the indexable surface
+      // during the AdSense re-review window — revisit after.
+      if (team.teamType === "national") return false;
+      if (NATIONAL_TEAM_SLUGS.has(team.slug)) return false; // legacy slug list
       if ((team.standingsCount ?? 0) === 0) return false; // hard gate: must have current standings
       const result = scoreTeamPage({
         country: team.country,

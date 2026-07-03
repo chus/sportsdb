@@ -100,10 +100,12 @@ async function getWorldCupData() {
     .innerJoin(teams, eq(teams.id, standings.teamId))
     .where(eq(standings.competitionSeasonId, compSeason.id));
 
-  // Group by the form field (which stores group letter)
+  // Group by the standings group column ("Group A" … "Group L" from the
+  // API-Football sync); display just the letter. (An earlier seed stashed the
+  // letter in `form`, but the live sync stores real W/D/L form there.)
   const groups: Record<string, typeof standingsData> = {};
   for (const row of standingsData) {
-    const group = row.standing.form || "?";
+    const group = (row.standing.group || "?").replace(/^Group\s+/i, "");
     if (!groups[group]) groups[group] = [];
     groups[group].push(row);
   }

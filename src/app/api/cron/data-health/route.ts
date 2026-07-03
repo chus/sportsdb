@@ -56,8 +56,19 @@ export async function GET() {
   //    rollover (the original "2026/27 with a future start" bug).
   const seasons = await sql`SELECT label, start_date, end_date FROM seasons WHERE is_current = true`;
   const today = new Date();
+  // Between-seasons grace: a European season (ends Jun 30) legitimately stays
+  // current through the summer break — its data IS what the site should show —
+  // until the successor season has real data (~Aug). Only flag a current
+  // season as stale if it ended more than 60 days ago (a genuinely missed
+  // rollover) or hasn't started yet (the original future-season bug).
+  const GRACE_MS = 60 * 86400000;
   const stale = (seasons as Array<{ label: string; start_date: string; end_date: string }>).filter(
-    (s) => !(new Date(s.start_date) <= today && today <= new Date(s.end_date)),
+    (s) => {
+      const start = new Date(s.start_date);
+      const end = new Date(s.end_date);
+      if (start > today) return true; // future season marked current — always a bug
+      return today.getTime() - end.getTime() > GRACE_MS; // ended long ago — missed rollover
+    },
   );
   if (seasons.length === 0) {
     checks.push({ name: "current_season", ok: false, detail: "no current season — rollover needed" });
