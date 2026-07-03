@@ -66,11 +66,10 @@ export const metadata: Metadata = {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
   },
   alternates: {
-    canonical: BASE_URL,
-    languages: {
-      en: BASE_URL,
-      es: `${BASE_URL}/es`,
-    },
+    // NO default canonical here: metadata.alternates is inherited by every
+    // page that doesn't define its own, so a BASE_URL canonical told Google
+    // that /pricing, /games/* etc. were duplicates of the homepage. Pages set
+    // their own canonical via localizedAlternates(); the homepage does too.
     types: {
       "application/rss+xml": [
         { url: "/feed.xml", title: "DataSports – All News" },

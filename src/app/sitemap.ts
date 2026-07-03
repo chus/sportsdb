@@ -351,10 +351,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // matchup matrix. Comparison pages are the one format that ranks on page
     // one in GSC, so we feed Google a generous, position-grouped set. Pairs
     // are built per-position below ("X vs Y" is almost always same-position).
+    // MUST mirror the page's own index gate (compare/[matchup] requires
+    // appearances>0 for BOTH players) — otherwise the sitemap lists URLs the
+    // page will noindex, the exact GSC inconsistency fixed for /trending.
     db
       .select({ slug: players.slug, position: players.position })
       .from(players)
-      .where(and(eq(players.isIndexable, true), sql`${players.popularityScore} > 0`))
+      .where(and(
+        eq(players.isIndexable, true),
+        sql`${players.popularityScore} > 0`,
+        sql`EXISTS (
+          SELECT 1 FROM player_season_stats pss
+          WHERE pss.player_id = ${players.id} AND pss.appearances > 0
+        )`,
+      ))
       .orderBy(desc(players.popularityScore))
       .limit(200),
     // Distinct team countries with 3+ teams (for /teams/country/[country])
@@ -613,22 +623,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Attach hreflang alternates to every entry. The canonical URL is the
   // default-locale (en) form; the Spanish alternate is the same path
-  // prefixed with /es. Tells Google "this same content also exists in es"
-  // so the right locale variant is shown to the right user.
+  // prefixed with /es. ONLY page types with a genuinely translated es variant
+  // (entity detail pages: es metadata + es body prose) declare an es
+  // alternate — matching the self-canonical policy in localizedAlternates().
+  // Hubs/articles/studies are en-only; declaring es alternates for them told
+  // Google a mixed-language page was a proper translation.
+  const TRANSLATED_DETAIL = /^\/(players|teams|competitions|matches)\/[^/]+$/;
+  const HUB_SUBROUTES = new Set(["position", "nationality", "country"]);
   return allEntries.map((entry) => {
     const path = entry.url.startsWith(BASE_URL)
       ? entry.url.slice(BASE_URL.length) || "/"
       : entry.url;
-    const esUrl =
-      path === "/"
-        ? `${BASE_URL}/es`
-        : `${BASE_URL}/es${path}`;
+    const second = path.split("/")[2];
+    const translated = TRANSLATED_DETAIL.test(path) && !HUB_SUBROUTES.has(second);
+    if (!translated) return entry;
     return {
       ...entry,
       alternates: {
         languages: {
           en: entry.url,
-          es: esUrl,
+          es: `${BASE_URL}/es${path}`,
           "x-default": entry.url,
         },
       },

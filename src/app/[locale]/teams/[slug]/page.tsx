@@ -113,7 +113,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
         description,
         ...(team.logoUrl && { images: [team.logoUrl] }),
       },
-      alternates: localizedAlternates(`/teams/${slug}`),
+      alternates: localizedAlternates(`/teams/${slug}`, locale),
       other: {
         ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
       },
@@ -173,7 +173,7 @@ export async function generateMetadata({ params }: TeamPageProps): Promise<Metad
       description,
       ...(team.logoUrl && { images: [team.logoUrl] }),
     },
-    alternates: localizedAlternates(`/teams/${slug}`),
+    alternates: localizedAlternates(`/teams/${slug}`, locale),
     other: {
       ...(team.updatedAt && { "article:modified_time": team.updatedAt.toISOString() }),
     },

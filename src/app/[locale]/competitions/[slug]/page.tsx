@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: CompetitionPageProps): Promis
       ...(competition.logoUrl && { images: [competition.logoUrl] }),
     },
     alternates: {
-      ...localizedAlternates(`/competitions/${slug}`),
+      ...localizedAlternates(`/competitions/${slug}`, locale),
       types: {
         "application/rss+xml": `${BASE_URL}/feed/${slug}.xml`,
       },

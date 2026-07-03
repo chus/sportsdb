@@ -133,7 +133,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
       description,
       ...(player.imageUrl && { images: [player.imageUrl] }),
     },
-    alternates: localizedAlternates(`/players/${slug}`),
+    alternates: localizedAlternates(`/players/${slug}`, locale),
     other: {
       ...(player.updatedAt && { "article:modified_time": player.updatedAt.toISOString() }),
     },

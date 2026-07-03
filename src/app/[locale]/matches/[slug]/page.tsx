@@ -117,7 +117,7 @@ export async function generateMetadata({
       description,
       images: [`${url}/opengraph-image`],
     },
-    alternates: localizedAlternates(`/matches/${slug}`),
+    alternates: localizedAlternates(`/matches/${slug}`, locale),
     other: {
       ...(match.updatedAt && { "article:modified_time": match.updatedAt.toISOString() }),
     },
