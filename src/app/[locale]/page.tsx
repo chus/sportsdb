@@ -28,6 +28,7 @@ import { FeaturedLeagues } from "@/components/homepage/featured-leagues";
 import { ExploreDatabase } from "@/components/homepage/explore-database";
 import { TeamSpotlightSection } from "@/components/homepage/team-spotlight";
 import { localizedAlternates } from "@/lib/seo/hreflang";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
@@ -241,7 +242,7 @@ export default async function HomePage() {
               href="/pricing"
               className="inline-flex items-center gap-2 px-6 py-3 bg-surface text-blue-600 font-bold rounded-full hover:shadow-xl transition-all text-sm"
             >
-              Go Pro — &euro;3/month
+              Go Pro — &euro;{getTierConfig("pro").price}/month
             </Link>
           </div>
         </section>

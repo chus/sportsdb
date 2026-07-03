@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { BreadcrumbJsonLd, FAQJsonLd, JsonLd } from "@/components/seo/json-ld";
 import { PageTracker } from "@/components/analytics/page-tracker";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
+const PRICING_DESCRIPTION = `Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €${getTierConfig("pro").price}/month.`;
+
 export const metadata: Metadata = {
   title: "Pricing – Free & Pro Plans",
-  description:
-    "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €3/month.",
+  description: PRICING_DESCRIPTION,
   openGraph: {
     title: "Pricing – Free & Pro Plans",
-    description:
-      "Compare DataSports Free and Pro plans. Unlock advanced stats, unlimited comparisons, historical data, and more from €3/month.",
+    description: PRICING_DESCRIPTION,
     url: `${BASE_URL}/pricing`,
   },
   alternates: { canonical: `${BASE_URL}/pricing` },
@@ -73,7 +74,7 @@ export default function PricingLayout({
           {
             "@type": "Offer",
             name: "Pro Plan",
-            price: "3",
+            price: String(getTierConfig("pro").price),
             priceCurrency: "EUR",
             availability: "https://schema.org/InStock",
             priceValidUntil: "2026-12-31",

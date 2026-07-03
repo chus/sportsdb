@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { Zap, BarChart3, Shield, Star, Ban } from "lucide-react";
 import { useSubscription } from "./subscription-provider";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 import { cn } from "@/lib/utils/cn";
 
 const contextCopy: Record<
@@ -67,6 +68,7 @@ export function UpgradeBanner({
   if (isLoading || tier !== "free") return null;
 
   const copy = contextCopy[context] || contextCopy.default;
+  const proPrice = getTierConfig("pro").price;
 
   if (variant === "inline") {
     return (
@@ -85,7 +87,7 @@ export function UpgradeBanner({
               {copy.headline}
             </p>
             <p className="text-xs text-muted">
-              Pro — €3/month
+              Pro — €{proPrice}/month
             </p>
           </div>
         </div>
@@ -125,7 +127,7 @@ export function UpgradeBanner({
           href="/pricing"
           className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
         >
-          Upgrade to Pro — €3/month
+          Upgrade to Pro — €{proPrice}/month
         </Link>
       </div>
     </div>

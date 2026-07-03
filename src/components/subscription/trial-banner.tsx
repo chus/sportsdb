@@ -3,6 +3,7 @@
 import { Zap } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useSubscription } from "./subscription-provider";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 
 /**
  * Reverse-trial countdown. New users get 7 days of Pro free; this nudges
@@ -30,7 +31,7 @@ export function TrialBanner() {
           href="/pricing"
           className="font-semibold underline underline-offset-2 hover:no-underline shrink-0"
         >
-          Keep Pro — €3/mo
+          Keep Pro — €{getTierConfig("pro").price}/mo
         </Link>
       </div>
     </div>

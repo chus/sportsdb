@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useSubscription } from "@/components/subscription/subscription-provider";
 import { useUpgradeModal } from "@/components/subscription/upgrade-modal";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 import { cn } from "@/lib/utils/cn";
 
 interface Player {
@@ -373,7 +374,7 @@ export function ComparePageContent() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
             >
               <Zap className="w-5 h-5" />
-              Upgrade to Pro — €3/month
+              Upgrade to Pro — €{getTierConfig("pro").price}/month
             </Link>
           </div>
         )}

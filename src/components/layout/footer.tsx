@@ -6,6 +6,7 @@ import { Trophy } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useCookieConsent } from "@/components/cookie-consent/cookie-consent-provider";
+import { getTierConfig } from "@/lib/subscriptions/tiers";
 
 export function Footer() {
   const t = useTranslations();
@@ -76,7 +77,9 @@ export function Footer() {
             <p className="text-sm text-faint leading-relaxed">
               {t("footer.tagline")}
             </p>
-            <p className="text-xs text-blue-400 mt-2">Pro — €3/month</p>
+            <p className="text-xs text-blue-400 mt-2">
+              Pro — €{getTierConfig("pro").price}/month
+            </p>
             <div className="mt-5">
               <NewsletterSignup />
             </div>
