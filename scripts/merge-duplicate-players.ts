@@ -15,10 +15,11 @@
  * has — so the shared current season isn't double-counted while extra
  * historical seasons are preserved.
  *
- * SAFETY: only merges high-confidence groups — exactly TWO rows for one
- * (team, first-initial, surname), one abbreviated af row + one full fd row.
- * Ambiguous groups (e.g. "Ché Adams" + "Chase Adams" + "C. Adams", or two
- * different full names) are skipped untouched.
+ * SAFETY: only merges high-confidence groups — deterministic legacy-id
+ * matches (same provider id on both rows), or exactly TWO rows for one
+ * (team, first-initial, surname) where the full-name row has no af identity
+ * of its own. Ambiguous groups (e.g. "Ché Adams" + "Chase Adams" +
+ * "C. Adams", or two different full names) are skipped untouched.
  *
  * Usage:
  *   npx tsx scripts/merge-duplicate-players.ts --dry-run
@@ -38,19 +39,49 @@ interface Pair {
   canon_name: string;
   dupe_id: string;
   dupe_name: string;
-  dupe_img: string | null;
+  dupe_ext: string | null;
 }
 
+/**
+ * Deterministic pairs: a row whose LEGACY players.external_id ("af-184")
+ * points at the same provider id that the external_ids table maps to a
+ * DIFFERENT row. Same provider id = same person — no name heuristics needed.
+ * These come from code paths that keyed on the legacy column (syncScorers)
+ * and re-created players the mapping table already knew.
+ */
+async function findLegacyIdPairs(sql: ReturnType<typeof neon>): Promise<Pair[]> {
+  return (await sql`
+    SELECT c.id AS canon_id, c.name AS canon_name,
+           d.id AS dupe_id, d.name AS dupe_name, d.external_id AS dupe_ext
+    FROM players d
+    JOIN external_ids x ON x.entity_type = 'player'
+      AND x.provider = substring(d.external_id from '^(af|fd)-[0-9]+$')
+      AND x.provider_id = substring(d.external_id from '^[a-z]+-([0-9]+)$')
+      AND x.entity_id <> d.id
+    JOIN players c ON c.id = x.entity_id
+    WHERE d.external_id ~ '^(af|fd)-[0-9]+$'
+      AND NOT EXISTS (SELECT 1 FROM external_ids y WHERE y.entity_id = d.id AND y.entity_type = 'player')
+  `) as Pair[];
+}
+
+/**
+ * Same-team name pairs: exactly TWO rows for one (team, first-initial,
+ * surname) — one abbreviated af row, one full-name row. The full-name row is
+ * canonical whether it is an fd row (the original af↔fd split) or a
+ * mapping-less stub (the Wikipedia squad ingest of 2026-06-14, which created
+ * full-name rows the af squad sync then duplicated under abbreviated names).
+ * Full-name rows that carry their own af identity are skipped — a second af
+ * id means the provider says they are two different people.
+ */
 async function findPairs(sql: ReturnType<typeof neon>): Promise<Pair[]> {
   return (await sql`
     WITH cur AS (
-      SELECT p.id, p.name, p.image_url,
+      SELECT p.id, p.name, p.external_id,
         upper(left(p.name,1)) AS initial,
         lower(regexp_replace(p.name,'^.* ','')) AS surname,
         (substr(p.name,2,1) = '.') AS abbrev,
         pt.team_id,
-        EXISTS (SELECT 1 FROM external_ids x WHERE x.entity_id=p.id AND x.entity_type='player' AND x.provider='af') AS has_af,
-        EXISTS (SELECT 1 FROM external_ids x WHERE x.entity_id=p.id AND x.entity_type='player' AND x.provider='fd') AS has_fd
+        EXISTS (SELECT 1 FROM external_ids x WHERE x.entity_id=p.id AND x.entity_type='player' AND x.provider='af') AS has_af
       FROM players p
       LEFT JOIN player_team_history pt ON pt.player_id=p.id AND pt.valid_to IS NULL
     ),
@@ -62,20 +93,21 @@ async function findPairs(sql: ReturnType<typeof neon>): Promise<Pair[]> {
       HAVING count(*) = 2
          AND count(*) FILTER (WHERE abbrev) = 1
          AND count(*) FILTER (WHERE NOT abbrev) = 1
-         AND bool_or(abbrev AND has_af)        -- the abbreviated row is the af one
-         AND bool_or((NOT abbrev) AND has_fd)  -- the full-name row is the fd one
+         AND bool_or(abbrev AND has_af)            -- the abbreviated row is the af one
+         AND NOT bool_or((NOT abbrev) AND has_af)  -- full-name row has no af identity of its own
     )
     SELECT cf.id AS canon_id, cf.name AS canon_name,
-           ca.id AS dupe_id, ca.name AS dupe_name, ca.image_url AS dupe_img
+           ca.id AS dupe_id, ca.name AS dupe_name, ca.external_id AS dupe_ext
     FROM grp g
     JOIN cur cf ON cf.team_id=g.team_id AND upper(left(cf.name,1))=g.initial
        AND lower(regexp_replace(cf.name,'^.* ',''))=g.surname AND NOT (substr(cf.name,2,1)='.')
+       AND (cf.external_id IS NULL OR cf.external_id !~ '^af-')  -- direction conflict guard
     JOIN cur ca ON ca.team_id=g.team_id AND upper(left(ca.name,1))=g.initial
        AND lower(regexp_replace(ca.name,'^.* ',''))=g.surname AND (substr(ca.name,2,1)='.')
   `) as Pair[];
 }
 
-async function mergePlayer(sql: ReturnType<typeof neon>, canon: string, dupe: string) {
+async function mergePlayer(sql: ReturnType<typeof neon>, canon: string, dupe: string, dupeExt: string | null) {
   // Enrich canonical with fields the af dupe has (image, bio) before delete.
   await sql`
     UPDATE players c SET
@@ -139,12 +171,39 @@ async function mergePlayer(sql: ReturnType<typeof neon>, canon: string, dupe: st
   await sql`DELETE FROM search_index WHERE id=${dupe}`;
 
   await sql`DELETE FROM players WHERE id=${dupe}`;
+
+  // Inherit the dupe's legacy external_id (now freed by the delete) so any
+  // remaining legacy-column lookups land on the canonical row. Guarded
+  // against another row already holding it (unique constraint).
+  if (dupeExt) {
+    await sql`
+      UPDATE players SET external_id = ${dupeExt}
+      WHERE id = ${canon} AND external_id IS NULL
+        AND NOT EXISTS (SELECT 1 FROM players WHERE external_id = ${dupeExt})
+    `;
+  }
 }
 
 async function main() {
   const sql = neon(process.env.DATABASE_URL!);
-  const pairs = await findPairs(sql);
-  console.log(`Found ${pairs.length} high-confidence duplicate pairs.`);
+  const legacy = await findLegacyIdPairs(sql);
+  const byName = await findPairs(sql);
+  console.log(`Found ${legacy.length} legacy-external-id pairs, ${byName.length} same-team name pairs.`);
+
+  // Each player id may participate in at most ONE merge per run. A player
+  // with two open team stints groups under two teams and would otherwise
+  // appear as the dupe of two different canonicals — the second merge then
+  // operates on an already-deleted row. Legacy pairs claim their ids first.
+  const taken = new Set<string>();
+  const pairs: Pair[] = [];
+  for (const p of [...legacy, ...byName]) {
+    if (taken.has(p.dupe_id) || taken.has(p.canon_id)) continue;
+    taken.add(p.dupe_id);
+    taken.add(p.canon_id);
+    pairs.push(p);
+  }
+  console.log(`Merging ${pairs.length} pairs total (${legacy.length + byName.length - pairs.length} skipped as overlapping).`);
+
   if (DRY_RUN) {
     for (const p of pairs.slice(0, 30)) console.log(`  [dry-run] ${p.dupe_name} → ${p.canon_name}`);
     if (pairs.length > 30) console.log(`  … and ${pairs.length - 30} more`);
@@ -153,12 +212,28 @@ async function main() {
   }
 
   let merged = 0;
+  let failed = 0;
   for (const p of pairs) {
     if (merged >= LIMIT) break;
-    await mergePlayer(sql, p.canon_id, p.dupe_id);
-    merged++;
+    // Every statement in mergePlayer is idempotent, so retrying a pair after
+    // a transient network drop (Neon HTTP ECONNRESET) is safe.
+    let done = false;
+    for (let attempt = 1; attempt <= 3 && !done; attempt++) {
+      try {
+        await mergePlayer(sql, p.canon_id, p.dupe_id, p.dupe_ext);
+        done = true;
+      } catch (e) {
+        if (attempt === 3) {
+          failed++;
+          console.error(`  FAILED ${p.dupe_name} → ${p.canon_name}: ${e instanceof Error ? e.message : e}`);
+        } else {
+          await new Promise((r) => setTimeout(r, 1000 * attempt));
+        }
+      }
+    }
+    if (done) merged++;
     if (merged % 100 === 0) console.log(`  merged ${merged}/${Math.min(LIMIT, pairs.length)}…`);
   }
-  console.log(`\nMerged ${merged} duplicate players.`);
+  console.log(`\nMerged ${merged} duplicate players${failed ? `, ${failed} pairs failed (re-run to retry)` : ""}.`);
 }
 main().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });

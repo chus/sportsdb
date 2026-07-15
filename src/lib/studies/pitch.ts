@@ -13,9 +13,10 @@ export async function draftPitch(study: Study): Promise<string | null> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return null;
 
+  const primaryKey = study.data.columns[0]?.key;
   const top5 = study.data.rows
     .slice(0, 5)
-    .map((r) => `${r.rank}. ${r.player} (${r.team ?? "—"}) — ${Object.values(r.values)[0]}`)
+    .map((r) => `${r.rank}. ${r.player} (${r.team ?? "—"}) — ${r.values[primaryKey] ?? ""}`)
     .join("\n");
   const url = `${BASE_URL}/studies/${study.slug}`;
 

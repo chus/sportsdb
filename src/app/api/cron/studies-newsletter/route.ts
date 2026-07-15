@@ -38,9 +38,12 @@ export async function GET(request: NextRequest) {
 
   const cards = studies
     .map((s) => {
+      // Index by the study's primary column — jsonb storage does not preserve
+      // the values object's key order, so Object.values()[0] picks a random stat.
+      const primaryKey = s.data.columns[0]?.key;
       const top3 = s.data.rows
         .slice(0, 3)
-        .map((r, i) => `<tr><td style="padding:2px 8px 2px 0;font-size:13px;color:#64748b;">${i + 1}. ${r.player}</td><td style="padding:2px 0;font-size:13px;color:#0f172a;font-weight:600;text-align:right;">${Object.values(r.values)[0]}</td></tr>`)
+        .map((r, i) => `<tr><td style="padding:2px 8px 2px 0;font-size:13px;color:#64748b;">${i + 1}. ${r.player}</td><td style="padding:2px 0;font-size:13px;color:#0f172a;font-weight:600;text-align:right;">${r.values[primaryKey] ?? ""}</td></tr>`)
         .join("");
       return `<div style="border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:12px;">
         <a href="${BASE_URL}/studies/${s.slug}" style="font-size:15px;font-weight:700;color:#0f172a;text-decoration:none;">${s.title}</a>

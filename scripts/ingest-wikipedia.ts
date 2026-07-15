@@ -10,6 +10,7 @@
 import * as cheerio from "cheerio";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
+import { eq, sql as drizzleSql } from "drizzle-orm";
 import { config } from "dotenv";
 import * as schema from "../src/lib/db/schema";
 
@@ -778,6 +779,33 @@ async function main() {
       console.log(`      👥 ${playersInfo.length} players`);
 
       for (const playerInfo of playersInfo) {
+        // Don't create a stub when the same person already exists on this
+        // team under an API-Football abbreviated name ("A. Beck" for
+        // "Adrian Beck") — the ingestion resolver only bridges in the other
+        // direction (abbreviated → full), so the stub would become a
+        // permanent duplicate. Upgrade the existing row's display name to
+        // the full Wikipedia name instead (slug untouched).
+        const surname = playerInfo.name.split(" ").pop() || "";
+        const existing = surname.length >= 3
+          ? await db.execute(drizzleSql`
+              SELECT p.id FROM players p
+              JOIN player_team_history pth ON pth.player_id = p.id
+                AND pth.team_id = ${team.id} AND pth.valid_to IS NULL
+              WHERE substr(p.name, 2, 2) = '. '
+                AND upper(left(p.name, 1)) = upper(left(${playerInfo.name}, 1))
+                AND lower(regexp_replace(p.name, '^.* ', '')) = lower(${surname})
+              LIMIT 2
+            `)
+          : { rows: [] };
+        const existingRows = (existing as unknown as { rows?: { id: string }[] }).rows ?? (existing as unknown as { id: string }[]);
+        if (existingRows.length === 1) {
+          await db
+            .update(schema.players)
+            .set({ name: playerInfo.name, knownAs: surname, updatedAt: new Date() })
+            .where(eq(schema.players.id, existingRows[0].id));
+          continue;
+        }
+
         const [player] = await db
           .insert(schema.players)
           .values({

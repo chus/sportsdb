@@ -61,9 +61,10 @@ export async function GET(request: NextRequest) {
   let emailed = false;
   if (!dryRun && to && emailConfigured()) {
     const url = `${BASE_URL}/studies/${featured.slug}`;
+    const primaryKey = featured.data.columns[0]?.key;
     const top5 = featured.data.rows
       .slice(0, 5)
-      .map((r) => `<tr><td style="padding:3px 8px 3px 0;font-size:13px;">${r.rank}. ${r.player}</td><td style="padding:3px 0;font-size:13px;color:#0f172a;font-weight:600;">${Object.values(r.values)[0]}</td></tr>`)
+      .map((r) => `<tr><td style="padding:3px 8px 3px 0;font-size:13px;">${r.rank}. ${r.player}</td><td style="padding:3px 0;font-size:13px;color:#0f172a;font-weight:600;">${r.values[primaryKey] ?? ""}</td></tr>`)
       .join("");
     emailed = await sendEmail({
       to,

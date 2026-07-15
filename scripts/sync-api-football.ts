@@ -537,148 +537,44 @@ async function upsertPlayer(
     return updated;
   }
 
-  const row = await upsertPlayerLegacy(apiPlayer, teamId);
-  if (row) {
-    await db
-      .insert(schema.externalIds)
-      .values({ entityType: "player", entityId: row.id, provider: "af", providerId: String(apiPlayer.id) })
-      .onConflictDoNothing();
-  }
-  return row;
-}
+  // Resolver fallback: slug match with fusion guard, abbreviated-name bridge
+  // to an existing full-name teammate, then create — always stamping the
+  // external_ids mapping. (The old legacy fallback matched only players.external_id
+  // + exact slug, so "A. Beck" never bridged to a "Adrian Beck" row and whole
+  // squads got duplicated.)
+  const resolved = await resolvePlayer(sql, "af", apiPlayer.id, apiPlayer.name, {
+    position: mapPosition(apiPlayer.position) || "Unknown",
+    imageUrl: apiPlayer.photo || null,
+    teamId,
+  });
+  if (!resolved) return null;
 
-async function upsertPlayerLegacy(
-  apiPlayer: any,
-  teamId: string
-): Promise<typeof schema.players.$inferSelect | null> {
-  const extId = afId(apiPlayer.id);
-  const playerSlug = slugify(apiPlayer.name);
-
-  // 1. Find by af- externalId
-  const [byExtId] = await db
+  const [row] = await db
     .select()
     .from(schema.players)
-    .where(eq(schema.players.externalId, extId))
+    .where(eq(schema.players.id, resolved.id))
     .limit(1);
+  if (!row) return null;
 
-  if (byExtId) {
-    const updates: any = {
-      imageUrl: apiPlayer.photo || byExtId.imageUrl,
-      position: mapPosition(apiPlayer.position) || byExtId.position,
-      updatedAt: new Date(),
-    };
-    if (apiPlayer.age && !byExtId.dateOfBirth) {
-      // Approximate date of birth from age
-      const approxYear = new Date().getFullYear() - apiPlayer.age;
-      updates.dateOfBirth = `${approxYear}-01-01`;
-    }
-    const [updated] = await db
-      .update(schema.players)
-      .set(updates)
-      .where(eq(schema.players.id, byExtId.id))
-      .returning();
-
-    // Update shirt number in player_team_history
-    if (apiPlayer.number) {
-      await upsertPlayerTeamLink(updated.id, teamId, apiPlayer.number);
-    }
-
-    return updated;
+  const updates: any = {
+    imageUrl: apiPlayer.photo || row.imageUrl,
+    position: mapPosition(apiPlayer.position) || row.position,
+    updatedAt: new Date(),
+  };
+  if (apiPlayer.age && !row.dateOfBirth) {
+    const approxYear = new Date().getFullYear() - apiPlayer.age;
+    updates.dateOfBirth = `${approxYear}-01-01`;
   }
+  const [updated] = await db
+    .update(schema.players)
+    .set(updates)
+    .where(eq(schema.players.id, row.id))
+    .returning();
 
-  // 2. Find by slug
-  const [bySlug] = await db
-    .select()
-    .from(schema.players)
-    .where(eq(schema.players.slug, playerSlug))
-    .limit(1);
-
-  if (bySlug) {
-    const updates: any = {
-      imageUrl: apiPlayer.photo || bySlug.imageUrl,
-      position: mapPosition(apiPlayer.position) || bySlug.position,
-      updatedAt: new Date(),
-    };
-    if (!bySlug.externalId) {
-      updates.externalId = extId;
-    }
-    const [updated] = await db
-      .update(schema.players)
-      .set(updates)
-      .where(eq(schema.players.id, bySlug.id))
-      .returning();
-
-    if (apiPlayer.number) {
-      await upsertPlayerTeamLink(updated.id, teamId, apiPlayer.number);
-    }
-
-    return updated;
+  if (apiPlayer.number) {
+    await upsertPlayerTeamLink(updated.id, teamId, apiPlayer.number);
   }
-
-  // 3. Brand new player — insert
-  try {
-    const [result] = await db
-      .insert(schema.players)
-      .values({
-        externalId: extId,
-        name: apiPlayer.name,
-        knownAs: apiPlayer.name.split(" ").pop() || null,
-        slug: playerSlug,
-        position: mapPosition(apiPlayer.position) || "Unknown",
-        status: "active",
-        imageUrl: apiPlayer.photo || null,
-        nationality: null, // Squads endpoint doesn't provide nationality
-      })
-      .onConflictDoUpdate({
-        target: schema.players.externalId,
-        set: {
-          imageUrl: apiPlayer.photo || null,
-          position: mapPosition(apiPlayer.position) || "Unknown",
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-
-    if (apiPlayer.number) {
-      await upsertPlayerTeamLink(result.id, teamId, apiPlayer.number);
-    }
-
-    return result;
-  } catch {
-    // Slug conflict — append API id
-    try {
-      const dedupSlug = `${playerSlug}-${apiPlayer.id}`;
-      const [result] = await db
-        .insert(schema.players)
-        .values({
-          externalId: extId,
-          name: apiPlayer.name,
-          knownAs: apiPlayer.name.split(" ").pop() || null,
-          slug: dedupSlug,
-          position: mapPosition(apiPlayer.position) || "Unknown",
-          status: "active",
-          imageUrl: apiPlayer.photo || null,
-          nationality: null,
-        })
-        .onConflictDoUpdate({
-          target: schema.players.externalId,
-          set: {
-            imageUrl: apiPlayer.photo || null,
-            updatedAt: new Date(),
-          },
-        })
-        .returning();
-
-      if (apiPlayer.number) {
-        await upsertPlayerTeamLink(result.id, teamId, apiPlayer.number);
-      }
-
-      return result;
-    } catch {
-      console.log(`   ! Skipping player: ${apiPlayer.name} (slug conflict)`);
-      return null;
-    }
-  }
+  return updated;
 }
 
 // ============================================================
@@ -1041,91 +937,27 @@ async function syncScorers(
     let teamId = teamIdMap.get(teamApiId);
     if (!teamId) continue;
 
-    // Upsert player (may already exist from squad sync)
-    const extId = afId(apiPlayer.id);
-    const playerSlug = slugify(apiPlayer.name);
-
-    let player: typeof schema.players.$inferSelect | null = null;
-
-    // Find existing
-    const [byExtId] = await db
-      .select()
-      .from(schema.players)
-      .where(eq(schema.players.externalId, extId))
-      .limit(1);
-
-    if (byExtId) {
-      // Update with richer data from scorers endpoint
-      const [updated] = await db
-        .update(schema.players)
-        .set({
-          nationality: apiPlayer.nationality || byExtId.nationality,
-          imageUrl: apiPlayer.photo || byExtId.imageUrl,
-          heightCm: apiPlayer.height ? parseInt(apiPlayer.height) || null : byExtId.heightCm,
-          dateOfBirth: apiPlayer.birth?.date || byExtId.dateOfBirth,
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.players.id, byExtId.id))
-        .returning();
-      player = updated;
-    } else {
-      // Try slug match
-      const [bySlug] = await db
-        .select()
-        .from(schema.players)
-        .where(eq(schema.players.slug, playerSlug))
-        .limit(1);
-
-      if (bySlug) {
-        const updates: any = {
-          nationality: apiPlayer.nationality || bySlug.nationality,
-          imageUrl: apiPlayer.photo || bySlug.imageUrl,
-          heightCm: apiPlayer.height ? parseInt(apiPlayer.height) || null : bySlug.heightCm,
-          dateOfBirth: apiPlayer.birth?.date || bySlug.dateOfBirth,
-          updatedAt: new Date(),
-        };
-        if (!bySlug.externalId) updates.externalId = extId;
-        const [updated] = await db
-          .update(schema.players)
-          .set(updates)
-          .where(eq(schema.players.id, bySlug.id))
-          .returning();
-        player = updated;
-      } else {
-        // Create new
-        try {
-          const [inserted] = await db
-            .insert(schema.players)
-            .values({
-              externalId: extId,
-              name: apiPlayer.name,
-              knownAs: apiPlayer.name.split(" ").pop() || null,
-              slug: playerSlug,
-              nationality: apiPlayer.nationality || null,
-              position: mapPosition(stats.games?.position) || "Unknown",
-              status: "active",
-              imageUrl: apiPlayer.photo || null,
-              heightCm: apiPlayer.height ? parseInt(apiPlayer.height) || null : null,
-              dateOfBirth: apiPlayer.birth?.date || null,
-            })
-            .onConflictDoUpdate({
-              target: schema.players.externalId,
-              set: {
-                nationality: apiPlayer.nationality || null,
-                imageUrl: apiPlayer.photo || null,
-                updatedAt: new Date(),
-              },
-            })
-            .returning();
-          player = inserted;
-        } catch {
-          console.log(`   ! Skipping scorer: ${apiPlayer.name}`);
-          continue;
-        }
-      }
-    }
-
+    // Identity-first resolve (may already exist from squad sync). The old
+    // legacy-external_id + exact-slug lookup here created abbreviated-name
+    // duplicates ("H. Kane" alongside "Harry Kane") and split their stats.
+    const player = await resolvePlayer(sql, "af", apiPlayer.id, apiPlayer.name, {
+      position: mapPosition(stats.games?.position) || "Unknown",
+      nationality: apiPlayer.nationality ?? null,
+      imageUrl: apiPlayer.photo ?? null,
+      teamId,
+    });
     if (!player) continue;
+
+    // Enrich with the richer bio data the scorers endpoint carries.
+    await sql`
+      UPDATE players SET
+        nationality   = COALESCE(nationality, ${apiPlayer.nationality ?? null}),
+        image_url     = COALESCE(image_url, ${apiPlayer.photo ?? null}),
+        height_cm     = COALESCE(height_cm, ${apiPlayer.height ? parseInt(apiPlayer.height) || null : null}),
+        date_of_birth = COALESCE(date_of_birth, ${apiPlayer.birth?.date ?? null}),
+        updated_at    = NOW()
+      WHERE id = ${player.id}
+    `;
 
     // Upsert player_season_stats
     await db

@@ -156,14 +156,16 @@ export async function GET() {
 
   // 7. No duplicate PLAYER entities — same signature as the club dupes:
   //    one (current team, first initial, surname) carrying exactly an
-  //    af-abbreviated row ("E. Haaland") + an fd-full-name row ("Erling
-  //    Haaland"). The resolver now bridges these, so any new occurrence means
-  //    the bridge missed a case — catch it before it splits stats again.
+  //    af-abbreviated row ("E. Haaland") + a full-name row ("Erling
+  //    Haaland") that has no af identity of its own. The old gating also
+  //    required the full-name row to carry an fd id, which let 2,699
+  //    Wikipedia-stub duplicates (no mappings at all) pass unseen — the
+  //    canary stayed green through the July 2026 studies-dupes incident.
   //    Matches scripts/merge-duplicate-players.ts findPairs() gating.
   const [{ c: dupePlayers }] = await sql`
     SELECT count(*)::int AS c FROM (
       WITH prov AS (
-        SELECT entity_id, bool_or(provider='af') AS af, bool_or(provider='fd') AS fd
+        SELECT entity_id, bool_or(provider='af') AS af
         FROM external_ids WHERE entity_type='player' GROUP BY entity_id
       ),
       cur AS (
@@ -171,7 +173,7 @@ export async function GET() {
           upper(left(p.name,1)) AS initial,
           lower(regexp_replace(p.name,'^.* ','')) AS surname,
           pth.team_id,
-          coalesce(pr.af,false) AS af, coalesce(pr.fd,false) AS fd
+          coalesce(pr.af,false) AS af
         FROM players p
         JOIN player_team_history pth ON pth.player_id=p.id AND pth.valid_to IS NULL
         LEFT JOIN prov pr ON pr.entity_id = p.id
@@ -183,10 +185,25 @@ export async function GET() {
          AND count(*) FILTER (WHERE abbrev) = 1
          AND count(*) FILTER (WHERE NOT abbrev) = 1
          AND bool_or(abbrev AND af)
-         AND bool_or((NOT abbrev) AND fd)
+         AND NOT bool_or((NOT abbrev) AND af)
     ) d
   `;
   checks.push({ name: "no_duplicate_players", ok: dupePlayers === 0, detail: `${dupePlayers} duplicate player pairs` });
+
+  // 7b. No rows recreated off the LEGACY players.external_id column — a
+  //     legacy-keyed code path re-inserting a player the external_ids table
+  //     already maps (the syncScorers "H. Kane"-twin bug of July 2026).
+  const [{ c: legacyDupes }] = await sql`
+    SELECT count(*)::int AS c
+    FROM players d
+    JOIN external_ids x ON x.entity_type = 'player'
+      AND x.provider = substring(d.external_id from '^(af|fd)-[0-9]+$')
+      AND x.provider_id = substring(d.external_id from '^[a-z]+-([0-9]+)$')
+      AND x.entity_id <> d.id
+    WHERE d.external_id ~ '^(af|fd)-[0-9]+$'
+      AND NOT EXISTS (SELECT 1 FROM external_ids y WHERE y.entity_id = d.id AND y.entity_type = 'player')
+  `;
+  checks.push({ name: "no_legacy_id_duplicate_players", ok: legacyDupes === 0, detail: `${legacyDupes} legacy-external-id duplicate players` });
 
   const failed = checks.filter((c) => !c.ok);
   const healthy = failed.length === 0;
