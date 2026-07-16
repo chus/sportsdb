@@ -48,6 +48,13 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Source images (crests, player photos, flags) are effectively immutable —
+    // cache transformations for 31 days instead of the 60s default.
+    minimumCacheTTL: 2678400,
+    // Single output format halves transformation count vs webp+avif.
+    formats: ["image/webp"],
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [32, 64, 96, 128, 256],
     remotePatterns: [
       {
         protocol: "https",

@@ -30,7 +30,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { TabPanel } from "@/components/ui/tab-navigation";
 import { PlayerTabs } from "./player-tabs";
 
-export const revalidate = 3600; // ISR: revalidate every hour
+export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
 
 interface PlayerPageProps {
   params: Promise<{ slug: string; locale: string }>;

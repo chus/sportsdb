@@ -9,7 +9,7 @@ import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 24h — content changes at most daily
 
 export const metadata: Metadata = {
   title: "Football Stadiums & Venues – Capacity, Location & Info",

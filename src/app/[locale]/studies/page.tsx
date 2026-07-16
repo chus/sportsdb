@@ -8,7 +8,7 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 24h — content changes at most daily
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Football Data Studies — Original Rankings & Stats";

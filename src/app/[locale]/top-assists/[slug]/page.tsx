@@ -16,7 +16,7 @@ import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 3600;
+export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
 
 interface PageProps {
   params: Promise<{ slug: string }>;

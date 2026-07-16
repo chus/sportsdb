@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import { localizedAlternates } from "@/lib/seo/hreflang";
 
-export const revalidate = 3600; // ISR: revalidate every hour
+export const revalidate = 86400; // 24h — content changes at most daily
 import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import {

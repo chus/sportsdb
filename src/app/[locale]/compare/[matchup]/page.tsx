@@ -16,7 +16,7 @@ import { ExternalLinks } from "@/components/entity/external-links";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 24h — content changes at most daily
 
 interface PageProps {
   params: Promise<{ matchup: string }>;

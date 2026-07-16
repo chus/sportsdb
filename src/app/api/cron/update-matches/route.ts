@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import {
@@ -173,6 +174,7 @@ export async function GET() {
   const { from, to } = getDateRange();
   let matchesUpdated = 0;
   const errors: string[] = [];
+  const updatedSlugs = new Set<string>();
 
   for (const [code, league] of Object.entries(LEAGUE_MAPPING)) {
     try {
@@ -258,6 +260,7 @@ export async function GET() {
           }
 
           matchesUpdated++;
+          updatedSlugs.add(matchSlug);
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           errors.push(`Match fd-${match.id}: ${msg}`);
@@ -267,6 +270,16 @@ export async function GET() {
       const msg = error instanceof Error ? error.message : String(error);
       errors.push(`${code}: ${msg}`);
     }
+  }
+
+  // Match pages carry a 6h ISR TTL; purge the ones this run actually touched
+  // so scores/status stay fresh without a short global TTL. Covers the
+  // unprefixed default-locale path plus each locale-prefixed variant
+  // (localePrefix "as-needed" — purging a non-existent path is a no-op).
+  for (const slug of updatedSlugs) {
+    revalidatePath(`/matches/${slug}`);
+    revalidatePath(`/en/matches/${slug}`);
+    revalidatePath(`/es/matches/${slug}`);
   }
 
   return NextResponse.json({
