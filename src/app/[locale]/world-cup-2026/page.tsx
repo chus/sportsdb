@@ -12,6 +12,8 @@ import { CountdownTimer } from "./countdown-timer";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 const WC_START_DATE = "2026-06-11T00:00:00Z";
 
+export const revalidate = 86400; // 24h — static event page, tournament is over
+
 export const metadata: Metadata = {
   title: "FIFA World Cup 2026 – Countdown, Host Countries & Key Players",
   description:

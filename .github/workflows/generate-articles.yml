@@ -1,9 +1,8 @@
 name: Daily Article Generation
 
+# PAUSED (July 2026 cost scale-down): schedule removed, manual dispatch only.
+# Restore the schedule block to resume daily article generation.
 on:
-  schedule:
-    # Runs at 6am UTC every day
-    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       type:

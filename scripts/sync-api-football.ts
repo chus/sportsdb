@@ -39,7 +39,10 @@ const db = drizzle(sql, { schema });
 // REQUEST BUDGET
 // ============================================================
 
-const MAX_REQUESTS = 7000; // Hard cap (Pro tier = 7,500/day)
+// Hard cap per process. Defaults to the Pro-tier headroom; override with
+// API_FOOTBALL_MAX_REQUESTS on the free tier (100 req/day) so scheduled runs
+// can never blow the daily quota.
+const MAX_REQUESTS = Number(process.env.API_FOOTBALL_MAX_REQUESTS) || 7000;
 let requestCount = 0;
 
 function canMakeRequest(): boolean {
@@ -50,7 +53,9 @@ function canMakeRequest(): boolean {
 // RATE LIMITING
 // ============================================================
 
-const RATE_LIMIT_MS = 250; // Pro tier: 300 req/min — 250ms keeps headroom
+// Pro tier: 300 req/min — 250ms keeps headroom. Free tier is 10 req/min:
+// set API_FOOTBALL_RATE_LIMIT_MS=6500.
+const RATE_LIMIT_MS = Number(process.env.API_FOOTBALL_RATE_LIMIT_MS) || 250;
 let lastRequestTime = 0;
 
 async function apiFetch(endpoint: string): Promise<any> {

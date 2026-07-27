@@ -68,9 +68,61 @@ const TEAM_SLUG_ALIASES: Record<string, string> = {
 
 const CANONICAL_HOST = "datasports.co";
 
+// ------------------------------------------------------------------
+// Bot control (July 2026 cost scale-down). The June Vercel overage was
+// ~23M invocations of near-pure crawler traffic, so bots are handled
+// before any DB work below.
+//
+// Hard-blocked crawlers: SEO scrapers already disallowed in robots.ts
+// (which they routinely ignore) plus generic scraping libraries. 403.
+const BLOCKED_BOT_RE =
+  /AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|DataForSeoBot|PetalBot|Bytespider|serpstatbot|ZoominfoBot|MegaIndex|SeekportBot|BacklinkCrawler|python-requests|Scrapy|HeadlessChrome/i;
+
+// Search engines that are never rate-limited — losing Google/Bing crawl
+// would defeat the purpose of keeping the site up.
+const SEARCH_BOT_RE = /Googlebot|Google-InspectionTool|bingbot|Applebot|DuckDuckBot/i;
+
+// Anything else that self-identifies as automated gets rate-limited.
+const GENERIC_BOT_RE = /bot|crawler|spider|crawling|scraper/i;
+
+// Fixed-window in-memory limiter. Per-isolate, so the effective global
+// limit is (100 × concurrent workers) — imprecise but sufficient to stop
+// a single crawler hammering one region, at zero infra cost.
+const RATE_LIMIT_PER_MIN = 100;
+const RATE_WINDOW_MS = 60_000;
+const rateBuckets = new Map<string, { count: number; windowStart: number }>();
+
+function botRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const bucket = rateBuckets.get(ip);
+  if (!bucket || now - bucket.windowStart >= RATE_WINDOW_MS) {
+    if (rateBuckets.size > 5_000) rateBuckets.clear(); // cap memory
+    rateBuckets.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > RATE_LIMIT_PER_MIN;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const host = request.headers.get("host") || "";
+
+  const userAgent = request.headers.get("user-agent") || "";
+  const isSearchBot = SEARCH_BOT_RE.test(userAgent);
+  if (!isSearchBot && BLOCKED_BOT_RE.test(userAgent)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+  if (!isSearchBot && GENERIC_BOT_RE.test(userAgent)) {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    if (botRateLimited(ip)) {
+      return new NextResponse("Too Many Requests", {
+        status: 429,
+        headers: { "Retry-After": "60" },
+      });
+    }
+  }
 
   // Redirect Vercel preview domains AND www. subdomain to the apex
   // (canonical) host. Both are configured as Vercel aliases for the

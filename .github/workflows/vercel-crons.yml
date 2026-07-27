@@ -1,0 +1,80 @@
+name: Scheduled Crons
+
+# Replaces vercel.json crons (July 2026 cost scale-down). Repo is public, so
+# Actions minutes are free — each job just curls the cron endpoint on
+# production with CRON_SECRET. Frequencies are reduced vs the old Vercel
+# schedules: data syncs went from 4x/day to 1x/day. Content-generation crons
+# (articles, summaries, event content, studies, social, indexing, seo-monitor,
+# studies-newsletter, generate-calendar) are intentionally NOT scheduled —
+# re-add them here to resume.
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # daily-early: assign-daily-challenge, expire-trials
+    - cron: '0 6 * * *'   # daily-data: update-matches, standings, player stats
+    - cron: '0 18 * * *'  # daily-evening: reminders, trial lifecycle, data health
+    - cron: '0 9 * * 5'   # weekly Friday: digest
+    - cron: '0 4 * * 1'   # weekly Monday: player quality rescore
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: 'Single cron path to hit (e.g. update-matches or fetch-standings?group=secondary)'
+        required: false
+        type: string
+
+jobs:
+  crons:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: https://datasports.co
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Manual dispatch
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.endpoint != ''
+        run: |
+          curl -fsS --retry 2 --retry-delay 10 -m 320 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$BASE_URL/api/cron/${{ github.event.inputs.endpoint }}"
+
+      - name: Daily early (02:00)
+        if: github.event.schedule == '0 2 * * *'
+        run: |
+          for EP in assign-daily-challenge expire-trials; do
+            echo "--- /api/cron/$EP"
+            curl -fsS --retry 2 --retry-delay 10 -m 320 \
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+            echo
+          done
+
+      - name: Daily data (06:00)
+        if: github.event.schedule == '0 6 * * *'
+        run: |
+          for EP in update-matches fetch-standings "fetch-standings?group=secondary" \
+                    fetch-player-stats "fetch-player-stats?group=secondary"; do
+            echo "--- /api/cron/$EP"
+            curl -fsS --retry 2 --retry-delay 10 -m 320 \
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+            echo
+          done
+
+      - name: Daily evening (18:00)
+        if: github.event.schedule == '0 18 * * *'
+        run: |
+          for EP in daily-reminders trial-lifecycle data-health; do
+            echo "--- /api/cron/$EP"
+            curl -fsS --retry 2 --retry-delay 10 -m 320 \
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+            echo
+          done
+
+      - name: Weekly digest (Friday 09:00)
+        if: github.event.schedule == '0 9 * * 5'
+        run: |
+          curl -fsS --retry 2 --retry-delay 10 -m 320 \
+            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/weekly-digest"
+
+      - name: Weekly player quality (Monday 04:00)
+        if: github.event.schedule == '0 4 * * 1'
+        run: |
+          curl -fsS --retry 2 --retry-delay 10 -m 320 \
+            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/update-player-quality"

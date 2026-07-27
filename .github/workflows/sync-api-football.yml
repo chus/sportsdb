@@ -2,18 +2,21 @@ name: API-Football Sync
 
 on:
   schedule:
-    # Daily 6am UTC full enrichment of every league. The round-robin
-    # one-league-per-day mode existed for the 100 req/day free tier;
-    # the Pro plan (7,500 req/day) covers all 11 leagues in one run.
-    - cron: '0 6 * * *'
+    # Weekly Monday 7am UTC (July 2026 cost scale-down, back on the free
+    # tier: 100 req/day, 10 req/min). The scheduled run uses the budgeted
+    # "weekly" mode below (~90 requests). The heavier modes (enrich-all,
+    # full-data, restore) remain available via manual dispatch — mind the
+    # free-tier quota before dispatching them.
+    - cron: '0 7 * * 1'
   workflow_dispatch:
     inputs:
       mode:
         description: 'Sync mode'
         required: true
-        default: 'enrich-all'
+        default: 'weekly'
         type: choice
         options:
+          - weekly
           - enrich-next
           - enrich-all
           - standings
@@ -55,7 +58,7 @@ jobs:
       - name: Determine enrichment target
         id: target
         run: |
-          MODE="${{ github.event.inputs.mode || 'enrich-all' }}"
+          MODE="${{ github.event.inputs.mode || 'weekly' }}"
           SLUG="${{ github.event.inputs.slug || '' }}"
 
           if [ "$MODE" = "enrich-next" ]; then
@@ -67,6 +70,9 @@ jobs:
             echo "mode=enrich" >> $GITHUB_OUTPUT
             echo "slug=$SLUG" >> $GITHUB_OUTPUT
             echo "Selected league for today: $SLUG (day $DAY_OF_YEAR, index $INDEX)"
+          elif [ "$MODE" = "weekly" ]; then
+            echo "mode=weekly" >> $GITHUB_OUTPUT
+            echo "slug=" >> $GITHUB_OUTPUT
           elif [ "$MODE" = "enrich-all" ]; then
             echo "mode=enrich-all" >> $GITHUB_OUTPUT
             echo "slug=" >> $GITHUB_OUTPUT
@@ -92,6 +98,42 @@ jobs:
       - name: Enrich single league
         if: steps.target.outputs.mode == 'enrich'
         run: npx tsx scripts/sync-api-football.ts --enrich --slug=${{ steps.target.outputs.slug }}
+
+      # Free-tier weekly refresh. Each step is a separate process, so each
+      # gets its own request budget via API_FOOTBALL_MAX_REQUESTS; the totals
+      # sum to ~90, under the 100/day free quota. 6.5s spacing respects the
+      # 10 req/min free rate limit.
+      - name: Weekly standings refresh
+        if: steps.target.outputs.mode == 'weekly'
+        env:
+          API_FOOTBALL_MAX_REQUESTS: '15'
+          API_FOOTBALL_RATE_LIMIT_MS: '6500'
+        run: npx tsx scripts/sync-api-football.ts --all-standings || true
+
+      - name: Weekly injuries refresh
+        if: steps.target.outputs.mode == 'weekly'
+        env:
+          API_FOOTBALL_MAX_REQUESTS: '15'
+          API_FOOTBALL_RATE_LIMIT_MS: '6500'
+        run: npx tsx scripts/sync-api-football.ts --injuries || true
+
+      # Only scheduled score source for the calendar-year leagues (Liga MX,
+      # MLS, Liga Argentina, Brasileirão), Eredivisie and Primeira Liga — the
+      # update-matches cron covers just the top-5 European fd league codes.
+      # Weekly cadence means those scores can lag up to a week.
+      - name: Weekly fixtures & scores
+        if: steps.target.outputs.mode == 'weekly'
+        env:
+          API_FOOTBALL_MAX_REQUESTS: '30'
+          API_FOOTBALL_RATE_LIMIT_MS: '6500'
+        run: npx tsx scripts/sync-api-football.ts --matches || true
+
+      - name: Weekly deep stats for newly finished fixtures
+        if: steps.target.outputs.mode == 'weekly'
+        env:
+          API_FOOTBALL_MAX_REQUESTS: '30'
+          API_FOOTBALL_RATE_LIMIT_MS: '6500'
+        run: npx tsx scripts/sync-api-football.ts --match-details || true
 
       - name: Enrich all European leagues
         if: steps.target.outputs.mode == 'enrich-all'

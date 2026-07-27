@@ -10,6 +10,10 @@ import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
+// NOTE: reading searchParams (type/page filters) keeps this route dynamic in
+// Next 15; revalidate only applies if the filters ever move to path segments.
+export const revalidate = 86400;
+
 const TYPE_META: Record<string, { title: string; description: string }> = {
   match_report: {
     title: "Match Reports — Post-Game Analysis & Results",

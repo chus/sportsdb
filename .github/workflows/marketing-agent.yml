@@ -1,11 +1,8 @@
 name: Marketing AI Agent
 
+# PAUSED (July 2026 cost scale-down): schedules removed, manual dispatch only.
+# Restore the schedule block to resume the weekly pipeline + daily distribution.
 on:
-  schedule:
-    # Full pipeline: every Sunday at 8:00 UTC
-    - cron: '0 8 * * 0'
-    # Social distribution: daily at 10:00 UTC
-    - cron: '0 10 * * *'
   workflow_dispatch:
     inputs:
       layers:
