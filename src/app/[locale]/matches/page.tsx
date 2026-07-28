@@ -14,6 +14,7 @@ import {
   getCompetitionsWithMatches,
   getRecentFinishedMatches,
 } from "@/lib/queries/matches";
+import { cachedQuery } from "@/lib/cache";
 import { PageHeader } from "@/components/layout/page-header";
 import { BreadcrumbJsonLd, ItemListJsonLd, CollectionPageJsonLd } from "@/components/seo/json-ld";
 import { MatchesContent } from "@/components/matches/matches-content";
@@ -23,6 +24,14 @@ import { localizedAlternates } from "@/lib/seo/hreflang";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 export const revalidate = 300;
+
+// Reading searchParams (?date=) makes this page dynamic, so the queries go
+// through the data cache — keys are day-scoped (startOfDay/endOfDay args),
+// so crawlers re-hitting /matches don't touch the DB within the TTL.
+const cachedMatchesForDateRange = cachedQuery(getMatchesForDateRange, ["matches-range"], 3600);
+const cachedMatchDaySummary = cachedQuery(getMatchDaySummary, ["matches-summary"], 3600);
+const cachedCompetitionsWithMatches = cachedQuery(getCompetitionsWithMatches, ["matches-comps"], 3600);
+const cachedRecentFinishedMatches = cachedQuery(getRecentFinishedMatches, ["matches-recent"], 3600);
 
 export async function generateMetadata(): Promise<Metadata> {
   const today = format(new Date(), "MMMM d, yyyy");
@@ -59,10 +68,10 @@ export default async function MatchesPage({
 
   // Fetch all data in parallel
   const [allMatches, summary, competitions, recentResults] = await Promise.all([
-    getMatchesForDateRange(yesterdayStart, weekEnd),
-    getMatchDaySummary(todayStart, tomorrowStart),
-    getCompetitionsWithMatches(yesterdayStart, weekEnd),
-    getRecentFinishedMatches(20),
+    cachedMatchesForDateRange(yesterdayStart, weekEnd),
+    cachedMatchDaySummary(todayStart, tomorrowStart),
+    cachedCompetitionsWithMatches(yesterdayStart, weekEnd),
+    cachedRecentFinishedMatches(20),
   ]);
 
   const competitionCount = competitions.length;

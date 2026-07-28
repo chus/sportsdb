@@ -46,7 +46,10 @@ interface UseLiveMatchesOptions {
 }
 
 export function useLiveMatches(options: UseLiveMatchesOptions = {}) {
-  const { pollingInterval = 30000, enabled = true } = options;
+  // 5 minutes. Match minute/score granularity is a nice-to-have, not a
+  // real-time product — and every poll is a serverless invocation. The
+  // endpoint is also CDN-cached, so most polls never reach the DB.
+  const { pollingInterval = 300_000, enabled = true } = options;
 
   const [matches, setMatches] = useState<LiveMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,13 +89,40 @@ export function useLiveMatches(options: UseLiveMatchesOptions = {}) {
     }
   }, [enabled, fetchLiveMatches]);
 
-  // Set up polling
+  // Set up polling — only while the tab is visible. Backgrounded tabs used
+  // to poll forever (30s interval, mounted site-wide via ScoreStrip), which
+  // kept the DB compute awake 24/7 with zero actual viewers.
   useEffect(() => {
     if (!enabled || pollingInterval <= 0) return;
 
-    const intervalId = setInterval(fetchLiveMatches, pollingInterval);
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (intervalId === null) {
+        intervalId = setInterval(fetchLiveMatches, pollingInterval);
+      }
+    };
+    const stop = () => {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        fetchLiveMatches(); // catch up immediately on return
+        start();
+      }
+    };
 
-    return () => clearInterval(intervalId);
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [enabled, pollingInterval, fetchLiveMatches]);
 
   const refetch = useCallback(() => {

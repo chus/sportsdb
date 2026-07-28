@@ -19,6 +19,10 @@ import { listStudies } from "@/lib/queries/studies";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
+// Regenerate at most once a day — crawlers fetch sitemap.xml constantly and
+// this function runs a dozen queries.
+export const revalidate = 86400;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages — only substantial content pages
   const staticPages: MetadataRoute.Sitemap = [

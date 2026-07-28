@@ -6,7 +6,7 @@ import { useLiveMatches } from "@/hooks/use-live-matches";
 
 export function LiveMatchesSection() {
   const { matches, isLoading, error, lastUpdated, refetch, hasLiveMatches } =
-    useLiveMatches({ pollingInterval: 30000 });
+    useLiveMatches();
 
   // Don't show anything until we know there are live matches
   if (!hasLiveMatches) {

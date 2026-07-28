@@ -2,6 +2,11 @@ import { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { Target, Vote, Brain, Trophy, Zap, ArrowRight } from "lucide-react";
 import { getCombinedLeaderboard } from "@/lib/queries/games-common";
+import { cachedQuery } from "@/lib/cache";
+
+// getCurrentUser() (cookies) makes this page dynamic — cache the public
+// queries so anonymous hits never touch the DB.
+const cachedLeaderboard = cachedQuery(getCombinedLeaderboard, ["games-leaderboard"], 3600);
 import { getCurrentUser } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -50,7 +55,7 @@ const GAMES = [
 
 export default async function GamesPage() {
   const [leaderboard, user] = await Promise.all([
-    getCombinedLeaderboard(10),
+    cachedLeaderboard(10),
     getCurrentUser(),
   ]);
 

@@ -1,6 +1,12 @@
 import { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
+import { cachedQuery } from "@/lib/cache";
 import { getAvailableMatches, getUserPredictions, getGlobalLeaderboard } from "@/lib/queries/predictions";
+
+// getCurrentUser() (cookies) makes this page dynamic — cache the public
+// queries so anonymous hits never touch the DB.
+const cachedAvailableMatches = cachedQuery(getAvailableMatches, ["prode-matches"], 3600);
+const cachedGlobalLeaderboard = cachedQuery(getGlobalLeaderboard, ["prode-leaderboard"], 3600);
 import { ProdeForm } from "./prode-form";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -15,8 +21,8 @@ export const metadata: Metadata = {
 
 export default async function ProdePage() {
   const [availableMatches, leaderboard, user] = await Promise.all([
-    getAvailableMatches(30),
-    getGlobalLeaderboard(20),
+    cachedAvailableMatches(30),
+    cachedGlobalLeaderboard(20),
     getCurrentUser(),
   ]);
 

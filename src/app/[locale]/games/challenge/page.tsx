@@ -1,6 +1,12 @@
 import { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
+import { cachedQuery } from "@/lib/cache";
 import { getDailyQuestions, getUserDailyProgress, getChallengeLeaderboard, getCurrentStreak } from "@/lib/queries/challenge";
+
+// getCurrentUser() (cookies) makes this page dynamic — cache the public
+// queries so anonymous hits never touch the DB.
+const cachedDailyQuestions = cachedQuery(getDailyQuestions, ["challenge-questions"], 3600);
+const cachedChallengeLeaderboard = cachedQuery(getChallengeLeaderboard, ["challenge-leaderboard"], 3600);
 import { ChallengeGame } from "./challenge-game";
 import { Flame } from "lucide-react";
 
@@ -16,8 +22,8 @@ export const metadata: Metadata = {
 
 export default async function ChallengePage() {
   const [questions, leaderboard, user] = await Promise.all([
-    getDailyQuestions(),
-    getChallengeLeaderboard(20),
+    cachedDailyQuestions(),
+    cachedChallengeLeaderboard(20),
     getCurrentUser(),
   ]);
 

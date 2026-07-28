@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { getPublishedArticles, getArticleCount } from "@/lib/queries/articles";
+import { cachedQuery } from "@/lib/cache";
 import { ArticleCard } from "@/components/news/article-card";
 import { Newspaper, FileText, Users, Trophy, Eye } from "lucide-react";
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
@@ -12,7 +13,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 // NOTE: reading searchParams (type/page filters) keeps this route dynamic in
 // Next 15; revalidate only applies if the filters ever move to path segments.
+// Because of that, the queries below go through unstable_cache (24h, keyed by
+// filter args) so per-request renders — crawlers walking ?type=/?page= links —
+// never touch the DB. Article generation is paused, so staleness is moot.
 export const revalidate = 86400;
+
+const cachedPublishedArticles = cachedQuery(getPublishedArticles, ["news-published-articles"], 86400);
+const cachedArticleCount = cachedQuery(getArticleCount, ["news-article-count"], 86400);
 
 const TYPE_META: Record<string, { title: string; description: string }> = {
   match_report: {
@@ -82,12 +89,12 @@ export default async function NewsPage({ searchParams }: Props) {
   const offset = (page - 1) * pageSize;
 
   const [articles, totalCount, matchReportCount, recapCount, previewCount, spotlightCount] = await Promise.all([
-    getPublishedArticles(pageSize, offset, type || undefined),
-    getArticleCount(type || undefined),
-    getArticleCount("match_report"),
-    getArticleCount("round_recap"),
-    getArticleCount("match_preview"),
-    getArticleCount("player_spotlight"),
+    cachedPublishedArticles(pageSize, offset, type || undefined),
+    cachedArticleCount(type || undefined),
+    cachedArticleCount("match_report"),
+    cachedArticleCount("round_recap"),
+    cachedArticleCount("match_preview"),
+    cachedArticleCount("player_spotlight"),
   ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);

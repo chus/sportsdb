@@ -101,7 +101,7 @@ ${urls}
   return new Response(xml, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, s-maxage=900, stale-while-revalidate=300",
+      "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
     },
   });
 }

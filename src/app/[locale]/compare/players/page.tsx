@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Users, TrendingUp, Target, Clock, AlertTriangle } from "lucide-react";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { cachedQuery } from "@/lib/cache";
 import { players, playerSeasonStats, competitionSeasons, seasons, teams } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { PlayerSearchSelector } from "@/components/search/player-search-selector";
@@ -56,6 +57,14 @@ interface PlayerWithStats {
     minutesPlayed: number;
   };
 }
+
+// Reading searchParams (?p1=&p2=) makes this page dynamic — cache the
+// per-player lookup (24h) so crawler hits don't touch the DB.
+const cachedPlayerWithStats = cachedQuery(
+  (slug: string) => getPlayerWithStats(slug),
+  ["compare-player-stats"],
+  86400
+);
 
 async function getPlayerWithStats(slug: string): Promise<PlayerWithStats | null> {
   const player = await db
@@ -204,8 +213,8 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   const p2Slug = params.p2;
 
   const [player1, player2] = await Promise.all([
-    p1Slug ? getPlayerWithStats(p1Slug) : null,
-    p2Slug ? getPlayerWithStats(p2Slug) : null,
+    p1Slug ? cachedPlayerWithStats(p1Slug) : null,
+    p2Slug ? cachedPlayerWithStats(p2Slug) : null,
   ]);
 
   return (

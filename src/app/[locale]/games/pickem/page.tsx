@@ -1,7 +1,14 @@
 import { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
+import { cachedQuery } from "@/lib/cache";
 import { getAvailableMatches } from "@/lib/queries/predictions";
 import { getPickemCommunityPercentages, getUserPickems, getPickemLeaderboard } from "@/lib/queries/pickem";
+
+// getCurrentUser() (cookies) makes this page dynamic — cache the public
+// queries so anonymous hits never touch the DB.
+const cachedAvailableMatches = cachedQuery(getAvailableMatches, ["pickem-matches"], 3600);
+const cachedPickemLeaderboard = cachedQuery(getPickemLeaderboard, ["pickem-leaderboard"], 3600);
+const cachedCommunityPercentages = cachedQuery(getPickemCommunityPercentages, ["pickem-community"], 3600);
 import { PickemForm } from "./pickem-form";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
@@ -16,13 +23,13 @@ export const metadata: Metadata = {
 
 export default async function PickemPage() {
   const [availableMatches, leaderboard, user] = await Promise.all([
-    getAvailableMatches(30),
-    getPickemLeaderboard(20),
+    cachedAvailableMatches(30),
+    cachedPickemLeaderboard(20),
     getCurrentUser(),
   ]);
 
   const matchIds = availableMatches.map((m) => m.id);
-  const communityPercentages = await getPickemCommunityPercentages(matchIds);
+  const communityPercentages = await cachedCommunityPercentages(matchIds);
 
   let userPickems: Awaited<ReturnType<typeof getUserPickems>> = [];
   if (user) {

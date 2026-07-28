@@ -50,7 +50,7 @@ ${items}
   return new Response(rss, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+      "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=86400",
     },
   });
 }

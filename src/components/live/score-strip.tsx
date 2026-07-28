@@ -7,9 +7,7 @@ import { useLiveMatches } from "@/hooks/use-live-matches";
 import { cn } from "@/lib/utils/cn";
 
 export function ScoreStrip() {
-  const { matches, hasLiveMatches, isLoading } = useLiveMatches({
-    pollingInterval: 30000,
-  });
+  const { matches, hasLiveMatches, isLoading } = useLiveMatches();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Hide completely when no live matches (and not loading)

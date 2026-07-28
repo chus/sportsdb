@@ -10,10 +10,7 @@ interface LiveMatchesSectionProps {
 }
 
 export function LiveMatchesSection({ competitionFilter }: LiveMatchesSectionProps) {
-  const { matches, isLoading, lastUpdated, hasLiveMatches } = useLiveMatches({
-    pollingInterval: 30000,
-    enabled: true,
-  });
+  const { matches, isLoading, lastUpdated, hasLiveMatches } = useLiveMatches();
 
   const filtered = competitionFilter
     ? matches.filter((m) => m.competition?.slug === competitionFilter)

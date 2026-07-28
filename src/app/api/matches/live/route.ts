@@ -16,7 +16,10 @@ export async function GET() {
       .orderBy(matches.scheduledAt);
 
     if (liveMatches.length === 0) {
-      return NextResponse.json({ matches: [], timestamp: new Date().toISOString() });
+      return NextResponse.json(
+        { matches: [], timestamp: new Date().toISOString() },
+        { headers: { "Cache-Control": "public, s-maxage=240, stale-while-revalidate=60" } }
+      );
     }
 
     // Get related data for each match
@@ -70,10 +73,13 @@ export async function GET() {
       })
     );
 
-    return NextResponse.json({
-      matches: matchesWithDetails,
-      timestamp: new Date().toISOString(),
-    });
+    return NextResponse.json(
+      {
+        matches: matchesWithDetails,
+        timestamp: new Date().toISOString(),
+      },
+      { headers: { "Cache-Control": "public, s-maxage=240, stale-while-revalidate=60" } }
+    );
   } catch (error) {
     console.error("Error fetching live matches:", error);
     return NextResponse.json(
