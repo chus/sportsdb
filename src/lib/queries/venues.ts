@@ -9,7 +9,7 @@ import {
   competitions,
   seasons,
 } from "@/lib/db/schema";
-import { eq, and, isNull, or, desc, gte, asc } from "drizzle-orm";
+import { eq, and, isNull, or, desc, gte, asc, sql } from "drizzle-orm";
 
 /**
  * Get a venue by their URL slug. cache()d so generateMetadata + Page
@@ -23,6 +23,19 @@ export const getVenueBySlug = cache(async (slug: string) => {
     .limit(1);
 
   return result[0] ?? null;
+});
+
+/**
+ * Count matches linked to a venue. cache()d so the page's generateMetadata
+ * (which decides indexability — a venue with 0 matches is thin and stays
+ * noindex) shares the query with anything else in the same request.
+ */
+export const getVenueMatchCount = cache(async (venueId: string) => {
+  const [row] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(matches)
+    .where(eq(matches.venueId, venueId));
+  return row?.c ?? 0;
 });
 
 /**

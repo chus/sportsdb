@@ -98,8 +98,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.7,
     },
-    // /venues hub omitted — venue detail pages are thin (no match data) and
-    // noindex, so the hub adds no indexable value for now.
+    {
+      url: `${BASE_URL}/venues`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
     {
       url: `${BASE_URL}/injuries`,
       lastModified: new Date(),
@@ -284,9 +288,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(articles)
       .where(eq(articles.status, "published")),
-    // Venues — capacity >= 10000 AND has at least one team association. Capacity
-    // alone leaves us with empty stub pages; require a real home team so the page
-    // has substantive content beyond "name + capacity".
+    // Venues — require at least one linked match. This mirrors the venue
+    // page's indexability gate (isThin === no matches): a venue with fixtures
+    // renders scores, upcoming matches, venue stats and SportsEvent JSON-LD;
+    // one without is a thin "name + capacity" stub and stays noindex, so it
+    // must not appear here.
     db
       .select({
         slug: venues.slug,
@@ -294,11 +300,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
       .from(venues)
       .where(
-        and(
-          isNotNull(venues.capacity),
-          sql`${venues.capacity} >= 10000`,
-          sql`EXISTS (SELECT 1 FROM team_venue_history tvh WHERE tvh.venue_id = ${venues.id} AND tvh.valid_to IS NULL)`,
-        )
+        sql`EXISTS (SELECT 1 FROM matches m WHERE m.venue_id = ${venues.id})`
       ),
     // Finished matches with scores (quality gate: both teams scored).
     // Slug must be set — we no longer expose UUID URLs in the sitemap.
@@ -482,11 +484,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ];
     });
 
-  // Venue pages are excluded from the sitemap: matches.venue_id is unpopulated,
-  // so venue pages have no fixtures/events and render as thin "low value
-  // content" (now noindex). Re-add once venue ↔ match linkage exists.
-  void allVenues;
-  const venuePages: MetadataRoute.Sitemap = [];
+  // Venue pages — now that matches.venue_id is populated, allVenues already
+  // holds only venues with linked fixtures (indexable, non-thin).
+  const venuePages: MetadataRoute.Sitemap = allVenues.map((venue) => ({
+    url: `${BASE_URL}/venues/${venue.slug}`,
+    lastModified: venue.updatedAt || new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
 
   // Match pages — finished current-season matches with scores (slug-based URLs only)
   const matchPages: MetadataRoute.Sitemap = finishedMatches.rows.map((match) => ({

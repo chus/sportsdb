@@ -19,7 +19,7 @@ import { config } from "dotenv";
 import { eq, sql as drizzleSql, and, isNull, inArray, notInArray } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
 import { buildMatchSlug } from "../src/lib/utils/match-slug";
-import { resolveMatch, resolvePlayer, resolveTeam } from "../src/lib/ingestion/resolve";
+import { resolveMatch, resolvePlayer, resolveTeam, resolveVenue } from "../src/lib/ingestion/resolve";
 
 config({ path: ".env.local" });
 
@@ -496,7 +496,35 @@ async function upsertVenue(venue: any, country: string): Promise<string | null> 
     })
     .returning();
 
+  // Record the af mapping so the fixtures sync (which sees the same venue id
+  // but only a name + city) resolves this row by id instead of re-matching
+  // by slug. Keeps venue identity consistent across the two endpoints.
+  if (result?.id && venue.id) {
+    await db
+      .insert(schema.externalIds)
+      .values({ entityType: "venue", entityId: result.id, provider: "af", providerId: String(venue.id) })
+      .onConflictDoNothing();
+  }
+
   return result?.id || null;
+}
+
+/**
+ * Resolve the venue for a fixture from its `fixture.venue` object (id +
+ * name + city). Identity-first via resolveVenue; on first contact links to
+ * the row syncTeams already created and records the af mapping. Returns the
+ * venue id, or null when the fixture carries no venue.
+ */
+async function resolveMatchVenue(
+  fixtureVenue: { id?: number | null; name?: string | null; city?: string | null } | null | undefined,
+  country: string,
+): Promise<string | null> {
+  if (!fixtureVenue?.name) return null;
+  const resolved = await resolveVenue(sql, "af", fixtureVenue.id ?? null, fixtureVenue.name, {
+    city: fixtureVenue.city ?? null,
+    country,
+  });
+  return resolved?.id ?? null;
 }
 
 // ============================================================
@@ -858,6 +886,11 @@ async function syncMatches(
 
     const scheduledAt = new Date(fixture.date);
 
+    // Venue: the fixture's venue object (id + name) is the authoritative
+    // per-match venue (handles neutral grounds, cup finals). Resolve once
+    // and apply to whichever branch runs below.
+    const venueId = await resolveMatchVenue(fixture.venue, league.country);
+
     // Identity-first: the same real-world fixture also arrives from
     // football-data with an unrelated ID. resolveMatch finds it via the
     // af mapping or the natural key (home, away, kickoff ±1d) and
@@ -876,6 +909,9 @@ async function syncMatches(
           homeScore: goals.home ?? null,
           awayScore: goals.away ?? null,
           referee: fixture.referee || null,
+          // Only overwrite when the fixture carries a venue — never wipe an
+          // existing (e.g. backfilled) venue_id with null.
+          ...(venueId ? { venueId } : {}),
           updatedAt: new Date(),
         })
         .where(eq(schema.matches.id, existing.id));
@@ -898,6 +934,7 @@ async function syncMatches(
         competitionSeasonId: compSeasonId,
         homeTeamId,
         awayTeamId,
+        venueId,
         matchday: entry.league.round ? parseInt(entry.league.round.replace(/\D/g, "")) || null : null,
         scheduledAt,
         status: mapMatchStatus(fixture.status.short),

@@ -22,6 +22,7 @@ import {
   getVenueBySlug,
   getVenueTeams,
   getVenueMatches,
+  getVenueMatchCount,
 } from "@/lib/queries/venues";
 import { getTeamStats } from "@/lib/queries/teams";
 import { BreadcrumbJsonLd, VenueJsonLd, FAQJsonLd } from "@/components/seo/json-ld";
@@ -48,11 +49,13 @@ export async function generateMetadata({
     notFound();
   }
 
-  // Venue pages are thin: matches.venue_id is unpopulated across the dataset,
-  // so a venue page renders only name/city/capacity with no fixtures or events —
-  // exactly the "low value content" AdSense flags. Keep them noindex until venue
-  // ↔ match linkage exists and the pages carry real content.
-  const isThin = true;
+  // A venue page is substantive only when fixtures are linked to it: scores,
+  // upcoming matches, venue stats and SportsEvent JSON-LD all hang off
+  // matches.venue_id. With zero linked matches it renders just name/city/
+  // capacity — the "low value content" AdSense flags — so keep those noindex.
+  // Now that venue_id is populated, gate on real match linkage instead of a
+  // blanket noindex.
+  const isThin = (await getVenueMatchCount(venue.id)) === 0;
 
   const title = `${venue.name} – Stadium Info & History`;
   const description = `${venue.name}${venue.city ? ` in ${venue.city}` : ""}${venue.country ? `, ${venue.country}` : ""}. Capacity: ${venue.capacity?.toLocaleString() || "N/A"}. View teams, matches, and stadium information.`;

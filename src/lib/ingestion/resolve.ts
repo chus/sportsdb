@@ -51,13 +51,21 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+/** Entities resolved via the external_ids mapping table, and their tables. */
+type MappedEntity = "team" | "player" | "venue";
+const ENTITY_TABLE: Record<MappedEntity, string> = {
+  team: "teams",
+  player: "players",
+  venue: "venues",
+};
+
 async function lookupMapping(
   sql: Sql,
-  entityType: "team" | "player",
+  entityType: MappedEntity,
   provider: Provider,
   providerId: number,
 ): Promise<{ id: string; slug: string } | null> {
-  const table = entityType === "team" ? "teams" : "players";
+  const table = ENTITY_TABLE[entityType];
   const rows = await sql.query(
     `SELECT e.id, e.slug
      FROM external_ids x
@@ -71,7 +79,7 @@ async function lookupMapping(
 
 async function writeMapping(
   sql: Sql,
-  entityType: "team" | "player",
+  entityType: MappedEntity,
   entityId: string,
   provider: Provider,
   providerId: number,
@@ -229,6 +237,54 @@ export async function resolvePlayer(
   const row = inserted[0] ?? (await sql`SELECT id, slug FROM players WHERE slug = ${finalSlug} LIMIT 1`)[0];
   if (!row) return null;
   await writeMapping(sql, "player", row.id, provider, providerPlayerId);
+  return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
+}
+
+/**
+ * Resolve a venue by provider venue ID.
+ *
+ * Venues arrive from two API-Football endpoints: /teams (full data —
+ * capacity, image) and /fixtures (id + name + city only). Both quote the
+ * same stable venue id, so identity-first keeps them as one row. Fallback
+ * matches by slugified name (the venue first created from the /teams sync)
+ * and stamps the mapping so the next sync resolves by id.
+ *
+ * `providerVenueId` may be null — API-Football occasionally sends a fixture
+ * venue with a name but no id. In that case we skip the mapping entirely
+ * and link/create purely by name; nothing to record.
+ */
+export async function resolveVenue(
+  sql: Sql,
+  provider: Provider,
+  providerVenueId: number | null,
+  name: string,
+  create?: { city?: string | null; country?: string | null; capacity?: number | null; imageUrl?: string | null },
+): Promise<ResolvedEntity | null> {
+  if (!name) return null;
+
+  if (providerVenueId != null) {
+    const mapped = await lookupMapping(sql, "venue", provider, providerVenueId);
+    if (mapped) return { ...mapped, via: "external_id" };
+  }
+
+  const slug = slugify(name);
+  const bySlug = await sql`SELECT id, slug FROM venues WHERE slug = ${slug} LIMIT 1`;
+  if (bySlug[0]) {
+    if (providerVenueId != null) await writeMapping(sql, "venue", bySlug[0].id, provider, providerVenueId);
+    return { ...bySlug[0], via: "name_match" } as ResolvedEntity;
+  }
+
+  if (!create) return null;
+
+  const inserted = await sql`
+    INSERT INTO venues (name, slug, city, country, capacity, image_url)
+    VALUES (${name}, ${slug}, ${create.city ?? null}, ${create.country ?? null}, ${create.capacity ?? null}, ${create.imageUrl ?? null})
+    ON CONFLICT (slug) DO NOTHING
+    RETURNING id, slug
+  `;
+  const row = inserted[0] ?? (await sql`SELECT id, slug FROM venues WHERE slug = ${slug} LIMIT 1`)[0];
+  if (!row) return null;
+  if (providerVenueId != null) await writeMapping(sql, "venue", row.id, provider, providerVenueId);
   return { ...row, via: inserted[0] ? "created" : "name_match" } as ResolvedEntity;
 }
 
