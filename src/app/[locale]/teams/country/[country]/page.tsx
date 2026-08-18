@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/layout/page-header";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 86400;
+export const revalidate = 604800;
 
 interface PageProps {
   params: Promise<{ country: string }>;

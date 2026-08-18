@@ -16,7 +16,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 // Because of that, the queries below go through unstable_cache (24h, keyed by
 // filter args) so per-request renders — crawlers walking ?type=/?page= links —
 // never touch the DB. Article generation is paused, so staleness is moot.
-export const revalidate = 86400;
+export const revalidate = 604800;
 
 const cachedPublishedArticles = cachedQuery(getPublishedArticles, ["news-published-articles"], 86400);
 const cachedArticleCount = cachedQuery(getArticleCount, ["news-article-count"], 86400);

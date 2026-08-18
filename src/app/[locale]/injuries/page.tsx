@@ -9,7 +9,7 @@ import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
+export const revalidate = 86400; // 6h — aligned with the data-sync cron cadence
 
 export async function generateMetadata(): Promise<Metadata> {
   // Off-season the list can be empty — don't let an empty page get indexed

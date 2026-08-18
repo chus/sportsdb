@@ -9,7 +9,7 @@ import { PlayerLink } from "@/components/player/player-link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 86400;
+export const revalidate = 604800;
 
 const VALID_POSITIONS = ["goalkeeper", "defender", "midfielder", "forward"] as const;
 type ValidPosition = (typeof VALID_POSITIONS)[number];

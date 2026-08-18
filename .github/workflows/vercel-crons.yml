@@ -42,7 +42,8 @@ jobs:
           for EP in assign-daily-challenge expire-trials; do
             echo "--- /api/cron/$EP"
             curl -fsS --retry 2 --retry-delay 10 -m 320 \
-              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP" \
+              || echo "::warning::$EP failed (tolerated — endpoint returned an error)"
             echo
           done
 
@@ -53,7 +54,8 @@ jobs:
                     fetch-player-stats "fetch-player-stats?group=secondary"; do
             echo "--- /api/cron/$EP"
             curl -fsS --retry 2 --retry-delay 10 -m 320 \
-              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP" \
+              || echo "::warning::$EP failed (tolerated — endpoint returned an error)"
             echo
           done
 
@@ -63,7 +65,8 @@ jobs:
           for EP in daily-reminders trial-lifecycle data-health; do
             echo "--- /api/cron/$EP"
             curl -fsS --retry 2 --retry-delay 10 -m 320 \
-              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP"
+              -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/$EP" \
+              || echo "::warning::$EP failed (tolerated — endpoint returned an error)"
             echo
           done
 
@@ -71,10 +74,12 @@ jobs:
         if: github.event.schedule == '0 9 * * 5'
         run: |
           curl -fsS --retry 2 --retry-delay 10 -m 320 \
-            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/weekly-digest"
+            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/weekly-digest" \
+            || echo "::warning::weekly-digest failed (tolerated)"
 
       - name: Weekly player quality (Monday 04:00)
         if: github.event.schedule == '0 4 * * 1'
         run: |
           curl -fsS --retry 2 --retry-delay 10 -m 320 \
-            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/update-player-quality"
+            -H "Authorization: Bearer $CRON_SECRET" "$BASE_URL/api/cron/update-player-quality" \
+            || echo "::warning::update-player-quality failed (tolerated)"

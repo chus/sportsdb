@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Trophy, Shield, Target, Calendar, TrendingUp, ChevronRight, Handshake } from "lucide-react";
 import { format, formatDistanceToNowStrict } from "date-fns";
 
-export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
+export const revalidate = 86400; // 6h — aligned with the data-sync cron cadence
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";

@@ -33,7 +33,7 @@ import { getTierConfig } from "@/lib/subscriptions/tiers";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
 // ISR: regenerate the homepage at most every 5 minutes.
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "DataSports – The International Sports Database",

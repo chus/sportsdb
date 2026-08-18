@@ -23,7 +23,7 @@ import { localizedAlternates } from "@/lib/seo/hreflang";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 // Reading searchParams (?date=) makes this page dynamic, so the queries go
 // through the data cache — keys are day-scoped (startOfDay/endOfDay args),

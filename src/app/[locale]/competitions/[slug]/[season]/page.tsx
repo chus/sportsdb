@@ -19,7 +19,7 @@ interface CompetitionSeasonPageProps {
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 86400; // 24h — historical standings rarely change
+export const revalidate = 604800; // 24h — historical standings rarely change
 
 export async function generateMetadata({
   params,

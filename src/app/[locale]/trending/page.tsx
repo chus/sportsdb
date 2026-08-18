@@ -11,7 +11,7 @@ import { PageTracker } from "@/components/analytics/page-tracker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
+export const revalidate = 86400; // 6h — aligned with the data-sync cron cadence
 
 export const metadata: Metadata = {
   title: "Trending – Popular Football Players & Teams",

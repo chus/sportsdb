@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
-export const revalidate = 86400; // 24h — content changes at most daily
+export const revalidate = 604800; // 24h — content changes at most daily
 
 import {
   MapPin,

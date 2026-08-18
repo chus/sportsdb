@@ -1,0 +1,27 @@
+name: Redeploy after Neon quota reset
+
+# One-shot recovery: Neon's free-tier data-transfer quota was exhausted in
+# August 2026, which makes the Vercel build fail (generateStaticParams and
+# page prerenders query the DB at build time). The quota resets on the 1st
+# of the month, so this pushes an empty commit on Sep 1 to trigger a fresh
+# Vercel deploy that picks up the longer ISR TTLs. The yearly cron is
+# harmless afterwards, but feel free to delete this file once it has run.
+
+on:
+  schedule:
+    - cron: '30 6 1 9 *' # Sep 1, 06:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Trigger redeploy after Neon data-transfer quota reset"
+          git push

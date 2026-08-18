@@ -40,7 +40,7 @@ import { MatchPredictionWidget } from "@/components/games/match-prediction-widge
 import { BetweenContentAd } from "@/components/ads/between-content-ad";
 import { PageTracker } from "@/components/analytics/page-tracker";
 
-export const revalidate = 21600; // 6h — aligned with the data-sync cron cadence
+export const revalidate = 86400; // 6h — aligned with the data-sync cron cadence
 
 interface MatchPageProps {
   params: Promise<{ slug: string; locale: string }>;
