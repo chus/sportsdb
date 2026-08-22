@@ -3,13 +3,13 @@ name: Redeploy after Neon quota reset
 # One-shot recovery: Neon's free-tier data-transfer quota was exhausted in
 # August 2026, which makes the Vercel build fail (generateStaticParams and
 # page prerenders query the DB at build time). The quota resets on the 1st
-# of the month, so this pushes an empty commit on Sep 1 to trigger a fresh
-# Vercel deploy that picks up the longer ISR TTLs. The yearly cron is
-# harmless afterwards, but feel free to delete this file once it has run.
+# of the month. Run this manually (Actions -> Run workflow) AFTER the Vercel
+# project is unblocked and Cloudflare is in front (docs/cloudflare-setup.md):
+# it pushes an empty commit to trigger a fresh Vercel deploy that picks up
+# the frugal build. Not scheduled on purpose — while the project is paused a
+# push would only produce a failed-deploy email.
 
 on:
-  schedule:
-    - cron: '30 6 1 9 *' # Sep 1, 06:30 UTC
   workflow_dispatch:
 
 permissions:

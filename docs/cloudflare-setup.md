@@ -69,7 +69,7 @@ A `HIT` means that request never reached Vercel.
 2. Submit Vercel's **one-time courtesy unblock** form.
 3. In GitHub → Actions → **"Redeploy after Neon quota reset" → Run workflow**, so the
    frugal build (long ISR TTLs, robots/middleware bot rules, no compare matrix in the
-   sitemap) becomes the live deployment. (The scheduled Sep 1 run does this too.)
+   sitemap) becomes the live deployment.
 4. Cloudflare → **Caching → Purge Everything** once, so the edge picks up the new build.
 5. Watch Vercel → Usage for a few days. Target: well under 1M edge requests/month.
 6. When comfortable, restore the schedules in `.github/workflows/vercel-crons.yml`
