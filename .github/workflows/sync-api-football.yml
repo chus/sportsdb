@@ -1,13 +1,10 @@
 name: API-Football Sync
 
+# PAUSED (Aug 2026): site paused on Vercel Hobby + Neon quota exhausted.
+# To resume the weekly free-tier refresh, restore:
+#   schedule:
+#     - cron: '0 7 * * 1'   # Monday 07:00 UTC, "weekly" budgeted mode (~90 req)
 on:
-  schedule:
-    # Weekly Monday 7am UTC (July 2026 cost scale-down, back on the free
-    # tier: 100 req/day, 10 req/min). The scheduled run uses the budgeted
-    # "weekly" mode below (~90 requests). The heavier modes (enrich-all,
-    # full-data, restore) remain available via manual dispatch — mind the
-    # free-tier quota before dispatching them.
-    - cron: '0 7 * * 1'
   workflow_dispatch:
     inputs:
       mode:

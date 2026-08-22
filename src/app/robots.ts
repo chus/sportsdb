@@ -2,29 +2,21 @@ import type { MetadataRoute } from "next";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 
-// SEO-tool and scraper crawlers that hammer the entity/compare matrix but
-// send no users and no ranking value. Search engines (Googlebot, Bingbot)
-// and AI-assistant crawlers (GPTBot, ClaudeBot, PerplexityBot…) stay allowed
-// on purpose — they are the GEO/SEO acquisition channel.
-const BLOCKED_BOTS = [
-  "AhrefsBot",
-  "SemrushBot",
-  "MJ12bot",
-  "DotBot",
-  "BLEXBot",
-  "DataForSeoBot",
-  "PetalBot",
-  "Bytespider",
-  "serpstatbot",
-  "ZoominfoBot",
-];
+// Frugal mode (Aug 2026, Vercel Hobby fair-use limits): ONLY Googlebot and
+// Bingbot may crawl. Every other user agent — SEO tools, scrapers, and the
+// AI-assistant crawlers (GPTBot, ClaudeBot, PerplexityBot…) that were
+// previously allowed as a GEO channel — is disallowed entirely. Well-behaved
+// bots honour this and stop sending requests at all, which is what keeps
+// edge-request volume under the free tier. Middleware enforces it for the
+// ones that don't.
+const SEARCH_ENGINES = ["Googlebot", "Bingbot"];
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      ...BLOCKED_BOTS.map((bot) => ({ userAgent: bot, disallow: "/" })),
+      { userAgent: "*", disallow: "/" },
       {
-        userAgent: "*",
+        userAgent: SEARCH_ENGINES,
         allow: [
           "/",
           "/api/entity-image",

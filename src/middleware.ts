@@ -44,8 +44,11 @@ const CANONICAL_HOST = "datasports.co";
 //
 // Hard-blocked crawlers: SEO scrapers already disallowed in robots.ts
 // (which they routinely ignore) plus generic scraping libraries. 403.
+// Aug 2026 (Vercel Hobby fair-use limits): AI-assistant crawlers are now
+// blocked too — they were the single largest non-search crawler group and
+// the GEO channel they represented produced no measurable traffic.
 const BLOCKED_BOT_RE =
-  /AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|DataForSeoBot|PetalBot|Bytespider|serpstatbot|ZoominfoBot|MegaIndex|SeekportBot|BacklinkCrawler|python-requests|Scrapy|HeadlessChrome/i;
+  /AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|DataForSeoBot|PetalBot|Bytespider|serpstatbot|ZoominfoBot|MegaIndex|SeekportBot|BacklinkCrawler|python-requests|Scrapy|HeadlessChrome|GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|anthropic-ai|PerplexityBot|CCBot|Amazonbot|meta-externalagent|FacebookBot|Applebot-Extended|YandexBot|Diffbot|ImagesiftBot|Timpibot|omgili|cohere-ai|GoogleOther|DuckAssistBot|Bravebot/i;
 
 // Search engines that are never rate-limited — losing Google/Bing crawl
 // would defeat the purpose of keeping the site up.
@@ -55,9 +58,9 @@ const SEARCH_BOT_RE = /Googlebot|Google-InspectionTool|bingbot|Applebot|DuckDuck
 const GENERIC_BOT_RE = /bot|crawler|spider|crawling|scraper/i;
 
 // Fixed-window in-memory limiter. Per-isolate, so the effective global
-// limit is (100 × concurrent workers) — imprecise but sufficient to stop
+// limit is (30 × concurrent workers) — imprecise but sufficient to stop
 // a single crawler hammering one region, at zero infra cost.
-const RATE_LIMIT_PER_MIN = 100;
+const RATE_LIMIT_PER_MIN = 30;
 const RATE_WINDOW_MS = 60_000;
 const rateBuckets = new Map<string, { count: number; windowStart: number }>();
 

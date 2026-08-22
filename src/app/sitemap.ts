@@ -23,6 +23,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://datasports.co";
 // this function runs a dozen queries.
 export const revalidate = 604800;
 
+const INCLUDE_COMPARE_MATRIX = false;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages — only substantial content pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -625,8 +627,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...topScorerCompPages,
     ...topAssistCompPages,
     ...historicalSeasonPages,
-    ...comparePages,
-    ...teamComparePages,
+    // Compare matrices are the largest combinatorial crawl surface (~3.5k+
+    // URLs x2 locales). Withheld while on the Vercel Hobby plan to stay
+    // under fair-use limits — flip to true to re-advertise them.
+    ...(INCLUDE_COMPARE_MATRIX ? comparePages : []),
+    ...(INCLUDE_COMPARE_MATRIX ? teamComparePages : []),
     ...teamCountryPages,
     ...playerPositionPages,
     ...playerNationalityPages,
